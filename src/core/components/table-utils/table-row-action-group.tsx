@@ -3,7 +3,7 @@
 import EyeIcon from "@core/components/icons/eye";
 import PencilIcon from "@core/components/icons/pencil";
 import { ActionIcon, Flex, Tooltip } from "rizzui";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import cn from "@core/utils/class-names";
 import DeletePopover from "../delete-popover";
 

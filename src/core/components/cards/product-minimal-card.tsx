@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import Image from "next/image";
 import WishlistButton from "../wishlist-button";
 import { generateSlug } from "../../utils/generate-slug";
@@ -51,7 +51,7 @@ export default function ProductMinimalCard({
       <div className="pt-3.5">
         <div className="pb-1 font-medium text-red-dark">Just In</div>
         <Link
-          href={routes.eCommerce.productDetails(
+          to={routes.eCommerce.productDetails(
             String(slug ?? generateSlug(title))
           )}
         >

@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from "react-router-dom";
 import Image from 'next/image';
 import { Title, Text } from 'rizzui';
 import cn from '../../utils/class-names';
@@ -49,7 +49,7 @@ export default function ProductModernCard({
 
       <div className="pt-3">
         <Link
-          href={routes.eCommerce.productDetails(
+          to={routes.eCommerce.productDetails(
             String(slug ?? generateSlug(title))
           )}
         >

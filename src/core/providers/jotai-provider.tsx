@@ -1,6 +1,5 @@
-'use client';
+import { Provider } from 'jotai'
 
-import { Provider } from 'jotai';
-export function JotaiProvider({ children }: React.PropsWithChildren<{}>) {
-  return <Provider>{children}</Provider>;
+export function JotaiProvider({ children }: React.PropsWithChildren) {
+  return <Provider>{children}</Provider>
 }

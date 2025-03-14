@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { Title, Text } from "rizzui";
 import cn from "../../utils/class-names";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { PiStarFill } from "react-icons/pi";
 import WishlistButton from "../wishlist-button";
 

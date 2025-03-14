@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import { Link } from "react-router-dom";
 import { ActionIcon, Empty, SearchNotFoundIcon, Button, Title, Input, cn } from "rizzui";
 import { PiFileTextDuotone, PiMagnifyingGlassBold, PiXBold } from "react-icons/pi";
 import { pageLinks } from "./page-links.data";
