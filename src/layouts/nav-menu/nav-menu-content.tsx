@@ -1,4 +1,4 @@
-'use client';
+
 import React, { Fragment } from 'react';
 import { useNavMenu } from './nav-menu-context';
 import cn from '@core/utils/class-names';

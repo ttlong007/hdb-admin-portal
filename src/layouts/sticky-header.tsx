@@ -1,4 +1,4 @@
-'use client';
+
 
 import cn from '@core/utils/class-names';
 import { useIsMounted } from '@core/hooks/use-is-mounted';

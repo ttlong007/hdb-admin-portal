@@ -1,4 +1,4 @@
-'use client';
+
 
 import { PiAlignLeft, PiAlignRight } from 'react-icons/pi';
 import { RadioGroup } from 'rizzui/radio-group';

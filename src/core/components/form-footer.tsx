@@ -1,4 +1,4 @@
-"use client";
+
 
 import { Button } from "rizzui";
 import cn from "../utils/class-names";

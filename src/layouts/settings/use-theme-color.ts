@@ -1,4 +1,4 @@
-'use client';
+
 
 import { useEffect } from 'react';
 import { atom, useAtom } from 'jotai';
@@ -25,7 +25,7 @@ const colorPresetsAtom = atom(
 
 const colorPresetsAtomWithPersistence = atom(
   (get) => get(colorPresetsAtom),
-  (get, set, newStorage: any) => {
+  (_get, set, newStorage: any) => {
     set(colorPresetsAtom, newStorage);
     localStorage.setItem('isomorphic-preset', JSON.stringify(newStorage));
   }
@@ -50,7 +50,7 @@ const colorPresetNameAtom = atom(
 
 const colorPresetNameAtomWithPersistence = atom(
   (get) => get(colorPresetNameAtom),
-  (get, set, newStorage: any) => {
+  (_get, set, newStorage: any) => {
     set(colorPresetNameAtom, newStorage);
     localStorage.setItem('isomorphic-preset-name', newStorage);
   }

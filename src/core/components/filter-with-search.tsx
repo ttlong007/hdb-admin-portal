@@ -1,9 +1,6 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { Disclosure } from "@headlessui/react";
+import { useEffect, useState } from 'react'
+import { Disclosure } from '@headlessui/react'
 import {
-  Title,
   Input,
   Checkbox,
   ActionIcon,
@@ -11,27 +8,27 @@ import {
   Tooltip,
   Button,
   Text,
-} from "rizzui";
-import cn from "../utils/class-names";
-import { PiMagnifyingGlassBold, PiPlusBold, PiXBold } from "react-icons/pi";
-import { generateSlug } from "../utils/generate-slug";
-import { BsExclamationCircle } from "react-icons/bs";
+} from 'rizzui'
+import cn from '../utils/class-names'
+import { PiMagnifyingGlassBold, PiPlusBold, PiXBold } from 'react-icons/pi'
+import { generateSlug } from '../utils/generate-slug'
+import { BsExclamationCircle } from 'react-icons/bs'
 
 type FilterOptions = {
-  name: string;
-  count?: string | number;
-  color?: string;
-  tooltipText?: string;
-};
+  name: string
+  count?: string | number
+  color?: string
+  tooltipText?: string
+}
 
 type FilterWithSearchProps = {
-  title: string;
-  name: string;
-  data: FilterOptions[];
-  state: any;
-  clearFilter?: (key: string[]) => void;
-  applyFilter: (query: string, value: any) => void;
-};
+  title: string
+  name: string
+  data: FilterOptions[]
+  state: any
+  clearFilter?: (key: string[]) => void
+  applyFilter: (query: string, value: any) => void
+}
 
 export default function FilterWithSearch({
   title,
@@ -41,34 +38,34 @@ export default function FilterWithSearch({
   clearFilter,
   applyFilter,
 }: FilterWithSearchProps) {
-  const [isSearchOpen, setSearchOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [isSearchOpen, setSearchOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
   const [values, setValues] = useState<string[]>(
-    state[name]?.length ? state[name].split(",") : []
-  );
-  const [event, setEvent] = useState(false);
+    state[name]?.length ? state[name].split(',') : []
+  )
+  const [event, setEvent] = useState(false)
 
   function handleOnChange(e: React.ChangeEvent<any>) {
-    setEvent(() => e.target.checked);
+    setEvent(() => e.target.checked)
   }
 
   // apply & clear filter
   useEffect(() => {
-    if (values.length) applyFilter(name, values);
+    if (values.length) applyFilter(name, values)
     if (values.length == 0 && event !== true) {
-      clearFilter && clearFilter([name]);
+      clearFilter && clearFilter([name])
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [values]);
+  }, [values])
 
   const filteredData = data.filter((element) => {
-    if (searchTerm === "") {
-      return element;
+    if (searchTerm === '') {
+      return element
     } else {
-      return element.name.toLowerCase().includes(searchTerm);
+      return element.name.toLowerCase().includes(searchTerm)
     }
-  });
+  })
 
   return (
     <>
@@ -89,7 +86,7 @@ export default function FilterWithSearch({
 
         <div className="flex flex-col pt-5">
           <CheckboxGroup
-            values={state[name]?.length ? state[name].split(",") : []}
+            values={state[name]?.length ? state[name].split(',') : []}
             setValues={setValues}
             onChange={(e) => handleOnChange(e)}
             className="space-y-3.5"
@@ -117,7 +114,7 @@ export default function FilterWithSearch({
           {filteredData!.length > 5 ? (
             <CollapsibleFilterOptions data={filteredData}>
               <CheckboxGroup
-                values={state[name]?.length ? state[name].split(",") : []}
+                values={state[name]?.length ? state[name].split(',') : []}
                 setValues={setValues}
                 className="space-y-3.5 pt-3.5"
               >
@@ -151,16 +148,16 @@ export default function FilterWithSearch({
         </div>
       </div>
     </>
-  );
+  )
 }
 
 type FilterOptionSearchProps = {
-  title: string;
-  isSearchOpen: boolean;
-  setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  searchTerm: string;
-  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
-};
+  title: string
+  isSearchOpen: boolean
+  setSearchOpen: React.Dispatch<React.SetStateAction<boolean>>
+  searchTerm: string
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>
+}
 
 function FilterOptionSearch({
   isSearchOpen,
@@ -172,8 +169,8 @@ function FilterOptionSearch({
   return (
     <div
       className={cn(
-        "absolute end-0 z-10 flex w-full",
-        isSearchOpen ? "-top-1" : "-top-0.5"
+        'absolute end-0 z-10 flex w-full',
+        isSearchOpen ? '-top-1' : '-top-0.5'
       )}
     >
       {isSearchOpen && (
@@ -182,7 +179,7 @@ function FilterOptionSearch({
           size="sm"
           rounded="pill"
           value={searchTerm}
-          onClear={() => setSearchTerm("")}
+          onClear={() => setSearchTerm('')}
           onChange={(event) => setSearchTerm(event.target.value)}
           placeholder={`Search for ${title.toLowerCase()}...`}
           inputClassName="ps-3 pe-9 bg-background"
@@ -192,15 +189,15 @@ function FilterOptionSearch({
 
       <ActionIcon
         size="sm"
-        variant={isSearchOpen ? "text" : "flat"}
+        variant={isSearchOpen ? 'text' : 'flat'}
         rounded="full"
         className={cn(
-          "absolute z-10 bg-opacity-95 backdrop-blur-lg transition-none",
-          isSearchOpen ? "end-1.5 top-0.5" : "end-0"
+          'absolute z-10 bg-opacity-95 backdrop-blur-lg transition-none',
+          isSearchOpen ? 'end-1.5 top-0.5' : 'end-0'
         )}
         onClick={() => {
-          setSearchOpen(!isSearchOpen);
-          setSearchTerm("");
+          setSearchOpen(!isSearchOpen)
+          setSearchTerm('')
         }}
       >
         {isSearchOpen ? (
@@ -222,7 +219,7 @@ function FilterOptionSearch({
         )}
       </ActionIcon>
     </div>
-  );
+  )
 }
 
 function FilterOption({ name, count, color, tooltipText }: FilterOptions) {
@@ -256,7 +253,7 @@ function FilterOption({ name, count, color, tooltipText }: FilterOptions) {
         <span className="text-xs opacity-80">{count}</span>
       ) : null}
     </div>
-  );
+  )
 }
 
 function CollapsibleFilterOptions({
@@ -284,5 +281,5 @@ function CollapsibleFilterOptions({
         )}
       </Disclosure>
     </div>
-  );
+  )
 }

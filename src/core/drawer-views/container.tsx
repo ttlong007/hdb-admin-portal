@@ -1,4 +1,4 @@
-'use client';
+
 
 import { Drawer } from 'rizzui';
 import { useEffect } from 'react';

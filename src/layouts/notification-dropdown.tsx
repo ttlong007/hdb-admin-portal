@@ -1,20 +1,18 @@
-'use client';
+import { notificationsData } from '@/data/notifications'
+import { useMedia } from '@core/hooks/use-media'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { Link } from 'react-router-dom'
+import { ReactElement, RefObject, useState } from 'react'
+import { PiCheck } from 'react-icons/pi'
+import { Badge, Checkbox, Popover, Text, Title } from 'rizzui'
 
-import { notificationsData } from '@/data/notifications';
-import { useMedia } from '@core/hooks/use-media';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import { Link } from "react-router-dom";
-import { ReactElement, ReactNode, RefObject, useState } from 'react';
-import { PiCheck } from 'react-icons/pi';
-import { Badge, Checkbox, Popover, Text, Title } from 'rizzui';
-
-dayjs.extend(relativeTime);
+dayjs.extend(relativeTime)
 
 function NotificationsList({
   setIsOpen,
 }: {
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
 }) {
   return (
     <div className="w-[320px] text-left sm:w-[360px] 2xl:w-[420px] rtl:text-right">
@@ -68,23 +66,23 @@ function NotificationsList({
         </div>
       </div>
       <Link
-        href={'#'}
+        to={'#'}
         onClick={() => setIsOpen(false)}
         className="-me-6 block px-6 pb-0.5 pt-3 text-center hover:underline"
       >
         View All Activity
       </Link>
     </div>
-  );
+  )
 }
 
 export default function NotificationDropdown({
   children,
 }: {
-  children: ReactElement & { ref?: RefObject<any> };
+  children: ReactElement & { ref?: RefObject<any> }
 }) {
-  const isMobile = useMedia('(max-width: 480px)', false);
-  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useMedia('(max-width: 480px)', false)
+  const [isOpen, setIsOpen] = useState(false)
   return (
     <Popover
       isOpen={isOpen}
@@ -97,5 +95,5 @@ export default function NotificationDropdown({
         <NotificationsList setIsOpen={setIsOpen} />
       </Popover.Content>
     </Popover>
-  );
+  )
 }

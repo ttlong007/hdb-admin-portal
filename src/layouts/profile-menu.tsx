@@ -95,7 +95,7 @@ function DropdownMenu() {
         {menuItems.map((item) => (
           <Link
             key={item.name}
-            href={item.href}
+            to={item.href}
             className="group my-0.5 flex items-center rounded-md px-2.5 py-2 hover:bg-gray-100 focus:outline-none hover:dark:bg-gray-50/50"
           >
             {item.name}

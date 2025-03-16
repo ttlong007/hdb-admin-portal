@@ -1,4 +1,4 @@
-'use client';
+
 
 import React, { Fragment } from 'react';
 import { useNavMenu } from './nav-menu-context';
@@ -10,7 +10,7 @@ export const NavMenuTrigger = React.forwardRef<
   NavMenuTriggerProps
 >(({ triggerType = 'hover', className, children, ...props }, ref) => {
   /*
-    REASON OF IGNORING TS ERROR: Noted below. 
+    REASON OF IGNORING TS ERROR: Noted below.
     */
   // @ts-ignore
   const { index, ...restProps } = props;

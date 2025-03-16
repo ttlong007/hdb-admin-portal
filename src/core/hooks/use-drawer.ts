@@ -1,4 +1,4 @@
-'use client';
+
 
 import { atom, useAtomValue, useSetAtom } from 'jotai';
 

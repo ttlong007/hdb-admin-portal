@@ -1,4 +1,4 @@
-'use client';
+
 import { useReducer, useRef } from 'react';
 import {
   NavMenuProvider,

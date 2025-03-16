@@ -1,4 +1,4 @@
-'use client';
+
 
 import { routes } from '@/config/routes';
 import { messagesData } from '@/data/messages';

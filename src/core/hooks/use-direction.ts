@@ -1,4 +1,4 @@
-'use client';
+
 import { atom, useAtom } from 'jotai';
 
 // 1. set initial atom for isomorphic direction
@@ -8,7 +8,7 @@ const isomorphicDirectionAtom = atom(
 
 const isomorphicDirectionAtomWithPersistence = atom(
   (get) => get(isomorphicDirectionAtom),
-  (get, set, newStorage: any) => {
+  (_get, set, newStorage: any) => {
     set(isomorphicDirectionAtom, newStorage);
     localStorage.setItem('iso-direction', newStorage);
   }

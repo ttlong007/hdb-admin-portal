@@ -1,4 +1,4 @@
-'use client';
+
 
 import { PiXBold } from 'react-icons/pi';
 import { Title, ActionIcon } from 'rizzui';

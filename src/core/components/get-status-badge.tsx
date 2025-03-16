@@ -1,4 +1,4 @@
-'use client';
+
 
 import { Badge } from 'rizzui';
 import cn from '../utils/class-names';

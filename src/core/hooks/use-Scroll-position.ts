@@ -1,7 +1,8 @@
-'use client';
 
-import React from 'react';
+
+
 import { useScroll, useSize } from 'ahooks';
+import React from 'react';
 
 export function getPercentage(partialValue?: number, totalValue?: number) {
   if (partialValue && totalValue) return (100 * partialValue) / totalValue;

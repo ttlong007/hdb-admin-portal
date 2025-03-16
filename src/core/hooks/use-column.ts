@@ -1,4 +1,4 @@
-'use client';
+
 
 import { useState, useMemo } from 'react';
 import { filterData } from '../utils/filter-data';

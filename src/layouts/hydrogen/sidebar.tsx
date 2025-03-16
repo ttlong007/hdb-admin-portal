@@ -1,4 +1,4 @@
-'use client';
+
 
 import Logo from '@core/components/logo';
 import cn from '@core/utils/class-names';

@@ -1,6 +1,3 @@
-'use client';
-
-import { useTheme } from 'next-themes';
 import { PiCheckBold } from 'react-icons/pi';
 import cn from '@core/utils/class-names';
 import { usePresets } from '@/config/color-presets';
@@ -9,6 +6,7 @@ import {
   useColorPresets,
 } from '@/layouts/settings/use-theme-color';
 import DrawerBlock from '@/layouts/settings/drawer-block';
+import { useTheme } from '@/core/providers/theme-provider';
 
 export default function ColorOptions() {
   const { theme } = useTheme();

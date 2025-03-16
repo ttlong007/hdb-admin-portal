@@ -1,4 +1,4 @@
-"use client";
+
 
 import { Box, Flex, Text } from "rizzui";
 
