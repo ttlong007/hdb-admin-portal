@@ -1,637 +1,157 @@
-import { DUMMY_ID } from '@/config/constants';
-import { routes } from '@/config/routes';
-import {
-  PiAirplaneTiltDuotone,
-  PiApplePodcastsLogoDuotone,
-  PiArrowsOutDuotone,
-  PiArrowsOutLineHorizontalDuotone,
-  PiBellSimpleRingingDuotone,
-  PiBinocularsDuotone,
-  PiBriefcaseDuotone,
-  PiBrowserDuotone,
-  PiCalendarDuotone,
-  PiCalendarPlusDuotone,
-  PiCaretCircleUpDownDuotone,
-  PiChartBarDuotone,
-  PiChartLineUpDuotone,
-  PiChartPieSliceDuotone,
-  PiChatCenteredDotsDuotone,
-  PiClipboardTextDuotone,
-  PiCodesandboxLogoDuotone,
-  PiCoinDuotone,
-  PiCreditCardDuotone,
-  PiCurrencyCircleDollarDuotone,
-  PiCurrencyDollarDuotone,
-  PiEnvelopeDuotone,
-  PiEnvelopeSimpleOpenDuotone,
-  PiFeatherDuotone,
-  PiFolderDuotone,
-  PiFolderLockDuotone,
-  PiFoldersDuotone,
-  PiFolderUserDuotone,
-  PiGridFourDuotone,
-  PiHammerDuotone,
-  PiHeadsetDuotone,
-  PiHourglassSimpleDuotone,
-  PiHouseLineDuotone,
-  PiListNumbersDuotone,
-  PiLockKeyDuotone,
-  PiMapPinLineDuotone,
-  PiNewspaperClippingDuotone,
-  PiNoteBlankDuotone,
-  PiPackageDuotone,
-  PiPresentationChartDuotone,
-  PiPushPinDuotone,
-  PiRocketLaunchDuotone,
-  PiScalesDuotone,
-  PiShapesDuotone,
-  PiShieldCheckDuotone,
-  PiShootingStarDuotone,
-  PiShoppingCartDuotone,
-  PiSparkleDuotone,
-  PiSquaresFourDuotone,
-  PiStairsDuotone,
-  PiStepsDuotone,
-  PiTableDuotone,
-  PiUserCircleDuotone,
-  PiUserDuotone,
-  PiUserGearDuotone,
-  PiUserPlusDuotone,
-} from 'react-icons/pi';
+import { routes } from '@/config/routes'
 
 // Note: do not add href in the label object, it is rendering as label
 export const menuItems = [
-  // label start
   {
-    name: 'Overview',
-  },
-  // label end
-  {
-    name: 'File Manager',
+    name: 'Quản lý điểm đại lý',
     href: '/',
-    icon: <PiFolderDuotone />,
-  },
-  {
-    name: 'Appointment',
-    href: routes.appointment.dashboard,
-    icon: <PiCalendarDuotone />,
-  },
-  {
-    name: 'Executive',
-    href: routes.executive.dashboard,
-    icon: <PiBriefcaseDuotone />,
-  },
-  {
-    name: 'Project',
-    href: routes.project.dashboard,
-    icon: <PiClipboardTextDuotone />,
-  },
-  {
-    name: 'CRM',
-    href: routes.crm.dashboard,
-    icon: <PiFolderUserDuotone />,
-  },
-  {
-    name: 'Affiliate',
-    href: routes.affiliate.dashboard,
-    icon: <PiChartPieSliceDuotone />,
-  },
-  {
-    name: 'Store Analytics',
-    href: routes.storeAnalytics.dashboard,
-    icon: <PiPresentationChartDuotone />,
-    badge: 'NEW',
-  },
-  {
-    name: 'Bidding',
-    href: routes.bidding.dashboard,
-    icon: <PiScalesDuotone />,
-    badge: 'NEW',
-  },
-  {
-    name: 'Social Media',
-    href: routes.socialMedia.dashboard,
-    icon: <PiSparkleDuotone />,
-  },
-  {
-    name: 'Job Board',
-    href: routes.jobBoard.dashboard,
-    icon: <PiShapesDuotone />,
-  },
-  {
-    name: 'Financial',
-    href: routes.financial.dashboard,
-    icon: <PiCurrencyCircleDollarDuotone />,
-  },
-  {
-    name: 'Logistics',
-    href: routes.logistics.dashboard,
-    icon: <PiPackageDuotone />,
-  },
-  {
-    name: 'E-Commerce',
-    href: routes.eCommerce.dashboard,
-    icon: <PiShoppingCartDuotone />,
-  },
-  {
-    name: 'Analytics',
-    href: routes.analytics,
-    icon: <PiChartBarDuotone />,
-  },
-  {
-    name: 'Support',
-    href: routes.support.dashboard,
-    icon: <PiHeadsetDuotone />,
-  },
-  {
-    name: 'Podcast',
-    href: routes.podcast.dashboard,
-    icon: <PiApplePodcastsLogoDuotone />,
-    badge: 'NEW',
-  },
-
-  // label start
-  {
-    name: 'Apps Kit',
-  },
-  // label end
-  {
-    name: 'E-Commerce',
-    href: '#',
-    icon: <PiShoppingCartDuotone />,
-    dropdownItems: [
-      {
-        name: 'Products',
-        href: routes.eCommerce.products,
-        badge: '',
-      },
-      {
-        name: 'Product Details',
-        href: routes.eCommerce.productDetails(DUMMY_ID),
-      },
-      {
-        name: 'Create Product',
-        href: routes.eCommerce.createProduct,
-      },
-      {
-        name: 'Edit Product',
-        href: routes.eCommerce.ediProduct(DUMMY_ID),
-      },
-      {
-        name: 'Categories',
-        href: routes.eCommerce.categories,
-      },
-      {
-        name: 'Create Category',
-        href: routes.eCommerce.createCategory,
-      },
-      {
-        name: 'Edit Category',
-        href: routes.eCommerce.editCategory(DUMMY_ID),
-      },
-      {
-        name: 'Orders',
-        href: routes.eCommerce.orders,
-      },
-      {
-        name: 'Order Details',
-        href: routes.eCommerce.orderDetails(DUMMY_ID),
-      },
-      {
-        name: 'Create Order',
-        href: routes.eCommerce.createOrder,
-      },
-      {
-        name: 'Edit Order',
-        href: routes.eCommerce.editOrder(DUMMY_ID),
-      },
-      {
-        name: 'Reviews',
-        href: routes.eCommerce.reviews,
-      },
-      {
-        name: 'Shop',
-        href: routes.eCommerce.shop,
-      },
-      {
-        name: 'Cart',
-        href: routes.eCommerce.cart,
-      },
-      {
-        name: 'Checkout & Payment',
-        href: routes.eCommerce.checkout,
-      },
-    ],
-  },
-  {
-    name: 'Support',
-    href: '#',
-    icon: <PiHeadsetDuotone />,
-    dropdownItems: [
-      {
-        name: 'Inbox',
-        href: routes.support.inbox,
-      },
-      {
-        name: 'Snippets',
-        href: routes.support.snippets,
-      },
-      {
-        name: 'Templates',
-        href: routes.support.templates,
-      },
-    ],
-  },
-  {
-    name: 'Invoice',
-    href: '#',
-    icon: <PiCurrencyDollarDuotone />,
-    dropdownItems: [
-      {
-        name: 'List',
-        href: routes.invoice.home,
-      },
-      {
-        name: 'Details',
-        href: routes.invoice.details(DUMMY_ID),
-      },
-      {
-        name: 'Create',
-        href: routes.invoice.create,
-      },
-      {
-        name: 'Edit',
-        href: routes.invoice.edit(DUMMY_ID),
-      },
-    ],
-  },
-  {
-    name: 'Logistics',
-    href: '#',
-    icon: <PiPackageDuotone />,
-    dropdownItems: [
-      {
-        name: 'Shipment List',
-        href: routes.logistics.shipmentList,
-      },
-      {
-        name: 'Shipment Details',
-        href: routes.logistics.shipmentDetails(DUMMY_ID),
-      },
-      {
-        name: 'Create Shipment',
-        href: routes.logistics.createShipment,
-      },
-      {
-        name: 'Edit Shipment',
-        href: routes.logistics.editShipment(DUMMY_ID),
-      },
-      {
-        name: 'Customer Profile',
-        href: routes.logistics.customerProfile,
-      },
-      {
-        name: 'Tracking',
-        href: routes.logistics.tracking(DUMMY_ID),
-      },
-    ],
-  },
-  {
-    name: 'Job Feeds',
-    href: routes.jobBoard.jobFeed,
-    icon: <PiShapesDuotone />,
-  },
-  {
-    name: 'Appointment',
-    href: routes.appointment.appointmentList,
-    icon: <PiCalendarDuotone />,
-  },
-  {
-    name: 'File Manager',
-    href: routes.file.manager,
-    icon: <PiFoldersDuotone />,
-  },
-  {
-    name: 'Event Calendar',
-    href: routes.eventCalendar,
-    icon: <PiCalendarPlusDuotone />,
-  },
-  {
-    name: 'Roles & Permissions',
-    href: routes.rolesPermissions,
-    icon: <PiFolderLockDuotone />,
-  },
-  {
-    name: 'Point of Sale',
-    href: routes.pos.index,
-    icon: <PiCreditCardDuotone />,
-  },
-  {
-    name: 'Invoice Builder',
-    href: routes.invoice.builder,
-    icon: <PiNewspaperClippingDuotone />,
-  },
-  {
-    name: 'Image Viewer',
-    href: routes.imageViewer,
-    icon: <PiCodesandboxLogoDuotone />,
-  },
-  // label start
-  {
-    name: 'Search & Filters',
-  },
-  {
-    name: 'Real Estate',
-    href: routes.searchAndFilter.realEstate,
-    icon: <PiHouseLineDuotone />,
-  },
-  {
-    name: 'Flight Booking',
-    href: routes.searchAndFilter.flight,
-    icon: <PiAirplaneTiltDuotone />,
-  },
-  {
-    name: 'NFT',
-    href: routes.searchAndFilter.nft,
-    icon: <PiCoinDuotone />,
-  },
-  // label end
-  // label start
-  {
-    name: 'Widgets',
-  },
-  // label end
-  {
-    name: 'Cards',
-    href: routes.widgets.cards,
-    icon: <PiSquaresFourDuotone />,
-  },
-  {
-    name: 'Icons',
-    href: routes.widgets.icons,
-    icon: <PiFeatherDuotone />,
-  },
-  {
-    name: 'Charts',
-    href: routes.widgets.charts,
-    icon: <PiChartLineUpDuotone />,
-  },
-  // {
-  //   name: 'Banners',
-  //   href: routes.widgets.banners,
-  //   icon: <PiImageDuotone />,
-  // },
-  {
-    name: 'Maps',
-    href: routes.widgets.maps,
-    icon: <PiMapPinLineDuotone />,
-  },
-  {
-    name: 'Email Templates',
-    href: routes.emailTemplates,
-    icon: <PiEnvelopeDuotone />,
-  },
-  // label start
-  {
-    name: 'Forms',
-  },
-  // label end
-  {
-    name: 'Account Settings',
-    href: routes.forms.profileSettings,
-    icon: <PiUserGearDuotone />,
-  },
-  {
-    name: 'Notification Preference',
-    href: routes.forms.notificationPreference,
-    icon: <PiBellSimpleRingingDuotone />,
-  },
-  {
-    name: 'Personal Information',
-    href: routes.forms.personalInformation,
-    icon: <PiUserDuotone />,
-  },
-  {
-    name: 'Newsletter',
-    href: routes.forms.newsletter,
-    icon: <PiEnvelopeSimpleOpenDuotone />,
-  },
-  {
-    name: 'Multi Step',
-    href: routes.multiStep,
-    icon: <PiStepsDuotone />,
-  },
-  {
-    name: 'Multi Step 2',
-    href: routes.multiStep2,
-    icon: <PiStairsDuotone />,
-  },
-  {
-    name: 'Payment Checkout',
-    href: routes.eCommerce.checkout,
-    icon: <PiCreditCardDuotone />,
-  },
-  // label start
-  {
-    name: 'Tables',
-  },
-  // label end
-  {
-    name: 'Basic',
-    href: routes.tables.basic,
-    icon: <PiGridFourDuotone />,
-  },
-  {
-    name: 'Collapsible',
-    href: routes.tables.collapsible,
-    icon: <PiCaretCircleUpDownDuotone />,
-  },
-  {
-    name: 'Enhanced',
-    href: routes.tables.enhanced,
-    icon: <PiTableDuotone />,
-  },
-  {
-    name: 'Sticky Header',
-    href: routes.tables.stickyHeader,
-    icon: <PiBrowserDuotone />,
-  },
-  {
-    name: 'Pagination',
-    href: routes.tables.pagination,
-    icon: <PiListNumbersDuotone />,
-  },
-  {
-    name: 'Search',
-    href: routes.tables.search,
-    icon: <PiHourglassSimpleDuotone />,
-  },
-  {
-    name: 'Resizable',
-    href: routes.tables.resizable,
-    icon: <PiArrowsOutLineHorizontalDuotone />,
-  },
-  {
-    name: 'Pinning',
-    href: routes.tables.pinning,
-    icon: <PiPushPinDuotone />,
-  },
-  {
-    name: 'Drag & Drop',
-    href: routes.tables.dnd,
-    icon: <PiArrowsOutDuotone />,
-  },
-  // label start
-  {
-    name: 'Pages',
-  },
-  {
-    name: 'Profile',
-    href: routes.profile,
-    icon: <PiUserCircleDuotone />,
-  },
-  {
-    name: 'Welcome',
-    href: routes.welcome,
-    icon: <PiShootingStarDuotone />,
-  },
-  {
-    name: 'Coming soon',
-    href: routes.comingSoon,
-    icon: <PiRocketLaunchDuotone />,
-  },
-  {
-    name: 'Access Denied',
-    href: routes.accessDenied,
-    icon: <PiFolderLockDuotone />,
-  },
-  {
-    name: 'Not Found',
-    href: routes.notFound,
-    icon: <PiBinocularsDuotone />,
-  },
-  {
-    name: 'Maintenance',
-    href: routes.maintenance,
-    icon: <PiHammerDuotone />,
-  },
-  {
-    name: 'Blank',
-    href: routes.blank,
-    icon: <PiNoteBlankDuotone />,
-  },
-
-  // label start
-  {
-    name: 'Authentication',
-  },
-  // label end
-  {
-    name: 'Sign Up',
-    href: '#',
-    icon: <PiUserPlusDuotone />,
-    dropdownItems: [
-      {
-        name: 'Modern Sign up',
-        href: routes.auth.signUp1,
-      },
-      {
-        name: 'Vintage Sign up',
-        href: routes.auth.signUp2,
-      },
-      {
-        name: 'Trendy Sign up',
-        href: routes.auth.signUp3,
-      },
-      {
-        name: 'Elegant Sign up',
-        href: routes.auth.signUp4,
-      },
-      {
-        name: 'Classic Sign up',
-        href: routes.auth.signUp5,
-      },
-    ],
-  },
-  {
-    name: 'Sign In',
-    href: '#',
-    icon: <PiShieldCheckDuotone />,
-    dropdownItems: [
-      {
-        name: 'Modern Sign in',
-        href: routes.auth.signIn1,
-      },
-      {
-        name: 'Vintage Sign in',
-        href: routes.auth.signIn2,
-      },
-      {
-        name: 'Trendy Sign in',
-        href: routes.auth.signIn3,
-      },
-      {
-        name: 'Elegant Sign in',
-        href: routes.auth.signIn4,
-      },
-      {
-        name: 'Classic Sign in',
-        href: routes.auth.signIn5,
-      },
-    ],
-  },
-  {
-    name: 'Forgot Password',
-    href: '#',
-    icon: <PiLockKeyDuotone />,
-    dropdownItems: [
-      {
-        name: 'Modern Forgot password',
-        href: routes.auth.forgotPassword1,
-      },
-      {
-        name: 'Vintage Forgot password',
-        href: routes.auth.forgotPassword2,
-      },
-      {
-        name: 'Trendy Forgot password',
-        href: routes.auth.forgotPassword3,
-      },
-      {
-        name: 'Elegant Forgot password',
-        href: routes.auth.forgotPassword4,
-      },
-      {
-        name: 'Classic Forgot password',
-        href: routes.auth.forgotPassword5,
-      },
-    ],
-  },
-  {
-    name: 'OTP Pages',
-    href: '#',
-    icon: <PiChatCenteredDotsDuotone />,
-    dropdownItems: [
-      {
-        name: 'Modern OTP page',
-        href: routes.auth.otp1,
-      },
-      {
-        name: 'Vintage OTP page',
-        href: routes.auth.otp2,
-      },
-      {
-        name: 'Trendy OTP page',
-        href: routes.auth.otp3,
-      },
-      {
-        name: 'Elegant OTP page',
-        href: routes.auth.otp4,
-      },
-      {
-        name: 'Classic OTP page',
-        href: routes.auth.otp5,
-      },
-    ],
-  },
-];
+    icon: (
+      <svg
+        width="40"
+        height="40"
+        viewBox="0 0 40 40"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g clipPath="url(#clip0_1274_56123)">
+          <rect width="40" height="40" rx="20" fill="#FF4548" />
+          <path
+            d="M21.5625 15.3125C21.5625 16.1754 20.8629 16.875 20 16.875C19.1371 16.875 18.4375 16.1754 18.4375 15.3125C18.4375 14.4496 19.1371 13.75 20 13.75C20.8629 13.75 21.5625 14.4496 21.5625 15.3125Z"
+            fill="url(#paint0_linear_1274_56123)"
+          />
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M26.25 15.8203C26.25 12.2384 23.595 9.0625 20 9.0625C16.405 9.0625 13.75 12.2384 13.75 15.8203C13.75 17.7091 14.5969 19.8874 15.4695 21.6785C16.3713 23.5296 17.4308 25.2223 18.0841 26.2125C18.9962 27.595 21.0038 27.595 21.9159 26.2125C22.5692 25.2223 23.6287 23.5296 24.5305 21.6785C25.4031 19.8874 26.25 17.7091 26.25 15.8203ZM20 10.625C22.5859 10.625 24.6875 12.9476 24.6875 15.8203C24.6875 18.8332 21.8817 23.427 20.6117 25.3521C20.3172 25.7985 19.6828 25.7985 19.3883 25.3521C18.1183 23.427 15.3125 18.8332 15.3125 15.8203C15.3125 12.9476 17.4141 10.625 20 10.625Z"
+            fill="url(#paint1_linear_1274_56123)"
+          />
+          <path
+            d="M9.84375 23.9062C9.84375 22.6118 10.8931 21.5625 12.1875 21.5625H12.9688C13.4002 21.5625 13.75 21.9123 13.75 22.3438C13.75 22.7752 13.4002 23.125 12.9688 23.125H12.1875C11.756 23.125 11.4062 23.4748 11.4062 23.9062V28.5938C11.4062 29.0252 11.756 29.375 12.1875 29.375H27.8125C28.244 29.375 28.5938 29.0252 28.5938 28.5938V23.9062C28.5938 23.4748 28.244 23.125 27.8125 23.125H27.0312C26.5998 23.125 26.25 22.7752 26.25 22.3438C26.25 21.9123 26.5998 21.5625 27.0312 21.5625H27.8125C29.1069 21.5625 30.1562 22.6118 30.1562 23.9062V28.5938C30.1562 29.8882 29.1069 30.9375 27.8125 30.9375H12.1875C10.8931 30.9375 9.84375 29.8882 9.84375 28.5938V23.9062Z"
+            fill="url(#paint2_linear_1274_56123)"
+          />
+        </g>
+        <defs>
+          <linearGradient
+            id="paint0_linear_1274_56123"
+            x1="20"
+            y1="9.0625"
+            x2="20"
+            y2="13.9337"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stopColor="white" stopOpacity="0.9" />
+            <stop offset="1" stopColor="#FFFDFD" />
+          </linearGradient>
+          <linearGradient
+            id="paint1_linear_1274_56123"
+            x1="20"
+            y1="9.0625"
+            x2="20"
+            y2="13.9337"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stopColor="white" stopOpacity="0.9" />
+            <stop offset="1" stopColor="#FFFDFD" />
+          </linearGradient>
+          <linearGradient
+            id="paint2_linear_1274_56123"
+            x1="20"
+            y1="9.0625"
+            x2="20"
+            y2="13.9337"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stopColor="white" stopOpacity="0.9" />
+            <stop offset="1" stopColor="#FFFDFD" />
+          </linearGradient>
+          <clipPath id="clip0_1274_56123">
+            <rect width="40" height="40" rx="8" fill="white" />
+          </clipPath>
+        </defs>
+      </svg>
+    ),
+  },
+  {
+    name: 'Quản lý nhân viên đại lý',
+    href: routes.staff,
+    icon: (
+      <svg
+        width="40"
+        height="40"
+        viewBox="0 0 40 40"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g clipPath="url(#clip0_1274_56142)">
+          <rect width="40" height="40" rx="20" fill="#2788FA" />
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M20.0001 19.4318C22.432 19.4318 24.4035 17.4603 24.4035 15.0284C24.4035 12.5965 22.432 10.625 20.0001 10.625C17.5682 10.625 15.5967 12.5965 15.5967 15.0284C15.5967 17.4603 17.5682 19.4318 20.0001 19.4318ZM20.0001 20.9943C23.295 20.9943 25.966 18.3233 25.966 15.0284C25.966 11.7335 23.295 9.0625 20.0001 9.0625C16.7052 9.0625 14.0342 11.7335 14.0342 15.0284C14.0342 18.3233 16.7052 20.9943 20.0001 20.9943Z"
+            fill="white"
+          />
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M13.75 26.25C12.8871 26.25 12.1875 26.9496 12.1875 27.8125V30.1562C12.1875 30.5877 11.8377 30.9375 11.4062 30.9375C10.9748 30.9375 10.625 30.5877 10.625 30.1562V27.8125C10.625 26.0866 12.0241 24.6875 13.75 24.6875H18.4375C18.869 24.6875 19.2188 25.0373 19.2188 25.4688C19.2188 25.9002 18.869 26.25 18.4375 26.25H13.75Z"
+            fill="white"
+          />
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M25.6487 27.9925C25.9538 27.6874 26.4485 27.6874 26.7536 27.9925L29.2438 30.4827C29.5489 30.7878 29.5489 31.2825 29.2438 31.5876C28.9387 31.8927 28.4441 31.8927 28.139 31.5876L25.6487 29.0973C25.3436 28.7923 25.3436 28.2976 25.6487 27.9925Z"
+            fill="white"
+          />
+          <path
+            fillRule="evenodd"
+            clipRule="evenodd"
+            d="M24.0039 28.0078C24.9208 28.0078 25.6641 27.2645 25.6641 26.3477C25.6641 25.4308 24.9208 24.6875 24.0039 24.6875C23.087 24.6875 22.3438 25.4308 22.3438 26.3477C22.3438 27.2645 23.087 28.0078 24.0039 28.0078ZM24.0039 29.5703C25.7837 29.5703 27.2266 28.1275 27.2266 26.3477C27.2266 24.5678 25.7837 23.125 24.0039 23.125C22.2241 23.125 20.7812 24.5678 20.7812 26.3477C20.7812 28.1275 22.2241 29.5703 24.0039 29.5703Z"
+            fill="white"
+          />
+        </g>
+        <defs>
+          <clipPath id="clip0_1274_56142">
+            <rect width="40" height="40" rx="8" fill="white" />
+          </clipPath>
+        </defs>
+      </svg>
+    ),
+  },
+  {
+    name: 'Quản lý giao dịch',
+    href: routes.transaction,
+    icon: (
+      <svg
+        width="40"
+        height="40"
+        viewBox="0 0 40 40"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g clipPath="url(#clip0_1274_56162)">
+          <rect width="40" height="40" rx="20" fill="#3BB281" />
+          <path
+            d="M18.6186 9.34363C18.8948 9.01216 19.3874 8.96737 19.7189 9.2436L22.5314 11.5873C22.7095 11.7358 22.8125 11.9557 22.8125 12.1875C22.8125 12.4194 22.7095 12.6393 22.5314 12.7877L19.7189 15.1314C19.3874 15.4077 18.8948 15.3629 18.6186 15.0314C18.3424 14.6999 18.3871 14.2073 18.7186 13.9311L19.8734 12.9688H12.3438C11.8933 12.9688 11.6025 12.9694 11.3811 12.9875C11.1689 13.0048 11.0902 13.0342 11.0516 13.0539C10.9046 13.1288 10.7851 13.2483 10.7102 13.3953C10.6905 13.434 10.661 13.5127 10.6437 13.7249C10.6256 13.9462 10.625 14.2371 10.625 14.6875L10.625 16.875H29.3554V13.75C29.3554 13.3185 29.0056 12.9688 28.5741 12.9688H26.2499C25.8184 12.9688 25.4686 12.619 25.4686 12.1875C25.4686 11.756 25.8184 11.4063 26.2499 11.4063H28.5741C29.8686 11.4063 30.9179 12.4556 30.9179 13.75L30.9179 25.3426C30.9179 25.7545 30.9179 26.1098 30.894 26.4024C30.8688 26.7112 30.8131 27.0184 30.6624 27.3141C30.4377 27.7551 30.0792 28.1136 29.6382 28.3383C29.3426 28.4889 29.0354 28.5447 28.7265 28.5699C28.4339 28.5938 28.0786 28.5938 27.6668 28.5938H20.5953L21.7501 29.5561C22.0815 29.8323 22.1263 30.3249 21.8501 30.6564C21.5739 30.9879 21.0812 31.0327 20.7498 30.7564L17.9373 28.4127C17.7592 28.2643 17.6562 28.0444 17.6562 27.8125C17.6562 27.5807 17.7592 27.3608 17.9373 27.2123L20.7498 24.8686C21.0812 24.5924 21.5739 24.6372 21.8501 24.9686C22.1263 25.3001 22.0815 25.7927 21.7501 26.0689L20.5953 27.0313H27.6366C28.0871 27.0313 28.3779 27.0307 28.5993 27.0126C28.8115 26.9952 28.8902 26.9658 28.9288 26.9461C29.0758 26.8712 29.1953 26.7517 29.2702 26.6047C29.2899 26.5661 29.3194 26.4874 29.3367 26.2751C29.3548 26.0538 29.3554 25.763 29.3554 25.3125V18.4375H10.625V26.25C10.625 26.6815 10.9748 27.0313 11.4063 27.0313H13.75C14.1815 27.0313 14.5313 27.381 14.5313 27.8125C14.5313 28.244 14.1815 28.5938 13.75 28.5938H11.4063C10.1118 28.5938 9.0625 27.5444 9.0625 26.25V14.6574C9.06249 14.2456 9.06247 13.8903 9.08638 13.5977C9.11162 13.2888 9.16733 12.9816 9.31795 12.686C9.54266 12.245 9.90121 11.8864 10.3422 11.6617C10.6378 11.5111 10.945 11.4554 11.2539 11.4302C11.5465 11.4062 11.9018 11.4063 12.3136 11.4063L19.8734 11.4063L18.7186 10.4439C18.3871 10.1677 18.3424 9.67509 18.6186 9.34363Z"
+            fill="url(#paint0_linear_1274_56162)"
+          />
+        </g>
+        <defs>
+          <linearGradient
+            id="paint0_linear_1274_56162"
+            x1="19.9902"
+            y1="9.0625"
+            x2="19.9902"
+            y2="13.9337"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop stopColor="white" stopOpacity="0.9" />
+            <stop offset="1" stopColor="#FFFDFD" />
+          </linearGradient>
+          <clipPath id="clip0_1274_56162">
+            <rect width="40" height="40" rx="8" fill="white" />
+          </clipPath>
+        </defs>
+      </svg>
+    ),
+  },
+]
