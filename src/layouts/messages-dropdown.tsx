@@ -1,22 +1,19 @@
+import { messagesData } from '@/data/messages'
+import { useMedia } from '@core/hooks/use-media'
+import cn from '@core/utils/class-names'
+import dayjs from 'dayjs'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import { Link } from 'react-router-dom'
+import { RefObject, useState } from 'react'
+import { PiCheck } from 'react-icons/pi'
+import { Avatar, Badge, Popover, Text, Title } from 'rizzui'
 
-
-import { routes } from '@/config/routes';
-import { messagesData } from '@/data/messages';
-import { useMedia } from '@core/hooks/use-media';
-import cn from '@core/utils/class-names';
-import dayjs from 'dayjs';
-import relativeTime from 'dayjs/plugin/relativeTime';
-import { Link } from "react-router-dom";
-import { RefObject, useState } from 'react';
-import { PiCheck } from 'react-icons/pi';
-import { Avatar, Badge, Popover, Text, Title } from 'rizzui';
-
-dayjs.extend(relativeTime);
+dayjs.extend(relativeTime)
 
 function MessagesList({
   setIsOpen,
 }: {
-  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsOpen: React.Dispatch<React.SetStateAction<boolean>>
 }) {
   return (
     <div className="w-[320px] text-left sm:w-[360px] 2xl:w-[420px] rtl:text-right">
@@ -25,7 +22,7 @@ function MessagesList({
           Messages
         </Title>
         <Link
-          to={routes.support.inbox}
+          to={'/'}
           onClick={() => setIsOpen(false)}
           className="hover:underline"
         >
@@ -45,7 +42,7 @@ function MessagesList({
                   name={item.name}
                   className={cn(
                     item.avatar.length > 1 &&
-                    'relative -end-1 -top-0.5 !h-9 !w-9'
+                      'relative -end-1 -top-0.5 !h-9 !w-9'
                   )}
                 />
                 {item.avatar.length > 1 && (
@@ -90,16 +87,16 @@ function MessagesList({
         </div>
       </div>
     </div>
-  );
+  )
 }
 
 export default function MessagesDropdown({
   children,
 }: {
-  children: React.ReactElement & { ref?: RefObject<any> };
+  children: React.ReactElement & { ref?: RefObject<any> }
 }) {
-  const isMobile = useMedia('(max-width: 480px)', false);
-  const [isOpen, setIsOpen] = useState(false);
+  const isMobile = useMedia('(max-width: 480px)', false)
+  const [isOpen, setIsOpen] = useState(false)
   return (
     <Popover
       isOpen={isOpen}
@@ -112,5 +109,5 @@ export default function MessagesDropdown({
         <MessagesList setIsOpen={setIsOpen} />
       </Popover.Content>
     </Popover>
-  );
+  )
 }

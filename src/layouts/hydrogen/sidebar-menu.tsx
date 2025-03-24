@@ -1,24 +1,24 @@
-import { Fragment } from 'react';
-import { usePathname } from 'next/navigation';
-import { Title } from 'rizzui/typography';
-import { Collapse } from 'rizzui/collapse';
-import cn from '@core/utils/class-names';
-import { PiCaretDownBold } from 'react-icons/pi';
-import { menuItems } from '@/layouts/hydrogen/menu-items';
-import StatusBadge from '@core/components/get-status-badge';
-import { Link } from 'react-router-dom';
+import { Fragment } from 'react'
+import { usePathname } from 'next/navigation'
+import { Title } from 'rizzui/typography'
+import { Collapse } from 'rizzui/collapse'
+import cn from '@core/utils/class-names'
+import { PiCaretDownBold } from 'react-icons/pi'
+import { menuItems } from '@/layouts/hydrogen/menu-items'
+import StatusBadge from '@core/components/get-status-badge'
+import { Link } from 'react-router-dom'
 
 export function SidebarMenu() {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   return (
     <div className="mt-4 pb-3 3xl:mt-6">
-      {menuItems.map((item, index) => {
-        const isActive = pathname === (item?.href as string);
+      {menuItems.map((item: any, index: any) => {
+        const isActive = pathname === (item?.href as string)
         const pathnameExistInDropdowns: any = item?.dropdownItems?.filter(
-          (dropdownItem) => dropdownItem.href === pathname
-        );
-        const isDropdownOpen = Boolean(pathnameExistInDropdowns?.length);
+          (dropdownItem: any) => dropdownItem.href === pathname
+        )
+        const isDropdownOpen = Boolean(pathnameExistInDropdowns?.length)
 
         return (
           <Fragment key={item.name + '-' + index}>
@@ -63,40 +63,42 @@ export function SidebarMenu() {
                       </div>
                     )}
                   >
-                    {item?.dropdownItems?.map((dropdownItem, index) => {
-                      const isChildActive =
-                        pathname === (dropdownItem?.href as string);
+                    {item?.dropdownItems?.map(
+                      (dropdownItem: any, index: any) => {
+                        const isChildActive =
+                          pathname === (dropdownItem?.href as string)
 
-                      return (
-                        <Link
-                          to={dropdownItem?.href}
-                          key={dropdownItem?.name + index}
-                          className={cn(
-                            'mx-3.5 mb-0.5 flex items-center justify-between rounded-md px-3.5 py-2 font-medium capitalize last-of-type:mb-1 lg:last-of-type:mb-2 2xl:mx-5',
-                            isChildActive
-                              ? 'text-primary'
-                              : 'text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900'
-                          )}
-                        >
-                          <div className="flex items-center truncate">
-                            <span
-                              className={cn(
-                                'me-[18px] ms-1 inline-flex h-1 w-1 rounded-full bg-current transition-all duration-200',
-                                isChildActive
-                                  ? 'bg-primary ring-[1px] ring-primary'
-                                  : 'opacity-40'
-                              )}
-                            />{' '}
-                            <span className="truncate">
-                              {dropdownItem?.name}
-                            </span>
-                          </div>
-                          {dropdownItem?.badge?.length ? (
-                            <StatusBadge status={dropdownItem?.badge} />
-                          ) : null}
-                        </Link>
-                      );
-                    })}
+                        return (
+                          <Link
+                            to={dropdownItem?.href}
+                            key={dropdownItem?.name + index}
+                            className={cn(
+                              'mx-3.5 mb-0.5 flex items-center justify-between rounded-md px-3.5 py-2 font-medium capitalize last-of-type:mb-1 lg:last-of-type:mb-2 2xl:mx-5',
+                              isChildActive
+                                ? 'text-primary'
+                                : 'text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900'
+                            )}
+                          >
+                            <div className="flex items-center truncate">
+                              <span
+                                className={cn(
+                                  'me-[18px] ms-1 inline-flex h-1 w-1 rounded-full bg-current transition-all duration-200',
+                                  isChildActive
+                                    ? 'bg-primary ring-[1px] ring-primary'
+                                    : 'opacity-40'
+                                )}
+                              />{' '}
+                              <span className="truncate">
+                                {dropdownItem?.name}
+                              </span>
+                            </div>
+                            {dropdownItem?.badge?.length ? (
+                              <StatusBadge status={dropdownItem?.badge} />
+                            ) : null}
+                          </Link>
+                        )
+                      }
+                    )}
                   </Collapse>
                 ) : (
                   <Link
@@ -141,8 +143,8 @@ export function SidebarMenu() {
               </Title>
             )}
           </Fragment>
-        );
+        )
       })}
     </div>
-  );
+  )
 }

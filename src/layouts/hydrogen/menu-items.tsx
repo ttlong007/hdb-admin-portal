@@ -154,4 +154,4 @@ export const menuItems = [
       </svg>
     ),
   },
-]
+] as any

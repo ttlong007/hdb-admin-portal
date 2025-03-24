@@ -1,9 +1,7 @@
-
-
-import Logo from '@core/components/logo';
-import cn from '@core/utils/class-names';
-import { Link } from "react-router-dom";
-import { SidebarMenu } from './sidebar-menu';
+import Logo from '@core/components/logo'
+import cn from '@core/utils/class-names'
+import { Link } from 'react-router-dom'
+import { SidebarMenu } from './sidebar-menu'
 
 export default function Sidebar({ className }: { className?: string }) {
   return (
@@ -19,7 +17,7 @@ export default function Sidebar({ className }: { className?: string }) {
           aria-label="Site Logo"
           className="text-gray-800 hover:text-gray-900"
         >
-          <Logo className="max-w-[155px]" />
+          <Logo />
         </Link>
       </div>
 
@@ -27,5 +25,5 @@ export default function Sidebar({ className }: { className?: string }) {
         <SidebarMenu />
       </div>
     </aside>
-  );
+  )
 }
