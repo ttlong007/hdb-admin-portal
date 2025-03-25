@@ -1,22 +1,13 @@
 import { useRoutes } from 'react-router-dom'
 import Layout from './Layout'
-import GlobalDrawer from './shared/drawer-views/container'
-
-const HomePage = () => {
-  return (
-    <div>
-      <GlobalDrawer />
-      Home Page
-    </div>
-  )
-}
+import Home from './pages/home'
 
 function RootRoutes() {
   const routes = [
     {
       path: '/',
       element: <Layout />,
-      children: [{ path: '/', element: <HomePage /> }],
+      children: [{ path: '/', element: <Home /> }],
     },
   ]
 
