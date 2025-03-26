@@ -1,8 +1,100 @@
 import React from 'react'
 import { BsDownload } from 'react-icons/bs'
 import { Input, Select } from 'rizzui'
+import { Table } from 'antd'
+import type { TableProps } from 'antd'
+import { Link } from 'react-router-dom'
+import { routes } from '@/Routes'
 
 const Home: React.FC = () => {
+  const dataSource = [
+    {
+      key: '1',
+      name: 'fake',
+    },
+    {
+      key: '2',
+      name: 'fake',
+    },
+    {
+      key: '3',
+      name: 'fake',
+    },
+    {
+      key: '4',
+      name: 'fake',
+    },
+  ]
+
+  const columns = [
+    {
+      title: 'STT',
+      dataIndex: 'key',
+    },
+    {
+      title: 'Mã CIF',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: true,
+    },
+    {
+      title: 'Tên công ty',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: true,
+    },
+    {
+      title: 'Số cửa hàng đại lý',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: true,
+    },
+    {
+      title: 'Tên đại lý',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: true,
+    },
+    {
+      title: 'Tên quản lý',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: true,
+    },
+    {
+      title: 'Mã nhân viên',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: true,
+    },
+    {
+      title: 'Trạng thái',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: true,
+    },
+    {
+      title: 'Tác vụ',
+      dataIndex: 'name',
+      key: 'name',
+      sorter: true,
+    },
+  ]
+
+  const rowSelection: TableProps<DataType>['rowSelection'] = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        'selectedRows: ',
+        selectedRows
+      )
+    },
+    getCheckboxProps: (record: DataType) => ({
+      disabled: record.name === 'Disabled User', // Column configuration not to be checked
+      name: record.name,
+    }),
+  }
+
   return (
     <div className="px-6 py-4 bg-white rounded-lg shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] flex flex-col justify-start items-start gap-4">
       <div className="self-stretch inline-flex justify-between items-center border-b border-[#DDE4EE] py-4">
@@ -29,7 +121,10 @@ const Home: React.FC = () => {
             Tải lên theo danh sách
           </button>
 
-          <button className="rounded-sm flex justify-center items-center gap-2 bg-[#DA2128] px-3 py-2 font-medium text-[14px] text-white">
+          <Link
+            to={routes.createMerchant}
+            className="rounded-sm flex justify-center items-center gap-2 bg-[#DA2128] px-3 py-2 font-medium text-[14px] text-white"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -43,7 +138,7 @@ const Home: React.FC = () => {
               />
             </svg>{' '}
             Đăng ký điểm đại lý
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -70,6 +165,20 @@ const Home: React.FC = () => {
           </button>
           <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
             Áp dụng
+          </button>
+        </div>
+      </div>
+
+      <div className="w-full">
+        <Table
+          rowSelection={{ type: 'checkbox', ...rowSelection }}
+          columns={columns}
+          dataSource={dataSource}
+        />
+
+        <div className="flex justify-end gap-4 w-full mt-8">
+          <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
+            Đồng ý duyệt
           </button>
         </div>
       </div>
