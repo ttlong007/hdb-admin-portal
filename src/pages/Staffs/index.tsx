@@ -6,7 +6,7 @@ import type { TableProps } from 'antd'
 import { Link } from 'react-router-dom'
 import { routes } from '@/config/routes'
 
-const Home: React.FC = () => {
+const Staffs: React.FC = () => {
   const dataSource = [
     {
       key: '1',
@@ -99,7 +99,7 @@ const Home: React.FC = () => {
     <div className="px-6 py-4 bg-white rounded-lg shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] flex flex-col justify-start items-start gap-4">
       <div className="self-stretch inline-flex justify-between items-center border-b border-[#DDE4EE] py-4">
         <div className="justify-start text-black text-3xl font-bold ">
-          Quản lý điểm đại lý
+          Danh sách nhân viên đại lý
         </div>
         <div className="size- flex justify-start items-center gap-3">
           <div className="text-[#366AE2] text-xs font-medium underline">
@@ -186,4 +186,4 @@ const Home: React.FC = () => {
   )
 }
 
-export default Home
+export default Staffs
