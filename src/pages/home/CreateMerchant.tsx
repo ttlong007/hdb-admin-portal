@@ -34,7 +34,6 @@ export default function CreateMerchant() {
                   <Input
                     label="Tên điểm đại lý"
                     placeholder="Value"
-                    required
                     className="h-10"
                   />
                 </div>
@@ -42,25 +41,18 @@ export default function CreateMerchant() {
                   <Input
                     label="Mã điểm đại lý"
                     placeholder="Value"
-                    required
                     className="h-10"
                   />
                 </div>
               </div>
               <div className="flex gap-6 items-start w-full max-md:flex-col">
                 <div className="w-[596px] max-md:w-full">
-                  <Input
-                    label="Địa chỉ"
-                    placeholder="Value"
-                    required
-                    className="h-10"
-                  />
+                  <Input label="Địa chỉ" placeholder="Value" className="h-10" />
                 </div>
                 <div className="flex-1">
                   <Select
                     label="Phường/Xã"
                     placeholder="Value"
-                    required
                     options={[{ value: 'value', label: 'Value' }]}
                     className="h-10"
                   />
@@ -69,7 +61,6 @@ export default function CreateMerchant() {
                   <Select
                     label="Quận/Huyện"
                     placeholder="Value"
-                    required
                     options={[{ value: 'value', label: 'Value' }]}
                     className="h-10"
                   />
@@ -84,7 +75,6 @@ export default function CreateMerchant() {
                 <Input
                   label="Hạn mức trong tháng"
                   value="5,000,000,000"
-                  required
                   className="h-10"
                 />
               </div>
@@ -92,7 +82,6 @@ export default function CreateMerchant() {
                 <Input
                   label="Hạn mức trong ngày"
                   placeholder="Value"
-                  required
                   className="h-10"
                 />
               </div>

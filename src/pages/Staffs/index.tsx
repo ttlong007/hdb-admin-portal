@@ -81,15 +81,15 @@ const Staffs: React.FC = () => {
     },
   ]
 
-  const rowSelection: TableProps<DataType>['rowSelection'] = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: DataType[]) => {
+  const rowSelection: TableProps['rowSelection'] = {
+    onChange: (selectedRowKeys: React.Key[], selectedRows) => {
       console.log(
         `selectedRowKeys: ${selectedRowKeys}`,
-        'selectedRows: ',
+        'selectedRows ',
         selectedRows
       )
     },
-    getCheckboxProps: (record: DataType) => ({
+    getCheckboxProps: (record) => ({
       disabled: record.name === 'Disabled User', // Column configuration not to be checked
       name: record.name,
     }),
