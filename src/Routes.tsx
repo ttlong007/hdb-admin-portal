@@ -1,8 +1,8 @@
 import { useRoutes } from 'react-router-dom'
 import Layout from './Layout'
-import Home from './pages/Home'
-import CreateMerchant from './pages/Home/CreateMerchant'
-import MerchantDetail from './pages/Home/MerchantDetail'
+import Home from './pages/Merchants'
+import CreateMerchant from './pages/Merchants/CreateMerchant'
+import MerchantDetail from './pages/Merchants/MerchantDetail'
 import Transactions from './pages/Transactions'
 import Staffs from './pages/Staffs'
 
