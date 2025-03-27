@@ -1,6 +1,4 @@
 import React from 'react'
-import { BsDownload } from 'react-icons/bs'
-import { Input, Select } from 'rizzui'
 import { Table } from 'antd'
 import type { TableProps } from 'antd'
 import { Link } from 'react-router-dom'
