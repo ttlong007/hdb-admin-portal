@@ -1,7 +1,9 @@
 import React from 'react'
-import { Table } from 'antd'
+import { Table, Tag, Space, Button } from 'antd';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { TableProps } from 'antd'
 import { Link } from 'react-router-dom'
+
 import { routes } from '@/config/routes'
 import Filters from './components/Filters'
 
@@ -9,77 +11,119 @@ const Home: React.FC = () => {
   const dataSource = [
     {
       key: '1',
-      name: 'fake',
+      stt: 1,
+      maCIF: 'ST001',
+      tenCongTy: 'Value',
+      soCuaHangDaiLy: 123,
+      diaChi: 'Value 123',
+      tenQuanLy: 'Nguyễn Văn A',
+      maNhanVien: 'CH123',
+      trangThai: 'Thành công',
     },
     {
       key: '2',
-      name: 'fake',
+      stt: 2,
+      maCIF: 'ST002',
+      tenCongTy: 'Value',
+      soCuaHangDaiLy: 123,
+      diaChi: 'Value 123',
+      tenQuanLy: 'Nguyễn Văn A',
+      maNhanVien: 'CH123',
+      trangThai: 'Thất bại',
     },
     {
       key: '3',
-      name: 'fake',
+      stt: 3,
+      maCIF: 'ST003',
+      tenCongTy: 'Value',
+      soCuaHangDaiLy: 123,
+      diaChi: 'Value 123',
+      tenQuanLy: 'Nguyễn Văn A',
+      maNhanVien: 'CH123',
+      trangThai: 'Thành công',
     },
     {
       key: '4',
-      name: 'fake',
+      stt: 4,
+      maCIF: 'ST004',
+      tenCongTy: 'Value',
+      soCuaHangDaiLy: 123,
+      diaChi: 'Value 123',
+      tenQuanLy: 'Nguyễn Văn A',
+      maNhanVien: 'CH123',
+      trangThai: 'Thất bại',
+    },
+    {
+      key: '5',
+      stt: 5,
+      maCIF: 'ST005',
+      tenCongTy: 'Value',
+      soCuaHangDaiLy: 123,
+      diaChi: 'Value 123',
+      tenQuanLy: 'Nguyễn Văn A',
+      maNhanVien: 'CH123',
+      trangThai: 'Thành công',
     },
   ]
 
+  // Table columns
   const columns = [
     {
       title: 'STT',
-      dataIndex: 'key',
+      dataIndex: 'stt',
+      key: 'stt',
+      width: 70,
     },
     {
       title: 'Mã CIF',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
+      dataIndex: 'maCIF',
+      key: 'maCIF',
     },
     {
       title: 'Tên công ty',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
+      dataIndex: 'tenCongTy',
+      key: 'tenCongTy',
     },
     {
       title: 'Số cửa hàng đại lý',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
+      dataIndex: 'soCuaHangDaiLy',
+      key: 'soCuaHangDaiLy',
     },
     {
-      title: 'Tên đại lý',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
+      title: 'Địa chỉ',
+      dataIndex: 'diaChi',
+      key: 'diaChi',
     },
     {
       title: 'Tên quản lý',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
+      dataIndex: 'tenQuanLy',
+      key: 'tenQuanLy',
     },
     {
       title: 'Mã nhân viên',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
+      dataIndex: 'maNhanVien',
+      key: 'maNhanVien',
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
+      dataIndex: 'trangThai',
+      key: 'trangThai',
+      render: (status: any) => {
+        const color = status === 'Thành công' ? 'green' : 'red'
+        return <Tag color={color}>{status}</Tag>
+      },
     },
     {
       title: 'Tác vụ',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
+      key: 'action',
+      render: () => (
+        <Space size="middle">
+          <Button type="text" icon={<EditOutlined />} />
+          <Button type="text" icon={<DeleteOutlined />} danger />
+        </Space>
+      ),
     },
   ]
-
   const rowSelection: TableProps['rowSelection'] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows) => {
       console.log(

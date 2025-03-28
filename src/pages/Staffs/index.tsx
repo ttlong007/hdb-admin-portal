@@ -1,5 +1,6 @@
 import React from 'react'
-import { Table } from 'antd'
+import { Button, Space, Table, Tag } from 'antd'
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import { Link } from 'react-router-dom'
 import { routes } from '@/config/routes'
@@ -9,74 +10,107 @@ const Staffs: React.FC = () => {
   const dataSource = [
     {
       key: '1',
-      name: 'fake',
+      stt: 1,
+      maNhanVien: 'ST001',
+      hoTen: 'Nguyễn Văn A',
+      trangThai: 'Active',
+      tenCuaHang: 'Downtown store',
+      nhomCuaHang: '174 Phan Đăng Lưu',
+      daiLyTong: 'ABC',
     },
     {
       key: '2',
-      name: 'fake',
+      stt: 2,
+      maNhanVien: 'ST002',
+      hoTen: 'Nguyễn Văn A',
+      trangThai: 'Pending',
+      tenCuaHang: 'Downtown store',
+      nhomCuaHang: '174 Phan Đăng Lưu',
+      daiLyTong: 'ABC',
     },
     {
       key: '3',
-      name: 'fake',
+      stt: 3,
+      maNhanVien: 'ST003',
+      hoTen: 'Nguyễn Văn A',
+      trangThai: 'Active',
+      tenCuaHang: 'Downtown store',
+      nhomCuaHang: '174 Phan Đăng Lưu',
+      daiLyTong: 'ABC',
     },
     {
       key: '4',
-      name: 'fake',
+      stt: 4,
+      maNhanVien: 'ST004',
+      hoTen: 'Nguyễn Văn A',
+      trangThai: 'Pending',
+      tenCuaHang: 'Downtown store',
+      nhomCuaHang: '174 Phan Đăng Lưu',
+      daiLyTong: 'ABC',
+    },
+    {
+      key: '5',
+      stt: 5,
+      maNhanVien: 'ST005',
+      hoTen: 'Nguyễn Văn A',
+      trangThai: 'Active',
+      tenCuaHang: 'Downtown store',
+      nhomCuaHang: '174 Phan Đăng Lưu',
+      daiLyTong: 'ABC',
     },
   ]
 
+  // Table columns
   const columns = [
     {
       title: 'STT',
-      dataIndex: 'key',
-    },
-    {
-      title: 'Mã CIF',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
-    },
-    {
-      title: 'Tên công ty',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
-    },
-    {
-      title: 'Số cửa hàng đại lý',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
-    },
-    {
-      title: 'Tên đại lý',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
-    },
-    {
-      title: 'Tên quản lý',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
+      dataIndex: 'stt',
+      key: 'stt',
+      width: 70,
     },
     {
       title: 'Mã nhân viên',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
+      dataIndex: 'maNhanVien',
+      key: 'maNhanVien',
+    },
+    {
+      title: 'Họ tên',
+      dataIndex: 'hoTen',
+      key: 'hoTen',
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
+      dataIndex: 'trangThai',
+      key: 'trangThai',
+      render: (status: any) => {
+        const color = status === 'Active' ? 'green' : 'orange'
+        return <Tag color={color}>{status}</Tag>
+      },
+    },
+    {
+      title: 'Tên cửa hàng',
+      dataIndex: 'tenCuaHang',
+      key: 'tenCuaHang',
+    },
+    {
+      title: 'Nhóm cửa hàng',
+      dataIndex: 'nhomCuaHang',
+      key: 'nhomCuaHang',
+    },
+    {
+      title: 'Đại lý tổng',
+      dataIndex: 'daiLyTong',
+      key: 'daiLyTong',
     },
     {
       title: 'Tác vụ',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
+      key: 'action',
+      render: () => (
+        <Space size="middle">
+          <Button type="text" icon={<EditOutlined />} />
+          <Button type="text" icon={<DeleteOutlined />} danger />
+        </Space>
+      ),
     },
   ]
 

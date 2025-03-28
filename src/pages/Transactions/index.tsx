@@ -1,5 +1,6 @@
 import React from 'react'
-import { Table } from 'antd'
+import { Table, Tag, Space, Button } from 'antd';
+import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 
 import type { TableProps } from 'antd'
 import { Link } from 'react-router-dom'
@@ -7,79 +8,125 @@ import { routes } from '@/config/routes'
 import Filters from './components/Filters'
 
 const Transactions: React.FC = () => {
-  const dataSource = [
-    {
-      key: '1',
-      name: 'fake',
-    },
-    {
-      key: '2',
-      name: 'fake',
-    },
-    {
-      key: '3',
-      name: 'fake',
-    },
-    {
-      key: '4',
-      name: 'fake',
-    },
-  ]
+    const dataSource = [
+      {
+        key: '1',
+        stt: 1,
+        maGiaoDich: 'ST001',
+        soTien: 200000000,
+        trangThai: 'Thành công',
+        loaiGD: 'Nộp tiền',
+        thoiGianGD: 'dd/mm/yyyy hh:mm',
+        soCIF: 'LOC001',
+        soCuaHang: '3644',
+      },
+      {
+        key: '2',
+        stt: 2,
+        maGiaoDich: 'ST002',
+        soTien: 200000000,
+        trangThai: 'Thất bại',
+        loaiGD: 'Chuyển tiền',
+        thoiGianGD: 'dd/mm/yyyy hh:mm',
+        soCIF: 'LOC001',
+        soCuaHang: '3644',
+      },
+      {
+        key: '3',
+        stt: 3,
+        maGiaoDich: 'ST003',
+        soTien: 200000000,
+        trangThai: 'Thành công',
+        loaiGD: 'Chuyển tiền',
+        thoiGianGD: 'dd/mm/yyyy hh:mm',
+        soCIF: 'LOC001',
+        soCuaHang: '3644',
+      },
+      {
+        key: '4',
+        stt: 4,
+        maGiaoDich: 'ST004',
+        soTien: 200000000,
+        trangThai: 'Thất bại',
+        loaiGD: 'Mở TK thanh toán',
+        thoiGianGD: 'dd/mm/yyyy hh:mm',
+        soCIF: 'LOC001',
+        soCuaHang: '3644',
+      },
+      {
+        key: '5',
+        stt: 5,
+        maGiaoDich: 'ST005',
+        soTien: 200000000,
+        trangThai: 'Thành công',
+        loaiGD: 'Nộp tiền',
+        thoiGianGD: 'dd/mm/yyyy hh:mm',
+        soCIF: 'LOC001',
+        soCuaHang: '3644',
+      },
+    ];
 
-  const columns = [
-    {
-      title: 'STT',
-      dataIndex: 'key',
-    },
-    {
-      title: 'Mã CIF',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
-    },
-    {
-      title: 'Tên công ty',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
-    },
-    {
-      title: 'Số cửa hàng đại lý',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
-    },
-    {
-      title: 'Tên đại lý',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
-    },
-    {
-      title: 'Tên quản lý',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
-    },
-    {
-      title: 'Mã nhân viên',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
-    },
-    {
-      title: 'Trạng thái',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
-    },
-    {
-      title: 'Tác vụ',
-      dataIndex: 'name',
-      key: 'name',
-      sorter: true,
-    },
-  ]
+    // Table columns
+    const columns = [
+      {
+        title: 'STT',
+        dataIndex: 'stt',
+        key: 'stt',
+        width: 70,
+      },
+      {
+        title: 'Mã giao dịch',
+        dataIndex: 'maGiaoDich',
+        key: 'maGiaoDich',
+      },
+      {
+        title: 'Số tiền',
+        dataIndex: 'soTien',
+        key: 'soTien',
+        // Example: format as currency with commas
+        render: (value: any) => value.toLocaleString('vi-VN'),
+      },
+      {
+        title: 'Trạng thái',
+        dataIndex: 'trangThai',
+        key: 'trangThai',
+        render: (status: any) => {
+          // Use green for success, red for failure
+          const color = status === 'Thành công' ? 'green' : 'red';
+          return <Tag color={color}>{status}</Tag>;
+        },
+      },
+      {
+        title: 'Loại GD',
+        dataIndex: 'loaiGD',
+        key: 'loaiGD',
+      },
+      {
+        title: 'Thời gian GD',
+        dataIndex: 'thoiGianGD',
+        key: 'thoiGianGD',
+      },
+      {
+        title: 'Số CIF',
+        dataIndex: 'soCIF',
+        key: 'soCIF',
+      },
+      {
+        title: 'Số cửa hàng',
+        dataIndex: 'soCuaHang',
+        key: 'soCuaHang',
+      },
+      {
+        title: 'Tác vụ',
+        key: 'action',
+        render: () => (
+          <Space size="middle">
+            <Button type="text" icon={<EditOutlined />} />
+            <Button type="text" icon={<DeleteOutlined />} danger />
+          </Space>
+        ),
+      },
+    ];
 
   const rowSelection: TableProps['rowSelection'] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows) => {
