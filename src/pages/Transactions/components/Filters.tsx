@@ -22,7 +22,7 @@ const Filters: React.FC = () => {
           onChange={() => {}}
           label="Loại giao dịch"
           dropdownClassName="h-auto"
-          className="bg-white"
+          selectClassName="bg-white"
         />
         <Select
           options={selectOptions}
@@ -30,7 +30,7 @@ const Filters: React.FC = () => {
           onChange={() => {}}
           label="Trạng thái giao dịch"
           dropdownClassName="h-auto"
-          className="bg-white"
+          selectClassName="bg-white"
         />
         <Input label="Số CIF" placeholder="Số CIF" inputClassName="bg-white" />
         <Input

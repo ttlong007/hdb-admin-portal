@@ -30,7 +30,7 @@ const Filters: React.FC = () => {
           onChange={() => {}}
           label="Trạng thái"
           dropdownClassName="h-auto"
-          className="bg-white"
+          selectClassName="bg-white"
         />
       </div>
       <div className="flex justify-end gap-4 w-full">
