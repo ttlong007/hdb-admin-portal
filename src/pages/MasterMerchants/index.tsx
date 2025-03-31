@@ -2,9 +2,7 @@ import React from 'react'
 import { Table, Tag, Space, Button } from 'antd'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
-import { Link } from 'react-router-dom'
 
-import { routes } from '@/config/routes'
 import Filters from './components/Filters'
 
 const Home: React.FC = () => {
