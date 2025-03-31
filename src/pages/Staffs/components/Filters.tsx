@@ -8,8 +8,12 @@ const Filters: React.FC = () => {
   return (
     <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
       <div className="grid grid-cols-3 gap-4 w-full">
-        <Input label="ID nhân viên" placeholder="ID nhân viên" />
-        <Input label="Họ tên" placeholder="Họ tên" />
+        <Input
+          label="ID nhân viên"
+          placeholder="ID nhân viên"
+          inputClassName="bg-white"
+        />
+        <Input label="Họ tên" placeholder="Họ tên" inputClassName="bg-white" />
         <Select
           options={selectOptions}
           value={null}
@@ -17,13 +21,18 @@ const Filters: React.FC = () => {
           label="Trạng thái"
           dropdownClassName="h-auto"
         />
-        <Input label="Mã đại lý" placeholder="Mã đại lý" />
+        <Input
+          label="Mã đại lý"
+          placeholder="Mã đại lý"
+          inputClassName="bg-white"
+        />
         <Select
           options={selectOptions}
           value={null}
           onChange={() => {}}
           label="Chức vụ"
           dropdownClassName="h-auto"
+          className="bg-white"
         />
       </div>
       <div className="flex justify-end gap-4 w-full">

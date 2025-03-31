@@ -8,16 +8,29 @@ const Filters: React.FC = () => {
   return (
     <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
       <div className="grid grid-cols-5 gap-4 w-full">
-        <Input label="Mã CIF" placeholder="Mã CIF" />
-        <Input label="Tên công ty" placeholder="Tên công ty" />
-        <Input label="Số cửa hàng đại lý" placeholder="Số cửa hàng đại lý" />
-        <Input label="Tên đại lý" placeholder="Tên đại lý" />
+        <Input label="Mã CIF" placeholder="Mã CIF" inputClassName="bg-white" />
+        <Input
+          label="Tên công ty"
+          placeholder="Tên công ty"
+          inputClassName="bg-white"
+        />
+        <Input
+          label="Số cửa hàng đại lý"
+          placeholder="Số cửa hàng đại lý"
+          inputClassName="bg-white"
+        />
+        <Input
+          label="Tên đại lý"
+          placeholder="Tên đại lý"
+          inputClassName="bg-white"
+        />
         <Select
           options={selectOptions}
           value={null}
           onChange={() => {}}
           label="Trạng thái"
           dropdownClassName="h-auto"
+          className="bg-white"
         />
       </div>
       <div className="flex justify-end gap-4 w-full">

@@ -11,13 +11,18 @@ const Filters: React.FC = () => {
   return (
     <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
       <div className="grid grid-cols-3 gap-4 w-full">
-        <Input label="Mã giao dịch" placeholder="Mã giao dịch" />
+        <Input
+          label="Mã giao dịch"
+          placeholder="Mã giao dịch"
+          inputClassName="bg-white"
+        />
         <Select
           options={selectOptions}
           value={null}
           onChange={() => {}}
           label="Loại giao dịch"
           dropdownClassName="h-auto"
+          className="bg-white"
         />
         <Select
           options={selectOptions}
@@ -25,15 +30,20 @@ const Filters: React.FC = () => {
           onChange={() => {}}
           label="Trạng thái giao dịch"
           dropdownClassName="h-auto"
+          className="bg-white"
         />
-        <Input label="Số CIF" placeholder="Số CIF" />
-        <Input label="Số cửa hàng đại lý" placeholder="Số cửa hàng đại lý " />
+        <Input label="Số CIF" placeholder="Số CIF" inputClassName="bg-white" />
+        <Input
+          label="Số cửa hàng đại lý"
+          placeholder="Số cửa hàng đại lý "
+          inputClassName="bg-white"
+        />
 
         <div>
           <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
             Ngày giao dịch
           </div>
-          <RangePicker />
+          <RangePicker rootClassName="px-3.5 py-2 w-full" />
         </div>
       </div>
       <div className="flex justify-end gap-4 w-full">
