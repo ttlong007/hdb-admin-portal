@@ -1,10 +1,13 @@
 import { HomeOutlined } from '@ant-design/icons'
 import { Breadcrumb } from 'antd'
-import { Input, Select, Switch, Checkbox } from 'rizzui'
+import { Input, Select, Checkbox } from 'rizzui'
 
-export default function CreateMerchant() {
+export default function CreateStaff() {
   return (
     <main className="flex p-6 flex-col items-start gap-6 rounded-lg bg-white">
+      <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal">
+        Thông tin nhân viên
+      </div>
       <Breadcrumb
         items={[
           {
@@ -24,61 +27,54 @@ export default function CreateMerchant() {
           },
         ]}
       />
-      <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal">
-        Thông tin điểm đại lý công ty A
-      </div>
+      <div className="grid grid-cols-4 gap-6 w-full">
+        <Input label="Họ tên *" placeholder="Nhập họ tên" className="w-full" />
+        <Input
+          label="Tên cửa hàng *"
+          placeholder="Nhập tên cửa hàng"
+          className="w-full"
+        />
+        <Input
+          label="Mã nhân viên *"
+          placeholder="Nhập mã nhân viên"
+          className="w-full"
+        />
+        <Input
+          label="Số điện thoại *"
+          placeholder="Nhập số điện thoại"
+          className="w-full"
+        />
+        <Input
+          label="Số CCCD *"
+          placeholder="Nhập số CCCD"
+          className="w-full"
+        />
+        <Input label="Email *" placeholder="Nhập email" className="w-full" />
 
-      <div className="grid grid-cols-2 gap-6 w-full">
-        <Input
-          label="Tên điểm đại lý *"
-          placeholder="Nhập tên điểm đại lý"
-          className="w-full"
-        />
-        <Input
-          label="Mã điểm đại lý *"
-          placeholder="Nhập mã điểm đại lý"
-          className="w-full"
-        />
-        <Input
-          label="Địa chỉ *"
-          placeholder="Nhập địa chỉ"
-          className="w-full"
-        />
-
-        <div className="grid grid-cols-2 gap-6">
+        <div className="col-span-2">
           <Select
-            label="Phường/Xã *"
-            placeholder="Chọn phường/xã"
+            label="Nhóm chức danh *"
+            placeholder="Chọn nhóm chức danh"
             className="w-full"
             options={[
-              { label: 'Phường 1', value: '1' },
-              { label: 'Phường 2', value: '2' },
-            ]}
-            defaultValue="1"
-          />
-          <Select
-            label="Quận/Huyện *"
-            placeholder="Chọn quận/huyện"
-            className="w-full"
-            options={[
-              { label: 'Quận 1', value: '1' },
-              { label: 'Quận 2', value: '2' },
+              { label: 'Quản lý', value: '1' },
+              { label: 'Nhân viên', value: '2' },
             ]}
             defaultValue="1"
           />
         </div>
 
-        <div className="col-span-1">
+        <div className="col-span-2">
           <Checkbox
             label="Tài khoản chuyên thu bằng chuyên chi"
             className="w-full"
           />
         </div>
-        <div className="col-span-1"></div>
+        <div className="col-span-2"></div>
 
         <div className="col-span-2">
           <Select
-            label="Tài khoản chuyên chi *"
+            label="Tài khoản chuyên chi"
             placeholder="Chọn tài khoản chuyên chi"
             className="w-full"
             options={[]}
@@ -88,7 +84,7 @@ export default function CreateMerchant() {
       </div>
 
       <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal">
-        Hạn mức giao dịch
+        Thông tin nhân viên
       </div>
       <div className="grid grid-cols-4 gap-6 w-full">
         <Input
@@ -101,32 +97,6 @@ export default function CreateMerchant() {
           placeholder="Nhập hạn mức trong ngày"
           className="w-full"
         />
-      </div>
-
-      <div>
-        <Switch
-          label="Yêu cầu trưởng cửa hàng duyệt giao dịch"
-          className="w-full"
-          labelClassName="text-[#212B36] text-[28px] not-italic font-bold leading-normal"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-6 w-full">
-        <Input
-          label="Ngưỡng giá trị cần duyệt *"
-          placeholder="Nhập ngưỡng giá trị cần duyệt"
-          className="w-full"
-        />
-      </div>
-
-      <div className="grid grid-cols-4 gap-6 w-full">
-        <Checkbox label="Rút tiền" className="w-full" />
-
-        <Checkbox label="Nộp tiền" className="w-full" />
-
-        <Checkbox label="Ủy nhiệm chi" className="w-full" />
-
-        <Checkbox label="Ủy nhiệm thu" className="w-full" />
       </div>
 
       <div className="flex items-center justify-end gap-4 w-full mt-8">
@@ -170,7 +140,7 @@ export default function CreateMerchant() {
               fill="white"
             />
           </svg>
-          Tạo đại lý
+          Tạo nhân viên
         </button>
       </div>
     </main>

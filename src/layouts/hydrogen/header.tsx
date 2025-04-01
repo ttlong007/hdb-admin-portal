@@ -7,7 +7,7 @@ import StickyHeader from '@/layouts/sticky-header'
 
 export default function Header() {
   return (
-    <StickyHeader className="z-[990] 2xl:py-5 3xl:px-8 4xl:px-10 shadow-sm ">
+    <StickyHeader className="z-[990] 2xl:py-5 3xl:px-8 4xl:px-10 shadow-sm bg-[#DA2128] sm:flex sm:justify-between">
       <div className="flex w-full max-w-2xl items-center">
         <HamburgerButton
           view={<Sidebar className="static w-full 2xl:w-full" />}
