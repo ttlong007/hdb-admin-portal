@@ -1,6 +1,6 @@
 import { HomeOutlined } from '@ant-design/icons'
-import { Breadcrumb } from 'antd'
-import { Input, Select, Checkbox } from 'rizzui'
+import { Breadcrumb, DatePicker } from 'antd'
+import { Input, Select, Checkbox, Switch } from 'rizzui'
 
 export default function CreateStaff() {
   return (
@@ -84,7 +84,7 @@ export default function CreateStaff() {
       </div>
 
       <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal">
-        Thông tin nhân viên
+        Hạn mức giao dịch
       </div>
       <div className="grid grid-cols-4 gap-6 w-full">
         <Input
@@ -97,6 +97,67 @@ export default function CreateStaff() {
           placeholder="Nhập hạn mức trong ngày"
           className="w-full"
         />
+      </div>
+
+      <div>
+        <Switch
+          label="Thông tin ủy quyền"
+          className="w-full"
+          labelClassName="text-[#212B36] text-[28px] not-italic font-bold leading-normal"
+        />
+      </div>
+
+      <div className="grid grid-cols-4 gap-6 w-full">
+        <Select
+          label="Tên người được ủy quyền *"
+          placeholder="Chọn người được ủy quyền"
+          className="w-full"
+          options={[]}
+          defaultValue="1"
+        />
+
+        <Input
+          label="Số CCCD"
+          placeholder="Nhập số CCCD"
+          className="w-full"
+          disabled
+        />
+
+        <Input
+          label="Số điện thoại"
+          placeholder="Nhập số điện thoại"
+          className="w-full"
+          disabled
+        />
+
+        <Input
+          label="Email"
+          placeholder="Nhập email"
+          className="w-full"
+          disabled
+        />
+
+        <div>
+          <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
+            Từ ngày
+          </div>
+          <DatePicker
+            placeholder="Từ ngày"
+            className="w-full"
+            format="DD/MM/YYYY"
+          />
+        </div>
+
+        <div>
+          <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
+            Đến ngày
+          </div>
+          <DatePicker
+            placeholder="Đến ngày"
+            className="w-full"
+            format="DD/MM/YYYY"
+          />
+        </div>
       </div>
 
       <div className="flex items-center justify-end gap-4 w-full mt-8">
