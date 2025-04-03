@@ -1,9 +1,11 @@
 import React from 'react'
 import { Table, Tag, Space, Button } from 'antd'
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 
 import Filters from './components/Filters'
+import { BsDownload, BsEye } from 'react-icons/bs'
+import { Link } from 'react-router-dom'
+import { routes } from '@/config/routes'
 
 const Transactions: React.FC = () => {
   const dataSource = [
@@ -119,8 +121,10 @@ const Transactions: React.FC = () => {
       key: 'action',
       render: () => (
         <Space size="middle">
-          <Button type="text" icon={<EditOutlined />} />
-          <Button type="text" icon={<DeleteOutlined />} danger />
+          <Link to={routes.transactionDetail}>
+            <BsEye />
+          </Link>
+          <Button type="text" icon={<BsDownload />} danger />
         </Space>
       ),
     },
