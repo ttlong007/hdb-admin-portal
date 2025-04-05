@@ -76,7 +76,7 @@ function InfoCard({
   )
 }
 
-export default function MerchantDetail() {
+export default function MasterMerchantDetail() {
   return (
     <main className="flex gap-6 px-6 pt-4 pb-0 mx-auto max-w-none bg-neutral-100 max-md:flex-col max-md:max-w-[991px] max-sm:p-2 max-sm:max-w-screen-sm">
       <section className="flex flex-col flex-1 gap-4">

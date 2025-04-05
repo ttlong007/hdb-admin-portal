@@ -5,7 +5,7 @@ import type { TableProps } from 'antd'
 
 import Filters from './components/Filters'
 
-const Home: React.FC = () => {
+const MasterMerchants: React.FC = () => {
   const dataSource = [
     {
       key: '1',
@@ -163,4 +163,4 @@ const Home: React.FC = () => {
   )
 }
 
-export default Home
+export default MasterMerchants

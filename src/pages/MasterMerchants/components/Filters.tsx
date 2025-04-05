@@ -100,7 +100,7 @@ const Filters: React.FC = () => {
             onClick={handleReset}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <BsDownload /> Làm mới
+            <BsDownload /> Đồng bộ dữ liệu
           </button>
           <button
             type="submit"

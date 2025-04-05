@@ -1,14 +1,16 @@
-import { useRoutes } from 'react-router-dom'
+import { useRoutes, Navigate } from 'react-router-dom'
 import Layout from './Layout'
 import Home from './pages/Merchants'
 import CreateMerchant from './pages/Merchants/CreateMerchant'
-import MerchantDetail from './pages/Merchants/MerchantDetail'
 import Transactions from './pages/Transactions'
 import Staffs from './pages/Staffs'
 import StaffDetail from './pages/Staffs/StaffDetail'
 import CreateStaff from './pages/Staffs/CreateStaff'
 import { routes } from './config/routes'
 import TransactionDetail from './pages/Transactions/TransactionDetail'
+import MasterMerchants from './pages/MasterMerchants'
+import MasterMerchantDetail from './pages/MasterMerchants/MasterMerchantDetail'
+import MerchantDetail from './pages/Merchants/MerchantDetail'
 
 function RootRoutes() {
   const rootRoutes = [
@@ -16,7 +18,17 @@ function RootRoutes() {
       path: '/',
       element: <Layout />,
       children: [
-        { path: '/', element: <Home /> },
+        // Default route that redirects to routes.merchant
+        {
+          index: true,
+          element: <Navigate to={routes.masterMerchant} replace />,
+        },
+        { path: routes.masterMerchant, element: <MasterMerchants /> },
+        {
+          path: routes.masterMerchantDetail,
+          element: <MasterMerchantDetail />,
+        },
+        { path: routes.merchant, element: <Home /> },
         { path: routes.createMerchant, element: <CreateMerchant /> },
         { path: routes.merchantDetail, element: <MerchantDetail /> },
         { path: routes.transaction, element: <Transactions /> },
