@@ -1,8 +1,8 @@
 'use client'
 
 import { Badge, ActionIcon } from 'rizzui'
-import MessagesDropdown from '@/layouts/messages-dropdown'
-import ProfileMenu from '@/layouts/profile-menu'
+import MessagesDropdown from '@layouts/messages-dropdown'
+import ProfileMenu from '@layouts/profile-menu'
 import NotificationDropdown from './notification-dropdown'
 import { CiMail, CiBellOn } from 'react-icons/ci'
 import { IoChevronDown } from 'react-icons/io5'

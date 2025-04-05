@@ -4,9 +4,9 @@ import { usePresets } from '@/config/color-presets';
 import {
   useColorPresetName,
   useColorPresets,
-} from '@/layouts/settings/use-theme-color';
-import DrawerBlock from '@/layouts/settings/drawer-block';
-import { useTheme } from '@/core/providers/theme-provider';
+} from '@layouts/settings/use-theme-color';
+import DrawerBlock from '@layouts/settings/drawer-block';
+import { useTheme } from '@core/providers/theme-provider';
 
 export default function ColorOptions() {
   const { theme } = useTheme();

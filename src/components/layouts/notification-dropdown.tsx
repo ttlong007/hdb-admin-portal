@@ -1,4 +1,4 @@
-import { notificationsData } from '@/data/notifications'
+import { notificationsData } from '@/components/data/notifications'
 import { useMedia } from '@core/hooks/use-media'
 import dayjs from 'dayjs'
 import relativeTime from 'dayjs/plugin/relativeTime'

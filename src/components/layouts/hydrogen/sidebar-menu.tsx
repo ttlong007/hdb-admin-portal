@@ -4,7 +4,7 @@ import { Title } from 'rizzui/typography'
 import { Collapse } from 'rizzui/collapse'
 import cn from '@core/utils/class-names'
 import { PiCaretDownBold } from 'react-icons/pi'
-import { menuItems } from '@/layouts/hydrogen/menu-items'
+import { menuItems } from '@layouts/hydrogen/menu-items'
 import StatusBadge from '@core/components/get-status-badge'
 import { Link } from 'react-router-dom'
 

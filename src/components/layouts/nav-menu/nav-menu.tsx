@@ -3,19 +3,19 @@ import { useReducer, useRef } from 'react';
 import {
   NavMenuProvider,
   initialState,
-} from '@/layouts/nav-menu/nav-menu-context';
-import { NavMenuTrigger } from '@/layouts/nav-menu/nav-menu-trigger';
+} from '@layouts/nav-menu/nav-menu-context';
+import { NavMenuTrigger } from '@layouts/nav-menu/nav-menu-trigger';
 import {
   NavMenuItem,
   NavMenuItemWrapper,
-} from '@/layouts/nav-menu/nav-menu-item';
-import { NavMenuContent } from '@/layouts/nav-menu/nav-menu-content';
+} from '@layouts/nav-menu/nav-menu-item';
+import { NavMenuContent } from '@layouts/nav-menu/nav-menu-content';
 import type {
   NavMenuProps,
   ContentUiProps,
   ItemRef,
-} from '@/layouts/nav-menu/nav-menu-types';
-import { navMenuReducer } from '@/layouts/nav-menu/nav-menu-utils';
+} from '@layouts/nav-menu/nav-menu-types';
+import { navMenuReducer } from '@layouts/nav-menu/nav-menu-utils';
 
 export default function NavMenu(props: NavMenuProps) {
   const {

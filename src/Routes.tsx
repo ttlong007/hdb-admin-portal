@@ -1,5 +1,5 @@
 import { useRoutes, Navigate } from 'react-router-dom'
-import Layout from './Layout'
+import Layout from './components/layouts/Layout'
 import Home from './pages/Merchants'
 import CreateMerchant from './pages/Merchants/CreateMerchant'
 import Transactions from './pages/Transactions'

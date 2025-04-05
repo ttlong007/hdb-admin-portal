@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom'
-import HamburgerButton from '@/layouts/hamburger-button'
-import Sidebar from '@/layouts/hydrogen/sidebar'
+import HamburgerButton from '@layouts/hamburger-button'
+import Sidebar from '@layouts/hydrogen/sidebar'
 import Logo from '@core/components/logo'
-import HeaderMenuRight from '@/layouts/header-menu-right'
-import StickyHeader from '@/layouts/sticky-header'
+import HeaderMenuRight from '@layouts/header-menu-right'
+import StickyHeader from '@layouts/sticky-header'
 
 export default function Header() {
   return (

@@ -26,8 +26,15 @@
     "paths": {
       "@/*": ["src/*"],
       "@public/*": ["public/*"],
-      "@shared/*": ["src/app/shared*"],
-      "@core/*": ["src/core/*"]
+      "@core/*": ["src/components/core/*"],
+      "@components/*": ["src/components/*"],
+      "@pages/*": ["src/pages/*"],
+      "@layouts/*": ["src/components/layouts/*"],
+      "@services/*": ["src/services/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@utils/*": ["src/utils/*"],
+      "@assets/*": ["src/assets/*"],
+      "@types/*": ["src/types/*"],
     }
   },
   "include": ["src"]

@@ -3,10 +3,10 @@ import { RadioGroup } from 'rizzui/radio-group'
 import { updateThemeColor } from '@core/utils/update-theme-color'
 import { presetLight } from '@/config/color-presets'
 import { useEffect } from 'react'
-import { useColorPresetName } from '@/layouts/settings/use-theme-color'
+import { useColorPresetName } from '@layouts/settings/use-theme-color'
 import LightMode from '@core/components/icons/light-mode'
-import RadioBox from '@/layouts/settings/radio-box'
-import DrawerBlock from '@/layouts/settings/drawer-block'
+import RadioBox from '@layouts/settings/radio-box'
+import DrawerBlock from '@layouts/settings/drawer-block'
 
 const themeOptions = ['light']
 

@@ -1,4 +1,4 @@
-import { DrawerPlacements, useDrawer } from '@/shared/drawer-views/use-drawer'
+import { DrawerPlacements, useDrawer } from '@/components/core/shared/drawer-views/use-drawer'
 import { ActionIcon } from 'rizzui'
 import cn from '@core/utils/class-names'
 

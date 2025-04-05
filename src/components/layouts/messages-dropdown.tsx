@@ -1,4 +1,4 @@
-import { messagesData } from '@/data/messages'
+import { messagesData } from '@/components/data/messages'
 import { useMedia } from '@core/hooks/use-media'
 import cn from '@core/utils/class-names'
 import dayjs from 'dayjs'

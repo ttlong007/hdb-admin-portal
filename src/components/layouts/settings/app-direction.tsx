@@ -3,8 +3,8 @@
 import { PiAlignLeft, PiAlignRight } from 'react-icons/pi';
 import { RadioGroup } from 'rizzui/radio-group';
 import { useDirection } from '@core/hooks/use-direction';
-import RadioBox from '@/layouts/settings/radio-box';
-import DrawerBlock from '@/layouts/settings/drawer-block';
+import RadioBox from '@layouts/settings/radio-box';
+import DrawerBlock from '@layouts/settings/drawer-block';
 
 const directionOptions = ['ltr', 'rtl'];
 
