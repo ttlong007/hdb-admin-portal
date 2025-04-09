@@ -4,7 +4,7 @@ import type { TableProps } from 'antd'
 
 import Filters from './components/Filters'
 import { BsDownload, BsEye } from 'react-icons/bs'
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { routes } from '@/config/routes'
 
 const Transactions: React.FC = () => {
@@ -145,29 +145,49 @@ const Transactions: React.FC = () => {
   }
 
   return (
-    <div className="px-6 py-4 bg-white rounded-lg shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] flex flex-col justify-start items-start gap-4">
-      <div className="self-stretch inline-flex justify-between items-center border-b border-[#DDE4EE] py-4">
-        <div className="justify-start text-black text-3xl font-bold ">
+    <>
+      {/* Breadcrumbs */}
+      <div className="flex justify-start items-center gap-2 mb-4">
+        <NavLink
+          to={routes.masterMerchants}
+          className={({ isActive }) =>
+            `text-base font-semibold hover:underline ${
+              !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'
+            }`
+          }
+        >
           Quản lý giao dịch
-        </div>
+        </NavLink>
+        <div className="text-base font-semibold text-[#A1AAB2]">/</div>
+        <span className="text-base font-semibold text-[#A1AAB2]">
+          Danh sách giao dịch
+        </span>
       </div>
 
-      <Filters />
+      <div className="px-6 py-4 bg-white rounded-lg shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] flex flex-col justify-start items-start gap-4">
+        <div className="self-stretch inline-flex justify-between items-center border-b border-[#DDE4EE] py-4">
+          <div className="justify-start text-black text-3xl font-bold ">
+            Quản lý giao dịch
+          </div>
+        </div>
 
-      <div className="w-full">
-        <Table
-          rowSelection={{ type: 'checkbox', ...rowSelection }}
-          columns={columns}
-          dataSource={dataSource}
-        />
+        <Filters />
 
-        <div className="flex justify-end gap-4 w-full mt-8">
-          <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
-            Đồng ý duyệt
-          </button>
+        <div className="w-full">
+          <Table
+            rowSelection={{ type: 'checkbox', ...rowSelection }}
+            columns={columns}
+            dataSource={dataSource}
+          />
+
+          <div className="flex justify-end gap-4 w-full mt-8">
+            <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
+              Đồng ý duyệt
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   )
 }
 

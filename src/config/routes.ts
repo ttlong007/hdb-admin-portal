@@ -12,4 +12,4 @@ export const routes = {
   editStaff: '/staffs/:staffId/edit',
   transaction: '/transactions',
   transactionDetail: '/transactions/:transactionId',
-}
+} as any;

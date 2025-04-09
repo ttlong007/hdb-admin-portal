@@ -1,9 +1,12 @@
 import React from 'react'
+import { NavLink } from 'react-router-dom'
 import { Table, Tag, Space, Button } from 'antd'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 
 import Filters from './components/Filters'
+import { routes } from '@/config/routes'
+// import ConfirmModal from '@/components/core/components/confirm-modal'
 
 const MasterMerchants: React.FC = () => {
   const dataSource = [
@@ -130,36 +133,64 @@ const MasterMerchants: React.FC = () => {
         selectedRows
       )
     },
-    getCheckboxProps: (record) => ({
+    getCheckboxProps: (record: any) => ({
       disabled: record.name === 'Disabled User', // Column configuration not to be checked
       name: record.name,
     }),
   }
 
   return (
-    <div className="px-6 py-4 bg-white rounded-lg shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] flex flex-col justify-start items-start gap-4">
-      <div className="self-stretch inline-flex justify-between items-center border-b border-[#DDE4EE] py-4">
-        <div className="justify-start text-black text-3xl font-bold ">
+    <>
+      {/* Breadcrumbs */}
+      <div className="flex justify-start items-center gap-2 mb-4">
+        <NavLink
+          to={routes.masterMerchants}
+          className={({ isActive }) =>
+            `text-base font-semibold hover:underline ${
+              !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'
+            }`
+          }
+        >
           Quản lý đại lý tổng
-        </div>
+        </NavLink>
+        <div className="text-base font-semibold text-[#A1AAB2]">/</div>
+        <span className="text-base font-semibold text-[#A1AAB2]">
+          Danh sách đại lý
+        </span>
       </div>
 
-      <Filters />
-
-      <div className="w-full">
-        <Table
-          rowSelection={{ type: 'checkbox', ...rowSelection }}
-          columns={columns}
-          dataSource={dataSource}
-        />
-
-        <div className="flex justify-end gap-4 w-full mt-8">
-          <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
-            Đồng ý duyệt
-          </button>
+      <div className="px-6 py-4 bg-white rounded-lg shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] flex flex-col justify-start items-start gap-4">
+        <div className="self-stretch inline-flex justify-between items-center border-b border-[#DDE4EE] py-4">
+          <div className="justify-start text-black text-3xl font-bold ">
+            Quản lý đại lý tổng
+          </div>
         </div>
+
+        <Filters />
+
+        <div className="w-full">
+          <Table
+            rowSelection={{ type: 'checkbox', ...rowSelection }}
+            columns={columns}
+            dataSource={dataSource}
+          />
+
+          <div className="flex justify-end gap-4 w-full mt-8">
+            <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
+              Đồng ý duyệt
+            </button>
+          </div>
+        </div>
+
+        {/* <ConfirmModal
+          isOpen={true}
+          title="Confirm Your Action"
+          content={<p>Are you sure you want to perform this action?</p>}
+          onConfirm={() => console.log('Confirmed')}
+          onCancel={() => console.log('Cancelled')}
+        /> */}
       </div>
-    </div>
+    </>
   )
 }
 
