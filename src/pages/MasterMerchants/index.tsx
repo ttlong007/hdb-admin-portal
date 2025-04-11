@@ -1,126 +1,98 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, Link } from 'react-router-dom'
 import { Table, Tag, Space, Button } from 'antd'
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
+import _get from 'lodash/get'
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from '@tanstack/react-query'
 
 import Filters from './components/Filters'
 import { routes } from '@/config/routes'
+import axiosInstance from '@/config/axios'
+import { PaginatedResponse } from '@/types'
 // import ConfirmModal from '@/components/core/components/confirm-modal'
 
-const MasterMerchants: React.FC = () => {
-  const dataSource = [
-    {
-      key: '1',
-      stt: 1,
-      maCIF: 'ST001',
-      tenCongTy: 'Value',
-      soCuaHangDaiLy: 123,
-      diaChi: 'Value 123',
-      tenQuanLy: 'Nguyễn Văn A',
-      maNhanVien: 'CH123',
-      trangThai: 'Thành công',
-    },
-    {
-      key: '2',
-      stt: 2,
-      maCIF: 'ST002',
-      tenCongTy: 'Value',
-      soCuaHangDaiLy: 123,
-      diaChi: 'Value 123',
-      tenQuanLy: 'Nguyễn Văn A',
-      maNhanVien: 'CH123',
-      trangThai: 'Thất bại',
-    },
-    {
-      key: '3',
-      stt: 3,
-      maCIF: 'ST003',
-      tenCongTy: 'Value',
-      soCuaHangDaiLy: 123,
-      diaChi: 'Value 123',
-      tenQuanLy: 'Nguyễn Văn A',
-      maNhanVien: 'CH123',
-      trangThai: 'Thành công',
-    },
-    {
-      key: '4',
-      stt: 4,
-      maCIF: 'ST004',
-      tenCongTy: 'Value',
-      soCuaHangDaiLy: 123,
-      diaChi: 'Value 123',
-      tenQuanLy: 'Nguyễn Văn A',
-      maNhanVien: 'CH123',
-      trangThai: 'Thất bại',
-    },
-    {
-      key: '5',
-      stt: 5,
-      maCIF: 'ST005',
-      tenCongTy: 'Value',
-      soCuaHangDaiLy: 123,
-      diaChi: 'Value 123',
-      tenQuanLy: 'Nguyễn Văn A',
-      maNhanVien: 'CH123',
-      trangThai: 'Thành công',
-    },
-  ]
+interface Data {
+  id: string
+}
 
-  // Table columns
+const MasterMerchants: React.FC = () => {
+  const [page, setPage] = React.useState(1)
+  const [limit, setLimit] = React.useState(10)
+  const [filter, setFilter] = React.useState<any>(null)
+
+  const { isPending, data } = useQuery<PaginatedResponse<Data>>({
+    queryKey: ['list-contract-action', page, limit, filter],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/v1/admin/company/list')
+      return data
+    },
+    placeholderData: keepPreviousData,
+  })
+
+  const dataSource = _get(data, 'data', [])
+
   const columns = [
     {
       title: 'STT',
-      dataIndex: 'stt',
       key: 'stt',
       width: 70,
+      render: (_: any, __: any, index: number) => index + 1,
     },
     {
       title: 'Mã CIF',
-      dataIndex: 'maCIF',
-      key: 'maCIF',
+      dataIndex: 'cif',
+      key: 'cif',
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Tên công ty',
-      dataIndex: 'tenCongTy',
-      key: 'tenCongTy',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text: string) => (text ? text : '---'),
     },
     {
-      title: 'Số cửa hàng đại lý',
-      dataIndex: 'soCuaHangDaiLy',
-      key: 'soCuaHangDaiLy',
+      title: 'Giấy phép kinh doanh',
+      dataIndex: 'tax_code',
+      key: 'tax_code',
+      render: (text: string) => (text ? text : '---'),
     },
     {
-      title: 'Địa chỉ',
-      dataIndex: 'diaChi',
-      key: 'diaChi',
+      title: 'Tên đại diện',
+      dataIndex: 'representative',
+      key: 'representative',
+      render: (text: string) => (text ? text : '---'),
     },
     {
-      title: 'Tên quản lý',
-      dataIndex: 'tenQuanLy',
-      key: 'tenQuanLy',
-    },
-    {
-      title: 'Mã nhân viên',
-      dataIndex: 'maNhanVien',
-      key: 'maNhanVien',
+      title: 'Số điểm đại lý',
+      dataIndex: 'merchant_count',
+      key: 'merchant_count',
+      render: (value: any) => (value || value === 0 ? value : '---'),
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'trangThai',
-      key: 'trangThai',
+      dataIndex: 'status',
+      key: 'status',
       render: (status: any) => {
+        const displayStatus = status ? status : 'N/A'
         const color = status === 'Thành công' ? 'green' : 'red'
-        return <Tag color={color}>{status}</Tag>
+        return <Tag color={color}>{displayStatus}</Tag>
       },
     },
     {
       title: 'Tác vụ',
       key: 'action',
-      render: () => (
+      render: (_, record) => (
         <Space size="middle">
           <Button type="text" icon={<EditOutlined />} />
-          <Button type="text" icon={<DeleteOutlined />} danger />
+          <Link to={routes.masterMerchantDetail.replace(':id', record.id)}>
+            <Button type="text" icon={<EyeOutlined />} />
+          </Link>
         </Space>
       ),
     },

@@ -1,6 +1,9 @@
 import React from 'react'
 import { Table, Tag, Space, Button } from 'antd'
 import type { TableProps } from 'antd'
+import _get from 'lodash/get'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import axiosInstance from '@/config/axios'
 
 import Filters from './components/Filters'
 import { BsDownload, BsEye } from 'react-icons/bs'
@@ -8,113 +11,76 @@ import { Link, NavLink } from 'react-router-dom'
 import { routes } from '@/config/routes'
 
 const Transactions: React.FC = () => {
-  const dataSource = [
-    {
-      key: '1',
-      stt: 1,
-      maGiaoDich: 'ST001',
-      soTien: 200000000,
-      trangThai: 'Thành công',
-      loaiGD: 'Nộp tiền',
-      thoiGianGD: 'dd/mm/yyyy hh:mm',
-      soCIF: 'LOC001',
-      soCuaHang: '3644',
-    },
-    {
-      key: '2',
-      stt: 2,
-      maGiaoDich: 'ST002',
-      soTien: 200000000,
-      trangThai: 'Thất bại',
-      loaiGD: 'Chuyển tiền',
-      thoiGianGD: 'dd/mm/yyyy hh:mm',
-      soCIF: 'LOC001',
-      soCuaHang: '3644',
-    },
-    {
-      key: '3',
-      stt: 3,
-      maGiaoDich: 'ST003',
-      soTien: 200000000,
-      trangThai: 'Thành công',
-      loaiGD: 'Chuyển tiền',
-      thoiGianGD: 'dd/mm/yyyy hh:mm',
-      soCIF: 'LOC001',
-      soCuaHang: '3644',
-    },
-    {
-      key: '4',
-      stt: 4,
-      maGiaoDich: 'ST004',
-      soTien: 200000000,
-      trangThai: 'Thất bại',
-      loaiGD: 'Mở TK thanh toán',
-      thoiGianGD: 'dd/mm/yyyy hh:mm',
-      soCIF: 'LOC001',
-      soCuaHang: '3644',
-    },
-    {
-      key: '5',
-      stt: 5,
-      maGiaoDich: 'ST005',
-      soTien: 200000000,
-      trangThai: 'Thành công',
-      loaiGD: 'Nộp tiền',
-      thoiGianGD: 'dd/mm/yyyy hh:mm',
-      soCIF: 'LOC001',
-      soCuaHang: '3644',
-    },
-  ]
+  // Added state for pagination and filter similar to MasterMerchants
+  const [page, setPage] = React.useState(1)
+  const [limit, setLimit] = React.useState(10)
+  const [filter, setFilter] = React.useState<any>(null)
 
-  // Table columns
+  const { isPending, data } = useQuery({
+    queryKey: ['list-transactions', page, limit, filter],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/v1/admin/transaction/list')
+      return data
+    },
+    placeholderData: keepPreviousData,
+  })
+
+  // Use lodash get to safely extract data array
+  const dataSource = _get(data, 'data', [])
+
   const columns = [
     {
       title: 'STT',
       dataIndex: 'stt',
       key: 'stt',
       width: 70,
+      render: (_: any, __: any, index: number) => index + 1,
     },
     {
       title: 'Mã giao dịch',
       dataIndex: 'maGiaoDich',
       key: 'maGiaoDich',
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Số tiền',
       dataIndex: 'soTien',
       key: 'soTien',
-      // Example: format as currency with commas
-      render: (value: any) => value.toLocaleString('vi-VN'),
+      render: (value: any) => (value ? value.toLocaleString('vi-VN') : '---'),
     },
     {
       title: 'Trạng thái',
       dataIndex: 'trangThai',
       key: 'trangThai',
       render: (status: any) => {
-        // Use green for success, red for failure
+        const displayStatus = status ? status : '---'
         const color = status === 'Thành công' ? 'green' : 'red'
-        return <Tag color={color}>{status}</Tag>
+        return <Tag color={color}>{displayStatus}</Tag>
       },
     },
     {
       title: 'Loại GD',
       dataIndex: 'loaiGD',
       key: 'loaiGD',
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Thời gian GD',
       dataIndex: 'thoiGianGD',
       key: 'thoiGianGD',
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Số CIF',
       dataIndex: 'soCIF',
       key: 'soCIF',
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Số cửa hàng',
       dataIndex: 'soCuaHang',
       key: 'soCuaHang',
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Tác vụ',
@@ -138,7 +104,7 @@ const Transactions: React.FC = () => {
         selectedRows
       )
     },
-    getCheckboxProps: (record) => ({
+    getCheckboxProps: (record: any) => ({
       disabled: record.name === 'Disabled User', // Column configuration not to be checked
       name: record.name,
     }),
@@ -178,6 +144,7 @@ const Transactions: React.FC = () => {
             rowSelection={{ type: 'checkbox', ...rowSelection }}
             columns={columns}
             dataSource={dataSource}
+            loading={isPending}
           />
 
           <div className="flex justify-end gap-4 w-full mt-8">

@@ -11,6 +11,7 @@ import TransactionDetail from './pages/Transactions/TransactionDetail'
 import MasterMerchants from './pages/MasterMerchants'
 import MasterMerchantDetail from './pages/MasterMerchants/MasterMerchantDetail'
 import MerchantDetail from './pages/Merchants/MerchantDetail'
+import MasterMerchantEdit from './pages/MasterMerchants/MasterMerchantEdit'
 
 function RootRoutes() {
   const rootRoutes = [
@@ -27,6 +28,10 @@ function RootRoutes() {
         {
           path: routes.masterMerchantDetail,
           element: <MasterMerchantDetail />,
+        },
+        {
+          path: routes.editMasterMerchant,
+          element: <MasterMerchantEdit />,
         },
         { path: routes.merchant, element: <Home /> },
         { path: routes.createMerchant, element: <CreateMerchant /> },

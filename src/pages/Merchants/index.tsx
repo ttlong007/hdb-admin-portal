@@ -3,68 +3,24 @@ import { Table, Tag, Space, Button } from 'antd'
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import { Link, NavLink } from 'react-router-dom'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import _get from 'lodash/get'
 
 import { routes } from '@/config/routes'
 import Filters from './components/Filters'
+import axiosInstance from '@/config/axios'
 
 const Home: React.FC = () => {
-  const dataSource = [
-    {
-      key: '1',
-      stt: 1,
-      maCIF: 'ST001',
-      tenCongTy: 'Value',
-      soCuaHangDaiLy: 123,
-      diaChi: 'Value 123',
-      tenQuanLy: 'Nguyễn Văn A',
-      maNhanVien: 'CH123',
-      trangThai: 'Thành công',
+  const { isPending, data } = useQuery({
+    queryKey: ['list-merchants'],
+    queryFn: async () => {
+      const { data } = await axiosInstance.get('/v1/admin/company/list')
+      return data
     },
-    {
-      key: '2',
-      stt: 2,
-      maCIF: 'ST002',
-      tenCongTy: 'Value',
-      soCuaHangDaiLy: 123,
-      diaChi: 'Value 123',
-      tenQuanLy: 'Nguyễn Văn A',
-      maNhanVien: 'CH123',
-      trangThai: 'Thất bại',
-    },
-    {
-      key: '3',
-      stt: 3,
-      maCIF: 'ST003',
-      tenCongTy: 'Value',
-      soCuaHangDaiLy: 123,
-      diaChi: 'Value 123',
-      tenQuanLy: 'Nguyễn Văn A',
-      maNhanVien: 'CH123',
-      trangThai: 'Thành công',
-    },
-    {
-      key: '4',
-      stt: 4,
-      maCIF: 'ST004',
-      tenCongTy: 'Value',
-      soCuaHangDaiLy: 123,
-      diaChi: 'Value 123',
-      tenQuanLy: 'Nguyễn Văn A',
-      maNhanVien: 'CH123',
-      trangThai: 'Thất bại',
-    },
-    {
-      key: '5',
-      stt: 5,
-      maCIF: 'ST005',
-      tenCongTy: 'Value',
-      soCuaHangDaiLy: 123,
-      diaChi: 'Value 123',
-      tenQuanLy: 'Nguyễn Văn A',
-      maNhanVien: 'CH123',
-      trangThai: 'Thành công',
-    },
-  ]
+    placeholderData: keepPreviousData,
+  })
+
+  const dataSource = _get(data, 'data', [])
 
   // Table columns
   const columns = [
@@ -73,36 +29,43 @@ const Home: React.FC = () => {
       dataIndex: 'stt',
       key: 'stt',
       width: 70,
+      render: (_: any, __: any, index: number) => index + 1,
     },
     {
       title: 'Mã CIF',
       dataIndex: 'maCIF',
       key: 'maCIF',
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Tên công ty',
       dataIndex: 'tenCongTy',
       key: 'tenCongTy',
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Số cửa hàng đại lý',
       dataIndex: 'soCuaHangDaiLy',
       key: 'soCuaHangDaiLy',
+      render: (value: any) => (value || value === 0 ? value : '---'),
     },
     {
       title: 'Địa chỉ',
       dataIndex: 'diaChi',
       key: 'diaChi',
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Tên quản lý',
       dataIndex: 'tenQuanLy',
       key: 'tenQuanLy',
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Mã nhân viên',
       dataIndex: 'maNhanVien',
       key: 'maNhanVien',
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Trạng thái',
@@ -110,7 +73,7 @@ const Home: React.FC = () => {
       key: 'trangThai',
       render: (status: any) => {
         const color = status === 'Thành công' ? 'green' : 'red'
-        return <Tag color={color}>{status}</Tag>
+        return <Tag color={color}>{status ? status : '---'}</Tag>
       },
     },
     {
@@ -124,6 +87,7 @@ const Home: React.FC = () => {
       ),
     },
   ]
+
   const rowSelection: TableProps['rowSelection'] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows) => {
       console.log(
@@ -132,8 +96,8 @@ const Home: React.FC = () => {
         selectedRows
       )
     },
-    getCheckboxProps: (record) => ({
-      disabled: record.name === 'Disabled User', // Column configuration not to be checked
+    getCheckboxProps: (record: any) => ({
+      disabled: record.name === 'Disabled User',
       name: record.name,
     }),
   }
@@ -211,6 +175,7 @@ const Home: React.FC = () => {
             rowSelection={{ type: 'checkbox', ...rowSelection }}
             columns={columns}
             dataSource={dataSource}
+            loading={isPending}
           />
 
           <div className="flex justify-end gap-4 w-full mt-8">

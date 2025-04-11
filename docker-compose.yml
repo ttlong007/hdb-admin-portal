@@ -1,0 +1,31 @@
+#version: "3.5"
+services:
+  db:
+    platform: linux/x86_64
+    image: postgres:13
+    container_name: ams.db
+    ports:
+      - "5461:5432"
+    environment:
+      POSTGRES_ROOT_PASSWORD: password
+      POSTGRES_DB: amsdb
+      POSTGRES_USER: ams
+      POSTGRES_PASSWORD: ams123
+      TZ: UTC
+    volumes:
+      - /var/lib/postgresql/data
+  # uncomment the following lines to run backend service
+  backend:
+    image: hmit208/hdb-agent-management:latest
+    ports:
+      - "8281:8281"
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+volumes:
+  db-data:

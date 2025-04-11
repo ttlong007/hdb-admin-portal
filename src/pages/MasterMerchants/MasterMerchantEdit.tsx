@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { NavLink, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import _get from 'lodash/get'
 
@@ -24,7 +24,7 @@ function InfoCard({
   )
 }
 
-export default function MasterMerchantDetail() {
+export default function MasterMerchantEdit() {
   const { id } = useParams<{ id: string }>()
   const { data, isLoading, error } = useQuery({
     queryKey: ['companyDetail', id],
@@ -100,12 +100,16 @@ export default function MasterMerchantDetail() {
     <>
       {/* Breadcrumbs */}
       <div className="flex justify-start items-center gap-2 mb-4">
-        <Link
+        <NavLink
           to={routes.masterMerchants}
-          className="text-base font-semibold hover:underline text-blue-600"
+          className={({ isActive }) =>
+            `text-base font-semibold hover:underline ${
+              !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'
+            }`
+          }
         >
           Quản lý đại lý tổng
-        </Link>
+        </NavLink>
         <div className="text-base font-semibold text-[#A1AAB2]">/</div>
         <span className="text-base font-semibold text-[#A1AAB2]">Chi tiết</span>
       </div>
