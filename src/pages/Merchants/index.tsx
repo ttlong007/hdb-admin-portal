@@ -10,11 +10,12 @@ import { routes } from '@/config/routes'
 import Filters from './components/Filters'
 import axiosInstance from '@/config/axios'
 
-const Home: React.FC = () => {
+const Merchants: React.FC = () => {
   const { isPending, data } = useQuery({
     queryKey: ['list-merchants'],
     queryFn: async () => {
-      const { data } = await axiosInstance.get('/v1/admin/company/list')
+      const { data } = await axiosInstance.get('/v1/admin/store/list')
+
       return data
     },
     placeholderData: keepPreviousData,
@@ -127,7 +128,7 @@ const Home: React.FC = () => {
           <div className="justify-start text-black text-3xl font-bold ">
             Quản lý điểm đại lý
           </div>
-          <div className="size- flex justify-start items-center gap-3">
+          <div className="flex justify-start items-center gap-3">
             <div className="text-[#366AE2] text-xs font-medium underline">
               Tải về file mẫu
             </div>
@@ -189,4 +190,4 @@ const Home: React.FC = () => {
   )
 }
 
-export default Home
+export default Merchants

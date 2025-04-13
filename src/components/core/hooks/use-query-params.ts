@@ -7,8 +7,9 @@ import { useEffect, useState } from 'react';
 const queryAtom = atom('');
 
 export function createQueryString(queryObj: any) {
-  let path = [];
+  const path = [];
   for (const [key, value] of Object.entries(queryObj)) {
+    // @ts-ignore
     path.push(`${key}=${value}`);
   }
   return path.join('&').toString();

@@ -1,5 +1,5 @@
 import { Fragment } from 'react'
-import { usePathname } from 'next/navigation'
+import { useLocation } from 'react-router-dom'
 import { Title } from 'rizzui/typography'
 import { Collapse } from 'rizzui/collapse'
 import cn from '@core/utils/class-names'
@@ -9,12 +9,15 @@ import StatusBadge from '@core/components/get-status-badge'
 import { Link } from 'react-router-dom'
 
 export function SidebarMenu() {
-  const pathname = usePathname()
+  const location = useLocation()
+  const pathname = location.pathname
 
   return (
     <div className="mt-4 pb-3 3xl:mt-6">
       {menuItems.map((item: any, index: any) => {
         const isActive = pathname === (item?.href as string)
+        console.log('isActive', isActive)
+        console.log('pathname', pathname)
         const pathnameExistInDropdowns: any = item?.dropdownItems?.filter(
           (dropdownItem: any) => dropdownItem.href === pathname
         )
