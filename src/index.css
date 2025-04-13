@@ -237,20 +237,20 @@
 }
 
 @layer utilities {
-  .fill-opacity-10 {
-    fill-opacity: 0.1;
+  .fillOpacity-10 {
+    fillOpacity: 0.1;
   }
 
-  .fill-opacity-20 {
-    fill-opacity: 0.2;
+  .fillOpacity-20 {
+    fillOpacity: 0.2;
   }
 
-  .fill-opacity-30 {
-    fill-opacity: 0.3;
+  .fillOpacity-30 {
+    fillOpacity: 0.3;
   }
 
-  .fill-opacity-60 {
-    fill-opacity: 0.6;
+  .fillOpacity-60 {
+    fillOpacity: 0.6;
   }
 
   /* animation delay required for the Loader component */

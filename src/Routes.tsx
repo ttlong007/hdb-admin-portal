@@ -12,6 +12,7 @@ import MasterMerchants from './pages/MasterMerchants'
 import MasterMerchantDetail from './pages/MasterMerchants/MasterMerchantDetail'
 import MerchantDetail from './pages/Merchants/MerchantDetail'
 import MasterMerchantEdit from './pages/MasterMerchants/MasterMerchantEdit'
+import StaffEdit from './pages/Staffs/StaffEdit'
 
 function RootRoutes() {
   const rootRoutes = [
@@ -41,6 +42,7 @@ function RootRoutes() {
         { path: routes.staff, element: <Staffs /> },
         { path: routes.staffDetail, element: <StaffDetail /> },
         { path: routes.createStaff, element: <CreateStaff /> },
+        { path: routes.editStaff, element: <StaffEdit /> },
       ],
     },
   ]

@@ -1,6 +1,6 @@
 import React from 'react'
 import { Button, Space, Table, Tag } from 'antd'
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import { Link, NavLink } from 'react-router-dom'
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
@@ -72,10 +72,14 @@ const Staffs: React.FC = () => {
     {
       title: 'Tác vụ',
       key: 'action',
-      render: () => (
+      render: (_, record: any) => (
         <Space size="middle">
-          <Button type="text" icon={<EditOutlined />} />
-          <Button type="text" icon={<DeleteOutlined />} danger />
+          <Link to={routes.editStaff.replace(':id', record.id)}>
+            <Button type="text" icon={<EditOutlined />} />
+          </Link>
+          <Link to={routes.staffDetail.replace(':id', record.id)}>
+            <Button type="text" icon={<EyeOutlined />} />
+          </Link>
         </Space>
       ),
     },

@@ -8,6 +8,7 @@ interface FiltersFormValues {
   fullName: string
   status: any
   agencyCode: string
+  cifCompanyName: string
   position: any
 }
 
@@ -18,6 +19,7 @@ const Filters: React.FC = () => {
       fullName: '',
       status: null,
       agencyCode: '',
+      cifCompanyName: '',
       position: null,
     },
   })
@@ -102,6 +104,18 @@ const Filters: React.FC = () => {
             )}
           />
           <Controller
+            name="cifCompanyName"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                label="CIF - Tên công ty"
+                placeholder="Nhập CIF và Tên công ty"
+                inputClassName="bg-white"
+              />
+            )}
+          />
+          <Controller
             name="position"
             control={control}
             render={({ field }) => (
@@ -110,7 +124,7 @@ const Filters: React.FC = () => {
                 options={positionOptions}
                 value={field.value}
                 onChange={field.onChange}
-                label="Chức vụ"
+                label="Nhóm chức vụ"
                 dropdownClassName="h-auto"
                 selectClassName="bg-white"
               />

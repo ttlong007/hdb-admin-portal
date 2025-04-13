@@ -2,7 +2,7 @@ import { HomeOutlined } from '@ant-design/icons'
 import { Breadcrumb, DatePicker } from 'antd'
 import { Input, Select, Checkbox, Switch } from 'rizzui'
 
-export default function CreateStaff() {
+export default function StaffEdit() {
   return (
     <main className="flex p-6 flex-col items-start gap-6 rounded-lg bg-white">
       <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal">

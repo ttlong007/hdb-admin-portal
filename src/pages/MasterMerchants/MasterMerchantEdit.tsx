@@ -5,7 +5,9 @@ import _get from 'lodash/get'
 
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
-import { Checkbox, Table } from 'antd'
+import { Switch, Table, Select } from 'antd'
+
+const { Option } = Select
 
 function InfoCard({
   title,
@@ -171,15 +173,33 @@ export default function MasterMerchantEdit() {
           <div className="flex gap-6 mb-6 max-sm:flex-col">
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Hạn mức trong tháng</span>
-              <span className="text-base text-gray-800">
-                {company.monthlyLimit ? company.monthlyLimit + ' VND' : '---'}
-              </span>
+              <Select
+                defaultValue={
+                  company.monthlyLimit ? company.monthlyLimit + ' VND' : '---'
+                }
+                style={{ width: '100%' }}
+                placeholder="Chọn hạn mức trong tháng"
+              >
+                <Option value="5000000">5,000,000 VND</Option>
+                <Option value="10000000">10,000,000 VND</Option>
+                <Option value="15000000">15,000,000 VND</Option>
+                <Option value="20000000">20,000,000 VND</Option>
+              </Select>
             </div>
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Hạn mức trong ngày</span>
-              <span className="text-base text-gray-800">
-                {company.dailyLimit ? company.dailyLimit + ' VND' : '---'}
-              </span>
+              <Select
+                defaultValue={
+                  company.dailyLimit ? company.dailyLimit + ' VND' : '---'
+                }
+                style={{ width: '100%' }}
+                placeholder="Chọn hạn mức trong ngày"
+              >
+                <Option value="1000000">1,000,000 VND</Option>
+                <Option value="2000000">2,000,000 VND</Option>
+                <Option value="3000000">3,000,000 VND</Option>
+                <Option value="4000000">4,000,000 VND</Option>
+              </Select>
             </div>
           </div>
 
@@ -198,18 +218,21 @@ export default function MasterMerchantEdit() {
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4 mt-8">
             Cấu hình phê duyệt doanh nghiệp đại lý
           </h4>
-          <div>
-            <Checkbox checked disabled />
-            <label htmlFor="approve-new-merchants" className="ml-2">
-              Yêu cầu phê duyệt cho các địa điểm đại lý mới
-            </label>
-          </div>
 
-          <div>
-            <Checkbox checked disabled />
-            <label htmlFor="approve-new-merchants" className="ml-2">
-              HDBank thực hiện khai báo điểm đại lý và nhân viên đại lý
-            </label>
+          <div className="flex flex-col gap-4">
+            <div>
+              <Switch checked />
+              <label htmlFor="approve-new-merchants" className="ml-2">
+                Yêu cầu phê duyệt cho các địa điểm đại lý mới
+              </label>
+            </div>
+
+            <div>
+              <Switch checked />
+              <label htmlFor="approve-new-merchants" className="ml-2">
+                HDBank thực hiện khai báo điểm đại lý và nhân viên đại lý
+              </label>
+            </div>
           </div>
         </InfoCard>
 
@@ -226,8 +249,8 @@ export default function MasterMerchantEdit() {
               fill="none"
             >
               <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
+                fillRule="evenodd"
+                clipRule="evenodd"
                 d="M13.1665 8C13.1665 7.72386 12.9426 7.5 12.6665 7.5L4.54033 7.5L7.68677 4.35355C7.88204 4.15829 7.88203 3.84171 7.68677 3.64645C7.49151 3.45118 7.17493 3.45118 6.97967 3.64645L2.97967 7.64645C2.78441 7.84171 2.78441 8.15829 2.97967 8.35355L6.97967 12.3536C7.17493 12.5488 7.49151 12.5488 7.68677 12.3536C7.88204 12.1583 7.88204 11.8417 7.68677 11.6464L4.54033 8.5L12.6665 8.5C12.9426 8.5 13.1665 8.27614 13.1665 8Z"
                 fill="#242729"
               />
@@ -246,8 +269,8 @@ export default function MasterMerchantEdit() {
               fill="none"
             >
               <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
+                fillRule="evenodd"
+                clipRule="evenodd"
                 d="M5.53397 12.2487L4.27625 12.4244C3.5312 12.5285 2.90379 11.8708 3.04303 11.1314L3.26635 9.94564C3.34174 9.54536 3.53755 9.17763 3.8276 8.89165L11.0764 1.74438C11.6684 1.16071 12.6222 1.1698 13.2029 1.76464L13.9185 2.49767C14.4969 3.09005 14.4859 4.03898 13.8941 4.61786L6.65566 11.6977C6.35021 11.9965 5.95712 12.1896 5.53397 12.2487L5.39558 11.2583C5.60716 11.2288 5.8037 11.1322 5.95643 10.9828L6.59255 10.3606L5.20511 8.93777L4.5297 9.60372C4.38467 9.74672 4.28677 9.93058 4.24907 10.1307L4.02575 11.3165C4.01309 11.3837 4.07013 11.4435 4.13786 11.4341L5.39558 11.2583L5.53397 12.2487ZM5.9172 8.23566L7.30745 9.66141L13.1948 3.90297C13.3921 3.71001 13.3958 3.3937 13.203 3.19624L12.4873 2.46321C12.2938 2.26493 11.9759 2.2619 11.7785 2.45646L5.9172 8.23566Z"
                 fill="white"
               />

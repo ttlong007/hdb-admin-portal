@@ -13,7 +13,7 @@ export const menuItems = [
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <g clip-path="url(#clip0_1525_24886)">
+        <g clipPath="url(#clip0_1525_24886)">
           <rect width="40" height="40" rx="20" fill="#FFB233" />
           <path
             d="M10.625 9.84375C10.625 9.41228 10.2752 9.0625 9.84375 9.0625C9.41228 9.0625 9.0625 9.41228 9.0625 9.84375V26.4385C9.06249 27.0674 9.06248 27.5864 9.09703 28.0092C9.13291 28.4484 9.20991 28.8521 9.40311 29.2312C9.70271 29.8192 10.1808 30.2973 10.7688 30.5969C11.1479 30.7901 11.5516 30.8671 11.9908 30.903C12.4136 30.9375 12.9326 30.9375 13.5615 30.9375H30.1562C30.5877 30.9375 30.9375 30.5877 30.9375 30.1562C30.9375 29.7248 30.5877 29.375 30.1562 29.375H13.5938C12.9245 29.375 12.4696 29.3744 12.118 29.3457C11.7755 29.3177 11.6003 29.267 11.4781 29.2047C11.1841 29.0549 10.9451 28.8159 10.7953 28.5219C10.733 28.3997 10.6823 28.2245 10.6543 27.882C10.6256 27.5304 10.625 27.0755 10.625 26.4062V9.84375Z"
@@ -41,8 +41,8 @@ export const menuItems = [
             y2="13.9337"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="white" stop-opacity="0.9" />
-            <stop offset="1" stop-color="#FFFDFD" />
+            <stop stopColor="white" stopOpacity="0.9" />
+            <stop offset="1" stopColor="#FFFDFD" />
           </linearGradient>
           <linearGradient
             id="paint1_linear_1525_24886"
@@ -52,8 +52,8 @@ export const menuItems = [
             y2="13.9337"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="white" stop-opacity="0.9" />
-            <stop offset="1" stop-color="#FFFDFD" />
+            <stop stopColor="white" stopOpacity="0.9" />
+            <stop offset="1" stopColor="#FFFDFD" />
           </linearGradient>
           <linearGradient
             id="paint2_linear_1525_24886"
@@ -63,8 +63,8 @@ export const menuItems = [
             y2="13.9337"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="white" stop-opacity="0.9" />
-            <stop offset="1" stop-color="#FFFDFD" />
+            <stop stopColor="white" stopOpacity="0.9" />
+            <stop offset="1" stopColor="#FFFDFD" />
           </linearGradient>
           <linearGradient
             id="paint3_linear_1525_24886"
@@ -74,8 +74,8 @@ export const menuItems = [
             y2="13.9337"
             gradientUnits="userSpaceOnUse"
           >
-            <stop stop-color="white" stop-opacity="0.9" />
-            <stop offset="1" stop-color="#FFFDFD" />
+            <stop stopColor="white" stopOpacity="0.9" />
+            <stop offset="1" stopColor="#FFFDFD" />
           </linearGradient>
           <clipPath id="clip0_1525_24886">
             <rect width="40" height="40" rx="8" fill="white" />

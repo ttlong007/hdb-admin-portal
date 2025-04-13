@@ -87,9 +87,11 @@ const MasterMerchants: React.FC = () => {
     {
       title: 'Tác vụ',
       key: 'action',
-      render: (_, record) => (
+      render: (_, record: any) => (
         <Space size="middle">
-          <Button type="text" icon={<EditOutlined />} />
+          <Link to={routes.editMasterMerchant.replace(':id', record.id)}>
+            <Button type="text" icon={<EditOutlined />} />
+          </Link>
           <Link to={routes.masterMerchantDetail.replace(':id', record.id)}>
             <Button type="text" icon={<EyeOutlined />} />
           </Link>

@@ -14,8 +14,9 @@ export default function HeaderMenuRight() {
         <select
           aria-label="Select Company"
           className="bg-transparent text-white rounded px-2 py-1 pr-8 outline-none border-none"
+          value="1"
         >
-          <option value="" disabled selected>
+          <option value="1" disabled>
             CONG TY TNHH KHUNG ANH VIET
           </option>
           <option value="company1">Company One</option>
@@ -39,11 +40,11 @@ export default function HeaderMenuRight() {
             fill="none"
           >
             <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
+              fillRule="evenodd"
+              clipRule="evenodd"
               d="M15.0432 16.3052C13.6693 17.4041 11.9267 18.0612 10.0306 18.0612C5.59543 18.0612 2 14.4658 2 10.0306C2 5.59543 5.59543 2 10.0306 2C14.4658 2 18.0612 5.59543 18.0612 10.0306C18.0612 11.9268 17.4041 13.6694 16.3051 15.0433L21.9999 20.7381L20.738 22L15.0432 16.3052ZM3.78458 10.0306C3.78458 6.58103 6.58103 3.78458 10.0306 3.78458C13.4802 3.78458 16.2767 6.58103 16.2767 10.0306C16.2767 11.7129 15.6116 13.2399 14.53 14.3629L14.3629 14.53C13.2399 15.6116 11.7129 16.2767 10.0306 16.2767C6.58103 16.2767 3.78458 13.4802 3.78458 10.0306Z"
               fill="white"
-              fill-opacity="0.8"
+              fillOpacity="0.8"
             />
           </svg>
         </div>
