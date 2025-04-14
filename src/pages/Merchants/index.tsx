@@ -1,6 +1,6 @@
 import React from 'react'
 import { Table, Tag, Space, Button } from 'antd'
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons'
+import { EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import { Link, NavLink } from 'react-router-dom'
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
@@ -80,10 +80,14 @@ const Merchants: React.FC = () => {
     {
       title: 'Tác vụ',
       key: 'action',
-      render: () => (
+      render: (_, record: any) => (
         <Space size="middle">
-          <Button type="text" icon={<EditOutlined />} />
-          <Button type="text" icon={<DeleteOutlined />} danger />
+          <Link to={routes.editMerchant.replace(':id', record.id)}>
+            <Button type="text" icon={<EditOutlined />} />
+          </Link>
+          <Link to={routes.merchantDetail.replace(':id', record.id)}>
+            <Button type="text" icon={<EyeOutlined />} />
+          </Link>
         </Space>
       ),
     },

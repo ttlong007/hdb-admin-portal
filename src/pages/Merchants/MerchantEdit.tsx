@@ -1,13 +1,11 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { HomeOutlined } from '@ant-design/icons'
 import { Breadcrumb, message, Button, Switch, Checkbox } from 'antd'
 import { Input, Select } from 'rizzui'
-import { useForm, Controller, SubmitHandler } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
-import { useMutation } from '@tanstack/react-query'
+import { useForm, Controller } from 'react-hook-form'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useParams } from 'react-router-dom'
 import { routes } from '@/config/routes'
 
 interface MerchantFormValues {
@@ -25,20 +23,9 @@ interface MerchantFormValues {
   transactionTypes: string[]
 }
 
-// Define validation schema with yup
-const schema = yup
-  .object({
-    name: yup.string().required('Tên không được để trống'),
-  })
-  .required()
-
-export default function CreateMerchant() {
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<MerchantFormValues>({
-    resolver: yupResolver(schema),
+export default function MerchantEdit() {
+  const { id } = useParams<{ id: string }>()
+  const { handleSubmit, control, reset } = useForm<MerchantFormValues>({
     defaultValues: {
       name: '',
       code: '',
@@ -55,25 +42,55 @@ export default function CreateMerchant() {
     },
   })
 
-  // Create mutation for submitting the payload
-  const createMerchantMutation = useMutation({
+  // Use useQuery to fetch details from /v1/agent/store/:id
+  const {
+    data: merchantData,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['merchant', id],
+    queryFn: async () => {
+      const res = await axiosInstance.get(`/v1/agent/store/${id}`)
+      return res.data
+    },
+    enabled: !!id,
+  })
+
+  useEffect(() => {
+    if (merchantData) {
+      reset({
+        name: merchantData.name,
+        code: merchantData.code,
+        address: merchantData.address,
+        ward: merchantData.ward || '1',
+        district: merchantData.district || '1',
+        accountOption: merchantData.accountOption || false,
+        accountSelect: merchantData.accountSelect || '',
+        monthlyLimit: merchantData.monthlyLimit || 0,
+        dailyLimit: merchantData.dailyLimit || 0,
+        needApprove: merchantData.needApprove || false,
+        approveThreshold: merchantData.approveThreshold || 0,
+        transactionTypes: merchantData.transactionTypes || [],
+      })
+    }
+  }, [merchantData, reset])
+
+  // Mutation to update the merchant using the id from params
+  const updateMerchantMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const { data } = await axiosInstance.post(
-        '/v1/admin/store/create',
-        payload
-      )
+      const { data } = await axiosInstance.put(`/v1/admin/store/${id}`, payload)
       return data
     },
     onSuccess: () => {
-      message.success('Đại lý được tạo thành công!')
+      message.success('Đại lý được cập nhật thành công!')
     },
     onError: () => {
-      message.error('Không thể tạo đại lý.')
+      message.error('Không thể cập nhật đại lý.')
     },
   })
 
-  // Explicitly type onSubmit with SubmitHandler
-  const onSubmit: SubmitHandler<MerchantFormValues> = (data) => {
+  // Map form values to payload structure and submit
+  const onSubmit = (data: MerchantFormValues) => {
     const payload = {
       address: data.address,
       approve_threshold: data.approveThreshold,
@@ -83,11 +100,11 @@ export default function CreateMerchant() {
       need_approve_transaction_types: data.transactionTypes,
       parent_id: 1, // Set to the appropriate parent ID
     }
-
-    console.log('Payload:', payload)
-
-    // createMerchantMutation.mutate(payload)
+    updateMerchantMutation.mutate(payload)
   }
+
+  if (isLoading) return <p>Loading...</p>
+  if (error) return <p>Error loading merchant data.</p>
 
   return (
     <>
@@ -116,26 +133,18 @@ export default function CreateMerchant() {
           </div>
 
           <div className="grid grid-cols-2 gap-6 w-full">
-            <div>
-              <Controller
-                name="name"
-                control={control}
-                render={({ field }) => (
-                  <>
-                    <Input
-                      {...field}
-                      label="Tên điểm đại lý *"
-                      placeholder="Nhập tên điểm đại lý"
-                      className="w-full"
-                    />
-                  </>
-                )}
-              />
-              {errors.name && (
-                <p className="text-red-500 text-sm">{errors.name.message}</p>
+            <Controller
+              name="name"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Tên điểm đại lý *"
+                  placeholder="Nhập tên điểm đại lý"
+                  className="w-full"
+                />
               )}
-            </div>
-
+            />
             <Controller
               name="code"
               control={control}
@@ -299,9 +308,7 @@ export default function CreateMerchant() {
                         field.onChange([...(field.value || []), 'Rút tiền'])
                       } else {
                         field.onChange(
-                          (field.value || []).filter(
-                            (val: string) => val !== 'Rút tiền'
-                          )
+                          (field.value || []).filter((val: string) => val !== 'Rút tiền')
                         )
                       }
                     }}
@@ -316,9 +323,7 @@ export default function CreateMerchant() {
                         field.onChange([...(field.value || []), 'Nộp tiền'])
                       } else {
                         field.onChange(
-                          (field.value || []).filter(
-                            (val: string) => val !== 'Nộp tiền'
-                          )
+                          (field.value || []).filter((val: string) => val !== 'Nộp tiền')
                         )
                       }
                     }}
@@ -333,9 +338,7 @@ export default function CreateMerchant() {
                         field.onChange([...(field.value || []), 'Ủy nhiệm chi'])
                       } else {
                         field.onChange(
-                          (field.value || []).filter(
-                            (val: string) => val !== 'Ủy nhiệm chi'
-                          )
+                          (field.value || []).filter((val: string) => val !== 'Ủy nhiệm chi')
                         )
                       }
                     }}
@@ -350,9 +353,7 @@ export default function CreateMerchant() {
                         field.onChange([...(field.value || []), 'Ủy nhiệm thu'])
                       } else {
                         field.onChange(
-                          (field.value || []).filter(
-                            (val: string) => val !== 'Ủy nhiệm thu'
-                          )
+                          (field.value || []).filter((val: string) => val !== 'Ủy nhiệm thu')
                         )
                       }
                     }}
@@ -376,7 +377,7 @@ export default function CreateMerchant() {
               type="primary"
               className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
             >
-              Tạo đại lý
+              Cập nhật đại lý
             </Button>
           </div>
         </main>

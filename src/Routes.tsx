@@ -13,6 +13,7 @@ import MasterMerchantDetail from './pages/MasterMerchants/MasterMerchantDetail'
 import MerchantDetail from './pages/Merchants/MerchantDetail'
 import MasterMerchantEdit from './pages/MasterMerchants/MasterMerchantEdit'
 import StaffEdit from './pages/Staffs/StaffEdit'
+import MerchantEdit from './pages/Merchants/MerchantEdit'
 
 function RootRoutes() {
   const rootRoutes = [
@@ -36,6 +37,7 @@ function RootRoutes() {
         },
         { path: routes.merchant, element: <Home /> },
         { path: routes.createMerchant, element: <CreateMerchant /> },
+        { path: routes.editMerchant, element: <MerchantEdit /> },
         { path: routes.merchantDetail, element: <MerchantDetail /> },
         { path: routes.transaction, element: <Transactions /> },
         { path: routes.transactionDetail, element: <TransactionDetail /> },
