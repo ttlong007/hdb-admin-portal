@@ -236,10 +236,10 @@ const Step01: React.FC<Step01Props> = ({ onNext }) => {
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="submit"
-            disabled={createMerchantMutation.status === 'loading'}
+            disabled={createMerchantMutation.isPending}
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
-            {createMerchantMutation.status === 'loading'
+            {createMerchantMutation.isPending
               ? 'Đang tạo đại lý...'
               : 'Tạo đại lý và tiếp tục'}
           </button>

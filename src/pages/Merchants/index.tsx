@@ -33,52 +33,45 @@ const Merchants: React.FC = () => {
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
-      title: 'Mã CIF',
-      dataIndex: 'maCIF',
-      key: 'maCIF',
+      title: 'Mã',
+      dataIndex: 'code',
+      key: 'code',
       render: (text: string) => (text ? text : '---'),
     },
     {
-      title: 'Tên công ty',
-      dataIndex: 'tenCongTy',
-      key: 'tenCongTy',
+      title: 'Tên đại lý',
+      dataIndex: 'name',
+      key: 'name',
       render: (text: string) => (text ? text : '---'),
-    },
-    {
-      title: 'Số cửa hàng đại lý',
-      dataIndex: 'soCuaHangDaiLy',
-      key: 'soCuaHangDaiLy',
-      render: (value: any) => (value || value === 0 ? value : '---'),
     },
     {
       title: 'Địa chỉ',
-      dataIndex: 'diaChi',
-      key: 'diaChi',
-      render: (text: string) => (text ? text : '---'),
-    },
-    {
-      title: 'Tên quản lý',
-      dataIndex: 'tenQuanLy',
-      key: 'tenQuanLy',
-      render: (text: string) => (text ? text : '---'),
-    },
-    {
-      title: 'Mã nhân viên',
-      dataIndex: 'maNhanVien',
-      key: 'maNhanVien',
+      dataIndex: 'address',
+      key: 'address',
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'trangThai',
-      key: 'trangThai',
-      render: (status: any) => {
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => {
         const color = status === 'Thành công' ? 'green' : 'red'
         return <Tag color={color}>{status ? status : '---'}</Tag>
       },
     },
     {
-      title: 'Tác vụ',
+      title: 'Cần phê duyệt',
+      dataIndex: 'need_approve_transaction',
+      key: 'need_approve_transaction',
+      render: (value: boolean) =>
+        value ? (
+          <Tag color="blue">Có</Tag>
+        ) : (
+          <Tag color="default">Không</Tag>
+        ),
+    },
+    {
+      title: 'Hành động',
       key: 'action',
       render: (_, record: any) => (
         <Space size="middle">
@@ -112,7 +105,7 @@ const Merchants: React.FC = () => {
       {/* Breadcrumbs */}
       <div className="flex justify-start items-center gap-2 mb-4">
         <NavLink
-          to={routes.masterMerchants}
+          to={routes.masterMerchant}
           className={({ isActive }) =>
             `text-base font-semibold hover:underline ${
               !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'

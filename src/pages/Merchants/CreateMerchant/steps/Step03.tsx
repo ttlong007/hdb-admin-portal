@@ -13,13 +13,11 @@ interface Step03FormValues {
 }
 
 interface Step03Props {
-  onNext: (data: Step03FormValues) => void
   onBack: () => void
   initialData?: Partial<Step03FormValues>
 }
 
 const Step03: React.FC<Step03Props> = ({
-  onNext,
   onBack,
   initialData = {},
 }) => {
@@ -35,7 +33,8 @@ const Step03: React.FC<Step03Props> = ({
   })
 
   const onSubmit = (data: Step03FormValues) => {
-    onNext(data)
+    console.log('Form data submitted:', data)
+    // Handle form submission without calling onNext
   }
 
   return (

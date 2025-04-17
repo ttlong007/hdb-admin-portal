@@ -104,7 +104,7 @@ const Staffs: React.FC = () => {
       {/* Breadcrumbs */}
       <div className="flex justify-start items-center gap-2 mb-4">
         <NavLink
-          to={routes.masterMerchants}
+          to={routes.masterMerchant}
           className={({ isActive }) =>
             `text-base font-semibold hover:underline ${
               !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'

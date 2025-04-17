@@ -101,7 +101,7 @@ export default function MasterMerchantDetail() {
       {/* Breadcrumbs */}
       <div className="flex justify-start items-center gap-2 mb-4">
         <Link
-          to={routes.masterMerchants}
+          to={routes.masterMerchant}
           className="text-base font-semibold hover:underline text-blue-600"
         >
           Quản lý đại lý tổng
