@@ -2,6 +2,10 @@ import React from 'react'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 import { Input, Select } from 'rizzui'
 import { Checkbox } from 'antd'
+import { useMutation } from '@tanstack/react-query'
+import axiosInstance from '@/config/axios'
+import { toast } from 'react-toastify'
+import { useStore } from '@/store/store/useStore'
 
 type FormValues = {
   name: string
@@ -13,7 +17,12 @@ type FormValues = {
   accountSelect: string
 }
 
-const Step01: React.FC = () => {
+interface Step01Props {
+  onNext: () => void
+}
+
+const Step01: React.FC<Step01Props> = ({ onNext }) => {
+  const { setStoreState } = useStore()
   const {
     control,
     handleSubmit,
@@ -30,9 +39,45 @@ const Step01: React.FC = () => {
     },
   })
 
+  // Create a mutation for calling the create API endpoint.
+  // It checks if data.status_code === "ACCEPT". If not, it throws an error.
+  const createMerchantMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const { data } = await axiosInstance.post(
+        '/v1/admin/store/create',
+        payload
+      )
+      if (data.status_code === 'ACCEPT') {
+        setStoreState({
+          storeCreateData: data.data,
+        })
+        return data
+      } else {
+        throw new Error('Creation failed')
+      }
+    },
+    onSuccess: () => {
+      toast.success('Đại lý được tạo thành công!')
+      onNext() // Navigate to next step on success.
+    },
+    onError: () => {
+      toast.error('Không thể tạo đại lý.')
+    },
+  })
+
+  // On form submission, build the API payload and trigger the mutation.
   const onSubmit: SubmitHandler<FormValues> = (data) => {
-    console.log(data)
-    // Proceed to the next step or handle form submission
+    const payload = {
+      address: data.address,
+      approve_threshold: 0,
+      company_id: 1,
+      name: data.name,
+      need_approve_transaction: false,
+      need_approve_transaction_types: [],
+      parent_id: 1,
+      code: data.code,
+    }
+    createMerchantMutation.mutate(payload)
   }
 
   return (
@@ -64,7 +109,6 @@ const Step01: React.FC = () => {
               )}
             />
           </div>
-
           <div>
             <Controller
               name="code"
@@ -87,7 +131,6 @@ const Step01: React.FC = () => {
               )}
             />
           </div>
-
           <div>
             <Controller
               name="address"
@@ -110,7 +153,6 @@ const Step01: React.FC = () => {
               )}
             />
           </div>
-
           <div className="grid grid-cols-2 gap-6">
             <Controller
               name="ward"
@@ -153,7 +195,6 @@ const Step01: React.FC = () => {
               )}
             />
           </div>
-
           <div className="flex flex-col gap-6">
             <div>
               <Controller
@@ -167,7 +208,7 @@ const Step01: React.FC = () => {
                       label="Tài khoản chuyên chi *"
                       placeholder="Chọn tài khoản chuyên chi"
                       className="w-full"
-                      options={[]} // Populate options as needed
+                      options={[]} // Populate options as needed.
                       defaultValue="1"
                     />
                     {errors.accountSelect && (
@@ -192,10 +233,15 @@ const Step01: React.FC = () => {
             </div>
           </div>
         </div>
-
         <div className="flex items-center justify-end gap-4 w-full mt-8">
-          <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
-            Tạo đại lý và tiếp tục
+          <button
+            type="submit"
+            disabled={createMerchantMutation.status === 'loading'}
+            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+          >
+            {createMerchantMutation.status === 'loading'
+              ? 'Đang tạo đại lý...'
+              : 'Tạo đại lý và tiếp tục'}
           </button>
         </div>
       </form>

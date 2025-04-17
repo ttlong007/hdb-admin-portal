@@ -12,21 +12,6 @@ const CreateMerchant = () => {
   const [activeKey, setActiveKey] = useState('1')
   const [currentStep, setCurrentStep] = useState(0)
 
-  const steps = [
-    {
-      title: 'Thông tin điểm đại lý',
-      content: <Step01 />,
-    },
-    {
-      title: 'Hạn mức giao dịch',
-      content: <Step02 />,
-    },
-    {
-      title: 'Duyệt giao dịch',
-      content: <Step03 />,
-    },
-  ]
-
   const next = () => {
     const nextStep = currentStep + 1
     setCurrentStep(nextStep)
@@ -43,6 +28,21 @@ const CreateMerchant = () => {
     setActiveKey(key)
     setCurrentStep(Number(key) - 1)
   }
+
+  const steps = [
+    {
+      title: 'Thông tin điểm đại lý',
+      content: <Step01 onNext={next} />,
+    },
+    {
+      title: 'Hạn mức giao dịch',
+      content: <Step02 onNext={next} onBack={prev} />,
+    },
+    {
+      title: 'Duyệt giao dịch',
+      content: <Step03 onBack={prev} />,
+    },
+  ]
 
   return (
     <>
@@ -78,26 +78,7 @@ const CreateMerchant = () => {
               className="px-8"
             >
               {item.content}
-              {/* <div style={{ marginTop: 24 }}>
-                {index > 0 && (
-                  <Button style={{ marginRight: 8 }} onClick={prev}>
-                    Previous
-                  </Button>
-                )}
-                {index < steps.length - 1 && (
-                  <Button type="primary" onClick={next}>
-                    Next
-                  </Button>
-                )}
-                {index === steps.length - 1 && (
-                  <Button
-                    type="primary"
-                    onClick={() => console.log('Submit form')}
-                  >
-                    Submit
-                  </Button>
-                )}
-              </div> */}
+              {/* Navigation buttons can be placed here if needed */}
             </TabPane>
           ))}
         </Tabs>
