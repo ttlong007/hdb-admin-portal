@@ -1,10 +1,13 @@
 import React from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { Input } from 'rizzui'
+import { useMutation } from '@tanstack/react-query'
+import axiosInstance from '@/config/axios'
+import { toast } from 'react-toastify'
 
 interface Step02FormValues {
-  monthlyLimit: number
-  dailyLimit: number
+  transaction_monthly_quota: number
+  transaction_daily_quota: number
 }
 
 interface Step02Props {
@@ -20,13 +23,45 @@ const Step02: React.FC<Step02Props> = ({ defaultValues, onBack, onNext }) => {
     formState: { errors },
   } = useForm<Step02FormValues>({
     defaultValues: defaultValues || {
-      monthlyLimit: 0,
-      dailyLimit: 0,
+      transaction_monthly_quota: 0,
+      transaction_daily_quota: 0,
+    },
+  })
+
+  const createLimitsMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const { data } = await axiosInstance.post('/v1/admin/limit/create-batch', payload)
+      return data
     },
   })
 
   const onSubmit = (data: Step02FormValues) => {
-    onNext(data)
+    const payload = {
+      limits: [
+        {
+          entity_id: 1,
+          entity_type: 'store',
+          type: 'transaction_quota_daily',
+          amount: data.transaction_daily_quota,
+        },
+        {
+          entity_id: 1,
+          entity_type: 'store',
+          type: 'transaction_monthly_quota',
+          amount: data.transaction_monthly_quota,
+        },
+      ],
+    }
+
+    createLimitsMutation.mutate(payload, {
+      onSuccess: () => {
+        toast.success('Limits created successfully!')
+        onNext(data)
+      },
+      onError: () => {
+        toast.error('Failed to create limits.')
+      },
+    })
   }
 
   return (
@@ -37,7 +72,7 @@ const Step02: React.FC<Step02Props> = ({ defaultValues, onBack, onNext }) => {
 
       <div className="grid grid-cols-4 gap-6 w-full">
         <Controller
-          name="monthlyLimit"
+          name="transaction_monthly_quota"
           control={control}
           rules={{ required: 'Hạn mức trong tháng là bắt buộc' }}
           render={({ field }) => (
@@ -50,14 +85,14 @@ const Step02: React.FC<Step02Props> = ({ defaultValues, onBack, onNext }) => {
           )}
         />
         <Controller
-          name="dailyLimit"
+          name="transaction_daily_quota"
           control={control}
-          rules={{ required: 'Hạn mức trong ngày là bắt buộc' }}
+          rules={{ required: 'Hạn mức giao dịch hàng ngày là bắt buộc' }}
           render={({ field }) => (
             <Input
               {...field}
-              label="Hạn mức trong ngày *"
-              placeholder="Nhập hạn mức trong ngày"
+              label="Hạn mức giao dịch hàng ngày *"
+              placeholder="Nhập hạn mức giao dịch hàng ngày"
               className="w-full"
             />
           )}
