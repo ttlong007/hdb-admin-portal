@@ -6,19 +6,22 @@ import type { TableProps } from 'antd'
 import _get from 'lodash/get'
 import {
   keepPreviousData,
-  useMutation,
   useQuery,
-  useQueryClient,
 } from '@tanstack/react-query'
 
 import Filters from './components/Filters'
 import { routes } from '@/config/routes'
 import axiosInstance from '@/config/axios'
 import { PaginatedResponse } from '@/types'
-// import ConfirmModal from '@/components/core/components/confirm-modal'
 
 interface Data {
   id: string
+  cif?: string
+  name?: string
+  tax_code?: string
+  representative?: string
+  merchant_count?: number
+  status?: string
 }
 
 const MasterMerchants: React.FC = () => {
@@ -29,13 +32,22 @@ const MasterMerchants: React.FC = () => {
   const { isPending, data } = useQuery<PaginatedResponse<Data>>({
     queryKey: ['list-contract-action', page, limit, filter],
     queryFn: async () => {
-      const { data } = await axiosInstance.get('/v1/admin/company/list')
-      return data
+      const response = await axiosInstance.get('/v1/admin/company/list', {
+        params: { page, limit, ...filter },
+      })
+      // Assuming response.data.status_code is returned, check it.
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data
+      } else {
+        throw new Error('Failed to get master merchants')
+      }
     },
     placeholderData: keepPreviousData,
   })
 
+  // Get list data and total count from the API response. Adjust the paths if needed.
   const dataSource = _get(data, 'data', [])
+  const total = _get(data, 'page_data.total', 0)
 
   const columns = [
     {
@@ -99,18 +111,20 @@ const MasterMerchants: React.FC = () => {
       ),
     },
   ]
+
   const rowSelection: TableProps['rowSelection'] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        'selectedRows ',
-        selectedRows
-      )
+      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows ', selectedRows)
     },
     getCheckboxProps: (record: any) => ({
-      disabled: record.name === 'Disabled User', // Column configuration not to be checked
+      disabled: record.name === 'Disabled User', // For example: don't allow checking if condition is met.
       name: record.name,
     }),
+  }
+
+  const onPaginationChange = (pagination: any) => {
+    setPage(pagination.current)
+    setLimit(pagination.pageSize)
   }
 
   return (
@@ -120,22 +134,18 @@ const MasterMerchants: React.FC = () => {
         <NavLink
           to={routes.masterMerchant}
           className={({ isActive }) =>
-            `text-base font-semibold hover:underline ${
-              !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'
-            }`
+            `text-base font-semibold hover:underline ${!isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'}`
           }
         >
           Quản lý đại lý tổng
         </NavLink>
         <div className="text-base font-semibold text-[#A1AAB2]">/</div>
-        <span className="text-base font-semibold text-[#A1AAB2]">
-          Danh sách đại lý
-        </span>
+        <span className="text-base font-semibold text-[#A1AAB2]">Danh sách đại lý</span>
       </div>
 
       <div className="px-6 py-4 bg-white rounded-lg shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] flex flex-col justify-start items-start gap-4">
         <div className="self-stretch inline-flex justify-between items-center border-b border-[#DDE4EE] py-4">
-          <div className="justify-start text-black text-3xl font-bold ">
+          <div className="justify-start text-black text-3xl font-bold">
             Quản lý đại lý tổng
           </div>
         </div>
@@ -147,6 +157,16 @@ const MasterMerchants: React.FC = () => {
             rowSelection={{ type: 'checkbox', ...rowSelection }}
             columns={columns}
             dataSource={dataSource}
+            loading={isPending}
+            pagination={{
+              total,
+              pageSize: limit,
+              current: page,
+              showSizeChanger: true,
+              showTotal: (total) => `Có ${total} items`,
+              pageSizeOptions: ['10', '20', '50', '100', '500'],
+            }}
+            onChange={onPaginationChange}
           />
 
           <div className="flex justify-end gap-4 w-full mt-8">
@@ -155,14 +175,6 @@ const MasterMerchants: React.FC = () => {
             </button>
           </div>
         </div>
-
-        {/* <ConfirmModal
-          isOpen={true}
-          title="Confirm Your Action"
-          content={<p>Are you sure you want to perform this action?</p>}
-          onConfirm={() => console.log('Confirmed')}
-          onCancel={() => console.log('Cancelled')}
-        /> */}
       </div>
     </>
   )

@@ -9,7 +9,7 @@ const persistConfig = {
   key: 'root',
   storage,
   // Specify the reducers you want to persist
-  whitelist: ['auth'], // In this example, we persist the 'user' reducer
+  whitelist: ['auth', 'store'],
 }
 
 const rootReducer = combineReducers({

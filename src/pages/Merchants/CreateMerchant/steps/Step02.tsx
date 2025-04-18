@@ -2,8 +2,11 @@ import React from 'react'
 import { useForm, Controller } from 'react-hook-form'
 import { Input } from 'rizzui'
 import { useMutation } from '@tanstack/react-query'
-import axiosInstance from '@/config/axios'
 import { toast } from 'react-toastify'
+import _get from 'lodash/get'
+
+import { useStore } from '@/store/store/useStore'
+import axiosInstance from '@/config/axios'
 
 interface Step02FormValues {
   transaction_monthly_quota: number
@@ -17,6 +20,7 @@ interface Step02Props {
 }
 
 const Step02: React.FC<Step02Props> = ({ defaultValues, onBack, onNext }) => {
+  const { storeCreateData } = useStore()
   const {
     control,
     handleSubmit,
@@ -27,28 +31,38 @@ const Step02: React.FC<Step02Props> = ({ defaultValues, onBack, onNext }) => {
       transaction_daily_quota: 0,
     },
   })
+  const storeId = _get(storeCreateData, 'id', null)
 
   const createLimitsMutation = useMutation({
     mutationFn: async (payload: any) => {
       const { data } = await axiosInstance.post('/v1/admin/limit/create-batch', payload)
-      return data
+      if (data.status_code === 'ACCEPT') {
+        return data
+      } else {
+        throw new Error('Creation failed')
+      }
     },
   })
 
   const onSubmit = (data: Step02FormValues) => {
+    if (!storeId) {
+      toast.error('Store ID is not available.')
+      return
+    }
+
     const payload = {
       limits: [
         {
-          entity_id: 1,
+          entity_id: storeId,
           entity_type: 'store',
           type: 'transaction_quota_daily',
-          amount: data.transaction_daily_quota,
+          amount: Number(data.transaction_daily_quota),
         },
         {
-          entity_id: 1,
+          entity_id: storeId,
           entity_type: 'store',
           type: 'transaction_monthly_quota',
-          amount: data.transaction_monthly_quota,
+          amount: Number(data.transaction_monthly_quota),
         },
       ],
     }

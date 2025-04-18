@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Table, Tag, Space, Button } from 'antd'
 import type { TableProps } from 'antd'
 import _get from 'lodash/get'
@@ -11,22 +11,25 @@ import { Link, NavLink } from 'react-router-dom'
 import { routes } from '@/config/routes'
 
 const Transactions: React.FC = () => {
-  // Added state for pagination and filter similar to MasterMerchants
-  const [page, setPage] = React.useState(1)
-  const [limit, setLimit] = React.useState(10)
-  const [filter, setFilter] = React.useState<any>(null)
+  // Pagination and filter state
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
+  const [filter, setFilter] = useState<any>(null)
 
   const { isPending, data } = useQuery({
     queryKey: ['list-transactions', page, limit, filter],
     queryFn: async () => {
-      const { data } = await axiosInstance.get('/v1/admin/transaction/list')
+      const { data } = await axiosInstance.get('/v1/admin/transaction/list', {
+        params: { page, limit, ...filter },
+      })
       return data
     },
     placeholderData: keepPreviousData,
   })
 
-  // Use lodash get to safely extract data array
+  // Extract data array and total count from response
   const dataSource = _get(data, 'data', [])
+  const total = _get(data, 'page_data.total', 0)
 
   const columns = [
     {
@@ -46,7 +49,8 @@ const Transactions: React.FC = () => {
       title: 'Số tiền',
       dataIndex: 'soTien',
       key: 'soTien',
-      render: (value: any) => (value ? value.toLocaleString('vi-VN') : '---'),
+      render: (value: any) =>
+        value ? value.toLocaleString('vi-VN') : '---',
     },
     {
       title: 'Trạng thái',
@@ -98,16 +102,17 @@ const Transactions: React.FC = () => {
 
   const rowSelection: TableProps['rowSelection'] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        'selectedRows ',
-        selectedRows
-      )
+      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows', selectedRows)
     },
     getCheckboxProps: (record: any) => ({
-      disabled: record.name === 'Disabled User', // Column configuration not to be checked
+      disabled: record.name === 'Disabled User',
       name: record.name,
     }),
+  }
+
+  const onPaginationChange = (pagination: any) => {
+    setPage(pagination.current)
+    setLimit(pagination.pageSize)
   }
 
   return (
@@ -117,9 +122,7 @@ const Transactions: React.FC = () => {
         <NavLink
           to={routes.transaction}
           className={({ isActive }) =>
-            `text-base font-semibold hover:underline ${
-              !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'
-            }`
+            `text-base font-semibold hover:underline ${!isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'}`
           }
         >
           Quản lý giao dịch
@@ -132,7 +135,7 @@ const Transactions: React.FC = () => {
 
       <div className="px-6 py-4 bg-white rounded-lg shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] flex flex-col justify-start items-start gap-4">
         <div className="self-stretch inline-flex justify-between items-center border-b border-[#DDE4EE] py-4">
-          <div className="justify-start text-black text-3xl font-bold ">
+          <div className="justify-start text-black text-3xl font-bold">
             Quản lý giao dịch
           </div>
         </div>
@@ -145,6 +148,15 @@ const Transactions: React.FC = () => {
             columns={columns}
             dataSource={dataSource}
             loading={isPending}
+            pagination={{
+              total,
+              current: page,
+              pageSize: limit,
+              showSizeChanger: true,
+              showTotal: (total: number) => `Có ${total} items`,
+              pageSizeOptions: ['10', '20', '50', '100', '500'],
+            }}
+            onChange={onPaginationChange}
           />
 
           <div className="flex justify-end gap-4 w-full mt-8">

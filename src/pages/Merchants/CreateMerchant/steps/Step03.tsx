@@ -2,6 +2,8 @@ import React from 'react'
 import { Button, Switch, Checkbox } from 'antd'
 import { Input } from 'rizzui'
 import { useForm, Controller } from 'react-hook-form'
+import { useQuery } from '@tanstack/react-query'
+import axiosInstance from '@/config/axios'
 
 interface Step03FormValues {
   merchantCode: string
@@ -17,10 +19,9 @@ interface Step03Props {
   initialData?: Partial<Step03FormValues>
 }
 
-const Step03: React.FC<Step03Props> = ({
-  onBack,
-  initialData = {},
-}) => {
+const defaultTransactionTypes = ['Rút tiền', 'Nộp tiền', 'Ủy nhiệm chi', 'Ủy nhiệm thu']
+
+const Step03: React.FC<Step03Props> = ({ onBack, initialData = {} }) => {
   const { control, handleSubmit } = useForm<Step03FormValues>({
     defaultValues: {
       merchantCode: initialData.merchantCode || '',
@@ -32,9 +33,22 @@ const Step03: React.FC<Step03Props> = ({
     },
   })
 
+  // Fetch transaction types using React Query
+  const { data: transactionOptions, isLoading } = useQuery({
+    queryKey: ['transactionList'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/transaction/list')
+      // Assume API returns data in the format: { data: [...] }
+      return response.data.data
+    },
+  })
+
+  // Use fetched data if available, otherwise fallback to default types.
+  const options = transactionOptions && transactionOptions.length ? transactionOptions : defaultTransactionTypes
+
   const onSubmit = (data: Step03FormValues) => {
     console.log('Form data submitted:', data)
-    // Handle form submission without calling onNext
+    // Handle form submission logic as needed.
   }
 
   return (
@@ -81,26 +95,26 @@ const Step03: React.FC<Step03Props> = ({
           control={control}
           render={({ field }) => (
             <div className="grid grid-cols-4 gap-6 w-full mb-4">
-              {['Rút tiền', 'Nộp tiền', 'Ủy nhiệm chi', 'Ủy nhiệm thu'].map(
-                (type) => (
-                  <Checkbox
-                    key={type}
-                    checked={field.value.includes(type)}
-                    value={type}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        field.onChange([...field.value, type])
-                      } else {
-                        field.onChange(
-                          field.value.filter((val: string) => val !== type)
-                        )
-                      }
-                    }}
-                  >
-                    {type}
-                  </Checkbox>
-                )
-              )}
+              {isLoading
+                ? 'Loading transaction types...'
+                : options.map((type: string) => (
+                    <Checkbox
+                      key={type}
+                      checked={field.value.includes(type)}
+                      value={type}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          field.onChange([...field.value, type])
+                        } else {
+                          field.onChange(
+                            field.value.filter((val: string) => val !== type)
+                          )
+                        }
+                      }}
+                    >
+                      {type}
+                    </Checkbox>
+                  ))}
             </div>
           )}
         />
