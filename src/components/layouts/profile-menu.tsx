@@ -4,6 +4,7 @@ import cn from '@core/utils/class-names'
 import { Link } from 'react-router-dom'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useAuth } from '@/store/authSlice/useAuth'
 
 export default function ProfileMenu({
   buttonClassName,
@@ -79,6 +80,12 @@ const menuItems = [
 ]
 
 function DropdownMenu() {
+  const { logout } = useAuth()
+
+  const handleLogout = () => {
+    logout()
+  }
+
   return (
     <div className="w-64 text-left rtl:text-right">
       <div className="flex items-center border-b border-gray-300 px-6 pb-5 pt-6">
@@ -105,9 +112,9 @@ function DropdownMenu() {
         <Button
           className="h-auto w-full justify-start p-0 font-medium text-gray-700 outline-none focus-within:text-gray-600 hover:text-gray-900 focus-visible:ring-0"
           variant="text"
-          onClick={() => {}}
+          onClick={() => handleLogout()}
         >
-          Sign Out
+          Đăng xuất
         </Button>
       </div>
     </div>

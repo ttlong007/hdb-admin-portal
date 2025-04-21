@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React from 'react'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useNavigate } from 'react-router-dom'
 import GlobalDrawer from '../core/shared/drawer-views/container'
 import GlobalModal from '../core/shared/modal-views/container'
 import HydrogenLayout from './hydrogen/layout'
@@ -9,11 +9,13 @@ import { useAuth } from '@/store/authSlice/useAuth'
 import { getEnv } from '@/config/env'
 import { useMutation } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
+import { routes } from '@/config/routes'
 
 const Layout = () => {
   const { isAuthenticated, setAuthState } = useAuth() // Assuming you have a setter to update auth state
   const queryParams = new URLSearchParams(window.location.search)
   const token = queryParams.get('token')
+  const navigate = useNavigate()
 
   const loginByTokenMutation = useMutation({
     mutationFn: async (data: { token: string; party_code: string }) => {
@@ -26,6 +28,7 @@ const Layout = () => {
           accessToken: response.data.data.access_token,
           refreshToken: response.data.data.refresh_token,
         })
+        navigate(routes.masterMerchant, { replace: true })
       } else {
         throw new Error('Login failed')
       }
