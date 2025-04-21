@@ -14,6 +14,7 @@ import MerchantDetail from './pages/Merchants/MerchantDetail'
 import MasterMerchantEdit from './pages/MasterMerchants/MasterMerchantEdit'
 import StaffEdit from './pages/Staffs/StaffEdit'
 import MerchantEdit from './pages/Merchants/MerchantEdit'
+import path from 'path'
 
 function RootRoutes() {
   const rootRoutes = [
@@ -21,11 +22,6 @@ function RootRoutes() {
       path: '/',
       element: <Layout />,
       children: [
-        // Default route that redirects to routes.merchant
-        {
-          index: true,
-          element: <Navigate to={routes.masterMerchant} replace />,
-        },
         { path: routes.masterMerchant, element: <MasterMerchants /> },
         {
           path: routes.masterMerchantDetail,

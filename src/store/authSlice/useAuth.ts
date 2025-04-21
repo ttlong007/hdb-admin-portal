@@ -14,7 +14,7 @@ export const useAuth = () => {
   const authState = useAuthState()
   const dispatch = useDispatch()
 
-  const isAuthenticated = !!authState.token
+  const isAuthenticated = !!authState.accessToken
 
   const setAuthState = (newState: any) => {
     dispatch(setState(newState))
@@ -22,8 +22,8 @@ export const useAuth = () => {
 
   const logout = () => {
     setAuthState({
-      token: null,
-      userId: null,
+      accessToken: null,
+      refreshToken: null,
     })
   }
 

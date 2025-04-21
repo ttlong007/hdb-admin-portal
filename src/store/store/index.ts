@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface State {
-  storeCreateData: any | null
+  storeCreateData: any
 }
 
 const initialState: State = {
