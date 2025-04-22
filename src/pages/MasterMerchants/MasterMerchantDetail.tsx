@@ -30,8 +30,18 @@ export default function MasterMerchantDetail() {
     queryKey: ['companyDetail', id],
     queryFn: async () => {
       const response = await axiosInstance.get(`/v1/admin/company/${id}`)
+      // Remap data if status is ACCEPT
+      if (response.data.status_code === 'ACCEPT') {
+        const company = response.data.data
 
-      return response.data
+        return {
+          ...company,
+          company_name: company.name, // remapping name to company_name
+          tax_code: company.tax_number, // remapping tax_number to tax_code
+        }
+      } else {
+        throw new Error('Failed to get company detail')
+      }
     },
     enabled: !!id,
   })
@@ -39,8 +49,9 @@ export default function MasterMerchantDetail() {
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error loading detail.</div>
 
-  // Assuming the API returns the detail in data.data
-  const company = _get(data, 'data', {})
+  // Use the remapped company data
+  const company = data || {}
+  console.log('Company detail:', company)
 
   const columns = [
     {
@@ -138,22 +149,6 @@ export default function MasterMerchantDetail() {
               <span className="text-sm text-gray-400">Số giấy phép ĐKKD</span>
               <span className="text-base text-gray-800">
                 {company.tax_code || '---'}
-              </span>
-            </div>
-
-            <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">
-                Số lượng điểm đại lý
-              </span>
-              <span className="text-base text-gray-800">
-                {company.merchant_count || '---'}
-              </span>
-            </div>
-
-            <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">Trạng thái</span>
-              <span className="text-base text-gray-800">
-                {company.status || '---'}
               </span>
             </div>
           </div>
