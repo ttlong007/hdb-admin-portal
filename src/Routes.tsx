@@ -14,23 +14,34 @@ import MerchantDetail from './pages/Merchants/MerchantDetail'
 import MasterMerchantEdit from './pages/MasterMerchants/MasterMerchantEdit'
 import StaffEdit from './pages/Staffs/StaffEdit'
 import MerchantEdit from './pages/Merchants/MerchantEdit'
-import path from 'path'
+import { useAuth } from './store/authSlice/useAuth'
+import Unauthorize from './pages/Unauthorize'
 
 function RootRoutes() {
+  const { isAuthenticated } = useAuth()
+
   const rootRoutes = [
     {
       path: '/',
       element: <Layout />,
       children: [
+        // Default route: if authenticated, redirect to masterMerchant
+        {
+          index: true,
+          element: isAuthenticated ? (
+            <Navigate to={routes.masterMerchant} replace />
+          ) : (
+            // Optionally, set another default route for non-authenticated users.
+            <Navigate to={routes.merchant} replace />
+          ),
+        },
+        { path: routes.unauthorize, element: <Unauthorize /> },
         { path: routes.masterMerchant, element: <MasterMerchants /> },
         {
           path: routes.masterMerchantDetail,
           element: <MasterMerchantDetail />,
         },
-        {
-          path: routes.editMasterMerchant,
-          element: <MasterMerchantEdit />,
-        },
+        { path: routes.editMasterMerchant, element: <MasterMerchantEdit /> },
         { path: routes.merchant, element: <Home /> },
         { path: routes.createMerchant, element: <CreateMerchant /> },
         { path: routes.editMerchant, element: <MerchantEdit /> },
