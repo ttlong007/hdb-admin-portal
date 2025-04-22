@@ -2,13 +2,13 @@ import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios'
 import { getEnv } from './env'
 import { store } from '@/store' // Ensure this import points to your Redux store
 
-const jwtToken = getEnv('VITE_JWT_TOKEN', undefined)
+const accessToken = store.getState().auth?.accessToken
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: getEnv('VITE_API_URL', 'http://localhost:4000'),
   headers: {
     'Content-Type': 'application/json',
-    ...(jwtToken && { Authorization: `Bearer ${jwtToken}` }),
+    ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
   },
 })
 
@@ -21,7 +21,7 @@ axiosInstance.interceptors.response.use(
       error.response?.status === 401 &&
       !(error.config as any).__isRetryRequest
     ) {
-      ;(error.config as any).__isRetryRequest = true
+      (error.config as any).__isRetryRequest = true
 
       // Get refresh_token from Redux store state (adjust according to your store shape)
       const { refreshToken } = store.getState().auth || {}

@@ -4,10 +4,7 @@ import { Table, Tag, Space, Button } from 'antd'
 import { EditOutlined, EyeOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import _get from 'lodash/get'
-import {
-  keepPreviousData,
-  useQuery,
-} from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 
 import Filters from './components/Filters'
 import { routes } from '@/config/routes'
@@ -114,7 +111,11 @@ const MasterMerchants: React.FC = () => {
 
   const rowSelection: TableProps['rowSelection'] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows ', selectedRows)
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        'selectedRows ',
+        selectedRows
+      )
     },
     getCheckboxProps: (record: any) => ({
       disabled: record.name === 'Disabled User', // For example: don't allow checking if condition is met.
@@ -134,13 +135,17 @@ const MasterMerchants: React.FC = () => {
         <NavLink
           to={routes.masterMerchant}
           className={({ isActive }) =>
-            `text-base font-semibold hover:underline ${!isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'}`
+            `text-base font-semibold hover:underline ${
+              !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'
+            }`
           }
         >
           Quản lý đại lý tổng
         </NavLink>
         <div className="text-base font-semibold text-[#A1AAB2]">/</div>
-        <span className="text-base font-semibold text-[#A1AAB2]">Danh sách đại lý</span>
+        <span className="text-base font-semibold text-[#A1AAB2]">
+          Danh sách đại lý
+        </span>
       </div>
 
       <div className="px-6 py-4 bg-white rounded-lg shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] flex flex-col justify-start items-start gap-4">
@@ -150,7 +155,7 @@ const MasterMerchants: React.FC = () => {
           </div>
         </div>
 
-        <Filters />
+        <Filters setFilter={setFilter} />
 
         <div className="w-full">
           <Table

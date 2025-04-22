@@ -5,24 +5,31 @@ import { useForm, Controller } from 'react-hook-form'
 
 interface FiltersFormValues {
   cif: string
-  companyName: string
+  name: string
   licenseNumber: string
-  agentStoreCount: string
 }
 
-const Filters: React.FC = () => {
+interface Props {
+  setFilter: (filter: any) => void
+}
+
+const Filters: React.FC<Props> = ({setFilter}) => {
   const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
     defaultValues: {
       cif: '',
-      companyName: '',
+      name: '',
       licenseNumber: '',
-      agentStoreCount: '',
     },
   })
 
   const onSubmit = (data: FiltersFormValues) => {
-    console.log('Filter Data Submitted:', data)
-    // Add your apply logic here (e.g., filtering data based on the input)
+    const payload = Object.entries(data).reduce((acc, [key, value]) => {
+      if (value) {
+        return { ...acc, [key]: value }
+      }
+      return acc
+    }, {} as Partial<FiltersFormValues>)
+    setFilter(payload)
   }
 
   const handleReset = () => {
@@ -37,7 +44,7 @@ const Filters: React.FC = () => {
   return (
     <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
-        <div className="grid grid-cols-5 gap-4 w-full">
+        <div className="grid grid-cols-3 gap-4 w-full">
           <Controller
             name="cif"
             control={control}
@@ -51,7 +58,7 @@ const Filters: React.FC = () => {
             )}
           />
           <Controller
-            name="companyName"
+            name="name"
             control={control}
             render={({ field }) => (
               <Input
@@ -74,18 +81,6 @@ const Filters: React.FC = () => {
               />
             )}
           />
-          <Controller
-            name="agentStoreCount"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label="Số cửa hàng đại lý"
-                placeholder="Số cửa hàng đại lý"
-                inputClassName="bg-white"
-              />
-            )}
-          />
         </div>
         <div className="flex justify-end gap-4 w-full mt-4">
           <button
@@ -100,7 +95,7 @@ const Filters: React.FC = () => {
             onClick={handleReset}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <BsDownload /> Đồng bộ dữ liệu
+            Đồng bộ dữ liệu
           </button>
           <button
             type="submit"
