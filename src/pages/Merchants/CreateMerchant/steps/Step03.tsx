@@ -24,6 +24,7 @@ const Step03: React.FC<Step03Props> = ({ onBack, initialData = {} }) => {
     },
   })
 
+  // @ts-ignore
   const { id } = useStoreState()
 
   // Fetch transaction types using React Query
