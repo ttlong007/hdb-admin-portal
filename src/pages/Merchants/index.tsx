@@ -147,6 +147,7 @@ const Merchants: React.FC = () => {
 
         <div className="w-full">
           <Table
+            rowKey="id"
             rowSelection={{ type: 'checkbox', ...rowSelection }}
             columns={columns}
             dataSource={dataSource}

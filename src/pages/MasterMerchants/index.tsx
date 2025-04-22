@@ -25,7 +25,11 @@ const MasterMerchants: React.FC = () => {
   const [page, setPage] = React.useState(1)
   const [limit, setLimit] = React.useState(10)
   const [filter, setFilter] = React.useState<any>(null)
+  const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([])
+  const [selectedRows, setSelectedRows] = React.useState<any[]>([])
 
+  console.log('Selected Row Keys:', selectedRowKeys)
+  console.log('Selected Rows:', selectedRows)
   const { isPending, data } = useQuery<PaginatedResponse<Data>>({
     queryKey: ['list-contract-action', page, limit, filter],
     queryFn: async () => {
@@ -110,12 +114,10 @@ const MasterMerchants: React.FC = () => {
   ]
 
   const rowSelection: TableProps['rowSelection'] = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        'selectedRows ',
-        selectedRows
-      )
+    onChange: (newSelectedRowKeys: React.Key[], newSelectedRows: any[]) => {
+      console.log('selectedRowKeys:', newSelectedRowKeys, 'selectedRows:', newSelectedRows)
+      setSelectedRowKeys(newSelectedRowKeys)
+      setSelectedRows(newSelectedRows)
     },
     getCheckboxProps: (record: any) => ({
       disabled: record.name === 'Disabled User', // For example: don't allow checking if condition is met.
@@ -159,6 +161,7 @@ const MasterMerchants: React.FC = () => {
 
         <div className="w-full">
           <Table
+            rowKey="id"
             rowSelection={{ type: 'checkbox', ...rowSelection }}
             columns={columns}
             dataSource={dataSource}
