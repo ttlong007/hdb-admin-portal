@@ -11,9 +11,13 @@ interface FiltersFormValues {
 
 interface Props {
   setFilter: (filter: any) => void
+  sync: () => void
+  syncLoading: boolean
+  export: () => void
+  exportLoading: boolean
 }
 
-const Filters: React.FC<Props> = ({setFilter}) => {
+const Filters: React.FC<Props> = ({ syncLoading, export: handleExport, exportLoading, setFilter, sync }) => {
   const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
     defaultValues: {
       cif: '',
@@ -34,11 +38,6 @@ const Filters: React.FC<Props> = ({setFilter}) => {
 
   const handleReset = () => {
     reset()
-  }
-
-  const handleDownload = () => {
-    console.log('Download triggered')
-    // Add your download logic here
   }
 
   return (
@@ -85,17 +84,20 @@ const Filters: React.FC<Props> = ({setFilter}) => {
         <div className="flex justify-end gap-4 w-full mt-4">
           <button
             type="button"
-            onClick={handleDownload}
+            onClick={handleExport}
+            disabled={exportLoading}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <BsDownload /> Tải xuống
+            <BsDownload />{' '}
+            {exportLoading ? 'Đang tải xuống...' : 'Tải xuống'}
           </button>
           <button
             type="button"
-            onClick={handleReset}
+            onClick={sync}
+            disabled={syncLoading}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            Đồng bộ dữ liệu
+            {syncLoading ? 'Đang đồng bộ...' : 'Đồng bộ công ty'}
           </button>
           <button
             type="submit"

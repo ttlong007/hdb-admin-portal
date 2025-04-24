@@ -4,7 +4,8 @@ import { Table, Tag, Space, Button } from 'antd'
 import { EditOutlined, EyeOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import _get from 'lodash/get'
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery, useMutation } from '@tanstack/react-query'
+import { toast } from 'react-toastify'
 
 import Filters from './components/Filters'
 import { routes } from '@/config/routes'
@@ -30,13 +31,13 @@ const MasterMerchants: React.FC = () => {
 
   console.log('Selected Row Keys:', selectedRowKeys)
   console.log('Selected Rows:', selectedRows)
-  const { isPending, data } = useQuery<PaginatedResponse<Data>>({
-    queryKey: ['list-contract-action', page, limit, filter],
+
+  const { isPending, data, refetch } = useQuery<PaginatedResponse<Data>>({
+    queryKey: ['companies', page, limit, filter],
     queryFn: async () => {
       const response = await axiosInstance.get('/v1/admin/company/list', {
         params: { page, limit, ...filter },
       })
-      // Assuming response.data.status_code is returned, check it.
       if (response.data.status_code === 'ACCEPT') {
         return response.data
       } else {
@@ -46,7 +47,7 @@ const MasterMerchants: React.FC = () => {
     placeholderData: keepPreviousData,
   })
 
-  // Get list data and total count from the API response. Adjust the paths if needed.
+  // Get list data and total count from the API response.
   const dataSource = _get(data, 'data', [])
   const total = _get(data, 'page_data.total', 0)
 
@@ -115,12 +116,17 @@ const MasterMerchants: React.FC = () => {
 
   const rowSelection: TableProps['rowSelection'] = {
     onChange: (newSelectedRowKeys: React.Key[], newSelectedRows: any[]) => {
-      console.log('selectedRowKeys:', newSelectedRowKeys, 'selectedRows:', newSelectedRows)
+      console.log(
+        'selectedRowKeys:',
+        newSelectedRowKeys,
+        'selectedRows:',
+        newSelectedRows
+      )
       setSelectedRowKeys(newSelectedRowKeys)
       setSelectedRows(newSelectedRows)
     },
     getCheckboxProps: (record: any) => ({
-      disabled: record.name === 'Disabled User', // For example: don't allow checking if condition is met.
+      disabled: record.name === 'Disabled User',
       name: record.name,
     }),
   }
@@ -129,6 +135,45 @@ const MasterMerchants: React.FC = () => {
     setPage(pagination.current)
     setLimit(pagination.pageSize)
   }
+
+  // Mutation to sync companies.
+  const syncMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post('/v1/admin/company/sync')
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data
+      } else {
+        throw new Error('Sync failed')
+      }
+    },
+    onSuccess: () => {
+      toast.success('Companies synced successfully!')
+      refetch()
+    },
+    onError: () => {
+      toast.error('Failed to sync companies.')
+    },
+  })
+
+  // Mutation to export companies data.
+  const exportMutation = useMutation({
+    mutationFn: async () => {
+      const payload = { page, limit, ...filter }
+      const response = await axiosInstance.post('/v1/admin/store/export-data', payload)
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data
+      } else {
+        throw new Error('Export failed')
+      }
+    },
+    onSuccess: () => {
+      toast.success('Export successful!')
+      // Optionally handle file download here if API returns a file URL or blob.
+    },
+    onError: () => {
+      toast.error('Failed to export companies.')
+    },
+  })
 
   return (
     <>
@@ -157,7 +202,13 @@ const MasterMerchants: React.FC = () => {
           </div>
         </div>
 
-        <Filters setFilter={setFilter} />
+        <Filters
+          setFilter={setFilter}
+          sync={() => syncMutation.mutate()}
+          export={() => exportMutation.mutate()}
+          exportLoading={exportMutation.isPending}
+          syncLoading={syncMutation.isPending}
+        />
 
         <div className="w-full">
           <Table
