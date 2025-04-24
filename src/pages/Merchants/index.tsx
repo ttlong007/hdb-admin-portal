@@ -43,7 +43,7 @@ const Merchants: React.FC = () => {
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
-      title: 'Mã',
+      title: 'Mã Cif',
       dataIndex: 'code',
       key: 'code',
       render: (text: string) => (text ? text : '---'),
@@ -52,12 +52,6 @@ const Merchants: React.FC = () => {
       title: 'Tên đại lý',
       dataIndex: 'name',
       key: 'name',
-      render: (text: string) => (text ? text : '---'),
-    },
-    {
-      title: 'Địa chỉ',
-      dataIndex: 'address',
-      key: 'address',
       render: (text: string) => (text ? text : '---'),
     },
     {
@@ -70,14 +64,7 @@ const Merchants: React.FC = () => {
       },
     },
     {
-      title: 'Cần phê duyệt',
-      dataIndex: 'need_approve_transaction',
-      key: 'need_approve_transaction',
-      render: (value: boolean) =>
-        value ? <Tag color="blue">Có</Tag> : <Tag color="default">Không</Tag>,
-    },
-    {
-      title: 'Hành động',
+      title: 'Tác vụ',
       key: 'action',
       render: (_, record: any) => (
         <Space size="middle">
@@ -99,7 +86,11 @@ const Merchants: React.FC = () => {
 
   const rowSelection: TableProps['rowSelection'] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows ', selectedRows)
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        'selectedRows ',
+        selectedRows
+      )
     },
     getCheckboxProps: (record: any) => ({
       disabled: record.name === 'Disabled User',
@@ -114,20 +105,28 @@ const Merchants: React.FC = () => {
         <NavLink
           to={routes.masterMerchant}
           className={({ isActive }) =>
-            `text-base font-semibold hover:underline ${!isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'}`
+            `text-base font-semibold hover:underline ${
+              !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'
+            }`
           }
         >
           Quản lý điểm đại lý
         </NavLink>
         <div className="text-base font-semibold text-[#A1AAB2]">/</div>
-        <span className="text-base font-semibold text-[#A1AAB2]">Danh sách đại lý</span>
+        <span className="text-base font-semibold text-[#A1AAB2]">
+          Danh sách đại lý
+        </span>
       </div>
 
       <div className="px-6 py-4 bg-white rounded-lg shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] flex flex-col justify-start items-start gap-4">
         <div className="self-stretch inline-flex justify-between items-center border-b border-[#DDE4EE] py-4">
-          <div className="justify-start text-black text-3xl font-bold">Quản lý điểm đại lý</div>
+          <div className="justify-start text-black text-3xl font-bold">
+            Quản lý điểm đại lý
+          </div>
           <div className="flex justify-start items-center gap-3">
-            <div className="text-[#366AE2] text-xs font-medium underline">Tải về file mẫu</div>
+            <div className="text-[#366AE2] text-xs font-medium underline">
+              Tải về file mẫu
+            </div>
             <button className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]">
               {/* SVG for download */}
               Tải lên theo danh sách

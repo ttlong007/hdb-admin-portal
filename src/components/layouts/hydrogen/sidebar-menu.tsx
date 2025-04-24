@@ -15,11 +15,11 @@ export function SidebarMenu() {
   return (
     <div className="mt-4 pb-3 3xl:mt-6">
       {menuItems.map((item: any, index: any) => {
-        const isActive = pathname === (item?.href as string)
-        console.log('isActive', isActive)
-        console.log('pathname', pathname)
+        // Use includes for isActive check.
+        const isActive = item?.href ? pathname.includes(item.href) : false
         const pathnameExistInDropdowns: any = item?.dropdownItems?.filter(
-          (dropdownItem: any) => dropdownItem.href === pathname
+          (dropdownItem: any) =>
+            dropdownItem.href ? pathname.includes(dropdownItem.href) : false
         )
         const isDropdownOpen = Boolean(pathnameExistInDropdowns?.length)
 
@@ -68,8 +68,9 @@ export function SidebarMenu() {
                   >
                     {item?.dropdownItems?.map(
                       (dropdownItem: any, index: any) => {
-                        const isChildActive =
-                          pathname === (dropdownItem?.href as string)
+                        const isChildActive = dropdownItem?.href
+                          ? pathname.includes(dropdownItem.href)
+                          : false
 
                         return (
                           <Link

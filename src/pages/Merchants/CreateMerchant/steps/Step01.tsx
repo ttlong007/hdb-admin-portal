@@ -1,7 +1,6 @@
 import React from 'react'
 import { useForm, Controller, SubmitHandler, useWatch } from 'react-hook-form'
 import { Input } from 'rizzui'
-import { Checkbox } from 'antd'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
@@ -18,8 +17,8 @@ type FormValues = {
   city: Option | null
   district: Option | null
   ward: Option | null
-  accountOption: boolean
-  accountSelect: string
+  expense_account: Option | null
+  income_account: Option | null
 }
 
 interface Step01Props {
@@ -40,8 +39,8 @@ const Step01: React.FC<Step01Props> = ({ onNext }) => {
       city: null,
       district: null,
       ward: null,
-      accountOption: false,
-      accountSelect: '1',
+      expense_account: null,
+      income_account: null,
     },
   })
 
@@ -109,9 +108,31 @@ const Step01: React.FC<Step01Props> = ({ onNext }) => {
     enabled: !!selectedDistrict,
   })
 
+  // Add this query to fetch the account list.
+  const { data: accountList, isLoading: isLoadingAccounts } = useQuery({
+    queryKey: ['companyAccounts'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/company/6')
+      if (response.data.status_code === 'ACCEPT') {
+        // Extract the accts property and map each account to the Option type.
+        return response?.data?.data?.accts
+          ? response?.data?.data?.accts.map((acc: any) => ({
+              label: `${acc.acct_desc} (${acc.acct_no})`,
+              value: acc.acct_no,
+            }))
+          : []
+      } else {
+        throw new Error('Failed to get accounts')
+      }
+    },
+  })
+
   const createMerchantMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const { data } = await axiosInstance.post('/v1/admin/store/create', payload)
+      const { data } = await axiosInstance.post(
+        '/v1/admin/store/create',
+        payload
+      )
       if (data.status_code === 'ACCEPT') {
         setStoreState({
           storeCreateData: data.data,
@@ -135,10 +156,12 @@ const Step01: React.FC<Step01Props> = ({ onNext }) => {
       address: data.address,
       location_id: data.ward?.value || '',
       approve_threshold: 0,
-      company_id: 1,
+      company_id: 6,
       name: data.name,
       parent_id: 1,
       code: data.code,
+      expense_account: data.expense_account?.value,
+      income_account: data.income_account?.value,
     }
     createMerchantMutation.mutate(payload)
   }
@@ -295,44 +318,59 @@ const Step01: React.FC<Step01Props> = ({ onNext }) => {
               )}
             />
           </div>
-          <div className="flex flex-col gap-6">
-            <div>
-              <div className="text-sm font-medium text-gray-700 mb-1">
-                Tài khoản chuyên chi *
-              </div>
-              <Controller
-                name="accountSelect"
-                control={control}
-                rules={{ required: 'Tài khoản chuyên chi là bắt buộc' }}
-                render={({ field }) => (
-                  <>
-                    <Select
-                      {...field}
-                      placeholder="Chọn tài khoản chuyên chi"
-                      className="w-full"
-                      options={[]} // Populate options as needed.
-                      defaultValue={null}
-                    />
-                    {errors.accountSelect && (
-                      <p className="text-red-500 text-sm">
-                        {errors.accountSelect.message}
-                      </p>
-                    )}
-                  </>
-                )}
-              />
+          <div>
+            <div className="text-sm font-medium text-gray-700 mb-1">
+              Tài khoản chuyên chi *
             </div>
-            <div>
-              <Controller
-                name="accountOption"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox {...field} className="w-full">
-                    Tài khoản chuyên thu bằng chuyên chi
-                  </Checkbox>
-                )}
-              />
+            <Controller
+              name="expense_account"
+              control={control}
+              rules={{ required: 'Tài khoản chuyên chi là bắt buộc' }}
+              render={({ field }) => (
+                <>
+                  <Select
+                    {...field}
+                    placeholder="Chọn tài khoản chuyên chi"
+                    className="w-full"
+                    options={accountList || []} // use fetched account list here.
+                    isLoading={isLoadingAccounts}
+                    defaultValue={null}
+                  />
+                  {errors.expense_account && (
+                    <p className="text-red-500 text-sm">
+                      {errors.expense_account.message}
+                    </p>
+                  )}
+                </>
+              )}
+            />
+          </div>
+          <div>
+            <div className="text-sm font-medium text-gray-700 mb-1">
+              Tài khoản chuyên thu *
             </div>
+            <Controller
+              name="income_account"
+              control={control}
+              rules={{ required: 'Tài khoản chuyên thu là bắt buộc' }}
+              render={({ field }) => (
+                <>
+                  <Select
+                    {...field}
+                    placeholder="Chọn tài khoản chuyên thu"
+                    className="w-full"
+                    options={accountList || []} // use fetched account list here.
+                    isLoading={isLoadingAccounts}
+                    defaultValue={null}
+                  />
+                  {errors.income_account && (
+                    <p className="text-red-500 text-sm">
+                      {errors.income_account.message}
+                    </p>
+                  )}
+                </>
+              )}
+            />
           </div>
         </div>
         <div className="flex items-center justify-end gap-4 w-full mt-8">
