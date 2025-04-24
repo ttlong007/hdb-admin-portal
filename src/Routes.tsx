@@ -32,7 +32,7 @@ function RootRoutes() {
             <Navigate to={routes.masterMerchant} replace />
           ) : (
             // Optionally, set another default route for non-authenticated users.
-            <Navigate to={routes.merchant} replace />
+            <Navigate to={routes.unauthorize} replace />
           ),
         },
         { path: routes.unauthorize, element: <Unauthorize /> },
