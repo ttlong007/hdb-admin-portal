@@ -1,32 +1,36 @@
 import React from 'react'
-import { Input, Select } from 'rizzui'
+import { Input } from 'rizzui'
 import { BsDownload } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
+import Select from 'react-select'
+
+import { MERCHANT_STATUS } from '@/config/constants'
 
 interface FiltersFormValues {
   cif: string
-  companyName: string
-  numberOfStores: string
+  companyName: any
+  code: string
   agentName: string
   status: any
 }
+
+// Sample options for the company name select. Replace these with your actual data.
+const companyOptions = [
+  { label: 'Company A', value: 'company_a' },
+  { label: 'Company B', value: 'company_b' },
+  { label: 'Company C', value: 'company_c' },
+]
 
 const Filters: React.FC = () => {
   const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
     defaultValues: {
       cif: '',
-      companyName: '',
-      numberOfStores: '',
+      companyName: null,
+      code: '',
       agentName: '',
       status: null,
     },
   })
-
-  // Sample options for the status select. Replace these with your actual data.
-  const selectOptions = [
-    { label: 'Active', value: 'active' },
-    { label: 'Inactive', value: 'inactive' },
-  ]
 
   const onSubmit = (data: FiltersFormValues) => {
     console.log('Submitted Filters:', data)
@@ -38,7 +42,6 @@ const Filters: React.FC = () => {
   }
 
   const handleDownload = () => {
-    // Implement your download logic here.
     console.log('Download triggered')
   }
 
@@ -58,26 +61,31 @@ const Filters: React.FC = () => {
               />
             )}
           />
+          <div>
+            <div className="text-sm text-[#000000] mb-2">Tên công ty</div>
+            <Controller
+              name="companyName"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={companyOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Chọn tên công ty"
+                  className="bg-white"
+                />
+              )}
+            />
+          </div>
           <Controller
-            name="companyName"
+            name="code"
             control={control}
             render={({ field }) => (
               <Input
                 {...field}
-                label="Tên công ty"
-                placeholder="Tên công ty"
-                inputClassName="bg-white"
-              />
-            )}
-          />
-          <Controller
-            name="numberOfStores"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label="Số cửa hàng đại lý"
-                placeholder="Số cửa hàng đại lý"
+                label="Mã đại lý"
+                placeholder="Mã đại lý"
                 inputClassName="bg-white"
               />
             )}
@@ -94,21 +102,23 @@ const Filters: React.FC = () => {
               />
             )}
           />
-          <Controller
-            name="status"
-            control={control}
-            render={({ field }) => (
-              <Select
-                {...field}
-                options={selectOptions}
-                value={field.value}
-                onChange={field.onChange}
-                label="Trạng thái"
-                dropdownClassName="h-auto"
-                selectClassName="bg-white"
-              />
-            )}
-          />
+          <div>
+            <div className="text-sm text-[#000000] mb-2">Trạng thái</div>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={MERCHANT_STATUS}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Chọn trạng thái"
+                  className="bg-white"
+                />
+              )}
+            />
+          </div>
         </div>
         <div className="flex justify-end gap-4 w-full mt-4">
           <button
@@ -123,7 +133,7 @@ const Filters: React.FC = () => {
             onClick={handleReset}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <BsDownload /> Làm mới
+            Làm mới
           </button>
           <button
             type="submit"

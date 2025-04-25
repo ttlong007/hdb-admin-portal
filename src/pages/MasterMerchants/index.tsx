@@ -72,8 +72,8 @@ const MasterMerchants: React.FC = () => {
     },
     {
       title: 'Giấy phép kinh doanh',
-      dataIndex: 'tax_code',
-      key: 'tax_code',
+      dataIndex: 'tax_number',
+      key: 'tax_number',
       render: (text: string) => (text ? text : '---'),
     },
     {
@@ -84,18 +84,20 @@ const MasterMerchants: React.FC = () => {
     },
     {
       title: 'Số điểm đại lý',
-      dataIndex: 'merchant_count',
-      key: 'merchant_count',
+      dataIndex: 'store_count',
+      key: 'store_count',
       render: (value: any) => (value || value === 0 ? value : '---'),
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
-      render: (status: any) => {
-        const displayStatus = status ? status : 'N/A'
-        const color = status === 'Thành công' ? 'green' : 'red'
-        return <Tag color={color}>{displayStatus}</Tag>
+      render: (status: string) => {
+        // Customize your status mapping here.
+        // Sample mapping: "P" indicates Pending.
+        const statusLabel = status === 'P' ? 'Pending' : (status ? status : '---')
+        const statusColor = status === 'P' ? 'orange' : 'default'
+        return <Tag color={statusColor}>{statusLabel}</Tag>
       },
     },
     {

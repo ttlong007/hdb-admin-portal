@@ -1,12 +1,16 @@
 import React, { useState } from 'react'
 import { Table, Tag, Space, Button } from 'antd'
-import { EditOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons'
+import { EditOutlined, EyeOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import { Link, NavLink } from 'react-router-dom'
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import _get from 'lodash/get'
 
 import { routes } from '@/config/routes'
+import {
+  MERCHANT_STATUS_MAP,
+  MERCHANT_STATUS_COLOR_MAP,
+} from '@/config/constants'
 import Filters from './components/Filters'
 import axiosInstance from '@/config/axios'
 
@@ -37,30 +41,37 @@ const Merchants: React.FC = () => {
   const columns = [
     {
       title: 'STT',
-      dataIndex: 'stt',
       key: 'stt',
       width: 70,
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
-      title: 'Mã Cif',
+      title: 'Mã điểm đại lý',
       dataIndex: 'code',
       key: 'code',
       render: (text: string) => (text ? text : '---'),
     },
     {
-      title: 'Tên đại lý',
+      title: 'Tên điểm đại lý',
       dataIndex: 'name',
       key: 'name',
       render: (text: string) => (text ? text : '---'),
     },
     {
-      title: 'Trạng thái',
+      title: 'Địa chỉ',
+      dataIndex: 'address',
+      key: 'address',
+      render: (text: string) => (text ? text : '---'),
+    },
+    {
+      title: 'Trạng thái duyệt',
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
-        const color = status === 'Thành công' ? 'green' : 'red'
-        return <Tag color={color}>{status ? status : '---'}</Tag>
+        const statusKey = status.toLowerCase()
+        const label = MERCHANT_STATUS_MAP[statusKey] || '---'
+        const color = MERCHANT_STATUS_COLOR_MAP[statusKey] || 'default'
+        return <Tag color={color}>{label}</Tag>
       },
     },
     {

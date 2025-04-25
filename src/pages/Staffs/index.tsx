@@ -15,7 +15,7 @@ const Staffs: React.FC = () => {
   const [limit, setLimit] = useState(10)
 
   const { isPending, data } = useQuery({
-    queryKey: ['list-staffs', page, limit],
+    queryKey: ['staffs', page, limit],
     queryFn: async () => {
       const { data } = await axiosInstance.get('/v1/admin/staff/list', {
         params: { page, limit },
@@ -35,49 +35,60 @@ const Staffs: React.FC = () => {
   const columns = [
     {
       title: 'STT',
-      dataIndex: 'stt',
       key: 'stt',
       width: 70,
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
       title: 'Mã nhân viên',
-      dataIndex: 'maNhanVien',
-      key: 'maNhanVien',
+      dataIndex: 'code',
+      key: 'code',
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Họ tên',
-      dataIndex: 'hoTen',
-      key: 'hoTen',
+      dataIndex: 'name',
+      key: 'name',
       render: (text: string) => (text ? text : '---'),
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'trangThai',
-      key: 'trangThai',
-      render: (status: string) => {
-        const color = status === 'Active' ? 'green' : 'orange'
-        return <Tag color={color}>{status ? status : '---'}</Tag>
-      },
+      title: 'Vai trò',
+      dataIndex: 'role',
+      key: 'role',
+      render: (role: string) =>
+        role ? role.replace('_', ' ') : '---',
     },
     {
-      title: 'Tên cửa hàng',
-      dataIndex: 'tenCuaHang',
-      key: 'tenCuaHang',
+      title: 'CMND/CCCD',
+      dataIndex: 'national_id_number',
+      key: 'national_id_number',
       render: (text: string) => (text ? text : '---'),
     },
     {
-      title: 'Nhóm cửa hàng',
-      dataIndex: 'nhomCuaHang',
-      key: 'nhomCuaHang',
+      title: 'Email',
+      dataIndex: 'email',
+      key: 'email',
       render: (text: string) => (text ? text : '---'),
     },
     {
-      title: 'Đại lý tổng',
-      dataIndex: 'daiLyTong',
-      key: 'daiLyTong',
+      title: 'SĐT',
+      dataIndex: 'phone_number',
+      key: 'phone_number',
       render: (text: string) => (text ? text : '---'),
+    },
+    {
+      title: 'Công ty',
+      dataIndex: 'company_id',
+      key: 'company_id',
+      render: (companyId: number) =>
+        companyId ? `Company ${companyId}` : '---',
+    },
+    {
+      title: 'Cửa hàng',
+      dataIndex: 'store_id',
+      key: 'store_id',
+      render: (storeId: number) =>
+        storeId ? `Store ${storeId}` : '---',
     },
     {
       title: 'Tác vụ',
