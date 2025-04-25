@@ -17,7 +17,7 @@ const Transactions: React.FC = () => {
   const [filter, setFilter] = useState<any>(null)
 
   const { isPending, data } = useQuery({
-    queryKey: ['list-transactions', page, limit, filter],
+    queryKey: ['transactions', page, limit, filter],
     queryFn: async () => {
       const { data } = await axiosInstance.get('/v1/admin/transaction/list', {
         params: { page, limit, ...filter },
@@ -34,65 +34,64 @@ const Transactions: React.FC = () => {
   const columns = [
     {
       title: 'STT',
-      dataIndex: 'stt',
       key: 'stt',
       width: 70,
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
       title: 'Mã giao dịch',
-      dataIndex: 'maGiaoDich',
-      key: 'maGiaoDich',
+      dataIndex: 'code',
+      key: 'code',
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Số tiền',
-      dataIndex: 'soTien',
-      key: 'soTien',
-      render: (value: any) =>
-        value ? value.toLocaleString('vi-VN') : '---',
+      dataIndex: 'amount',
+      key: 'amount',
+      render: (amount: number) =>
+        amount ? amount.toLocaleString('vi-VN') : '---',
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'trangThai',
-      key: 'trangThai',
-      render: (status: any) => {
-        const displayStatus = status ? status : '---'
-        const color = status === 'Thành công' ? 'green' : 'red'
-        return <Tag color={color}>{displayStatus}</Tag>
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => {
+        const color =
+          status === 'SUCCESS'
+            ? 'green'
+            : status === 'FAILED'
+            ? 'red'
+            : 'blue'
+        return <Tag color={color}>{status || '---'}</Tag>
       },
     },
     {
-      title: 'Loại GD',
-      dataIndex: 'loaiGD',
-      key: 'loaiGD',
-      render: (text: string) => (text ? text : '---'),
+      title: 'Loại giao dịch',
+      dataIndex: 'transaction_type',
+      key: 'transaction_type',
+      render: (transactionType: any) =>
+        transactionType && transactionType.name ? transactionType.name : 'N/A',
     },
     {
-      title: 'Thời gian GD',
-      dataIndex: 'thoiGianGD',
-      key: 'thoiGianGD',
-      render: (text: string) => (text ? text : '---'),
+      title: 'Công ty',
+      dataIndex: 'company_id',
+      key: 'company_id',
+      render: (id: number) => (id ? `Company ${id}` : '---'),
     },
     {
-      title: 'Số CIF',
-      dataIndex: 'soCIF',
-      key: 'soCIF',
-      render: (text: string) => (text ? text : '---'),
-    },
-    {
-      title: 'Số cửa hàng',
-      dataIndex: 'soCuaHang',
-      key: 'soCuaHang',
-      render: (text: string) => (text ? text : '---'),
+      title: 'Cửa hàng',
+      dataIndex: 'store',
+      key: 'store',
+      render: (store: any) =>
+        store && store.name ? store.name : '---',
     },
     {
       title: 'Tác vụ',
       key: 'action',
-      render: () => (
+      render: (_, record: any) => (
         <Space size="middle">
-          <Link to={routes.transactionDetail}>
-            <BsEye />
+          <Link to={`/transactions/${record.id}`}>
+            <Button type="text" icon={<BsEye />} />
           </Link>
           <Button type="text" icon={<BsDownload />} danger />
         </Space>

@@ -17,12 +17,13 @@ import axiosInstance from '@/config/axios'
 const Merchants: React.FC = () => {
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
+  const [filter, setFilter] = useState<any>(null)
 
   const { isPending, data } = useQuery({
-    queryKey: ['list-merchants', page, limit],
+    queryKey: ['merchants', page, limit, filter],
     queryFn: async () => {
       const response = await axiosInstance.get('/v1/admin/store/list', {
-        params: { page, limit },
+        params: { page, limit, ...filter },
       })
       // Check the status code before returning data
       if (response.data.status_code === 'ACCEPT') {
@@ -153,7 +154,7 @@ const Merchants: React.FC = () => {
           </div>
         </div>
 
-        <Filters />
+        <Filters setFilter={setFilter} />
 
         <div className="w-full">
           <Table
