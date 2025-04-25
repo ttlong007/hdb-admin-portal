@@ -29,7 +29,7 @@ const Step03: React.FC<Step03Props> = ({ onBack, initialData = {} }) => {
 
   // Fetch transaction types using React Query
   const { data: transactionOptions, isLoading } = useQuery({
-    queryKey: ['transactionList'],
+    queryKey: ['transaction-types'],
     queryFn: async () => {
       const response = await axiosInstance.get(
         '/v1/admin/transaction/list-types'

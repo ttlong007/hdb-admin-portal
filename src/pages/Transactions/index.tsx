@@ -139,7 +139,7 @@ const Transactions: React.FC = () => {
           </div>
         </div>
 
-        <Filters />
+        <Filters setFilter={setFilter} />
 
         <div className="w-full">
           <Table

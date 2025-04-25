@@ -1,54 +1,84 @@
 import React from 'react'
-import { Input, Select } from 'rizzui'
+import { Input, Select as RizzSelect } from 'rizzui'
 import { BsDownload } from 'react-icons/bs'
 import { DatePicker } from 'antd'
 import { useForm, Controller } from 'react-hook-form'
+import { useQuery } from '@tanstack/react-query'
+import axiosInstance from '@/config/axios'
 
 const { RangePicker } = DatePicker
 
 interface FiltersFormValues {
-  transactionId: string
-  transactionType: any
-  transactionStatus: any
-  cifNumber: string
-  agentStores: string
-  transactionDateRange: any
+  code: string
+  transaction_type_id: any
+  status: any
+  store_code: string
+  duration: any
 }
 
-const Filters: React.FC = () => {
+interface Props {
+  setFilter: (filter: any) => void
+}
+
+const Filters: React.FC<Props> = ({ setFilter }) => {
   const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
     defaultValues: {
-      transactionId: '',
-      transactionType: null,
-      transactionStatus: null,
-      cifNumber: '',
-      agentStores: '',
-      transactionDateRange: [],
+      code: '',
+      transaction_type_id: null,
+      status: null,
+      store_code: '',
+      duration: [],
     },
   })
 
-  // Example options for the select fields. Replace these with actual options.
-  const transactionTypeOptions = [
-    { label: 'Loại 1', value: 'type1' },
-    { label: 'Loại 2', value: 'type2' },
-  ]
+  // Fetch transaction types from API.
+  const { data: transactionTypes, isLoading: isLoadingTransactionTypes } = useQuery({
+    queryKey: ['transaction-types'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/transaction/list-types')
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch transaction types')
+    },
+  })
 
-  const transactionStatusOptions = [
+  // Map transaction types to options.
+  const transactionTypeOptions =
+    transactionTypes?.map((type: any) => ({
+      label: type.name,
+      value: type.id,
+    })) || []
+
+  // Example status options; replace with your actual data if needed.
+  const statusOptions = [
     { label: 'Thành công', value: 'success' },
     { label: 'Thất bại', value: 'failed' },
   ]
 
   const onSubmit = (data: FiltersFormValues) => {
-    console.log('Form Data Submitted:', data)
-    // Place your filtering logic here.
+    // Transform select fields to only use their 'value'
+    const processedData = {
+      ...data,
+      transaction_type_id: data.transaction_type_id ? data.transaction_type_id.value : null,
+      status: data.status ? data.status.value : null,
+    }
+
+    // Remove keys with null, empty or undefined values.
+    const filteredData = Object.fromEntries(
+      Object.entries(processedData).filter(([_, value]) => value !== null && value !== '' && value !== undefined)
+    )
+
+    console.log('Form Data Submitted:', filteredData)
+    setFilter(filteredData)
   }
 
   const handleReset = () => {
     reset()
+    setFilter(null)
   }
 
   const handleDownload = () => {
-    // Implement your download logic here.
     console.log('Download triggered')
   }
 
@@ -57,7 +87,7 @@ const Filters: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="grid grid-cols-3 gap-4 w-full">
           <Controller
-            name="transactionId"
+            name="code"
             control={control}
             render={({ field }) => (
               <Input
@@ -69,67 +99,54 @@ const Filters: React.FC = () => {
             )}
           />
           <Controller
-            name="transactionType"
+            name="transaction_type_id"
             control={control}
             render={({ field }) => (
-              <Select
+              <RizzSelect
                 {...field}
+                label="Loại giao dịch"
                 options={transactionTypeOptions}
                 value={field.value}
                 onChange={field.onChange}
-                label="Loại giao dịch"
                 dropdownClassName="h-auto"
                 selectClassName="bg-white"
+                placeholder={isLoadingTransactionTypes ? 'Loading...' : 'Chọn loại giao dịch'}
               />
             )}
           />
           <Controller
-            name="transactionStatus"
+            name="status"
             control={control}
             render={({ field }) => (
-              <Select
+              <RizzSelect
                 {...field}
-                options={transactionStatusOptions}
+                label="Trạng thái"
+                options={statusOptions}
                 value={field.value}
                 onChange={field.onChange}
-                label="Trạng thái giao dịch"
                 dropdownClassName="h-auto"
                 selectClassName="bg-white"
               />
             )}
           />
           <Controller
-            name="cifNumber"
+            name="store_code"
             control={control}
             render={({ field }) => (
               <Input
                 {...field}
-                label="Số CIF"
-                placeholder="Số CIF"
+                label="Mã cửa hàng"
+                placeholder="Mã cửa hàng"
                 inputClassName="bg-white"
               />
             )}
           />
           <Controller
-            name="agentStores"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label="Số cửa hàng đại lý"
-                placeholder="Số cửa hàng đại lý"
-                inputClassName="bg-white"
-              />
-            )}
-          />
-          <Controller
-            name="transactionDateRange"
+            name="duration"
             control={control}
             render={({ field }) => (
               <div>
-                <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
-                  Ngày giao dịch
-                </div>
+                <div className="rizzui-input-label block text-sm mb-1.5 font-medium">Khoảng thời gian</div>
                 <RangePicker
                   rootClassName="px-3.5 py-2 w-full"
                   value={field.value}
@@ -152,7 +169,7 @@ const Filters: React.FC = () => {
             onClick={handleReset}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <BsDownload /> Làm mới
+            Làm mới
           </button>
           <button
             type="submit"
