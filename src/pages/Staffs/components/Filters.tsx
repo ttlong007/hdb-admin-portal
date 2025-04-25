@@ -2,50 +2,90 @@ import React from 'react'
 import { Input, Select } from 'rizzui'
 import { BsDownload } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
+import { useQuery } from '@tanstack/react-query'
+import axiosInstance from '@/config/axios'
 
 interface FiltersFormValues {
-  employeeId: string
-  fullName: string
+  code: string
+  company_id: any
+  name: string
+  role: any
   status: any
-  agencyCode: string
-  cifCompanyName: string
-  position: any
+  store_id: string
 }
 
-const Filters: React.FC = () => {
+interface Props {
+  setFilter: (filter: any) => void
+}
+
+const Filters: React.FC<Props> = ({ setFilter }) => {
   const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
     defaultValues: {
-      employeeId: '',
-      fullName: '',
+      code: '',
+      company_id: null,
+      name: '',
+      role: null,
       status: null,
-      agencyCode: '',
-      cifCompanyName: '',
-      position: null,
+      store_id: '',
     },
   })
 
-  // Example options for the select fields. Replace these with actual data as needed.
+  // Fetch all companies (no limit/page)
+  const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
+    queryKey: ['companies-all'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/company/list')
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch companies')
+    },
+  })
+
+  // Transform fetched companies into options for the Select component.
+  const companyOptions =
+    companiesData?.map((company: any) => ({
+      label: company.name,
+      value: company.id,
+    })) || []
+
   const statusOptions = [
-    { label: 'Active', value: 'active' },
-    { label: 'Inactive', value: 'inactive' },
+    { label: 'active', value: 'active' },
+    { label: 'inactive', value: 'inactive' },
+    { label: 'waiting_approve', value: 'waiting_approve' },
   ]
 
-  const positionOptions = [
-    { label: 'Manager', value: 'manager' },
-    { label: 'Staff', value: 'staff' },
+  const roleOptions = [
+    { label: 'store_manager', value: 'store_manager' },
+    { label: 'store_employee', value: 'store_employee' },
   ]
 
   const onSubmit = (data: FiltersFormValues) => {
-    console.log('Form data submitted:', data)
-    // Place your filtering logic here.
+    // Extract only the value from select fields.
+    const processedData = {
+      ...data,
+      company_id: data.company_id ? data.company_id.value : null,
+      role: data.role ? data.role.value : null,
+      status: data.status ? data.status.value : null,
+    }
+
+    // Filter out null, empty, or undefined fields.
+    const filteredData = Object.fromEntries(
+      Object.entries(processedData).filter(
+        ([, value]) => value !== null && value !== '' && value !== undefined
+      )
+    )
+
+    console.log('Form data submitted:', filteredData)
+    setFilter(filteredData)
   }
 
   const handleReset = () => {
     reset()
+    setFilter(null)
   }
 
   const handleDownload = () => {
-    // Place your download logic here.
     console.log('Download triggered')
   }
 
@@ -54,26 +94,58 @@ const Filters: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="grid grid-cols-3 gap-4 w-full">
           <Controller
-            name="employeeId"
+            name="code"
             control={control}
             render={({ field }) => (
               <Input
                 {...field}
-                label="ID nhân viên"
-                placeholder="ID nhân viên"
+                label="Mã"
+                placeholder="Nhập mã"
                 inputClassName="bg-white"
               />
             )}
           />
           <Controller
-            name="fullName"
+            name="company_id"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                options={companyOptions}
+                value={field.value}
+                onChange={field.onChange}
+                label="Công ty"
+                dropdownClassName="h-auto"
+                selectClassName="bg-white"
+                placeholder={isLoadingCompanies ? 'Loading...' : 'Chọn công ty'}
+              />
+            )}
+          />
+          <Controller
+            name="name"
             control={control}
             render={({ field }) => (
               <Input
                 {...field}
-                label="Họ tên"
-                placeholder="Họ tên"
+                label="Tên"
+                placeholder="Nhập tên"
                 inputClassName="bg-white"
+              />
+            )}
+          />
+          <Controller
+            name="role"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                options={roleOptions}
+                value={field.value}
+                onChange={field.onChange}
+                label="Vai trò"
+                dropdownClassName="h-auto"
+                selectClassName="bg-white"
+                placeholder="Chọn vai trò"
               />
             )}
           />
@@ -88,45 +160,20 @@ const Filters: React.FC = () => {
                 onChange={field.onChange}
                 label="Trạng thái"
                 dropdownClassName="h-auto"
-              />
-            )}
-          />
-          <Controller
-            name="agencyCode"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label="Mã đại lý"
-                placeholder="Mã đại lý"
-                inputClassName="bg-white"
-              />
-            )}
-          />
-          <Controller
-            name="cifCompanyName"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label="CIF - Tên công ty"
-                placeholder="Nhập CIF và Tên công ty"
-                inputClassName="bg-white"
-              />
-            )}
-          />
-          <Controller
-            name="position"
-            control={control}
-            render={({ field }) => (
-              <Select
-                {...field}
-                options={positionOptions}
-                value={field.value}
-                onChange={field.onChange}
-                label="Nhóm chức vụ"
-                dropdownClassName="h-auto"
                 selectClassName="bg-white"
+                placeholder="Chọn trạng thái"
+              />
+            )}
+          />
+          <Controller
+            name="store_id"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                label="Mã cửa hàng"
+                placeholder="Nhập mã cửa hàng"
+                inputClassName="bg-white"
               />
             )}
           />
@@ -144,7 +191,7 @@ const Filters: React.FC = () => {
             onClick={handleReset}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <BsDownload /> Làm mới
+            Làm mới
           </button>
           <button
             type="submit"

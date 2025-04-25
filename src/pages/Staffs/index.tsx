@@ -13,12 +13,13 @@ import axiosInstance from '@/config/axios'
 const Staffs: React.FC = () => {
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
+  const [filter, setFilter] = useState<any>(null)
 
   const { isPending, data } = useQuery({
-    queryKey: ['staffs', page, limit],
+    queryKey: ['staffs', page, limit, filter],
     queryFn: async () => {
       const { data } = await axiosInstance.get('/v1/admin/staff/list', {
-        params: { page, limit },
+        params: { page, limit, ...(filter || {}) },
       })
       // If your API returns a status_code to indicate success:
       if (data.status_code === 'ACCEPT') {
@@ -164,7 +165,7 @@ const Staffs: React.FC = () => {
           </div>
         </div>
 
-        <Filters />
+        <Filters setFilter={setFilter} />
 
         <div className="w-full">
           <Table
