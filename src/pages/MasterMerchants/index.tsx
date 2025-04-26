@@ -26,11 +26,6 @@ const MasterMerchants: React.FC = () => {
   const [page, setPage] = React.useState(1)
   const [limit, setLimit] = React.useState(10)
   const [filter, setFilter] = React.useState<any>(null)
-  const [selectedRowKeys, setSelectedRowKeys] = React.useState<React.Key[]>([])
-  const [selectedRows, setSelectedRows] = React.useState<any[]>([])
-
-  console.log('Selected Row Keys:', selectedRowKeys)
-  console.log('Selected Rows:', selectedRows)
 
   const { isPending, data, refetch } = useQuery<PaginatedResponse<Data>>({
     queryKey: ['companies', page, limit, filter],
@@ -93,8 +88,6 @@ const MasterMerchants: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
-        // Customize your status mapping here.
-        // Sample mapping: "P" indicates Pending.
         const statusLabel = status === 'P' ? 'Pending' : (status ? status : '---')
         const statusColor = status === 'P' ? 'orange' : 'default'
         return <Tag color={statusColor}>{statusLabel}</Tag>
@@ -115,23 +108,6 @@ const MasterMerchants: React.FC = () => {
       ),
     },
   ]
-
-  const rowSelection: TableProps['rowSelection'] = {
-    onChange: (newSelectedRowKeys: React.Key[], newSelectedRows: any[]) => {
-      console.log(
-        'selectedRowKeys:',
-        newSelectedRowKeys,
-        'selectedRows:',
-        newSelectedRows
-      )
-      setSelectedRowKeys(newSelectedRowKeys)
-      setSelectedRows(newSelectedRows)
-    },
-    getCheckboxProps: (record: any) => ({
-      disabled: record.name === 'Disabled User',
-      name: record.name,
-    }),
-  }
 
   const onPaginationChange = (pagination: any) => {
     setPage(pagination.current)
@@ -161,7 +137,10 @@ const MasterMerchants: React.FC = () => {
   const exportMutation = useMutation({
     mutationFn: async () => {
       const payload = { page, limit, ...filter }
-      const response = await axiosInstance.post('/v1/admin/store/export-data', payload)
+      const response = await axiosInstance.post(
+        '/v1/admin/store/export-data',
+        payload
+      )
       if (response.data.status_code === 'ACCEPT') {
         return response.data
       } else {
@@ -170,7 +149,6 @@ const MasterMerchants: React.FC = () => {
     },
     onSuccess: () => {
       toast.success('Export successful!')
-      // Optionally handle file download here if API returns a file URL or blob.
     },
     onError: () => {
       toast.error('Failed to export companies.')
@@ -215,7 +193,6 @@ const MasterMerchants: React.FC = () => {
         <div className="w-full">
           <Table
             rowKey="id"
-            rowSelection={{ type: 'checkbox', ...rowSelection }}
             columns={columns}
             dataSource={dataSource}
             loading={isPending}
@@ -229,12 +206,6 @@ const MasterMerchants: React.FC = () => {
             }}
             onChange={onPaginationChange}
           />
-
-          <div className="flex justify-end gap-4 w-full mt-8">
-            <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
-              Đồng ý duyệt
-            </button>
-          </div>
         </div>
       </div>
     </>

@@ -5,7 +5,7 @@ import _get from 'lodash/get'
 
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
-import { Checkbox, Table } from 'antd'
+import { Checkbox, Table, Tag } from 'antd'
 import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons'
 
 function InfoCard({
@@ -48,12 +48,55 @@ export default function MasterMerchantDetail() {
     enabled: !!id,
   })
 
+  const { data: limitData, isLoading: isLimitLoading, error: limitError } = useQuery({
+    queryKey: ['limitList', id],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/limit/list', {
+        params: {
+          entity_id: id,
+          entity_type: 'COMPANY',
+        },
+      })
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error(response.data.reason_message || 'Failed to fetch limit list')
+    },
+    enabled: !!id, // only run query when company.id is available
+  })
+
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error loading detail.</div>
 
   // Use the remapped company data
   const company = data || {}
   console.log('Company detail:', company)
+
+  // Compute the status label and color based on company.status
+  const statusLabel =
+    company.status === 'P'
+      ? 'Pending'
+      : company.status === 'ACTIVE'
+      ? 'Active'
+      : company.status === 'INACTIVE'
+      ? 'Inactive'
+      : company.status || '---'
+  const statusColor =
+    company.status === 'P'
+      ? 'orange'
+      : company.status === 'ACTIVE'
+      ? 'green'
+      : company.status === 'INACTIVE'
+      ? 'red'
+      : 'default'
+
+  // Map limitData response for daily and monthly limits
+  const dailyLimit = limitData?.find(
+    (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
+  )?.amount
+  const monthlyLimit = limitData?.find(
+    (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
+  )?.amount
 
   const columns = [
     {
@@ -128,30 +171,44 @@ export default function MasterMerchantDetail() {
           <div className="flex gap-6 mb-6 max-sm:flex-col">
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Mã Cif</span>
-              <span className="text-base text-gray-800">
+              <span className="text-base font-semibold">
                 {company.cif || '---'}
               </span>
             </div>
 
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Tên công ty</span>
-              <span className="text-base text-gray-800">
+              <span className="text-base font-semibold">
                 {company.company_name || '---'}
               </span>
             </div>
 
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Người đại diện</span>
-              <span className="text-base text-gray-800">
+              <span className="text-base font-semibold">
                 {company.representative || '---'}
               </span>
             </div>
 
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Số giấy phép ĐKKD</span>
-              <span className="text-base text-gray-800">
+              <span className="text-base font-semibold">
                 {company.tax_code || '---'}
               </span>
+            </div>
+
+            <div className="flex flex-col flex-1 gap-2">
+              <span className="text-sm text-gray-400">Số điểm đại lý</span>
+              <span className="text-base font-semibold">
+                {company.store_count || '---'}
+              </span>
+            </div>
+
+            <div className="flex flex-col flex-1 gap-2">
+              <span className="text-sm text-gray-400">Trạng thái</span>
+              <Tag color={statusColor} className="w-fit">
+                {statusLabel}
+              </Tag>
             </div>
           </div>
         </InfoCard>
@@ -164,14 +221,14 @@ export default function MasterMerchantDetail() {
           <div className="flex gap-6 mb-6 max-sm:flex-col">
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Hạn mức trong tháng</span>
-              <span className="text-base text-gray-800">
-                {company.monthlyLimit ? company.monthlyLimit + ' VND' : '---'}
+              <span className="text-base font-semibold">
+                {monthlyLimit ? monthlyLimit.toLocaleString('vi-VN') + ' VND' : '---'}
               </span>
             </div>
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Hạn mức trong ngày</span>
-              <span className="text-base text-gray-800">
-                {company.dailyLimit ? company.dailyLimit + ' VND' : '---'}
+              <span className="text-base font-semibold">
+                {dailyLimit ? dailyLimit.toLocaleString('vi-VN') + ' VND' : '---'}
               </span>
             </div>
           </div>
@@ -192,15 +249,23 @@ export default function MasterMerchantDetail() {
             Cấu hình phê duyệt doanh nghiệp đại lý
           </h4>
           <div>
-            <Checkbox checked disabled />
-            <label htmlFor="approve-new-merchants" className="ml-2">
+            <Checkbox
+              id="need_approve_new_store"
+              checked={company.need_approve_new_store}
+              disabled
+            />
+            <label htmlFor="need_approve_new_store" className="ml-2">
               Yêu cầu phê duyệt cho các địa điểm đại lý mới
             </label>
           </div>
 
           <div>
-            <Checkbox checked disabled />
-            <label htmlFor="approve-new-merchants" className="ml-2">
+            <Checkbox
+              id="need_approve_new_staff"
+              checked={company.need_approve_new_staff}
+              disabled
+            />
+            <label htmlFor="need_approve_new_staff" className="ml-2">
               HDBank thực hiện khai báo điểm đại lý và nhân viên đại lý
             </label>
           </div>
@@ -217,10 +282,12 @@ export default function MasterMerchantDetail() {
           </button>
           <button
             type="submit"
-            onClick={() => navigate(routes.editMasterMerchant.replace(':id', id || ''))}
+            onClick={() =>
+              navigate(routes.editMasterMerchant.replace(':id', id || ''))
+            }
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
-           <EditOutlined />
+            <EditOutlined />
             Chỉnh sửa
           </button>
         </div>

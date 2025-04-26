@@ -19,8 +19,10 @@ const Transactions: React.FC = () => {
   const { isPending, data } = useQuery({
     queryKey: ['transactions', page, limit, filter],
     queryFn: async () => {
-      const { data } = await axiosInstance.get('/v1/admin/transaction/list', {
-        params: { page, limit, ...filter },
+      const { data } = await axiosInstance.post('/v1/admin/transaction/list', {
+        page,
+        limit,
+        ...filter,
       })
       return data
     },
@@ -57,11 +59,7 @@ const Transactions: React.FC = () => {
       key: 'status',
       render: (status: string) => {
         const color =
-          status === 'SUCCESS'
-            ? 'green'
-            : status === 'FAILED'
-            ? 'red'
-            : 'blue'
+          status === 'SUCCESS' ? 'green' : status === 'FAILED' ? 'red' : 'blue'
         return <Tag color={color}>{status || '---'}</Tag>
       },
     },
@@ -82,8 +80,7 @@ const Transactions: React.FC = () => {
       title: 'Cửa hàng',
       dataIndex: 'store',
       key: 'store',
-      render: (store: any) =>
-        store && store.name ? store.name : '---',
+      render: (store: any) => (store && store.name ? store.name : '---'),
     },
     {
       title: 'Tác vụ',
@@ -93,7 +90,6 @@ const Transactions: React.FC = () => {
           <Link to={`/transactions/${record.id}`}>
             <Button type="text" icon={<BsEye />} />
           </Link>
-          <Button type="text" icon={<BsDownload />} danger />
         </Space>
       ),
     },
@@ -101,7 +97,11 @@ const Transactions: React.FC = () => {
 
   const rowSelection: TableProps['rowSelection'] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows', selectedRows)
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        'selectedRows',
+        selectedRows
+      )
     },
     getCheckboxProps: (record: any) => ({
       disabled: record.name === 'Disabled User',
@@ -121,7 +121,9 @@ const Transactions: React.FC = () => {
         <NavLink
           to={routes.transaction}
           className={({ isActive }) =>
-            `text-base font-semibold hover:underline ${!isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'}`
+            `text-base font-semibold hover:underline ${
+              !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'
+            }`
           }
         >
           Quản lý giao dịch

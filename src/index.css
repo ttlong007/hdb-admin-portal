@@ -1603,3 +1603,7 @@ div[style='z-index: 1000001;'],
     transform: rotateZ(360deg) rotateX(66deg) rotateZ(360deg);
   }
 }
+
+[type='text']:focus {
+  @apply outline-none ring-0;
+}

@@ -28,7 +28,7 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
       transaction_type_id: null,
       status: null,
       store_code: '',
-      duration: [],
+      duration: null,
     },
   })
 
@@ -70,10 +70,21 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
       status: data.status ? data.status.value : null,
     }
 
+    // If duration exists and is an array, parse the dates
+    if (processedData.duration && Array.isArray(processedData.duration)) {
+      // Assuming Moment objects, format them to 'YYYY-MM-DD'
+      const startDate = processedData.duration[0].format('YYYY-MM-DD')
+      const endDate = processedData.duration[1].format('YYYY-MM-DD')
+      // Remove raw duration array if not needed
+      delete processedData.duration
+
+      processedData.duration = [startDate, endDate]
+    }
+
     // Remove keys with null, empty, or undefined values.
     const filteredData = Object.fromEntries(
       Object.entries(processedData).filter(
-        ([_, value]) => value !== null && value !== '' && value !== undefined
+        ([, value]) => value !== null && value !== '' && value !== undefined
       )
     )
 
@@ -91,21 +102,41 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
   }
 
   return (
-    <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
+    <div className="p-6 bg-[#F8FAFC] rounded-md w-full">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="grid grid-cols-3 gap-4 w-full">
-          <Controller
-            name="code"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label="Mã giao dịch"
-                placeholder="Mã giao dịch"
-                inputClassName="bg-white"
-              />
-            )}
-          />
+          <div>
+            <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
+              Thời gian
+            </div>
+            <Controller
+              name="duration"
+              control={control}
+              render={({ field }) => (
+                <RangePicker
+                  rootClassName="px-3.5 py-2 w-full"
+                  value={field.value}
+                  onChange={(dates) => field.onChange(dates)}
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <Controller
+              name="code"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Mã giao dịch"
+                  placeholder="Mã giao dịch"
+                  inputClassName="bg-white"
+                />
+              )}
+            />
+          </div>
+
           <div>
             <div className="text-sm text-[#000000] mb-2">Loại giao dịch</div>
 
@@ -128,6 +159,7 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
               )}
             />
           </div>
+
           <div>
             <div className="text-sm text-[#000000] mb-2">Trạng thái</div>
 
@@ -146,35 +178,23 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
               )}
             />
           </div>
-          <Controller
-            name="store_code"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label="Mã cửa hàng"
-                placeholder="Mã cửa hàng"
-                inputClassName="bg-white"
-              />
-            )}
-          />
-          <Controller
-            name="duration"
-            control={control}
-            render={({ field }) => (
-              <div>
-                <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
-                  Thời gian
-                </div>
-                <RangePicker
-                  rootClassName="px-3.5 py-2 w-full"
-                  value={field.value}
-                  onChange={(dates) => field.onChange(dates)}
+
+          <div>
+            <Controller
+              name="store_code"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Mã cửa hàng"
+                  placeholder="Mã cửa hàng"
+                  inputClassName="bg-white"
                 />
-              </div>
-            )}
-          />
+              )}
+            />
+          </div>
         </div>
+
         <div className="flex justify-end gap-4 w-full mt-4">
           <button
             type="button"
@@ -182,13 +202,6 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
             <BsDownload /> Tải xuống
-          </button>
-          <button
-            type="button"
-            onClick={handleReset}
-            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
-          >
-            Làm mới
           </button>
           <button
             type="submit"
