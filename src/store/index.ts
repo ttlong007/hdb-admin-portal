@@ -1,21 +1,38 @@
 import { configureStore, combineReducers } from '@reduxjs/toolkit'
-import { persistStore, persistReducer } from 'redux-persist'
-import storage from 'redux-persist/lib/storage' // Choose your storage engine
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
 
 import authReducer from './authSlice'
 import storeReducer from './store'
 
+const PERSISTED_KEYS: string[] = ['auth', 'store']
+
 const persistConfig = {
   key: 'root',
   storage,
-  // Specify the reducers you want to persist
-  whitelist: ['auth', 'store'],
+  whitelist: PERSISTED_KEYS,
 }
 
-const rootReducer = combineReducers({
+const combinedReducer = combineReducers({
   auth: authReducer,
   store: storeReducer,
 })
+
+const rootReducer = (state: any, action: any) => {
+  if (action.type === 'clearStore') {
+    state = undefined
+  }
+  return combinedReducer(state, action)
+}
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 
@@ -23,7 +40,9 @@ const store = configureStore({
   reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
     }),
 })
 

@@ -1,10 +1,11 @@
 import { Title, Text, Avatar, Button, Popover } from 'rizzui'
 import cn from '@core/utils/class-names'
-// import { signOut } from 'next-auth/react';
 import { Link } from 'react-router-dom'
 import { usePathname } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/store/authSlice/useAuth'
+import axiosInstance from '@/config/axios'
 
 export default function ProfileMenu({
   buttonClassName,
@@ -15,6 +16,30 @@ export default function ProfileMenu({
   avatarClassName?: string
   username?: boolean
 }) {
+  // Use React Query to fetch profile data
+  const { data: profile, isLoading, error } = useQuery({
+    queryKey: ['profile'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/profile/me')
+      if (response.data.status_code === 'ACCEPT') {
+        const profileData = response.data.data
+        return {
+          id: profileData.id,
+          // Use display_name if available; otherwise full_name
+          name: profileData.display_name || profileData.full_name,
+          avatar: profileData.avatar,
+          email: profileData.email,
+          nationalId: profileData.national_id,
+          phoneNumber: profileData.phone_number,
+          status: profileData.status,
+          role: profileData.role,
+        }
+      }
+      throw new Error(response.data.reason_message || 'Failed to fetch profile')
+    },
+  })
+
+  console.log('Profile data:', profile)
   return (
     <ProfileMenuPopover>
       <Popover.Trigger>
@@ -25,21 +50,21 @@ export default function ProfileMenu({
           )}
         >
           <Avatar
-            src="/avatar.png"
-            name="User"
+            src={profile?.avatar || '/avatar.png'}
+            name={profile?.name || 'User'}
             className={cn('!h-9 w-9 sm:!h-10 sm:!w-10', avatarClassName)}
             color="warning"
           />
           {!!username && (
             <span className="username hidden text-gray-200 dark:text-gray-700 md:inline-flex">
-              Hi, Andry
+              Hi, {profile?.name || 'User'}
             </span>
           )}
         </button>
       </Popover.Trigger>
 
       <Popover.Content className="z-[9999] p-0 dark:bg-gray-100 [&>svg]:dark:fill-gray-100">
-        <DropdownMenu />
+        <DropdownMenu profile={profile} />
       </Popover.Content>
     </ProfileMenuPopover>
   )
@@ -65,7 +90,12 @@ function ProfileMenuPopover({ children }: React.PropsWithChildren<{}>) {
   )
 }
 
-const menuItems = [
+interface MenuItem {
+  name: string
+  href: string
+}
+
+const menuItems: MenuItem[] = [
   {
     name: 'My Profile',
     href: '/',
@@ -80,7 +110,11 @@ const menuItems = [
   },
 ]
 
-function DropdownMenu() {
+interface DropdownMenuProps {
+  profile: any
+}
+
+function DropdownMenu({ profile }: DropdownMenuProps) {
   const { logout } = useAuth()
 
   const handleLogout = () => {
@@ -90,20 +124,25 @@ function DropdownMenu() {
   return (
     <div className="w-64 text-left rtl:text-right">
       <div className="flex items-center border-b border-gray-300 px-6 pb-5 pt-6">
-        <Avatar src="/avatar.png" name="User" color='warning' />
+        <Avatar
+          src={profile?.avatar || '/avatar.png'}
+          name={profile?.name || 'User'}
+          color="warning"
+        />
         <div className="ms-3">
           <Title as="h6" className="font-semibold">
-            Albert Flores
+            {profile?.name || 'User'}
           </Title>
-          <Text className="text-gray-600">flores@doe.io</Text>
+          <Text className="text-gray-600">
+            {profile?.email || 'email@example.com'}
+          </Text>
         </div>
       </div>
-
       <div className="border-t border-gray-300 px-6 pb-6 pt-5">
         <Button
           className="h-auto w-full justify-start p-0 font-medium text-gray-700 outline-none focus-within:text-gray-600 hover:text-gray-900 focus-visible:ring-0"
           variant="text"
-          onClick={() => handleLogout()}
+          onClick={handleLogout}
         >
           Đăng xuất
         </Button>

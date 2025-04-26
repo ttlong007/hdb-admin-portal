@@ -1,11 +1,12 @@
 import React from 'react'
-import { NavLink, useParams } from 'react-router-dom'
+import { NavLink, useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import _get from 'lodash/get'
 
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
 import { Switch, Table, Select } from 'antd'
+import { ArrowLeftOutlined } from '@ant-design/icons'
 
 const { Option } = Select
 
@@ -28,6 +29,8 @@ function InfoCard({
 
 export default function MasterMerchantEdit() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate() // Use navigate for go back
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['companyDetail', id],
     queryFn: async () => {
@@ -239,22 +242,10 @@ export default function MasterMerchantEdit() {
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
+            onClick={() => navigate(-1)}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M13.1665 8C13.1665 7.72386 12.9426 7.5 12.6665 7.5L4.54033 7.5L7.68677 4.35355C7.88204 4.15829 7.88203 3.84171 7.68677 3.64645C7.49151 3.45118 7.17493 3.45118 6.97967 3.64645L2.97967 7.64645C2.78441 7.84171 2.78441 8.15829 2.97967 8.35355L6.97967 12.3536C7.17493 12.5488 7.49151 12.5488 7.68677 12.3536C7.88204 12.1583 7.88204 11.8417 7.68677 11.6464L4.54033 8.5L12.6665 8.5C12.9426 8.5 13.1665 8.27614 13.1665 8Z"
-                fill="#242729"
-              />
-            </svg>
+            <ArrowLeftOutlined />
             Quay lại
           </button>
           <button

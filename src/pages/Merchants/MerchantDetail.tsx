@@ -1,11 +1,12 @@
 import React from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import _get from 'lodash/get'
 
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
 import { Checkbox, Table } from 'antd'
+import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons'
 
 function InfoCard({
   title,
@@ -26,14 +27,14 @@ function InfoCard({
 
 export default function MasterMerchantDetail() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['companyDetail', id],
     queryFn: async () => {
       const response = await axiosInstance.get(`/v1/admin/company/${id}`)
-      // Remap data if status is ACCEPT
       if (response.data.status_code === 'ACCEPT') {
         const company = response.data.data
-
         return {
           ...company,
           company_name: company.name, // remapping name to company_name
@@ -49,9 +50,7 @@ export default function MasterMerchantDetail() {
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error loading detail.</div>
 
-  // Use the remapped company data
   const company = data || {}
-  console.log('Company detail:', company)
 
   const columns = [
     {
@@ -113,9 +112,9 @@ export default function MasterMerchantDetail() {
       <div className="flex justify-start items-center gap-2 mb-4">
         <Link
           to={routes.masterMerchant}
-          className="text-base font-semibold hover:underline text-blue-600"
+          className="text-base font-semibold hover:underline"
         >
-          Quản lý đại lý tổng
+          Quản lý đại lý
         </Link>
         <div className="text-base font-semibold text-[#A1AAB2]">/</div>
         <span className="text-base font-semibold text-[#A1AAB2]">Chi tiết</span>
@@ -278,46 +277,18 @@ export default function MasterMerchantDetail() {
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
+            onClick={() => navigate(-1)}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M13.1665 8C13.1665 7.72386 12.9426 7.5 12.6665 7.5L4.54033 7.5L7.68677 4.35355C7.88204 4.15829 7.88203 3.84171 7.68677 3.64645C7.49151 3.45118 7.17493 3.45118 6.97967 3.64645L2.97967 7.64645C2.78441 7.84171 2.78441 8.15829 2.97967 8.35355L6.97967 12.3536C7.17493 12.5488 7.49151 12.5488 7.68677 12.3536C7.88204 12.1583 7.88204 11.8417 7.68677 11.6464L4.54033 8.5L12.6665 8.5C12.9426 8.5 13.1665 8.27614 13.1665 8Z"
-                fill="#242729"
-              />
-            </svg>
+            <ArrowLeftOutlined />
             Quay lại
           </button>
           <button
             type="submit"
+            onClick={() => navigate(routes.editMasterMerchant.replace(':id', id || ''))}
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M5.53397 12.2487L4.27625 12.4244C3.5312 12.5285 2.90379 11.8708 3.04303 11.1314L3.26635 9.94564C3.34174 9.54536 3.53755 9.17763 3.8276 8.89165L11.0764 1.74438C11.6684 1.16071 12.6222 1.1698 13.2029 1.76464L13.9185 2.49767C14.4969 3.09005 14.4859 4.03898 13.8941 4.61786L6.65566 11.6977C6.35021 11.9965 5.95712 12.1896 5.53397 12.2487L5.39558 11.2583C5.60716 11.2288 5.8037 11.1322 5.95643 10.9828L6.59255 10.3606L5.20511 8.93777L4.5297 9.60372C4.38467 9.74672 4.28677 9.93058 4.24907 10.1307L4.02575 11.3165C4.01309 11.3837 4.07013 11.4435 4.13786 11.4341L5.39558 11.2583L5.53397 12.2487ZM5.9172 8.23566L7.30745 9.66141L13.1948 3.90297C13.3921 3.71001 13.3958 3.3937 13.203 3.19624L12.4873 2.46321C12.2938 2.26493 11.9759 2.2619 11.7785 2.45646L5.9172 8.23566Z"
-                fill="white"
-              />
-              <path
-                d="M1 14.5026C1 14.2264 1.22386 14.0026 1.5 14.0026H14.5C14.7761 14.0026 15 14.2264 15 14.5026C15 14.7787 14.7761 15.0026 14.5 15.0026H1.5C1.22386 15.0026 1 14.7787 1 14.5026Z"
-                fill="white"
-              />
-            </svg>
+            <EditOutlined />
             Chỉnh sửa
           </button>
         </div>

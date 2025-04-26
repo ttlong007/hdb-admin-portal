@@ -1,5 +1,6 @@
 import React from 'react'
-import { Input, Select as RizzSelect } from 'rizzui'
+import { Input } from 'rizzui'
+import Select from 'react-select'
 import { BsDownload } from 'react-icons/bs'
 import { DatePicker } from 'antd'
 import { useForm, Controller } from 'react-hook-form'
@@ -32,16 +33,19 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
   })
 
   // Fetch transaction types from API.
-  const { data: transactionTypes, isLoading: isLoadingTransactionTypes } = useQuery({
-    queryKey: ['transaction-types'],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/transaction/list-types')
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error('Failed to fetch transaction types')
-    },
-  })
+  const { data: transactionTypes, isLoading: isLoadingTransactionTypes } =
+    useQuery({
+      queryKey: ['transaction-types'],
+      queryFn: async () => {
+        const response = await axiosInstance.get(
+          '/v1/admin/transaction/list-types'
+        )
+        if (response.data.status_code === 'ACCEPT') {
+          return response.data.data
+        }
+        throw new Error('Failed to fetch transaction types')
+      },
+    })
 
   // Map transaction types to options.
   const transactionTypeOptions =
@@ -50,7 +54,7 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
       value: type.id,
     })) || []
 
-  // Example status options; replace with your actual data if needed.
+  // Example status options.
   const statusOptions = [
     { label: 'Thành công', value: 'success' },
     { label: 'Thất bại', value: 'failed' },
@@ -60,13 +64,17 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
     // Transform select fields to only use their 'value'
     const processedData = {
       ...data,
-      transaction_type_id: data.transaction_type_id ? data.transaction_type_id.value : null,
+      transaction_type_id: data.transaction_type_id
+        ? data.transaction_type_id.value
+        : null,
       status: data.status ? data.status.value : null,
     }
 
-    // Remove keys with null, empty or undefined values.
+    // Remove keys with null, empty, or undefined values.
     const filteredData = Object.fromEntries(
-      Object.entries(processedData).filter(([_, value]) => value !== null && value !== '' && value !== undefined)
+      Object.entries(processedData).filter(
+        ([_, value]) => value !== null && value !== '' && value !== undefined
+      )
     )
 
     console.log('Form Data Submitted:', filteredData)
@@ -98,37 +106,46 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
               />
             )}
           />
-          <Controller
-            name="transaction_type_id"
-            control={control}
-            render={({ field }) => (
-              <RizzSelect
-                {...field}
-                label="Loại giao dịch"
-                options={transactionTypeOptions}
-                value={field.value}
-                onChange={field.onChange}
-                dropdownClassName="h-auto"
-                selectClassName="bg-white"
-                placeholder={isLoadingTransactionTypes ? 'Loading...' : 'Chọn loại giao dịch'}
-              />
-            )}
-          />
-          <Controller
-            name="status"
-            control={control}
-            render={({ field }) => (
-              <RizzSelect
-                {...field}
-                label="Trạng thái"
-                options={statusOptions}
-                value={field.value}
-                onChange={field.onChange}
-                dropdownClassName="h-auto"
-                selectClassName="bg-white"
-              />
-            )}
-          />
+          <div>
+            <div className="text-sm text-[#000000] mb-2">Loại giao dịch</div>
+
+            <Controller
+              name="transaction_type_id"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={transactionTypeOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder={
+                    isLoadingTransactionTypes
+                      ? 'Loading...'
+                      : 'Chọn loại giao dịch'
+                  }
+                  className="bg-white"
+                />
+              )}
+            />
+          </div>
+          <div>
+            <div className="text-sm text-[#000000] mb-2">Trạng thái</div>
+
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  options={statusOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  className="bg-white"
+                  placeholder="Chọn trạng thái"
+                />
+              )}
+            />
+          </div>
           <Controller
             name="store_code"
             control={control}
@@ -146,7 +163,9 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
             control={control}
             render={({ field }) => (
               <div>
-                <div className="rizzui-input-label block text-sm mb-1.5 font-medium">Khoảng thời gian</div>
+                <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
+                  Thời gian
+                </div>
                 <RangePicker
                   rootClassName="px-3.5 py-2 w-full"
                   value={field.value}
