@@ -1,5 +1,6 @@
 import React from 'react'
-import { Input, Select } from 'rizzui'
+import { Input } from 'rizzui'
+import ReactSelect from 'react-select'
 import { BsDownload } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
@@ -42,7 +43,7 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
     },
   })
 
-  // Transform fetched companies into options for the Select component.
+  // Transform fetched companies into options for react-select.
   const companyOptions =
     companiesData?.map((company: any) => ({
       label: company.name,
@@ -105,22 +106,25 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
               />
             )}
           />
-          <Controller
-            name="company_id"
-            control={control}
-            render={({ field }) => (
-              <Select
-                {...field}
-                options={companyOptions}
-                value={field.value}
-                onChange={field.onChange}
-                label="Công ty"
-                dropdownClassName="h-auto"
-                selectClassName="bg-white"
-                placeholder={isLoadingCompanies ? 'Loading...' : 'Chọn công ty'}
-              />
-            )}
-          />
+
+          <div>
+            <div className="text-sm text-[#000000] mb-2">Công ty</div>
+            <Controller
+              name="company_id"
+              control={control}
+              render={({ field }) => (
+                <ReactSelect
+                  {...field}
+                  options={companyOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder={isLoadingCompanies ? 'Loading...' : 'Chọn công ty'}
+                  className="bg-white"
+                />
+              )}
+            />
+          </div>
+
           <Controller
             name="name"
             control={control}
@@ -133,38 +137,44 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
               />
             )}
           />
-          <Controller
-            name="role"
-            control={control}
-            render={({ field }) => (
-              <Select
-                {...field}
-                options={roleOptions}
-                value={field.value}
-                onChange={field.onChange}
-                label="Vai trò"
-                dropdownClassName="h-auto"
-                selectClassName="bg-white"
-                placeholder="Chọn vai trò"
-              />
-            )}
-          />
-          <Controller
-            name="status"
-            control={control}
-            render={({ field }) => (
-              <Select
-                {...field}
-                options={statusOptions}
-                value={field.value}
-                onChange={field.onChange}
-                label="Trạng thái"
-                dropdownClassName="h-auto"
-                selectClassName="bg-white"
-                placeholder="Chọn trạng thái"
-              />
-            )}
-          />
+
+          <div>
+            <div className="text-sm text-[#000000] mb-2">Vai trò</div>
+            <Controller
+              name="role"
+              control={control}
+              render={({ field }) => (
+                <ReactSelect
+                  {...field}
+                  options={roleOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Chọn vai trò"
+                  className="bg-white"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <div className="text-sm text-[#000000] mb-2">Trạng thái</div>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <ReactSelect
+                  {...field}
+                  isClearable
+                  options={statusOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Chọn trạng thái"
+                  className="bg-white"
+                />
+              )}
+            />
+          </div>
+
           <Controller
             name="store_id"
             control={control}
@@ -178,6 +188,7 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
             )}
           />
         </div>
+
         <div className="flex justify-end gap-4 w-full mt-4">
           <button
             type="button"

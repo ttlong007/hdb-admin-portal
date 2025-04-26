@@ -3,7 +3,7 @@ import { Table, Tag, Space, Button } from 'antd'
 import { EditOutlined, EyeOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import { Link, NavLink } from 'react-router-dom'
-import { useQuery, keepPreviousData } from '@tanstack/react-query'
+import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query'
 import _get from 'lodash/get'
 
 import { routes } from '@/config/routes'
@@ -13,19 +13,20 @@ import {
 } from '@/config/constants'
 import Filters from './components/Filters'
 import axiosInstance from '@/config/axios'
+import { toast } from 'react-toastify'
 
 const Merchants: React.FC = () => {
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
   const [filter, setFilter] = useState<any>(null)
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
-  const { isPending, data } = useQuery({
+  const { isPending, data, refetch } = useQuery({
     queryKey: ['merchants', page, limit, filter],
     queryFn: async () => {
       const response = await axiosInstance.get('/v1/admin/store/list', {
         params: { page, limit, ...filter },
       })
-      // Check the status code before returning data
       if (response.data.status_code === 'ACCEPT') {
         return response.data
       } else {
@@ -38,7 +39,6 @@ const Merchants: React.FC = () => {
   const dataSource = _get(data, 'data', [])
   const total = _get(data, 'page_data.total', 0)
 
-  // Table columns
   const columns = [
     {
       title: 'STT',
@@ -97,17 +97,39 @@ const Merchants: React.FC = () => {
   }
 
   const rowSelection: TableProps['rowSelection'] = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        'selectedRows ',
-        selectedRows
-      )
+    onChange: (selectedKeys: React.Key[], selectedRows: any[]) => {
+      console.log('Selected Row Keys:', selectedKeys, 'Selected Rows:', selectedRows)
+      setSelectedRowKeys(selectedKeys)
     },
     getCheckboxProps: (record: any) => ({
-      disabled: record.name === 'Disabled User',
-      name: record.name,
+      // Hide the checkbox for rows whose status is not "waiting_approve"
+      style: record.status?.toLowerCase() !== 'waiting_approve' ? { display: 'none' } : {},
     }),
+  }
+
+  const approveMutation = useMutation({
+    mutationFn: async (ids: React.Key[]) => {
+      const payload = { ids }
+      const response = await axiosInstance.post('/v1/admin/store/approve-stores', payload)
+      // Check if the HTTP status code is 204 or the response data has status_code "ACCEPT"
+      if (response.status === 204) {
+        return response
+      }
+      throw new Error(response.data.reason_message || 'Approval failed')
+    },
+    onSuccess: () => {
+      toast.success('Approval successful')
+      refetch() // refresh list merchants when status code is 204 or ACCEPT
+      setSelectedRowKeys([]) // clear selection
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'An error occurred while approving merchants')
+      console.error('Approval error:', error)
+    },
+  })
+
+  const handleApprove = () => {
+    approveMutation.mutate(selectedRowKeys)
   }
 
   return (
@@ -117,9 +139,7 @@ const Merchants: React.FC = () => {
         <NavLink
           to={routes.merchant}
           className={({ isActive }) =>
-            `text-base font-semibold hover:underline ${
-              !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'
-            }`
+            `text-base font-semibold hover:underline ${!isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'}`
           }
         >
           Quản lý điểm đại lý
@@ -143,7 +163,6 @@ const Merchants: React.FC = () => {
               {/* SVG for download */}
               Tải lên theo danh sách
             </button>
-
             <Link
               to={routes.createMerchant}
               className="rounded-sm flex justify-center items-center gap-2 bg-[#DA2128] px-3 py-2 font-medium text-[14px] text-white"
@@ -175,7 +194,10 @@ const Merchants: React.FC = () => {
           />
 
           <div className="flex justify-end gap-4 w-full mt-8">
-            <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
+            <button
+              onClick={handleApprove}
+              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            >
               Đồng ý duyệt
             </button>
           </div>

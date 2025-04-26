@@ -39,12 +39,15 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
       status: data.status ? data.status.value : null,
     }
 
-    const payload = Object.entries(processedData).reduce((acc, [key, value]) => {
-      if (value) {
-        return { ...acc, [key]: value }
-      }
-      return acc
-    }, {} as Partial<FiltersFormValues>)
+    const payload = Object.entries(processedData).reduce(
+      (acc, [key, value]) => {
+        if (value) {
+          return { ...acc, [key]: value }
+        }
+        return acc
+      },
+      {} as Partial<FiltersFormValues>
+    )
 
     setFilter(payload)
   }
@@ -102,6 +105,7 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
               render={({ field }) => (
                 <Select
                   {...field}
+                  isClearable
                   options={companyOptions}
                   value={field.value}
                   onChange={field.onChange}
@@ -145,6 +149,7 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
               render={({ field }) => (
                 <Select
                   {...field}
+                  isClearable
                   options={MERCHANT_STATUS}
                   value={field.value}
                   onChange={field.onChange}
