@@ -57,8 +57,8 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
   ]
 
   const roleOptions = [
-    { label: 'store_manager', value: 'store_manager' },
-    { label: 'store_employee', value: 'store_employee' },
+    { label: 'STORE_MANAGER', value: 'STORE_MANAGER' },
+    { label: 'STORE_EMPLOYEE', value: 'STORE_EMPLOYEE' },
   ]
 
   const onSubmit = (data: FiltersFormValues) => {

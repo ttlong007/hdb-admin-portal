@@ -1,18 +1,17 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { Input } from 'rizzui'
 import ReactSelect from 'react-select'
 import { Button } from 'antd'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { toast } from 'react-toastify'
 import { routes } from '@/config/routes'
 
-type Option = { label: string; value: string }
+type Option = { label: string; value: number }
 
 type FormData = {
-  // code field removed since it's auto-generated
   company_id: Option | null
   email: string
   name: string
@@ -23,7 +22,7 @@ type FormData = {
 }
 
 export default function CreateStaff() {
-  const { control, handleSubmit, reset } = useForm<FormData>({
+  const { control, handleSubmit, reset, watch, setValue } = useForm<FormData>({
     defaultValues: {
       company_id: null,
       email: '',
@@ -36,6 +35,52 @@ export default function CreateStaff() {
   })
 
   const navigate = useNavigate()
+
+  // Fetch companies
+  const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
+    queryKey: ['companies-all'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/company/list')
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch companies')
+    },
+  })
+
+  const companyOptions =
+    companiesData?.map((company: any) => ({
+      label: company.name,
+      value: company.id,
+    })) || []
+
+  // Watch selected company_id to fetch stores
+  const selectedCompany = watch('company_id')
+
+  useEffect(() => {
+    // When the company selection changes, reset store_id to null
+    setValue('store_id', null)
+  }, [selectedCompany, setValue])
+
+  const { data: storesData, isLoading: isLoadingStores } = useQuery({
+    queryKey: ['stores', selectedCompany?.value],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/store/list', {
+        params: { company_id: selectedCompany?.value },
+      })
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch stores')
+    },
+    enabled: !!selectedCompany?.value,
+  })
+
+  const storeOptions =
+    storesData?.map((store: any) => ({
+      label: store.name,
+      value: store.id,
+    })) || []
 
   const createStaffMutation = useMutation({
     mutationFn: async (data: FormData) => {
@@ -56,7 +101,13 @@ export default function CreateStaff() {
   })
 
   const onSubmit = (data: FormData) => {
-    createStaffMutation.mutate(data)
+    const formattedData = {
+      ...data,
+      company_id: data.company_id?.value,
+      role: data.role?.value,
+      store_id: data.store_id?.value,
+    } as any;
+    createStaffMutation.mutate(formattedData)
   }
 
   return (
@@ -84,7 +135,6 @@ export default function CreateStaff() {
         <div className="text-[#212B36] text-[28px] font-bold">
           Thông tin nhân viên
         </div>
-
         <div className="grid grid-cols-4 gap-6 w-full">
           <Controller
             name="name"
@@ -99,7 +149,6 @@ export default function CreateStaff() {
               />
             )}
           />
-
           <Controller
             name="company_id"
             control={control}
@@ -111,12 +160,14 @@ export default function CreateStaff() {
                 </label>
                 <ReactSelect
                   {...field}
-                  options={[]}
+                  options={companyOptions}
+                  placeholder={
+                    isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
+                  }
                 />
               </div>
             )}
           />
-
           <Controller
             name="store_id"
             control={control}
@@ -126,13 +177,16 @@ export default function CreateStaff() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Cửa hàng *
                 </label>
-                <ReactSelect {...field} options={[]} />
+                <ReactSelect
+                  {...field}
+                  options={storeOptions}
+                  placeholder={
+                    isLoadingStores ? 'Loading stores...' : 'Chọn cửa hàng'
+                  }
+                />
               </div>
             )}
           />
-
-          {/* Mã nhân viên field has been removed */}
-
           <Controller
             name="phone_number"
             control={control}
@@ -146,7 +200,6 @@ export default function CreateStaff() {
               />
             )}
           />
-
           <Controller
             name="national_id_number"
             control={control}
@@ -160,7 +213,6 @@ export default function CreateStaff() {
               />
             )}
           />
-
           <Controller
             name="email"
             control={control}
@@ -174,7 +226,6 @@ export default function CreateStaff() {
               />
             )}
           />
-
           <Controller
             name="role"
             control={control}
@@ -186,46 +237,37 @@ export default function CreateStaff() {
                 </label>
                 <ReactSelect
                   {...field}
-                  options={[
-                    { label: 'Quản lý', value: 'store_manager' },
-                    { label: 'Nhân viên', value: 'store_employee' },
-                  ]}
+                  options={
+                    [
+                      { label: 'Quản lý', value: 'STORE_MANAGER' },
+                      { label: 'Nhân viên', value: 'STORE_EMPLOYEE' },
+                    ] as unknown as Option[]
+                  }
+                  placeholder="Chọn nhóm chức danh"
                 />
               </div>
             )}
           />
         </div>
-
-        {/* <div className="text-[#212B36] text-[28px] font-bold">
-          Hạn mức giao dịch
-        </div>
-        <div className="grid grid-cols-4 gap-6 w-full">
-          <Input
-            label="Hạn mức trong tháng *"
-            placeholder="Nhập hạn mức trong tháng"
-            className="w-full"
-          />
-          <Input
-            label="Hạn mức trong ngày *"
-            placeholder="Nhập hạn mức trong ngày"
-            className="w-full"
-          />
-        </div> */}
-
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+            onClick={() => {
+              // Optionally perform cancel actions here
+            }}
+            disabled={createStaffMutation.isPending}
           >
-            {/* SVG for cancel */}
             Hủy bỏ
           </button>
           <button
             type="submit"
-            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            disabled={createStaffMutation.isPending}
+            className={`rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white ${
+              createStaffMutation.isPending ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
-            {/* SVG for create */}
-            Tạo nhân viên
+            {createStaffMutation.isPending ? 'Đang tạo...' : 'Tạo nhân viên'}
           </button>
         </div>
       </form>
