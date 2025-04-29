@@ -1,12 +1,14 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { NavLink, useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import _get from 'lodash/get'
-
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
-import { Switch, Table, Select } from 'antd'
-import { ArrowLeftOutlined } from '@ant-design/icons'
+import { Select, Tag, Switch, Button } from 'antd'
+import { CloseCircleOutlined, SaveOutlined } from '@ant-design/icons'
+import { useForm, Controller, SubmitHandler } from 'react-hook-form'
+import AdminFeeEditTable from './components/AdminFeeEditTable'
+import { toast } from 'react-toastify'
+import { Input } from 'rizzui'
 
 const { Option } = Select
 
@@ -19,87 +21,126 @@ function InfoCard({
 }) {
   return (
     <section className="p-6 bg-white rounded-lg shadow-[0_1px_4px_rgba(51,49,65,0.25)]">
-      <h2 className="mb-6 text-3xl font-bold text-gray-800 max-sm:text-2xl">
-        {title}
-      </h2>
+      {title && (
+        <h2 className="mb-6 text-3xl font-bold text-gray-800 max-sm:text-2xl">
+          {title}
+        </h2>
+      )}
       {children}
     </section>
   )
 }
 
+interface FormData {
+  transaction_monthly_quota: string
+  transaction_daily_quota: string
+  need_approve_new_store: boolean
+  some_other_switch: boolean
+  another_switch: boolean
+  active: boolean
+}
+
 export default function MasterMerchantEdit() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate() // Use navigate for go back
+  const navigate = useNavigate()
 
-  const { data, isLoading, error } = useQuery({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting },
+  } = useForm<FormData>({
+    defaultValues: {
+      transaction_monthly_quota: '',
+      transaction_daily_quota: '',
+      need_approve_new_store: false,
+      some_other_switch: false,
+      another_switch: false,
+      active: false,
+    },
+  })
+
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ['companyDetail', id],
     queryFn: async () => {
       const response = await axiosInstance.get(`/v1/admin/company/${id}`)
-
-      return response.data
+      if (response.data.status_code === 'ACCEPT') {
+        const company = response.data.data
+        return {
+          ...company,
+          company_name: company.name,
+          tax_code: company.tax_number,
+          // assuming these fields exist; adjust if needed:
+          transaction_monthly_quota: company.transaction_monthly_quota,
+          transaction_daily_quota: company.transaction_daily_quota,
+        }
+      } else {
+        throw new Error('Failed to get company detail')
+      }
     },
     enabled: !!id,
   })
 
+  const company = data || {}
+
+  const statusLabel =
+    company.status === 'P'
+      ? 'Pending'
+      : company.status === 'ACTIVE'
+      ? 'Active'
+      : company.status === 'INACTIVE'
+      ? 'Inactive'
+      : company.status || '---'
+  const statusColor =
+    company.status === 'P'
+      ? 'orange'
+      : company.status === 'ACTIVE'
+      ? 'green'
+      : company.status === 'INACTIVE'
+      ? 'red'
+      : 'default'
+
+  useEffect(() => {
+    if (data) {
+      // Reset react-hook-form with fetched data.
+      reset({
+        transaction_monthly_quota: company.transaction_monthly_quota,
+        transaction_daily_quota: company.transaction_daily_quota,
+        need_approve_new_store: company.need_approve_new_store,
+        some_other_switch: company.some_other_switch,
+        another_switch: company.another_switch,
+        active: company.active,
+      })
+    }
+  }, [data, reset, company])
+
+  const onFinish: SubmitHandler<FormData> = async (values) => {
+    try {
+      const payload = {
+        // transaction_monthly_quota: values.transaction_monthly_quota,
+        // transaction_daily_quota: values.transaction_daily_quota,
+        status: values.active ? 'ACTIVE' : 'INACTIVE',
+        // need_approve_new_store: values.need_approve_new_store,
+        // some_other_switch: values.some_other_switch,
+        // another_switch: values.another_switch,
+      }
+      const response = await axiosInstance.patch(
+        `/v1/admin/company/${id}`,
+        payload
+      )
+      if (response.data.status_code === 'ACCEPT') {
+        toast.success('Cập nhật thành công!')
+        refetch()
+      } else {
+        toast.error(response.data.reason_message || 'Cập nhật thất bại')
+      }
+    } catch (err) {
+      toast.error('Có lỗi xảy ra khi cập nhật')
+    }
+  }
+
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error loading detail.</div>
-
-  // Assuming the API returns the detail in data.data
-  const company = _get(data, 'data', {})
-
-  const columns = [
-    {
-      title: 'Loại giao dịch',
-      dataIndex: 'transactionType',
-      key: 'transactionType',
-    },
-    {
-      title: 'Phí cố định',
-      dataIndex: 'fixedFee',
-      key: 'fixedFee',
-    },
-    {
-      title: 'Phí phần trăm theo giao dịch',
-      dataIndex: 'transactionFeePercent',
-      key: 'transactionFeePercent',
-    },
-    {
-      title: 'Phí tối thiểu',
-      dataIndex: 'minFee',
-      key: 'minFee',
-    },
-    {
-      title: 'Phí tối đa',
-      dataIndex: 'maxFee',
-      key: 'maxFee',
-    },
-    {
-      title: 'Phí dịch vụ ngoài giờ',
-      dataIndex: 'afterHoursFee',
-      key: 'afterHoursFee',
-    },
-  ]
-
-  const dataSource = [
-    {
-      key: '1',
-      transactionType: 'Giao dịch 1',
-      fixedFee: '1000',
-      transactionFeePercent: '2%',
-      minFee: '500',
-      maxFee: '3000',
-      afterHoursFee: '150',
-    },
-    {
-      key: '2',
-      transactionType: 'Giao dịch 2',
-      fixedFee: '2000',
-      transactionFeePercent: '3%',
-      minFee: '600',
-      maxFee: '4000',
-      afterHoursFee: '250',
-    },
-  ]
 
   return (
     <>
@@ -116,54 +157,49 @@ export default function MasterMerchantEdit() {
           Quản lý đại lý tổng
         </NavLink>
         <div className="text-base font-semibold text-[#A1AAB2]">/</div>
-        <span className="text-base font-semibold text-[#A1AAB2]">Chi tiết</span>
+        <span className="text-base font-semibold text-[#A1AAB2]">
+          Chỉnh sửa
+        </span>
       </div>
 
-      <section className="flex flex-col gap-4">
+      <form onSubmit={handleSubmit(onFinish)} className="flex flex-col gap-4">
         <InfoCard title="Thông tin công ty">
           <div className="flex gap-6 mb-6 max-sm:flex-col">
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Mã Cif</span>
-              <span className="text-base text-gray-800">
+              <span className="text-base font-semibold">
                 {company.cif || '---'}
               </span>
             </div>
-
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Tên công ty</span>
-              <span className="text-base text-gray-800">
+              <span className="text-base font-semibold">
                 {company.company_name || '---'}
               </span>
             </div>
-
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Người đại diện</span>
-              <span className="text-base text-gray-800">
+              <span className="text-base font-semibold">
                 {company.representative || '---'}
               </span>
             </div>
-
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Số giấy phép ĐKKD</span>
-              <span className="text-base text-gray-800">
+              <span className="text-base font-semibold">
                 {company.tax_code || '---'}
               </span>
             </div>
-
             <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">
-                Số lượng điểm đại lý
-              </span>
-              <span className="text-base text-gray-800">
-                {company.merchant_count || '---'}
+              <span className="text-sm text-gray-400">Số điểm đại lý</span>
+              <span className="text-base font-semibold">
+                {company.store_count || '---'}
               </span>
             </div>
-
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Trạng thái</span>
-              <span className="text-base text-gray-800">
-                {company.status || '---'}
-              </span>
+              <Tag color={statusColor} className="w-fit">
+                {statusLabel}
+              </Tag>
             </div>
           </div>
         </InfoCard>
@@ -172,71 +208,94 @@ export default function MasterMerchantEdit() {
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4">
             Hạn mức giao dịch
           </h4>
-
           <div className="flex gap-6 mb-6 max-sm:flex-col">
-            <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">Hạn mức trong tháng</span>
-              <Select
-                defaultValue={
-                  company.monthlyLimit ? company.monthlyLimit + ' VND' : '---'
-                }
-                style={{ width: '100%' }}
-                placeholder="Chọn hạn mức trong tháng"
-              >
-                <Option value="5000000">5,000,000 VND</Option>
-                <Option value="10000000">10,000,000 VND</Option>
-                <Option value="15000000">15,000,000 VND</Option>
-                <Option value="20000000">20,000,000 VND</Option>
-              </Select>
-            </div>
-            <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">Hạn mức trong ngày</span>
-              <Select
-                defaultValue={
-                  company.dailyLimit ? company.dailyLimit + ' VND' : '---'
-                }
-                style={{ width: '100%' }}
-                placeholder="Chọn hạn mức trong ngày"
-              >
-                <Option value="1000000">1,000,000 VND</Option>
-                <Option value="2000000">2,000,000 VND</Option>
-                <Option value="3000000">3,000,000 VND</Option>
-                <Option value="4000000">4,000,000 VND</Option>
-              </Select>
-            </div>
+            <Controller
+              name="transaction_monthly_quota"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Hạn mức trong tháng"
+                  placeholder="Nhập hạn mức trong tháng"
+                  className="w-full"
+                />
+              )}
+            />
+            <Controller
+              name="transaction_daily_quota"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Hạn mức giao dịch hàng ngày"
+                  placeholder="Nhập hạn mức giao dịch hàng ngày"
+                  className="w-full"
+                />
+              )}
+            />
           </div>
 
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mt-8">
             Phí giao dịch
           </h4>
-
           <div className="mt-4">
-            <Table
-              columns={columns}
-              dataSource={dataSource}
-              pagination={false}
-            />
+            <AdminFeeEditTable />
           </div>
 
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4 mt-8">
             Cấu hình phê duyệt doanh nghiệp đại lý
           </h4>
-
           <div className="flex flex-col gap-4">
-            <div>
-              <Switch checked />
-              <label htmlFor="approve-new-merchants" className="ml-2">
-                Yêu cầu phê duyệt cho các địa điểm đại lý mới
-              </label>
-            </div>
-
-            <div>
-              <Switch checked />
-              <label htmlFor="approve-new-merchants" className="ml-2">
-                HDBank thực hiện khai báo điểm đại lý và nhân viên đại lý
-              </label>
-            </div>
+            <Controller
+              name="need_approve_new_store"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <Switch {...field} checked={field.value} />
+                  <label className="ml-2">
+                    Yêu cầu phê duyệt cho các địa điểm đại lý mới
+                  </label>
+                </div>
+              )}
+            />
+            <Controller
+              name="some_other_switch"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <Switch {...field} checked={field.value} />
+                  <label className="ml-2">
+                    HDBank thực hiện khai báo điểm đại lý và nhân viên đại lý
+                  </label>
+                </div>
+              )}
+            />
+            <Controller
+              name="another_switch"
+              control={control}
+              render={({ field }) => (
+                <div>
+                  <Switch {...field} checked={field.value} />
+                  <label className="ml-2">
+                    HDBank thực hiện khai báo điểm đại lý và nhân viên đại lý
+                  </label>
+                </div>
+              )}
+            />
           </div>
+        </InfoCard>
+
+        <InfoCard title="">
+          <Controller
+            name="active"
+            control={control}
+            render={({ field }) => (
+              <div>
+                <Switch {...field} checked={field.value} />
+                <label className="ml-2">Hoạt động</label>
+              </div>
+            )}
+          />
         </InfoCard>
 
         <div className="flex items-center justify-end gap-4 w-full mt-8">
@@ -245,35 +304,19 @@ export default function MasterMerchantEdit() {
             onClick={() => navigate(-1)}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <ArrowLeftOutlined />
-            Quay lại
+            <CloseCircleOutlined />
+            Hủy bỏ
           </button>
           <button
             type="submit"
+            disabled={isSubmitting}
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-            >
-              <path
-                fillRule="evenodd"
-                clipRule="evenodd"
-                d="M5.53397 12.2487L4.27625 12.4244C3.5312 12.5285 2.90379 11.8708 3.04303 11.1314L3.26635 9.94564C3.34174 9.54536 3.53755 9.17763 3.8276 8.89165L11.0764 1.74438C11.6684 1.16071 12.6222 1.1698 13.2029 1.76464L13.9185 2.49767C14.4969 3.09005 14.4859 4.03898 13.8941 4.61786L6.65566 11.6977C6.35021 11.9965 5.95712 12.1896 5.53397 12.2487L5.39558 11.2583C5.60716 11.2288 5.8037 11.1322 5.95643 10.9828L6.59255 10.3606L5.20511 8.93777L4.5297 9.60372C4.38467 9.74672 4.28677 9.93058 4.24907 10.1307L4.02575 11.3165C4.01309 11.3837 4.07013 11.4435 4.13786 11.4341L5.39558 11.2583L5.53397 12.2487ZM5.9172 8.23566L7.30745 9.66141L13.1948 3.90297C13.3921 3.71001 13.3958 3.3937 13.203 3.19624L12.4873 2.46321C12.2938 2.26493 11.9759 2.2619 11.7785 2.45646L5.9172 8.23566Z"
-                fill="white"
-              />
-              <path
-                d="M1 14.5026C1 14.2264 1.22386 14.0026 1.5 14.0026H14.5C14.7761 14.0026 15 14.2264 15 14.5026C15 14.7787 14.7761 15.0026 14.5 15.0026H1.5C1.22386 15.0026 1 14.7787 1 14.5026Z"
-                fill="white"
-              />
-            </svg>
-            Chỉnh sửa
+            <SaveOutlined />
+            {isSubmitting ? 'Đang lưu...' : 'Lưu và gửi duyệt'}
           </button>
         </div>
-      </section>
+      </form>
     </>
   )
 }

@@ -48,7 +48,11 @@ export default function MasterMerchantDetail() {
     enabled: !!id,
   })
 
-  const { data: limitData, isLoading: isLimitLoading, error: limitError } = useQuery({
+  const {
+    data: limitData,
+    isLoading: isLimitLoading,
+    error: limitError,
+  } = useQuery({
     queryKey: ['limitList', id],
     queryFn: async () => {
       const response = await axiosInstance.get('/v1/admin/limit/list', {
@@ -60,9 +64,30 @@ export default function MasterMerchantDetail() {
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data
       }
-      throw new Error(response.data.reason_message || 'Failed to fetch limit list')
+      throw new Error(
+        response.data.reason_message || 'Failed to fetch limit list'
+      )
     },
     enabled: !!id, // only run query when company.id is available
+  })
+
+  // New query: Fetch admin fees
+  const {
+    data: adminFeesData,
+    isLoading: isAdminFeesLoading,
+    error: adminFeesError,
+  } = useQuery({
+    queryKey: ['adminFees', id],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`/v1/admin/company/${id}/fees`)
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error(
+        response.data.reason_message || 'Failed to fetch admin fees'
+      )
+    },
+    enabled: !!id,
   })
 
   if (isLoading) return <div>Loading...</div>
@@ -98,6 +123,19 @@ export default function MasterMerchantDetail() {
     (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
   )?.amount
 
+  // adminFeesData can now be used to display admin fee info
+  // Map the adminFeesData to match table columns
+  const feeDataSource =
+    adminFeesData?.map((fee: any, index: number) => ({
+      key: (index + 1).toString(),
+      transactionType: fee.transaction_type, // adjust based on API structure
+      fixedFee: fee.fixed_fee,
+      transactionFeePercent: fee.transaction_fee_percent,
+      minFee: fee.min_fee,
+      maxFee: fee.max_fee,
+      afterHoursFee: fee.after_hours_fee,
+    })) || []
+
   const columns = [
     {
       title: 'Loại giao dịch',
@@ -128,27 +166,6 @@ export default function MasterMerchantDetail() {
       title: 'Phí dịch vụ ngoài giờ',
       dataIndex: 'afterHoursFee',
       key: 'afterHoursFee',
-    },
-  ]
-
-  const dataSource = [
-    {
-      key: '1',
-      transactionType: 'Giao dịch 1',
-      fixedFee: '1000',
-      transactionFeePercent: '2%',
-      minFee: '500',
-      maxFee: '3000',
-      afterHoursFee: '150',
-    },
-    {
-      key: '2',
-      transactionType: 'Giao dịch 2',
-      fixedFee: '2000',
-      transactionFeePercent: '3%',
-      minFee: '600',
-      maxFee: '4000',
-      afterHoursFee: '250',
     },
   ]
 
@@ -222,13 +239,17 @@ export default function MasterMerchantDetail() {
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Hạn mức trong tháng</span>
               <span className="text-base font-semibold">
-                {monthlyLimit ? monthlyLimit.toLocaleString('vi-VN') + ' VND' : '---'}
+                {monthlyLimit
+                  ? monthlyLimit.toLocaleString('vi-VN') + ' VND'
+                  : '---'}
               </span>
             </div>
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Hạn mức trong ngày</span>
               <span className="text-base font-semibold">
-                {dailyLimit ? dailyLimit.toLocaleString('vi-VN') + ' VND' : '---'}
+                {dailyLimit
+                  ? dailyLimit.toLocaleString('vi-VN') + ' VND'
+                  : '---'}
               </span>
             </div>
           </div>
@@ -236,11 +257,10 @@ export default function MasterMerchantDetail() {
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mt-8">
             Phí giao dịch
           </h4>
-
           <div className="mt-4">
             <Table
               columns={columns}
-              dataSource={dataSource}
+              dataSource={feeDataSource}
               pagination={false}
             />
           </div>

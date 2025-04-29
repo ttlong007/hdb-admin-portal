@@ -238,19 +238,19 @@
 
 @layer utilities {
   .fillOpacity-10 {
-    fillOpacity: 0.1;
+    fillopacity: 0.1;
   }
 
   .fillOpacity-20 {
-    fillOpacity: 0.2;
+    fillopacity: 0.2;
   }
 
   .fillOpacity-30 {
-    fillOpacity: 0.3;
+    fillopacity: 0.3;
   }
 
   .fillOpacity-60 {
-    fillOpacity: 0.6;
+    fillopacity: 0.6;
   }
 
   /* animation delay required for the Loader component */
@@ -1606,4 +1606,8 @@ div[style='z-index: 1000001;'],
 
 [type='text']:focus {
   @apply outline-none ring-0;
+}
+
+.ant-switch-checked {
+  background: #da2128 !important;
 }
