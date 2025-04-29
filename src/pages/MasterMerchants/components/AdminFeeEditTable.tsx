@@ -1,29 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import type { TableProps } from 'antd';
-import { Form, Input, InputNumber, Popconfirm, Table, Typography, Select } from 'antd';
-import { useQuery } from '@tanstack/react-query';
-import axiosInstance from '@/config/axios';
+import React, { useEffect, useState } from 'react'
+import type { TableProps } from 'antd'
+import {
+  Form,
+  Input,
+  InputNumber,
+  Popconfirm,
+  Table,
+  Typography,
+  Select,
+} from 'antd'
+import { useQuery } from '@tanstack/react-query'
+import axiosInstance from '@/config/axios'
 
 interface DataType {
-  key: string;
-  transactionType?: string; // fee type name
-  fixedFee?: string;
-  transactionFeePercent?: string;
-  minFee?: string;
-  maxFee?: string;
-  afterHoursFee?: string;
+  key: string
+  transactionType?: string // fee type name
+  fixedFee?: string
+  transactionFeePercent?: string
+  minFee?: string
+  maxFee?: string
+  afterHoursFee?: string
 }
 
-const initialData: DataType[] = [];
+const initialData: DataType[] = []
 
 interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
-  editing: boolean;
-  dataIndex: string;
-  title: any;
-  inputType: 'number' | 'text' | 'select';
-  record: DataType;
-  index: number;
-  feeTypes?: any[];
+  editing: boolean
+  dataIndex: string
+  title: any
+  inputType: 'number' | 'text' | 'select'
+  record: DataType
+  index: number
+  feeTypes?: any[]
 }
 
 const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
@@ -37,9 +45,9 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
   children,
   ...restProps
 }) => {
-  let inputNode;
+  let inputNode
   if (inputType === 'number') {
-    inputNode = <InputNumber />;
+    inputNode = <InputNumber />
   } else if (inputType === 'select') {
     inputNode = (
       <Select>
@@ -50,9 +58,9 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
             </Select.Option>
           ))}
       </Select>
-    );
+    )
   } else {
-    inputNode = <Input />;
+    inputNode = <Input />
   }
 
   return (
@@ -74,26 +82,55 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
         children
       )}
     </td>
-  );
-};
+  )
+}
 
-const AdminFeeEditTable: React.FC = () => {
-  const [form] = Form.useForm();
-  const [data, setData] = useState<DataType[]>(initialData);
-  const [editingKey, setEditingKey] = useState('');
+interface AdminFeeEditTableProps {
+  id: number
+}
 
-  // Fetch fee types from the API
+const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({ id }) => {
+  const [form] = Form.useForm()
+  const [data, setData] = useState<DataType[]>(initialData)
+  const [editingKey, setEditingKey] = useState('')
+
+  // Fetch fee types from the API (fallback if needed)
   const { data: feeTypes = [] } = useQuery({
     queryKey: ['feeTypes'],
     queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/fee/list-types');
-      return response.data.data;
+      const response = await axiosInstance.get('/v1/admin/fee/list-types')
+      return response.data.data
     },
-  });
+  })
 
-  // Map feeTypes to table rows.
+  // Fetch company fees from the API
+  const { data: companyFees, isLoading: isFeesLoading, error: feesError } = useQuery({
+    queryKey: ['companyFees', id],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`/v1/admin/company/${id}/fees`)
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error(response.data.reason_message || 'Failed to fetch company fees')
+    },
+    enabled: !!id,
+  })
+
+  // Map company fees to table rows if available; otherwise fallback to feeTypes mapping.
   useEffect(() => {
-    if (feeTypes && feeTypes.length) {
+    if (companyFees && companyFees.length) {
+      const mappedFees = companyFees.map((fee: any) => ({
+        key: fee.fee_transaction_type_id.toString(),
+        // You may replace below with a lookup for fee type name if available.
+        transactionType: `Type ${fee.fee_transaction_type_id}`,
+        fixedFee: fee.fixed_fee?.toString() || '',
+        transactionFeePercent: fee.percentage_fee_per_txn?.toString() || '',
+        minFee: fee.min_fee?.toString() || '',
+        maxFee: fee.max_fee?.toString() || '',
+        afterHoursFee: fee.overtime_fee?.toString() || '',
+      }))
+      setData(mappedFees)
+    } else if (feeTypes && feeTypes.length) {
       const mappedData = feeTypes.map((ft: any) => ({
         key: ft.id.toString(),
         transactionType: ft.name,
@@ -102,12 +139,34 @@ const AdminFeeEditTable: React.FC = () => {
         minFee: '',
         maxFee: '',
         afterHoursFee: '',
-      }));
-      setData(mappedData);
+      }))
+      setData(mappedData)
     }
-  }, [feeTypes]);
+  }, [companyFees, feeTypes])
 
-  const isEditing = (record: DataType) => record.key === editingKey;
+  useEffect(() => {
+    if (feeTypes && feeTypes.length) {
+      // Map feeTypes and try to find corresponding fee information from companyFees.
+      const mappedData = feeTypes.map((ft: any) => {
+        // find matching fee from companyFees (if available)
+        const fee = companyFees?.find(
+          (f: any) => f.fee_transaction_type_id === ft.id
+        );
+        return {
+          key: ft.id.toString(),
+          transactionType: ft.name,
+          fixedFee: fee ? fee.fixed_fee?.toString() || '' : '',
+          transactionFeePercent: fee ? fee.percentage_fee_per_txn?.toString() || '' : '',
+          minFee: fee ? fee.min_fee?.toString() || '' : '',
+          maxFee: fee ? fee.max_fee?.toString() || '' : '',
+          afterHoursFee: fee ? fee.overtime_fee?.toString() || '' : '',
+        }
+      })
+      setData(mappedData)
+    }
+  }, [companyFees, feeTypes])
+
+  const isEditing = (record: DataType) => record.key === editingKey
 
   const edit = (record: Partial<DataType> & { key: React.Key }) => {
     form.setFieldsValue({
@@ -117,43 +176,63 @@ const AdminFeeEditTable: React.FC = () => {
       maxFee: '',
       afterHoursFee: '',
       ...record,
-    });
-    setEditingKey(record.key);
-  };
+    })
+    setEditingKey(record.key)
+  }
 
   const cancel = () => {
-    setEditingKey('');
-  };
+    setEditingKey('')
+  }
 
   const save = async (key: React.Key) => {
     try {
-      const row = (await form.validateFields()) as DataType;
-      const newData = [...data];
-      const index = newData.findIndex((item) => key === item.key);
+      const row = (await form.validateFields()) as DataType
+      const newData = [...data]
+      const index = newData.findIndex((item) => key === item.key)
       if (index > -1) {
-        const item = newData[index];
-        newData.splice(index, 1, {
+        const item = newData[index]
+        const updatedRow = {
           ...item,
           ...row,
-        });
-        setData(newData);
-        setEditingKey('');
+        }
+
+        // Build the payload – replace company_id with actual company id if needed.
+        const feePayload = {
+          fees: [
+            {
+              company_id: id,
+              fee_transaction_type_id: Number(updatedRow.key),
+              fixed_fee: Number(updatedRow.fixedFee),
+              max_fee: Number(updatedRow.maxFee),
+              min_fee: Number(updatedRow.minFee),
+              overtime_fee: Number(updatedRow.afterHoursFee),
+              percentage_fee_per_txn: Number(updatedRow.transactionFeePercent),
+            },
+          ],
+        }
+
+        // Call POST /v1/admin/fee/upsert-batch with the payload.
+        await axiosInstance.post('/v1/admin/fee/upsert-batch', feePayload)
+
+        // Update local state
+        newData.splice(index, 1, updatedRow)
+        setData(newData)
+        setEditingKey('')
       } else {
-        newData.push(row);
-        setData(newData);
-        setEditingKey('');
+        newData.push(row)
+        setData(newData)
+        setEditingKey('')
       }
     } catch (errInfo) {
-      console.log('Validate Failed:', errInfo);
+      console.log('Validate Failed:', errInfo)
     }
-  };
+  }
 
   const columns = [
     {
       title: 'Loại giao dịch',
       dataIndex: 'transactionType',
       key: 'transactionType',
-      // Removed editable property so it cannot be edited.
       render: (text: string) => text,
     },
     {
@@ -187,35 +266,34 @@ const AdminFeeEditTable: React.FC = () => {
       editable: true,
     },
     {
-      title: 'Operation',
+      title: 'Tác vụ',
       dataIndex: 'operation',
       key: 'operation',
       render: (_: any, record: DataType) => {
-        const editable = isEditing(record);
+        const editable = isEditing(record)
         return editable ? (
           <span>
             <Typography.Link onClick={() => save(record.key)} style={{ marginInlineEnd: 8 }}>
-              Save
+              Lưu
             </Typography.Link>
             <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
-              <a>Cancel</a>
+              <a>Hủy bỏ</a>
             </Popconfirm>
           </span>
         ) : (
           <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)}>
-            Edit
+            Sửa
           </Typography.Link>
-        );
+        )
       },
     },
-  ];
+  ]
 
   const mergedColumns: TableProps<DataType>['columns'] = columns.map((col) => {
     if (!col.editable) {
-      return col;
+      return col
     }
-    let inputType: 'number' | 'text' | 'select' = 'text';
-    // For fixed fee and others, we continue to use editing capabilities.
+    let inputType: 'number' | 'text' | 'select' = 'text'
     return {
       ...col,
       onCell: (record: DataType) => ({
@@ -225,8 +303,8 @@ const AdminFeeEditTable: React.FC = () => {
         title: col.title,
         editing: isEditing(record),
       }),
-    };
-  });
+    }
+  })
 
   return (
     <Form form={form} component={false}>
@@ -239,7 +317,7 @@ const AdminFeeEditTable: React.FC = () => {
         pagination={false}
       />
     </Form>
-  );
-};
+  )
+}
 
-export default AdminFeeEditTable;
+export default AdminFeeEditTable

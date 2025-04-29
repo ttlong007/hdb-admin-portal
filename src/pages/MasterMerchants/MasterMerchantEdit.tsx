@@ -327,7 +327,7 @@ export default function MasterMerchantEdit() {
             Phí giao dịch
           </h4>
           <div className="mt-4">
-            <AdminFeeEditTable />
+            <AdminFeeEditTable id={Number(id)} />
           </div>
 
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4 mt-8">
