@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { NavLink, useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
 import { Select, Tag, Switch, Button } from 'antd'
@@ -70,8 +70,7 @@ export default function MasterMerchantEdit() {
           ...company,
           company_name: company.name,
           tax_code: company.tax_number,
-          transaction_monthly_quota: company.transaction_monthly_quota,
-          transaction_daily_quota: company.transaction_daily_quota,
+          // Removed transaction_monthly_quota and transaction_daily_quota
           need_approve_new_store: company.need_approve_new_store,
           need_approve_new_staff: company.need_approve_new_staff,
           hdb_can_manage: company.hdb_can_manage,
@@ -88,6 +87,7 @@ export default function MasterMerchantEdit() {
     data: limitData,
     isLoading: isLimitLoading,
     error: limitError,
+    refetch: refetchLimit,
   } = useQuery({
     queryKey: ['limitList', id],
     queryFn: async () => {
@@ -109,10 +109,10 @@ export default function MasterMerchantEdit() {
 
   // Map limitData response for daily and monthly limits
   const dailyLimit = limitData?.find(
-    (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
+    (limit: any) => limit.type === 'transaction_quota_daily'
   )?.amount
   const monthlyLimit = limitData?.find(
-    (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
+    (limit: any) => limit.type === 'transaction_monthly_quota'
   )?.amount
 
   const company = data || {}
@@ -144,33 +144,87 @@ export default function MasterMerchantEdit() {
         need_approve_new_store: company.need_approve_new_store,
         need_approve_new_staff: company.need_approve_new_staff,
         hdb_can_manage: company.hdb_can_manage,
-        active: company.active,
+        active: company.status === 'ACTIVE',
       })
     }
   }, [data, monthlyLimit, dailyLimit, reset, company])
 
-  const onFinish: SubmitHandler<FormData> = async (values) => {
-    try {
+  // Add the mutation to create limits
+  const createLimitsMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const { data } = await axiosInstance.post(
+        '/v1/admin/limit/create-batch',
+        payload
+      )
+      if (data.status_code === 'ACCEPT') {
+        return data
+      } else {
+        throw new Error('Creation failed')
+      }
+    },
+    onSuccess: () => {
+      // Refetch the limit list after successful limit creation
+      refetchLimit()
+    },
+  })
+
+  function updateList(values: FormData) {
+    // Only update limits if they have changed compared to the fetched values.
+    // Ensure you compare the values as strings.
+    if (
+      values.transaction_daily_quota !== String(dailyLimit || '') ||
+      values.transaction_monthly_quota !== String(monthlyLimit || '')
+    ) {
+      const limitsPayload = {
+        limits: [
+          {
+            entity_id: Number(id),
+            entity_type: 'COMPANY',
+            type: 'transaction_quota_daily',
+            amount: Number(values.transaction_daily_quota),
+          },
+          {
+            entity_id: Number(id),
+            entity_type: 'COMPANY',
+            type: 'transaction_monthly_quota',
+            amount: Number(values.transaction_monthly_quota),
+          },
+        ],
+      }
+      createLimitsMutation.mutateAsync(limitsPayload)
+    }
+  }
+
+  const updateCompanyMutation = useMutation({
+    mutationFn: async (values: FormData) => {
       const payload = {
         status: values.active ? 'ACTIVE' : 'INACTIVE',
-        // need_approve_new_store: values.need_approve_new_store,
-        // need_approve_new_staff: values.need_approve_new_staff,
-        // hdb_can_manage: values.hdb_can_manage,
-        // additional fields can be added here if needed
+        need_approve_new_store: values.need_approve_new_store,
+        need_approve_new_staff: values.need_approve_new_staff,
+        hdb_can_manage: values.hdb_can_manage,
       }
       const response = await axiosInstance.patch(
         `/v1/admin/company/${id}`,
         payload
       )
       if (response.data.status_code === 'ACCEPT') {
-        toast.success('Cập nhật thành công!')
-        refetch()
+        return response.data
       } else {
-        toast.error(response.data.reason_message || 'Cập nhật thất bại')
+        throw new Error(response.data.reason_message || 'Cập nhật thất bại')
       }
-    } catch (err) {
-      toast.error('Có lỗi xảy ra khi cập nhật')
-    }
+    },
+    onSuccess: () => {
+      toast.success('Cập nhật thành công!')
+      refetch()
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi cập nhật')
+    },
+  })
+
+  const onFinish: SubmitHandler<FormData> = async (values) => {
+    updateCompanyMutation.mutate(values)
+    updateList(values)
   }
 
   if (isLoading) return <div>Loading...</div>
@@ -242,7 +296,7 @@ export default function MasterMerchantEdit() {
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4">
             Hạn mức giao dịch
           </h4>
-          <div className="flex gap-6 mb-6 max-sm:flex-col">
+          <div className="flex gap-6 mb-6 max-sm:flex-col w-1/2">
             <Controller
               name="transaction_monthly_quota"
               control={control}
@@ -269,7 +323,7 @@ export default function MasterMerchantEdit() {
             />
           </div>
 
-          <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mt-8">
+          <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4 mt-8">
             Phí giao dịch
           </h4>
           <div className="mt-4">

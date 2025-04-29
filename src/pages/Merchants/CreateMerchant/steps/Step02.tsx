@@ -9,8 +9,8 @@ import { useStore } from '@/store/store/useStore'
 import axiosInstance from '@/config/axios'
 
 interface Step02FormValues {
-  transaction_monthly_quota: number
-  transaction_daily_quota: number
+  transaction_monthly_quota: number | string
+  transaction_daily_quota: number | string
 }
 
 interface Step02Props {
@@ -27,15 +27,18 @@ const Step02: React.FC<Step02Props> = ({ defaultValues, onBack, onNext }) => {
     formState: { errors },
   } = useForm<Step02FormValues>({
     defaultValues: defaultValues || {
-      transaction_monthly_quota: 0,
-      transaction_daily_quota: 0,
+      transaction_monthly_quota: '',
+      transaction_daily_quota: '',
     },
   })
   const storeId = _get(storeCreateData, 'id', null)
 
   const createLimitsMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const { data } = await axiosInstance.post('/v1/admin/limit/create-batch', payload)
+      const { data } = await axiosInstance.post(
+        '/v1/admin/limit/create-batch',
+        payload
+      )
       if (data.status_code === 'ACCEPT') {
         return data
       } else {
