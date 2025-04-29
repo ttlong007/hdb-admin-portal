@@ -275,7 +275,7 @@ export default function MasterMerchantDetail() {
               disabled
             />
             <label htmlFor="need_approve_new_store" className="ml-2">
-              Yêu cầu phê duyệt cho các địa điểm đại lý mới
+              Yêu cầu phê duyệt cho việc đăng lý nhân viên
             </label>
           </div>
 

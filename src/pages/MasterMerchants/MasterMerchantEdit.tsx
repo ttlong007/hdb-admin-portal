@@ -35,8 +35,8 @@ interface FormData {
   transaction_monthly_quota: string
   transaction_daily_quota: string
   need_approve_new_store: boolean
-  some_other_switch: boolean
-  another_switch: boolean
+  need_approve_new_staff: boolean
+  hdb_can_manage: boolean
   active: boolean
 }
 
@@ -54,8 +54,8 @@ export default function MasterMerchantEdit() {
       transaction_monthly_quota: '',
       transaction_daily_quota: '',
       need_approve_new_store: false,
-      some_other_switch: false,
-      another_switch: false,
+      need_approve_new_staff: false,
+      hdb_can_manage: false,
       active: false,
     },
   })
@@ -70,9 +70,12 @@ export default function MasterMerchantEdit() {
           ...company,
           company_name: company.name,
           tax_code: company.tax_number,
-          // assuming these fields exist; adjust if needed:
           transaction_monthly_quota: company.transaction_monthly_quota,
           transaction_daily_quota: company.transaction_daily_quota,
+          need_approve_new_store: company.need_approve_new_store,
+          need_approve_new_staff: company.need_approve_new_staff,
+          hdb_can_manage: company.hdb_can_manage,
+          active: company.active,
         }
       } else {
         throw new Error('Failed to get company detail')
@@ -80,6 +83,37 @@ export default function MasterMerchantEdit() {
     },
     enabled: !!id,
   })
+
+  const {
+    data: limitData,
+    isLoading: isLimitLoading,
+    error: limitError,
+  } = useQuery({
+    queryKey: ['limitList', id],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/limit/list', {
+        params: {
+          entity_id: id,
+          entity_type: 'COMPANY',
+        },
+      })
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error(
+        response.data.reason_message || 'Failed to fetch limit list'
+      )
+    },
+    enabled: !!id,
+  })
+
+  // Map limitData response for daily and monthly limits
+  const dailyLimit = limitData?.find(
+    (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
+  )?.amount
+  const monthlyLimit = limitData?.find(
+    (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
+  )?.amount
 
   const company = data || {}
 
@@ -104,25 +138,25 @@ export default function MasterMerchantEdit() {
     if (data) {
       // Reset react-hook-form with fetched data.
       reset({
-        transaction_monthly_quota: company.transaction_monthly_quota,
-        transaction_daily_quota: company.transaction_daily_quota,
+        transaction_monthly_quota:
+          monthlyLimit || company.transaction_monthly_quota,
+        transaction_daily_quota: dailyLimit || company.transaction_daily_quota,
         need_approve_new_store: company.need_approve_new_store,
-        some_other_switch: company.some_other_switch,
-        another_switch: company.another_switch,
+        need_approve_new_staff: company.need_approve_new_staff,
+        hdb_can_manage: company.hdb_can_manage,
         active: company.active,
       })
     }
-  }, [data, reset, company])
+  }, [data, monthlyLimit, dailyLimit, reset, company])
 
   const onFinish: SubmitHandler<FormData> = async (values) => {
     try {
       const payload = {
-        // transaction_monthly_quota: values.transaction_monthly_quota,
-        // transaction_daily_quota: values.transaction_daily_quota,
         status: values.active ? 'ACTIVE' : 'INACTIVE',
         // need_approve_new_store: values.need_approve_new_store,
-        // some_other_switch: values.some_other_switch,
-        // another_switch: values.another_switch,
+        // need_approve_new_staff: values.need_approve_new_staff,
+        // hdb_can_manage: values.hdb_can_manage,
+        // additional fields can be added here if needed
       }
       const response = await axiosInstance.patch(
         `/v1/admin/company/${id}`,
@@ -259,19 +293,19 @@ export default function MasterMerchantEdit() {
               )}
             />
             <Controller
-              name="some_other_switch"
+              name="need_approve_new_staff"
               control={control}
               render={({ field }) => (
                 <div>
                   <Switch {...field} checked={field.value} />
                   <label className="ml-2">
-                    HDBank thực hiện khai báo điểm đại lý và nhân viên đại lý
+                    Yêu cầu phê duyệt cho việc đăng lý nhân viên
                   </label>
                 </div>
               )}
             />
             <Controller
-              name="another_switch"
+              name="hdb_can_manage"
               control={control}
               render={({ field }) => (
                 <div>
