@@ -678,8 +678,8 @@ const EditMerchant = () => {
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
             {createMerchantMutation.isPending
-              ? 'Đang tạo đại lý...'
-              : 'Tạo đại lý'}
+              ? 'Đang chỉnh sửa đại lý...'
+              : 'Chỉnh sửa đại lý'}
           </button>
         </div>
       </form>
