@@ -25,7 +25,7 @@ const Merchants: React.FC = () => {
     queryKey: ['merchants', page, limit, filter],
     queryFn: async () => {
       const response = await axiosInstance.get('/v1/admin/store/list', {
-        params: { page, limit, ...filter },
+        params: { page, limit, order_by_column: 'updated_at', descending: true,  ...filter },
       })
       if (response.data.status_code === 'ACCEPT') {
         return response.data

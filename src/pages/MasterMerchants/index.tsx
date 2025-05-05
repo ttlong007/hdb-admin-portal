@@ -31,7 +31,7 @@ const MasterMerchants: React.FC = () => {
     queryKey: ['companies', page, limit, filter],
     queryFn: async () => {
       const response = await axiosInstance.get('/v1/admin/company/list', {
-        params: { page, limit, ...filter },
+        params: { page, limit, order_by_column: 'updated_at', descending: true, ...filter },
       })
       if (response.data.status_code === 'ACCEPT') {
         return response.data
