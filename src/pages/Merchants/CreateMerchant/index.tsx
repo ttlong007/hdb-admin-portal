@@ -1,14 +1,14 @@
 import React from 'react'
 import { Checkbox, Button, Switch } from 'antd'
-import { Input,  } from 'rizzui'
+import { Input } from 'rizzui'
 import Select from 'react-select'
 import { useForm, Controller, useWatch } from 'react-hook-form'
 import { NavLink } from 'react-router-dom'
+import { toast } from 'react-toastify'
 
 import { useQuery, useMutation } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
-
 
 type Option = { label: string; value: string }
 
@@ -25,6 +25,7 @@ interface MerchantFormValues {
   transaction_daily_quota: number | string
   approveThreshold: number | string
   transactionTypes: number[]
+  company_id: Option | null  // Added property for company selection
 }
 
 const defaultTransactionTypes = [
@@ -168,6 +169,26 @@ const CreateMerchant = () => {
     },
   })
 
+  // Fetch companies
+  const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
+    queryKey: ['companies-all'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/company/list')
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch companies')
+    },
+  })
+
+  // Map companies to options for the Select component
+  const companyOptions = companiesData
+    ? companiesData.map((company: any) => ({
+        label: company.name, // Adjust the field as needed
+        value: company.id,   // Adjust the field as needed
+      }))
+    : []
+
   // Create merchant mutation
   const createMerchantMutation = useMutation({
     mutationFn: async (payload: any) => {
@@ -181,10 +202,11 @@ const CreateMerchant = () => {
       throw new Error('Creation failed')
     },
     onSuccess: () => {
-      console.log('Merchant created successfully!')
+     toast.success('Tạo đại lý thành công!')
       // Navigate or show success message as needed.
     },
     onError: (error: any) => {
+      toast.error('Tạo đại lý thất bại!')
       console.error(error)
     },
   })
@@ -194,13 +216,28 @@ const CreateMerchant = () => {
       name: data.name,
       code: data.code,
       address: data.address,
-      location_id: data.ward?.value || '',
-      expense_account: data.expense_account?.value,
-      income_account: data.income_account?.value,
-      transaction_monthly_quota: data.transaction_monthly_quota,
-      transaction_daily_quota: data.transaction_daily_quota,
-      approveThreshold: data.approveThreshold,
-      transactionTypes: data.transactionTypes,
+      // Use the ward value as location_id; adjust as needed
+      location_id: data.ward?.value || 0,
+      expense_account: data.expense_account?.value || '',
+      income_account: data.income_account?.value || '',
+      company_id: data.company_id?.value || 0,
+      approve_threshold: Number(data.approveThreshold),
+      // Map limits based on the transaction quotas
+      limits: [
+        {
+          amount: Number(data.transaction_daily_quota),
+          type: 'TRANSACTION_QUOTA_DAILY',
+        },
+        {
+          amount: Number(data.transaction_monthly_quota),
+          type: 'TRANSACTION_QUOTA_MONTHLY',
+        },
+      ],
+      // Map approval data using the approveThreshold and selected transaction types
+      need_approve_transaction_data: {
+        approve_amount: Number(data.approveThreshold),
+        need_approve_transaction_ids: data.transactionTypes,
+      },
     }
     createMerchantMutation.mutate(payload)
   }
@@ -233,6 +270,28 @@ const CreateMerchant = () => {
             Thông tin điểm đại lý
           </div>
           <div className="grid grid-cols-3 gap-6 w-full">
+            {/* Company */}
+            <div>
+              <Controller
+                name="company_id"
+                control={control}
+                rules={{ required: true }}
+                render={({ field }) => (
+                  <div className="w-full">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Công ty *
+                    </label>
+                    <Select
+                      {...field}
+                      options={companyOptions}
+                      placeholder={
+                        isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
+                      }
+                    />
+                  </div>
+                )}
+              />
+            </div>
             {/* Name */}
             <div>
               <Controller

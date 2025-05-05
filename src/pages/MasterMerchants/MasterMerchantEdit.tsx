@@ -112,7 +112,7 @@ export default function MasterMerchantEdit() {
     (limit: any) => limit.type === 'transaction_quota_daily'
   )?.amount
   const monthlyLimit = limitData?.find(
-    (limit: any) => limit.type === 'transaction_monthly_quota'
+    (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
   )?.amount
 
   const company = data || {}
@@ -180,13 +180,13 @@ export default function MasterMerchantEdit() {
           {
             entity_id: Number(id),
             entity_type: 'COMPANY',
-            type: 'transaction_quota_daily',
+            type: 'TRANSACTION_QUOTA_DAILY',
             amount: Number(values.transaction_daily_quota),
           },
           {
             entity_id: Number(id),
             entity_type: 'COMPANY',
-            type: 'transaction_monthly_quota',
+            type: 'TRANSACTION_QUOTA_MONTHLY',
             amount: Number(values.transaction_monthly_quota),
           },
         ],

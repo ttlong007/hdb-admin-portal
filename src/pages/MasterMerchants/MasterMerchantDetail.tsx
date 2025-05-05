@@ -111,10 +111,10 @@ export default function MasterMerchantDetail() {
       : 'default'
 
   const dailyLimit = limitData?.find(
-    (limit: any) => limit.type === 'transaction_quota_daily'
+    (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
   )?.amount
   const monthlyLimit = limitData?.find(
-    (limit: any) => limit.type === 'transaction_monthly_quota'
+    (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
   )?.amount
 
   // adminFeesData can now be used to display admin fee info
