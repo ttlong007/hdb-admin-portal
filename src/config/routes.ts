@@ -28,6 +28,6 @@ export const routes: Routes = {
     createStaff: '/staffs/create',
     editStaff: '/staffs/:id/edit',
     transaction: '/transactions',
-    transactionDetail: '/transactions/:transactionId',
+    transactionDetail: '/transactions/:id',
     unauthorize: '/unauthorize',
 };

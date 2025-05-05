@@ -1,10 +1,86 @@
 import React from 'react'
 import { useParams } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import axiosInstance from '@/config/axios'
 
 const TransactionDetail: React.FC = () => {
-  const { id } = useParams<any>()
+  const { id } = useParams<{ id: string }>()
 
-  console.log(id)
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['transactionDetail', id],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`/v1/admin/transaction/${id}`)
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch transaction details')
+    },
+    enabled: !!id,
+  })
+
+  if (isLoading) return <div>Loading...</div>
+  if (error) return <div>Error loading transaction details.</div>
+
+  const transaction = {
+    id: data.id,
+    code: data.code,
+    amount: data.amount,
+    status: data.status,
+    channel: data.channel,
+    transactionType: data.transaction_type
+      ? {
+          id: data.transaction_type.id,
+          code: data.transaction_type.code,
+          name: data.transaction_type.name,
+          description: data.transaction_type.description,
+        }
+      : null,
+    store: data.store
+      ? {
+          id: data.store.id,
+          company_id: data.store.company_id,
+          parent_id: data.store.parent_id,
+          code: data.store.code,
+          name: data.store.name,
+          address: data.store.address,
+          status: data.store.status,
+          income_account: data.store.income_account,
+          expense_account: data.store.expense_account,
+          created_at: data.store.created_at,
+          updated_at: data.store.updated_at,
+        }
+      : null,
+    company: data.company
+      ? {
+          id: data.company.id,
+          name: data.company.name,
+          cif: data.company.cif,
+          tax_number: data.company.tax_number,
+          status: data.company.status,
+          representative: data.company.representative,
+        }
+      : null,
+    approvedAt: data.approved_at,
+    approvedByStaff: data.approved_by_staff
+      ? {
+          id: data.approved_by_staff.id,
+          name: data.approved_by_staff.name,
+          role: data.approved_by_staff.role,
+        }
+      : null,
+    createdByStaff: data.created_by_staff
+      ? {
+          id: data.created_by_staff.id,
+          name: data.created_by_staff.name,
+          role: data.created_by_staff.role,
+        }
+      : null,
+    transactionFee: data.transaction_fee,
+    fromAccount: data.from_account,
+    toAccount: data.to_account,
+    // Additional fields (if needed) can be mapped here.
+  }
+
   return (
     <div className="flex flex-col gap-6 mt-4">
       <div className="flex flex-col items-start gap-6 rounded-lg bg-white shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] p-6">
@@ -12,13 +88,13 @@ const TransactionDetail: React.FC = () => {
           Thông tin công ty
         </div>
 
-        <div className="grid grid-cols-4 gap-4 w-full">
+        <div className="grid grid-cols-5 gap-4 w-full">
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
               Mã Cif
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              CIF123456789
+              {transaction.company?.cif || '---'}
             </span>
           </div>
           <div className="flex flex-col">
@@ -26,7 +102,15 @@ const TransactionDetail: React.FC = () => {
               Tên công ty
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              Công ty TNHH ABC
+              {transaction.company?.name || '---'}
+            </span>
+          </div>
+          <div className="flex flex-col">
+            <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
+              Người đại diện
+            </label>
+            <span className="text-[#344054] text-[16px] font-medium leading-normal">
+              {transaction.company?.representative || '---'}
             </span>
           </div>
           <div className="flex flex-col">
@@ -34,7 +118,7 @@ const TransactionDetail: React.FC = () => {
               Tax ID
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              123456789
+              {transaction.company?.tax_number || '---'}
             </span>
           </div>
 
@@ -43,7 +127,9 @@ const TransactionDetail: React.FC = () => {
               Trạng thái
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              Đang hoạt động
+              {transaction.company?.status === 'ACTIVE'
+                ? 'Đang hoạt động'
+                : transaction.company?.status}
             </span>
           </div>
         </div>
@@ -53,67 +139,76 @@ const TransactionDetail: React.FC = () => {
           Thông tin cửa hàng đại lý
         </div>
 
-        <div className="grid grid-cols-4 gap-4 w-full">
+        <div className="grid grid-cols-5 gap-4 w-full">
+          {/* Mã cửa hàng */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
-              Tài khoản cửa hàng TT
+              Mã cửa hàng
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              ACC-991239940
+              {transaction.store?.code || '---'}
             </span>
           </div>
 
-          <div className="flex flex-col">
-            <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
-              Tên công ty
-            </label>
-            <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              The Global
-            </span>
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
-              Mã công ty
-            </label>
-            <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              CMP-1234
-            </span>
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
-              Mã cửa hàng đại lý
-            </label>
-            <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              Nguyễn Văn B
-            </span>
-          </div>
-
+          {/* Tên cửa hàng */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
               Tên cửa hàng
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              Value
+              {transaction.store?.name || '---'}
             </span>
           </div>
 
+          {/* Nhân viên thực hiện giao dịch */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
-              Tên người quản lý
+              Nhân viên thực hiện giao dịch
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              Nguyễn Văn A
+              {transaction.createdByStaff?.name || '---'}
             </span>
           </div>
 
+          {/* Thời gian giao dịch */}
+          <div className="flex flex-col">
+            <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
+              Thời gian giao dịch
+            </label>
+            <span className="text-[#344054] text-[16px] font-medium leading-normal">
+              {transaction.createdAt
+                ? new Date(transaction.createdAt).toLocaleString()
+                : '---'}
+            </span>
+          </div>
+
+          {/* Người phê duyệt */}
+          <div className="flex flex-col">
+            <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
+              Người phê duyệt
+            </label>
+            <span className="text-[#344054] text-[16px] font-medium leading-normal">
+              {transaction.approvedByStaff?.name || '---'}
+            </span>
+          </div>
+
+          {/* Tên khách hàng */}
+          <div className="flex flex-col">
+            <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
+              Tên khách hàng
+            </label>
+            <span className="text-[#344054] text-[16px] font-medium leading-normal">
+              {/* {transaction.customerName || '---'} */}
+            </span>
+          </div>
+
+          {/* Nhân viên thực hiện */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
               Nhân viên thực hiện
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              Nguyễn Văn B
+              {transaction.createdByStaff?.name || '---'}
             </span>
           </div>
         </div>
@@ -124,69 +219,102 @@ const TransactionDetail: React.FC = () => {
           Thông tin giao dịch
         </div>
 
-        <div className="grid grid-cols-4 gap-4 w-full">
+        <div className="grid grid-cols-5 gap-4 w-full">
+          {/* Mã giao dịch */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
               Mã giao dịch
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              TXN-123456
+              {transaction.code || '---'}
             </span>
           </div>
+
+          {/* Tổng tiền */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
-              Số tiền
+              Tổng tiền
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              1,000,000 VND
+              {transaction.totalAmount
+                ? transaction.totalAmount.toLocaleString('vi-VN') + ' VND'
+                : '---'}
             </span>
           </div>
+
+          {/* Số tiền giao dịch */}
+          <div className="flex flex-col">
+            <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
+              Số tiền giao dịch
+            </label>
+            <span className="text-[#344054] text-[16px] font-medium leading-normal">
+              {transaction.amount
+                ? transaction.amount.toLocaleString('vi-VN') + ' VND'
+                : '---'}
+            </span>
+          </div>
+
+          {/* Loại giao dịch */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
               Loại giao dịch
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              Nạp tiền
+              {transaction.transactionType?.name || '---'}
             </span>
           </div>
+
+          {/* Trạng thái */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
               Trạng thái
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              Thành công
+              {transaction.status || '---'}
             </span>
           </div>
+
+          {/* Số tài khoản nguồn */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
-              Mã giới thiệu
+              Số tài khoản nguồn
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              REF-98765
+              {transaction.fromAccount || '---'}
             </span>
           </div>
+
+          {/* Số tài khoản nhận */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
-              Ngày giao dịch
+              Số tài khoản nhận
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              2023-10-05
+              {transaction.toAccount || '---'}
             </span>
           </div>
+
+          {/* Thời gian giao dịch */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
-              Số tài khoản
+              Thời gian giao dịch
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              ACC-111222333
+              {transaction.createdAt
+                ? new Date(transaction.createdAt).toLocaleString('vi-VN')
+                : '---'}
             </span>
           </div>
+
+          {/* Phí giao dịch */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
               Phí giao dịch
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              50,000 VND
+              {transaction.transactionFee !== undefined
+                ? transaction.transactionFee.toLocaleString('vi-VN') + ' VND'
+                : '---'}
             </span>
           </div>
         </div>
@@ -212,48 +340,6 @@ const TransactionDetail: React.FC = () => {
             />
           </svg>
           Quay lại
-        </button>
-        <button
-          type="button"
-          className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-          >
-            <path
-              d="M5.14669 5.14645C5.34195 4.95118 5.65854 4.95118 5.8538 5.14645L8.00012 7.29277L10.1464 5.14645C10.3417 4.95118 10.6583 4.95118 10.8536 5.14645C11.0488 5.34171 11.0488 5.65829 10.8536 5.85355L8.70723 7.99988L10.8537 10.1464C11.049 10.3416 11.049 10.6582 10.8537 10.8535C10.6585 11.0487 10.3419 11.0487 10.1466 10.8535L8.00012 8.70698L5.85364 10.8535C5.65838 11.0487 5.34179 11.0487 5.14653 10.8535C4.95127 10.6582 4.95127 10.3416 5.14653 10.1464L7.29302 7.99988L5.14669 5.85355C4.95143 5.65829 4.95143 5.34171 5.14669 5.14645Z"
-              fill="#242729"
-            />
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M8 15C11.866 15 15 11.866 15 8C15 4.13401 11.866 1 8 1C4.13401 1 1 4.13401 1 8C1 11.866 4.13401 15 8 15ZM8 14C11.3137 14 14 11.3137 14 8C14 4.68629 11.3137 2 8 2C4.68629 2 2 4.68629 2 8C2 11.3137 4.68629 14 8 14Z"
-              fill="#242729"
-            />
-          </svg>{' '}
-          Hủy bỏ
-        </button>
-        <button
-          type="submit"
-          className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-          >
-            <path
-              d="M5.86663 10.5979L3.06663 7.79792L2.1333 8.73125L5.86663 12.4646L13.8666 4.46458L12.9333 3.53125L5.86663 10.5979Z"
-              fill="white"
-            />
-          </svg>
-          Đồng ý duyệt
         </button>
       </div>
     </div>
