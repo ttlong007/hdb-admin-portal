@@ -114,17 +114,17 @@ const EditMerchant = () => {
         // Map limits.
         transaction_daily_quota: dailyLimit,
         transaction_monthly_quota: monthlyLimit,
-        // Map approveThreshold using the first need_approve_transaction_types' approve_amount.
+        // Map approveThreshold using the first available approve_amount.
         approveThreshold:
           storeData.need_approve_transaction_types &&
           storeData.need_approve_transaction_types.length > 0
             ? storeData.need_approve_transaction_types[0].approve_amount
             : '',
-        // Map approval transaction types.
+        // Map transactionTypes based on the active items' transaction_type_code.
         transactionTypes:
-          storeData.need_approve_transaction_types?.filter(
-            (item: any) => item.is_active
-          ).map((item: any) => item.transaction_type_code) || [],
+          storeData.need_approve_transaction_types
+            ?.filter((item: any) => item.is_active)
+            .map((item: any) => item.transaction_type_code) || [],
         // Map company.
         company_id:
           storeData.company_id && storeData.company
@@ -132,7 +132,7 @@ const EditMerchant = () => {
             : null,
       })
 
-      // Also set needApprove if there are any approval types.
+      // Set the needApprove flag based on whether any approval transaction types exist.
       setNeedApprove(
         storeData.need_approve_transaction_types &&
           storeData.need_approve_transaction_types.length > 0
@@ -158,11 +158,14 @@ const EditMerchant = () => {
 
   const options =
     transactionOptions && transactionOptions.length
-      ? transactionOptions.map((t: { id: number; name: string }) => ({
-          id: t.id,
+      ? transactionOptions.map((t: { id: number; name: string; code: string }) => ({
+          id: t.code, // Use the code as the checkbox value
           name: t.name,
         }))
-      : defaultTransactionTypes
+      : defaultTransactionTypes.map((t) => ({
+          id: t.name.toUpperCase(), // or another logic that matches your API codes
+          name: t.name,
+        }))
 
   // Fetch provinces (cities)
   const { data: provinces, isLoading: isLoadingProvinces } = useQuery<Option[]>({
@@ -321,7 +324,7 @@ const EditMerchant = () => {
         </NavLink>
         <div className="text-base font-semibold text-[#A1AAB2]">/</div>
         <span className="text-base font-semibold text-[#A1AAB2]">
-          Đăng ký điểm đại lý
+          Chỉnh sửa điểm đại lý
         </span>
       </div>
 
@@ -653,11 +656,7 @@ const EditMerchant = () => {
                             if (e.target.checked) {
                               field.onChange([...field.value, type.id])
                             } else {
-                              field.onChange(
-                                field.value.filter(
-                                  (id: number) => id !== type.id
-                                )
-                              )
+                              field.onChange(field.value.filter((val: any) => val !== type.id))
                             }
                           }}
                         >
