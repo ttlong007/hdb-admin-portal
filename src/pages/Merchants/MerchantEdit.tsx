@@ -40,7 +40,7 @@ const EditMerchant = () => {
     handleSubmit,
     control,
     reset,
-    formState: { errors },
+    formState: { errors, dirtyFields },
   } = useForm<MerchantFormValues>({
     defaultValues: {
       name: '',
@@ -78,8 +78,9 @@ const EditMerchant = () => {
         storeData.limits?.find((l: any) => l.type === 'TRANSACTION_QUOTA_DAILY')
           ?.amount || ''
       const monthlyLimit =
-        storeData.limits?.find((l: any) => l.type === 'TRANSACTION_QUOTA_MONTHLY')
-          ?.amount || ''
+        storeData.limits?.find(
+          (l: any) => l.type === 'TRANSACTION_QUOTA_MONTHLY'
+        )?.amount || ''
 
       reset({
         name: storeData.name || '',
@@ -106,7 +107,10 @@ const EditMerchant = () => {
           : null,
         // Map accounts.
         expense_account: storeData.expense_account
-          ? { label: storeData.expense_account, value: storeData.expense_account }
+          ? {
+              label: storeData.expense_account,
+              value: storeData.expense_account,
+            }
           : null,
         income_account: storeData.income_account
           ? { label: storeData.income_account, value: storeData.income_account }
@@ -128,7 +132,10 @@ const EditMerchant = () => {
         // Map company.
         company_id:
           storeData.company_id && storeData.company
-            ? { label: storeData.company.name, value: storeData.company.id.toString() }
+            ? {
+                label: storeData.company.name,
+                value: storeData.company.id.toString(),
+              }
             : null,
       })
 
@@ -148,7 +155,9 @@ const EditMerchant = () => {
   const { data: transactionOptions } = useQuery({
     queryKey: ['transaction-types'],
     queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/transaction/list-types')
+      const response = await axiosInstance.get(
+        '/v1/admin/transaction/list-types'
+      )
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data
       }
@@ -158,32 +167,40 @@ const EditMerchant = () => {
 
   const options =
     transactionOptions && transactionOptions.length
-      ? transactionOptions.map((t: { id: number; name: string; code: string }) => ({
-          id: t.code, // Use the code as the checkbox value
-          name: t.name,
-        }))
+      ? transactionOptions.map(
+          (t: { id: number; name: string; code: string }) => ({
+            id: t.id, // Use the code as the checkbox value
+            code: t.code,
+            name: t.name,
+          })
+        )
       : defaultTransactionTypes.map((t) => ({
-          id: t.name.toUpperCase(), // or another logic that matches your API codes
+          id: t.id, // or another logic that matches your API codes
+          code: t.name.toUpperCase(),
           name: t.name,
         }))
-
   // Fetch provinces (cities)
-  const { data: provinces, isLoading: isLoadingProvinces } = useQuery<Option[]>({
-    queryKey: ['location', 'province'],
-    queryFn: async () => {
-      const response = await axiosInstance.post('/v1/admin/location/get-list', {
-        location_type: 'province',
-        parent_code: '',
-      })
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data.map((p: any) => ({
-          label: p.name,
-          value: p.code,
-        }))
-      }
-      throw new Error('Failed to fetch provinces')
-    },
-  })
+  const { data: provinces, isLoading: isLoadingProvinces } = useQuery<Option[]>(
+    {
+      queryKey: ['location', 'province'],
+      queryFn: async () => {
+        const response = await axiosInstance.post(
+          '/v1/admin/location/get-list',
+          {
+            location_type: 'province',
+            parent_code: '',
+          }
+        )
+        if (response.data.status_code === 'ACCEPT') {
+          return response.data.data.map((p: any) => ({
+            label: p.name,
+            value: p.code,
+          }))
+        }
+        throw new Error('Failed to fetch provinces')
+      },
+    }
+  )
 
   const selectedCity = useWatch({ control, name: 'city' })
 
@@ -228,7 +245,9 @@ const EditMerchant = () => {
   })
 
   // Fetch dynamically the account list.
-  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<Option[]>({
+  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<
+    Option[]
+  >({
     queryKey: ['companyAccounts'],
     queryFn: async () => {
       const response = await axiosInstance.get('/v1/admin/company/6')
@@ -264,7 +283,10 @@ const EditMerchant = () => {
   // Create merchant mutation.
   const createMerchantMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const response = await axiosInstance.post('/v1/admin/store/create', payload)
+      const response = await axiosInstance.post(
+        '/v1/admin/store/create',
+        payload
+      )
       if (response.data.status_code === 'ACCEPT') {
         return response.data
       }
@@ -279,32 +301,99 @@ const EditMerchant = () => {
     },
   })
 
+  const editMerchantMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const response = await axiosInstance.patch(
+        `/v1/admin/store/${id}`,
+        payload
+      )
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data
+      }
+      throw new Error('Edit failed')
+    },
+    onSuccess: () => {
+      toast.success('Chỉnh sửa đại lý thành công!')
+    },
+    onError: (error: any) => {
+      toast.error('Chỉnh sửa đại lý thất bại!')
+      console.error(error)
+    },
+  })
+
   const onSubmit = (data: MerchantFormValues) => {
-    const payload = {
-      name: data.name,
-      code: data.code,
-      address: data.address,
-      location_id: data.ward?.value || 0,
-      expense_account: data.expense_account?.value || '',
-      income_account: data.income_account?.value || '',
-      company_id: data.company_id?.value || 0,
-      approve_threshold: Number(data.approveThreshold),
-      limits: [
-        {
+    // Start with required field(s)
+    const payload: any = {}
+
+    // Loop over changed fields (dirtyFields) to add them in payload.
+    Object.keys(dirtyFields).forEach((key) => {
+      // For simple fields, assign directly.
+      if (
+        key !== 'transaction_daily_quota' &&
+        key !== 'transaction_monthly_quota' &&
+        key !== 'approveThreshold' &&
+        key !== 'transactionTypes' &&
+        key !== 'expense_account' &&
+        key !== 'income_account' &&
+        key !== 'ward'
+      ) {
+        payload[key] = (data as any)[key]
+      }
+    })
+
+    // Handle accounts separately (assuming they are Option objects)
+    if (dirtyFields.expense_account && data.expense_account) {
+      payload.expense_account = data.expense_account.value
+    }
+    if (dirtyFields.income_account && data.income_account) {
+      payload.income_account = data.income_account.value
+    }
+
+    // Handle location: use ward to map location_id.
+    if (dirtyFields.ward && data.ward) {
+      payload.location_id = Number(data.ward.value)
+    }
+
+    // Handle limits if either daily or monthly quotas changed.
+    if (
+      dirtyFields.transaction_daily_quota ||
+      dirtyFields.transaction_monthly_quota
+    ) {
+      payload.limits = []
+      if (dirtyFields.transaction_daily_quota) {
+        payload.limits.push({
           amount: Number(data.transaction_daily_quota),
           type: 'TRANSACTION_QUOTA_DAILY',
-        },
-        {
+        })
+      }
+      if (dirtyFields.transaction_monthly_quota) {
+        payload.limits.push({
           amount: Number(data.transaction_monthly_quota),
           type: 'TRANSACTION_QUOTA_MONTHLY',
-        },
-      ],
-      need_approve_transaction_data: {
-        approve_amount: Number(data.approveThreshold),
-        need_approve_transaction_ids: data.transactionTypes,
-      },
+        })
+      }
     }
-    createMerchantMutation.mutate(payload)
+
+    // Handle approval data if approveThreshold or transactionTypes changed.
+    if (dirtyFields.approveThreshold || dirtyFields.transactionTypes) {
+      // Map selected transaction type codes to their corresponding IDs.
+      const selectedIds = (data.transactionTypes as any)
+        .map((code) => {
+          const option = options.find(
+            (opt: { id: number; code: string; name: string }) => opt.code === code
+          )
+          return option ? option.id : null
+        })
+        .filter((id): id is number => id !== null)
+
+      payload.need_approve_transaction_data = {
+        approve_amount: Number(data.approveThreshold),
+        need_approve_transaction_ids: selectedIds,
+      }
+    }
+
+    // Submit only the changed payload.
+    editMerchantMutation.mutate(payload)
   }
 
   if (isLoadingStore) return <div>Loading store details...</div>
@@ -647,22 +736,28 @@ const EditMerchant = () => {
                   control={control}
                   render={({ field }) => (
                     <div className="grid grid-cols-4 gap-6 w-full mb-4">
-                      {options.map((type: { id: number; name: string }) => (
-                        <Checkbox
-                          key={type.id}
-                          checked={field.value.includes(type.id)}
-                          value={type.id}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              field.onChange([...field.value, type.id])
-                            } else {
-                              field.onChange(field.value.filter((val: any) => val !== type.id))
-                            }
-                          }}
-                        >
-                          {type.name}
-                        </Checkbox>
-                      ))}
+                      {options.map(
+                        (type: { id: number; name: string; code: any }) => (
+                          <Checkbox
+                            key={type.id}
+                            checked={field.value.includes(type.code)}
+                            value={type.code}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                field.onChange([...field.value, type.code])
+                              } else {
+                                field.onChange(
+                                  field.value.filter(
+                                    (val: any) => val !== type.code
+                                  )
+                                )
+                              }
+                            }}
+                          >
+                            {type.name}
+                          </Checkbox>
+                        )
+                      )}
                     </div>
                   )}
                 />
