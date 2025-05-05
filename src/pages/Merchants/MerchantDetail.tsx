@@ -28,7 +28,11 @@ export default function MasterMerchantDetail() {
   const navigate = useNavigate()
 
   // Fetch store details using id from route params.
-  const { data: storeData, isLoading: isLoadingStore, error } = useQuery<any, Error>({
+  const {
+    data: storeData,
+    isLoading: isLoadingStore,
+    error,
+  } = useQuery<any, Error>({
     queryKey: ['storeDetail', id],
     queryFn: async () => {
       const response = await axiosInstance.get(`/v1/admin/store/${id}`)
@@ -43,68 +47,34 @@ export default function MasterMerchantDetail() {
   if (isLoadingStore) return <div>Loading...</div>
   if (error) return <div>Error loading detail.</div>
 
-  // Here, you can map the fetched storeData as needed.
-  const store = storeData || {}
+  const merchant = {
+    id: storeData.id,
+    code: storeData.code,
+    name: storeData.name,
+    address: storeData.address,
+    status: storeData.status,
+    income_account: storeData.income_account,
+    expense_account: storeData.expense_account,
+    company: storeData.company
+      ? {
+          id: storeData.company.id,
+          name: storeData.company.name,
+          cif: storeData.company.cif,
+          tax_number: storeData.company.tax_number,
+          representative: storeData.company.representative,
+          status: storeData.company.status,
+        }
+      : null,
+    // map additional fields if needed...
+  }
 
-  // Example: mapping stored values for display.
-  const companyName = store.name || '---'
-  const taxCode = store.tax_number || '---'
-  const merchantCount = store.merchant_count || '---'
-  const status = store.status || '---'
-
-  const columns = [
-    {
-      title: 'Loại giao dịch',
-      dataIndex: 'transactionType',
-      key: 'transactionType',
-    },
-    {
-      title: 'Phí cố định',
-      dataIndex: 'fixedFee',
-      key: 'fixedFee',
-    },
-    {
-      title: 'Phí phần trăm theo giao dịch',
-      dataIndex: 'transactionFeePercent',
-      key: 'transactionFeePercent',
-    },
-    {
-      title: 'Phí tối thiểu',
-      dataIndex: 'minFee',
-      key: 'minFee',
-    },
-    {
-      title: 'Phí tối đa',
-      dataIndex: 'maxFee',
-      key: 'maxFee',
-    },
-    {
-      title: 'Phí dịch vụ ngoài giờ',
-      dataIndex: 'afterHoursFee',
-      key: 'afterHoursFee',
-    },
-  ]
-
-  const dataSource = [
-    {
-      key: '1',
-      transactionType: 'Giao dịch 1',
-      fixedFee: '1000',
-      transactionFeePercent: '2%',
-      minFee: '500',
-      maxFee: '3000',
-      afterHoursFee: '150',
-    },
-    {
-      key: '2',
-      transactionType: 'Giao dịch 2',
-      fixedFee: '2000',
-      transactionFeePercent: '3%',
-      minFee: '600',
-      maxFee: '4000',
-      afterHoursFee: '250',
-    },
-  ]
+  // Example: Calculate limits (ensure this is defined before the return block)
+  const monthlyLimit = storeData.limits?.find(
+    (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
+  )?.amount;
+  const dailyLimit = storeData.limits?.find(
+    (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
+  )?.amount;
 
   return (
     <>
@@ -123,60 +93,133 @@ export default function MasterMerchantDetail() {
       <section className="flex flex-col gap-4">
         <div className="flex gap-4">
           <div id="A" className="w-2/3 flex flex-col gap-4">
-            {/* Info Card displaying store details */}
-            <InfoCard title="Thông tin điểm đại lý">
-              <div className="flex gap-6 mb-6 max-sm:flex-col">
+            <InfoCard title="Thông tin công ty">
+              <div className="grid grid-cols-3">
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">Mã Cif</span>
+                  <span className="text-base text-gray-800">
+                    {merchant.company?.cif || '---'}
+                  </span>
+                </div>
+
                 <div className="flex flex-col flex-1 gap-2">
                   <span className="text-sm text-gray-400">Tên công ty</span>
                   <span className="text-base text-gray-800">
-                    {companyName}
+                    {merchant.company?.name || '---'}
                   </span>
                 </div>
+
                 <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">Mã số thuế</span>
+                  <span className="text-sm text-gray-400">Người đại điện</span>
                   <span className="text-base text-gray-800">
-                    {taxCode}
+                    {merchant.company?.representative || '---'}
                   </span>
                 </div>
+
                 <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">Số lượng điểm đại lý</span>
+                  <span className="text-sm text-gray-400">
+                    Số giấy phép DKKD
+                  </span>
                   <span className="text-base text-gray-800">
-                    {merchantCount}
+                    {merchant.company?.tax_number || '---'}
                   </span>
                 </div>
+
                 <div className="flex flex-col flex-1 gap-2">
                   <span className="text-sm text-gray-400">Trạng thái</span>
                   <span className="text-base text-gray-800">
-                    {status}
+                    {merchant.company?.status || '---'}
                   </span>
                 </div>
               </div>
             </InfoCard>
 
-            <InfoCard title="Thông tin cấu hình nghiệp vụ Ngân hàng đại lý">
-              <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4">
-                Hạn mức giao dịch
-              </h4>
-              <div className="flex gap-6 mb-6 max-sm:flex-col">
+            <InfoCard title="Thông tin điểm đại lý">
+              <div className="grid grid-cols-3">
+                {/* Mã điểm địa lý */}
                 <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">Hạn mức trong tháng</span>
+                  <span className="text-sm text-gray-400">Mã điểm địa lý</span>
                   <span className="text-base text-gray-800">
-                    {store.monthlyLimit ? store.monthlyLimit + ' VND' : '---'}
+                    {merchant.code || '---'}
                   </span>
                 </div>
+
+                {/* Tên điểm đại lý */}
                 <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">Hạn mức trong ngày</span>
+                  <span className="text-sm text-gray-400">Tên điểm đại lý</span>
                   <span className="text-base text-gray-800">
-                    {store.dailyLimit ? store.dailyLimit + ' VND' : '---'}
+                    {merchant.name || '---'}
+                  </span>
+                </div>
+
+                {/* Địa chỉ */}
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">Địa chỉ</span>
+                  <span className="text-base text-gray-800">
+                    {merchant.address || '---'}
+                  </span>
+                </div>
+
+                {/* Tài khoản chuyên thu */}
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">
+                    Tài khoản chuyên thu
+                  </span>
+                  <span className="text-base text-gray-800">
+                    {merchant.income_account || '---'}
+                  </span>
+                </div>
+
+                {/* Tài khoản chuyên chi */}
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">
+                    Tài khoản chuyên chi
+                  </span>
+                  <span className="text-base text-gray-800">
+                    {merchant.expense_account || '---'}
+                  </span>
+                </div>
+
+                {/* Trạng thái */}
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">Trạng thái</span>
+                  <span className="text-base text-gray-800">
+                    {merchant.status || '---'}
+                  </span>
+                </div>
+              </div>
+            </InfoCard>
+
+            <InfoCard title="Hạn mức giao dịch">
+              <div className="grid grid-cols-3">
+                {/* Hạn mức trong tháng */}
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">
+                    Hạn mức trong tháng
+                  </span>
+                  <span className="text-base text-gray-800">
+                    {monthlyLimit !== undefined
+                      ? monthlyLimit.toLocaleString('vi-VN') + ' VND'
+                      : '---'}
+                  </span>
+                </div>
+
+                {/* Hạn mức trong ngày */}
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">
+                    Hạn mức trong ngày
+                  </span>
+                  <span className="text-base text-gray-800">
+                    {dailyLimit !== undefined
+                      ? dailyLimit.toLocaleString('vi-VN') + ' VND'
+                      : '---'}
                   </span>
                 </div>
               </div>
             </InfoCard>
           </div>
           <div id="B" className="w-1/3">
-            <aside>
-              {/* Additional side information */}
-            </aside>
+            <aside>{/* Additional side information */}</aside>
           </div>
         </div>
 

@@ -78,6 +78,9 @@ const TransactionDetail: React.FC = () => {
     transactionFee: data.transaction_fee,
     fromAccount: data.from_account,
     toAccount: data.to_account,
+    createdAt: data.created_at,
+    updatedAt: data.updated_at,
+    totalAmount: data.total_amount,
     // Additional fields (if needed) can be mapped here.
   }
 
