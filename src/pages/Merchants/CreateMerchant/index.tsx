@@ -1,48 +1,209 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { Checkbox, Button, Switch } from 'antd'
+import { Input,  } from 'rizzui'
+import Select from 'react-select'
+import { useForm, Controller, useWatch } from 'react-hook-form'
 import { NavLink } from 'react-router-dom'
-import { routes } from '@/config/routes'
-import { Tabs, Button } from 'antd'
-import Step01 from './steps/Step01'
-import Step02 from './steps/Step02'
-import Step03 from './steps/Step03'
 
-const { TabPane } = Tabs
+import { useQuery, useMutation } from '@tanstack/react-query'
+import axiosInstance from '@/config/axios'
+import { routes } from '@/config/routes'
+
+
+type Option = { label: string; value: string }
+
+interface MerchantFormValues {
+  name: string
+  code: string
+  address: string
+  city: Option | null
+  district: Option | null
+  ward: Option | null
+  expense_account: Option | null
+  income_account: Option | null
+  transaction_monthly_quota: number | string
+  transaction_daily_quota: number | string
+  approveThreshold: number | string
+  transactionTypes: number[]
+}
+
+const defaultTransactionTypes = [
+  { id: 1, name: 'Giao dịch 1' },
+  { id: 2, name: 'Giao dịch 2' },
+  { id: 3, name: 'Giao dịch 3' },
+]
 
 const CreateMerchant = () => {
-  const [activeKey, setActiveKey] = useState('1')
-  const [currentStep, setCurrentStep] = useState(0)
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<MerchantFormValues>({
+    defaultValues: {
+      name: '',
+      code: '',
+      address: '',
+      city: null,
+      district: null,
+      ward: null,
+      expense_account: null,
+      income_account: null,
+      transaction_monthly_quota: '',
+      transaction_daily_quota: '',
+      approveThreshold: '',
+      transactionTypes: [],
+    },
+  })
 
-  const next = () => {
-    const nextStep = currentStep + 1
-    setCurrentStep(nextStep)
-    setActiveKey(String(nextStep + 1))
+  const [needApprove, setNeedApprove] = React.useState(false)
+
+  const handleApporveChange = (checked: boolean) => {
+    setNeedApprove(checked)
   }
 
-  const prev = () => {
-    const prevStep = currentStep - 1
-    setCurrentStep(prevStep)
-    setActiveKey(String(prevStep + 1))
-  }
+  const { data: transactionOptions, isLoading } = useQuery({
+    queryKey: ['transaction-types'],
+    queryFn: async () => {
+      const response = await axiosInstance.get(
+        '/v1/admin/transaction/list-types'
+      )
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      } else {
+        throw new Error('Failed to fetch transaction types')
+      }
+    },
+  })
 
-  const onTabChange = (key: string) => {
-    setActiveKey(key)
-    setCurrentStep(Number(key) - 1)
-  }
+  // Use fetched data if available; fallback to default list if needed.
+  const options =
+    transactionOptions && transactionOptions.length
+      ? transactionOptions.map((t: { id: number; name: string }) => ({
+          id: t.id,
+          name: t.name,
+        }))
+      : defaultTransactionTypes
 
-  const steps = [
+  // Fetch provinces (cities)
+  const { data: provinces, isLoading: isLoadingProvinces } = useQuery<Option[]>(
     {
-      title: 'Thông tin điểm đại lý',
-      content: <Step01 onNext={next} />,
+      queryKey: ['location', 'province'],
+      queryFn: async () => {
+        const response = await axiosInstance.post(
+          '/v1/admin/location/get-list',
+          {
+            location_type: 'province',
+            parent_code: '',
+          }
+        )
+        if (response.data.status_code === 'ACCEPT') {
+          return response.data.data.map((p: any) => ({
+            label: p.name,
+            value: p.code,
+          }))
+        }
+        throw new Error('Failed to fetch provinces')
+      },
+    }
+  )
+
+  // Watch selected city
+  const selectedCity = useWatch({ control, name: 'city' })
+
+  // Fetch districts when a city is selected
+  const { data: districts, isLoading: isLoadingDistrict } = useQuery<Option[]>({
+    queryKey: ['location', 'district', selectedCity?.value],
+    queryFn: async () => {
+      const response = await axiosInstance.post('/v1/admin/location/get-list', {
+        location_type: 'district',
+        parent_code: selectedCity?.value || '',
+      })
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data.map((d: any) => ({
+          label: d.name,
+          value: d.code,
+        }))
+      }
+      throw new Error('Failed to fetch districts')
     },
-    {
-      title: 'Hạn mức giao dịch',
-      content: <Step02 onNext={next} onBack={prev} />,
+    enabled: !!selectedCity,
+  })
+
+  // Watch selected district
+  const selectedDistrict = useWatch({ control, name: 'district' })
+
+  // Fetch wards when a district is selected
+  const { data: wards, isLoading: isLoadingWard } = useQuery<Option[]>({
+    queryKey: ['location', 'ward', selectedDistrict?.value],
+    queryFn: async () => {
+      const response = await axiosInstance.post('/v1/admin/location/get-list', {
+        location_type: 'ward',
+        parent_code: selectedDistrict?.value || '',
+      })
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data.map((w: any) => ({
+          label: w.name,
+          value: w.id,
+        }))
+      }
+      throw new Error('Failed to fetch wards')
     },
-    {
-      title: 'Duyệt giao dịch',
-      content: <Step03 onBack={prev} />,
+    enabled: !!selectedDistrict,
+  })
+
+  // Fetch account list dynamically
+  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<
+    Option[]
+  >({
+    queryKey: ['companyAccounts'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/company/6')
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data.accts.map((acc: any) => ({
+          label: `${acc.acct_desc} (${acc.acct_no})`,
+          value: acc.acct_no,
+        }))
+      }
+      throw new Error('Failed to fetch accounts')
     },
-  ]
+  })
+
+  // Create merchant mutation
+  const createMerchantMutation = useMutation({
+    mutationFn: async (payload: any) => {
+      const response = await axiosInstance.post(
+        '/v1/admin/store/create',
+        payload
+      )
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data
+      }
+      throw new Error('Creation failed')
+    },
+    onSuccess: () => {
+      console.log('Merchant created successfully!')
+      // Navigate or show success message as needed.
+    },
+    onError: (error: any) => {
+      console.error(error)
+    },
+  })
+
+  const onSubmit = (data: MerchantFormValues) => {
+    const payload = {
+      name: data.name,
+      code: data.code,
+      address: data.address,
+      location_id: data.ward?.value || '',
+      expense_account: data.expense_account?.value,
+      income_account: data.income_account?.value,
+      transaction_monthly_quota: data.transaction_monthly_quota,
+      transaction_daily_quota: data.transaction_daily_quota,
+      approveThreshold: data.approveThreshold,
+      transactionTypes: data.transactionTypes,
+    }
+    createMerchantMutation.mutate(payload)
+  }
 
   return (
     <>
@@ -63,26 +224,343 @@ const CreateMerchant = () => {
         </span>
       </div>
 
-      <main className="flex p-6 flex-col items-start gap-6 rounded-lg bg-white">
-        <Tabs
-          activeKey={activeKey}
-          onChange={onTabChange}
-          type="card"
-          tabPosition="left"
-          className="w-full"
-        >
-          {steps.map((item, index) => (
-            <TabPane
-              tab={item.title}
-              key={String(index + 1)}
-              className="px-8"
-            >
-              {item.content}
-              {/* Navigation buttons can be placed here if needed */}
-            </TabPane>
-          ))}
-        </Tabs>
-      </main>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="flex p-6 flex-col items-start gap-6 rounded-lg bg-white"
+      >
+        <section className="w-full border-b pb-8">
+          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
+            Thông tin điểm đại lý
+          </div>
+          <div className="grid grid-cols-3 gap-6 w-full">
+            {/* Name */}
+            <div>
+              <Controller
+                name="name"
+                control={control}
+                rules={{ required: 'Tên điểm đại lý là bắt buộc' }}
+                render={({ field }) => (
+                  <>
+                    <Input
+                      {...field}
+                      label="Tên điểm đại lý *"
+                      placeholder="Nhập tên điểm đại lý"
+                      className="w-full"
+                    />
+                    {errors.name && (
+                      <p className="text-red-500 text-sm">
+                        {errors.name.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            {/* Code */}
+            <div>
+              <Controller
+                name="code"
+                control={control}
+                rules={{ required: 'Mã điểm đại lý là bắt buộc' }}
+                render={({ field }) => (
+                  <>
+                    <Input
+                      {...field}
+                      label="Mã điểm đại lý *"
+                      placeholder="Nhập mã điểm đại lý"
+                      className="w-full"
+                    />
+                    {errors.code && (
+                      <p className="text-red-500 text-sm">
+                        {errors.code.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            {/* Address */}
+            <div>
+              <Controller
+                name="address"
+                control={control}
+                rules={{ required: 'Địa chỉ là bắt buộc' }}
+                render={({ field }) => (
+                  <>
+                    <Input
+                      {...field}
+                      label="Địa chỉ *"
+                      placeholder="Nhập địa chỉ"
+                      className="w-full"
+                    />
+                    {errors.address && (
+                      <p className="text-red-500 text-sm">
+                        {errors.address.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            {/* City Field */}
+            <div>
+              <div className="text-sm font-medium text-gray-700 mb-1">
+                Tỉnh/Thành phố *
+              </div>
+              <Controller
+                name="city"
+                control={control}
+                rules={{ required: 'Tỉnh/Thành phố là bắt buộc' }}
+                render={({ field }) => (
+                  <>
+                    <Select
+                      {...field}
+                      placeholder="Chọn tỉnh/thành phố"
+                      className="w-full"
+                      options={provinces || []}
+                      isLoading={isLoadingProvinces}
+                      value={field.value}
+                    />
+                    {errors.city && (
+                      <p className="text-red-500 text-sm">
+                        {errors.city.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            {/* District Field */}
+            <div>
+              <div className="text-sm font-medium text-gray-700 mb-1">
+                Quận/Huyện *
+              </div>
+              <Controller
+                name="district"
+                control={control}
+                rules={{ required: 'Quận/Huyện là bắt buộc' }}
+                render={({ field }) => (
+                  <>
+                    <Select
+                      {...field}
+                      placeholder="Chọn quận/huyện"
+                      className="w-full"
+                      options={districts || []}
+                      isLoading={isLoadingDistrict}
+                      value={field.value}
+                    />
+                    {errors.district && (
+                      <p className="text-red-500 text-sm">
+                        {errors.district.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            {/* Ward Field */}
+            <div>
+              <div className="text-sm font-medium text-gray-700 mb-1">
+                Phường/Xã *
+              </div>
+              <Controller
+                name="ward"
+                control={control}
+                rules={{ required: 'Phường/Xã là bắt buộc' }}
+                render={({ field }) => (
+                  <>
+                    <Select
+                      {...field}
+                      placeholder="Chọn phường/xã"
+                      className="w-full"
+                      options={wards || []}
+                      isLoading={isLoadingWard}
+                      value={field.value}
+                    />
+                    {errors.ward && (
+                      <p className="text-red-500 text-sm">
+                        {errors.ward.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            {/* Expense Account */}
+            <div>
+              <div className="text-sm font-medium text-gray-700 mb-1">
+                Tài khoản chuyên chi *
+              </div>
+              <Controller
+                name="expense_account"
+                control={control}
+                rules={{ required: 'Tài khoản chuyên chi là bắt buộc' }}
+                render={({ field }) => (
+                  <>
+                    <Select
+                      {...field}
+                      placeholder="Chọn tài khoản chuyên chi"
+                      className="w-full"
+                      options={accountList || []}
+                      isLoading={isLoadingAccounts}
+                      value={field.value}
+                    />
+                    {errors.expense_account && (
+                      <p className="text-red-500 text-sm">
+                        {errors.expense_account.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            {/* Income Account */}
+            <div>
+              <div className="text-sm font-medium text-gray-700 mb-1">
+                Tài khoản chuyên thu *
+              </div>
+              <Controller
+                name="income_account"
+                control={control}
+                rules={{ required: 'Tài khoản chuyên thu là bắt buộc' }}
+                render={({ field }) => (
+                  <>
+                    <Select
+                      {...field}
+                      placeholder="Chọn tài khoản chuyên thu"
+                      className="w-full"
+                      options={accountList || []}
+                      isLoading={isLoadingAccounts}
+                      value={field.value}
+                    />
+                    {errors.income_account && (
+                      <p className="text-red-500 text-sm">
+                        {errors.income_account.message}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="w-full border-b pb-8">
+          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
+            Hạn mức giao dịch
+          </div>
+          <div className="grid grid-cols-3 gap-6 w-full">
+            <Controller
+              name="transaction_monthly_quota"
+              control={control}
+              rules={{ required: 'Hạn mức trong tháng là bắt buộc' }}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Hạn mức trong tháng *"
+                  placeholder="Nhập hạn mức trong tháng"
+                  className="w-full"
+                />
+              )}
+            />
+            <Controller
+              name="transaction_daily_quota"
+              control={control}
+              rules={{ required: 'Hạn mức giao dịch hàng ngày là bắt buộc' }}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Hạn mức giao dịch hàng ngày *"
+                  placeholder="Nhập hạn mức giao dịch hàng ngày"
+                  className="w-full"
+                />
+              )}
+            />
+          </div>
+        </section>
+
+        <section className="w-full border-b pb-8">
+          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
+            Duyệt giao dịch
+          </div>
+
+          <div className="flex items-center gap-2 mb-4">
+            <Switch
+              checked={needApprove}
+              onChange={handleApporveChange}
+              className="!w-[40px] !h-[20px] !rounded-full"
+            />
+            <span className="text-[#212B36]">
+              Yêu cầu trưởng cửa hàng duyệt giao dịch
+            </span>
+          </div>
+
+          {needApprove ? (
+            <>
+              <div className="grid grid-cols-3 gap-6 w-full mb-4">
+                <Controller
+                  name="approveThreshold"
+                  control={control}
+                  render={({ field }) => (
+                    <Input
+                      {...field}
+                      label="Ngưỡng giá trị cần duyệt *"
+                      placeholder="Nhập ngưỡng giá trị cần duyệt"
+                      className="w-full"
+                    />
+                  )}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm mb-1.5 font-medium">
+                  Loại giao dịch cần duyệt *
+                </label>
+                <Controller
+                  name="transactionTypes"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="grid grid-cols-4 gap-6 w-full mb-4">
+                      {options.map((type: { id: number; name: string }) => (
+                        <Checkbox
+                          key={type.id}
+                          checked={field.value.includes(type.id)}
+                          value={type.id}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              field.onChange([...field.value, type.id])
+                            } else {
+                              field.onChange(
+                                field.value.filter(
+                                  (id: number) => id !== type.id
+                                )
+                              )
+                            }
+                          }}
+                        >
+                          {type.name}
+                        </Checkbox>
+                      ))}
+                    </div>
+                  )}
+                />
+              </div>
+            </>
+          ) : null}
+        </section>
+
+        <div className="flex items-center justify-end gap-4 w-full my-4">
+          <button
+            type="submit"
+            disabled={createMerchantMutation.isPending}
+            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+          >
+            {createMerchantMutation.isPending
+              ? 'Đang tạo đại lý...'
+              : 'Tạo đại lý'}
+          </button>
+        </div>
+      </form>
     </>
   )
 }

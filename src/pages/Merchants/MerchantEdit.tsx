@@ -1,110 +1,136 @@
-import React, { useEffect } from 'react'
-import { HomeOutlined } from '@ant-design/icons'
-import { Breadcrumb, message, Button, Switch, Checkbox } from 'antd'
-import { Input, Select } from 'rizzui'
-import { useForm, Controller } from 'react-hook-form'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import axiosInstance from '@/config/axios'
-import { NavLink, useParams } from 'react-router-dom'
+import React, { useState } from 'react'
+import { Table, Tag, Space, Button } from 'antd'
+import { EditOutlined, EyeOutlined } from '@ant-design/icons'
+import type { TableProps } from 'antd'
+import { Link, NavLink } from 'react-router-dom'
+import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query'
+import _get from 'lodash/get'
+
 import { routes } from '@/config/routes'
+import {
+  MERCHANT_STATUS_MAP,
+  MERCHANT_STATUS_COLOR_MAP,
+} from '@/config/constants'
+import Filters from './components/Filters'
+import axiosInstance from '@/config/axios'
+import { toast } from 'react-toastify'
 
-interface MerchantFormValues {
-  name: string
-  code: string
-  address: string
-  ward: string
-  district: string
-  accountOption: boolean
-  accountSelect: string
-  monthlyLimit: number
-  dailyLimit: number
-  needApprove: boolean
-  approveThreshold: number
-  transactionTypes: string[]
-}
+const Merchants: React.FC = () => {
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
+  const [filter, setFilter] = useState<any>(null)
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
-export default function MerchantEdit() {
-  const { id } = useParams<{ id: string }>()
-  const { handleSubmit, control, reset } = useForm<MerchantFormValues>({
-    defaultValues: {
-      name: '',
-      code: '',
-      address: '',
-      ward: '1',
-      district: '1',
-      accountOption: false,
-      accountSelect: '',
-      monthlyLimit: 0,
-      dailyLimit: 0,
-      needApprove: false,
-      approveThreshold: 0,
-      transactionTypes: [],
-    },
-  })
-
-  // Use useQuery to fetch details from /v1/agent/store/:id
-  const {
-    data: merchantData,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ['merchant', id],
+  const { isPending, data, refetch } = useQuery({
+    queryKey: ['merchants', page, limit, filter],
     queryFn: async () => {
-      const res = await axiosInstance.get(`/v1/agent/store/${id}`)
-      return res.data
-    },
-    enabled: !!id,
-  })
-
-  useEffect(() => {
-    if (merchantData) {
-      reset({
-        name: merchantData.name,
-        code: merchantData.code,
-        address: merchantData.address,
-        ward: merchantData.ward || '1',
-        district: merchantData.district || '1',
-        accountOption: merchantData.accountOption || false,
-        accountSelect: merchantData.accountSelect || '',
-        monthlyLimit: merchantData.monthlyLimit || 0,
-        dailyLimit: merchantData.dailyLimit || 0,
-        needApprove: merchantData.needApprove || false,
-        approveThreshold: merchantData.approveThreshold || 0,
-        transactionTypes: merchantData.transactionTypes || [],
+      const response = await axiosInstance.get('/v1/admin/store/list', {
+        params: { page, limit, ...filter },
       })
-    }
-  }, [merchantData, reset])
-
-  // Mutation to update the merchant using the id from params
-  const updateMerchantMutation = useMutation({
-    mutationFn: async (payload: any) => {
-      const { data } = await axiosInstance.put(`/v1/admin/store/${id}`, payload)
-      return data
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data
+      } else {
+        throw new Error('Failed to get merchants')
+      }
     },
-    onSuccess: () => {
-      message.success('Đại lý được cập nhật thành công!')
-    },
-    onError: () => {
-      message.error('Không thể cập nhật đại lý.')
-    },
+    placeholderData: keepPreviousData,
   })
 
-  // Map form values to payload structure and submit
-  const onSubmit = (data: MerchantFormValues) => {
-    const payload = {
-      address: data.address,
-      approve_threshold: data.approveThreshold,
-      company_id: 1, // Set to the appropriate company ID
-      name: data.name,
-      need_approve_transaction: data.needApprove,
-      need_approve_transaction_types: data.transactionTypes,
-      parent_id: 1, // Set to the appropriate parent ID
-    }
-    updateMerchantMutation.mutate(payload)
+  const dataSource = _get(data, 'data', [])
+  const total = _get(data, 'page_data.total', 0)
+
+  const columns = [
+    {
+      title: 'STT',
+      key: 'stt',
+      width: 70,
+      render: (_: any, __: any, index: number) => index + 1,
+    },
+    {
+      title: 'Mã điểm đại lý',
+      dataIndex: 'code',
+      key: 'code',
+      render: (text: string) => (text ? text : '---'),
+    },
+    {
+      title: 'Tên điểm đại lý',
+      dataIndex: 'name',
+      key: 'name',
+      render: (text: string) => (text ? text : '---'),
+    },
+    {
+      title: 'Địa chỉ',
+      dataIndex: 'address',
+      key: 'address',
+      render: (text: string) => (text ? text : '---'),
+    },
+    {
+      title: 'Trạng thái duyệt',
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => {
+        const statusKey = status.toLowerCase()
+        const label = MERCHANT_STATUS_MAP[statusKey] || '---'
+        const color = MERCHANT_STATUS_COLOR_MAP[statusKey] || 'default'
+        return <Tag color={color}>{label}</Tag>
+      },
+    },
+    {
+      title: 'Tác vụ',
+      key: 'action',
+      render: (_, record: any) => (
+        <Space size="middle">
+          <Link to={routes.editMerchant.replace(':id', record.id)}>
+            <Button type="text" icon={<EditOutlined />} />
+          </Link>
+          <Link to={routes.merchantDetail.replace(':id', record.id)}>
+            <Button type="text" icon={<EyeOutlined />} />
+          </Link>
+        </Space>
+      ),
+    },
+  ]
+
+  const onPaginationChange = (pagination: any) => {
+    setPage(pagination.current)
+    setLimit(pagination.pageSize)
   }
 
-  if (isLoading) return <p>Loading...</p>
-  if (error) return <p>Error loading merchant data.</p>
+  const rowSelection: TableProps['rowSelection'] = {
+    onChange: (selectedKeys: React.Key[], selectedRows: any[]) => {
+      console.log('Selected Row Keys:', selectedKeys, 'Selected Rows:', selectedRows)
+      setSelectedRowKeys(selectedKeys)
+    },
+    getCheckboxProps: (record: any) => ({
+      // Hide the checkbox for rows whose status is not "waiting_approve"
+      style: record.status?.toLowerCase() !== 'waiting_approve' ? { display: 'none' } : {},
+    }),
+  }
+
+  const approveMutation = useMutation({
+    mutationFn: async (ids: React.Key[]) => {
+      const payload = { ids }
+      const response = await axiosInstance.post('/v1/admin/store/approve-stores', payload)
+      // Check if the HTTP status code is 204 or the response data has status_code "ACCEPT"
+      if (response.status === 204) {
+        return response
+      }
+      throw new Error(response.data.reason_message || 'Approval failed')
+    },
+    onSuccess: () => {
+      toast.success('Approval successful')
+      refetch() // refresh list merchants when status code is 204 or ACCEPT
+      setSelectedRowKeys([]) // clear selection
+    },
+    onError: (error: any) => {
+      toast.error(error.message || 'An error occurred while approving merchants')
+      console.error('Approval error:', error)
+    },
+  })
+
+  const handleApprove = () => {
+    approveMutation.mutate(selectedRowKeys)
+  }
 
   return (
     <>
@@ -113,275 +139,72 @@ export default function MerchantEdit() {
         <NavLink
           to={routes.merchant}
           className={({ isActive }) =>
-            `text-base font-semibold hover:underline ${
-              !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'
-            }`
+            `text-base font-semibold hover:underline ${!isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'}`
           }
         >
           Quản lý điểm đại lý
         </NavLink>
         <div className="text-base font-semibold text-[#A1AAB2]">/</div>
         <span className="text-base font-semibold text-[#A1AAB2]">
-          Đăng ký điểm đại lý
+          Danh sách đại lý
         </span>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <main className="flex p-6 flex-col items-start gap-6 rounded-lg bg-white">
-          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal">
-            Thông tin điểm đại lý công ty A
+      <div className="px-6 py-4 bg-white rounded-lg shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] flex flex-col justify-start items-start gap-4">
+        <div className="self-stretch inline-flex justify-between items-center border-b border-[#DDE4EE] py-4">
+          <div className="justify-start text-black text-3xl font-bold">
+            Quản lý điểm đại lý
           </div>
-
-          <div className="grid grid-cols-2 gap-6 w-full">
-            <Controller
-              name="name"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Tên điểm đại lý *"
-                  placeholder="Nhập tên điểm đại lý"
-                  className="w-full"
-                />
-              )}
-            />
-            <Controller
-              name="code"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Mã điểm đại lý *"
-                  placeholder="Nhập mã điểm đại lý"
-                  className="w-full"
-                />
-              )}
-            />
-            <Controller
-              name="address"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Địa chỉ *"
-                  placeholder="Nhập địa chỉ"
-                  className="w-full"
-                />
-              )}
-            />
-
-            <div className="grid grid-cols-2 gap-6">
-              <Controller
-                name="ward"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    label="Phường/Xã *"
-                    placeholder="Chọn phường/xã"
-                    className="w-full"
-                    options={[
-                      { label: 'Phường 1', value: '1' },
-                      { label: 'Phường 2', value: '2' },
-                    ]}
-                    defaultValue="1"
-                  />
-                )}
-              />
-              <Controller
-                name="district"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    label="Quận/Huyện *"
-                    placeholder="Chọn quận/huyện"
-                    className="w-full"
-                    options={[
-                      { label: 'Quận 1', value: '1' },
-                      { label: 'Quận 2', value: '2' },
-                    ]}
-                    defaultValue="1"
-                  />
-                )}
-              />
+          <div className="flex justify-start items-center gap-3">
+            <div className="text-[#366AE2] text-xs font-medium underline">
+              Tải về file mẫu
             </div>
-
-            <div className="col-span-1">
-              <Controller
-                name="accountOption"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox {...field} className="w-full">
-                    Tài khoản chuyên thu bằng chuyên chi
-                  </Checkbox>
-                )}
-              />
-            </div>
-            <div className="col-span-1" />
-
-            <div className="col-span-2">
-              <Controller
-                name="accountSelect"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    {...field}
-                    label="Tài khoản chuyên chi *"
-                    placeholder="Chọn tài khoản chuyên chi"
-                    className="w-full"
-                    options={[]} // Populate options as needed
-                    defaultValue="1"
-                  />
-                )}
-              />
-            </div>
-          </div>
-
-          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal">
-            Hạn mức giao dịch
-          </div>
-          <div className="grid grid-cols-4 gap-6 w-full">
-            <Controller
-              name="monthlyLimit"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Hạn mức trong tháng *"
-                  placeholder="Nhập hạn mức trong tháng"
-                  className="w-full"
-                />
-              )}
-            />
-            <Controller
-              name="dailyLimit"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Hạn mức trong ngày *"
-                  placeholder="Nhập hạn mức trong ngày"
-                  className="w-full"
-                />
-              )}
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Controller
-              name="needApprove"
-              control={control}
-              render={({ field }) => <Switch {...field} />}
-            />
-            <span className="text-[#212B36] text-[28px] not-italic font-bold leading-normal">
-              Yêu cầu trưởng cửa hàng duyệt giao dịch
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-6 w-full">
-            <Controller
-              name="approveThreshold"
-              control={control}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Ngưỡng giá trị cần duyệt *"
-                  placeholder="Nhập ngưỡng giá trị cần duyệt"
-                  className="w-full"
-                />
-              )}
-            />
-          </div>
-
-          <div className="grid grid-cols-4 gap-6 w-full">
-            <Controller
-              name="transactionTypes"
-              control={control}
-              render={({ field }) => (
-                <div className="flex gap-6">
-                  <Checkbox
-                    {...field}
-                    value="Rút tiền"
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        field.onChange([...(field.value || []), 'Rút tiền'])
-                      } else {
-                        field.onChange(
-                          (field.value || []).filter((val: string) => val !== 'Rút tiền')
-                        )
-                      }
-                    }}
-                  >
-                    Rút tiền
-                  </Checkbox>
-                  <Checkbox
-                    {...field}
-                    value="Nộp tiền"
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        field.onChange([...(field.value || []), 'Nộp tiền'])
-                      } else {
-                        field.onChange(
-                          (field.value || []).filter((val: string) => val !== 'Nộp tiền')
-                        )
-                      }
-                    }}
-                  >
-                    Nộp tiền
-                  </Checkbox>
-                  <Checkbox
-                    {...field}
-                    value="Ủy nhiệm chi"
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        field.onChange([...(field.value || []), 'Ủy nhiệm chi'])
-                      } else {
-                        field.onChange(
-                          (field.value || []).filter((val: string) => val !== 'Ủy nhiệm chi')
-                        )
-                      }
-                    }}
-                  >
-                    Ủy nhiệm chi
-                  </Checkbox>
-                  <Checkbox
-                    {...field}
-                    value="Ủy nhiệm thu"
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        field.onChange([...(field.value || []), 'Ủy nhiệm thu'])
-                      } else {
-                        field.onChange(
-                          (field.value || []).filter((val: string) => val !== 'Ủy nhiệm thu')
-                        )
-                      }
-                    }}
-                  >
-                    Ủy nhiệm thu
-                  </Checkbox>
-                </div>
-              )}
-            />
-          </div>
-
-          <div className="flex items-center justify-end gap-4 w-full mt-8">
-            <Button
-              type="default"
-              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+            <button className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]">
+              {/* SVG for download */}
+              Tải lên theo danh sách
+            </button>
+            <Link
+              to={routes.createMerchant}
+              className="rounded-sm flex justify-center items-center gap-2 bg-[#DA2128] px-3 py-2 font-medium text-[14px] text-white"
             >
-              Hủy bỏ
-            </Button>
-            <Button
-              htmlType="submit"
-              type="primary"
+              {/* SVG for create */}
+              Đăng ký điểm đại lý
+            </Link>
+          </div>
+        </div>
+
+        <Filters setFilter={setFilter} />
+
+        <div className="w-full">
+          <Table
+            rowKey="id"
+            rowSelection={{ type: 'checkbox', ...rowSelection }}
+            columns={columns}
+            dataSource={dataSource}
+            loading={isPending}
+            pagination={{
+              total,
+              pageSize: limit,
+              current: page,
+              showSizeChanger: true,
+              showTotal: (total) => `Có ${total} items`,
+              pageSizeOptions: ['10', '20', '50', '100', '500'],
+            }}
+            onChange={onPaginationChange}
+          />
+
+          <div className="flex justify-end gap-4 w-full mt-8">
+            <button
+              onClick={handleApprove}
               className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
             >
-              Cập nhật đại lý
-            </Button>
+              Đồng ý duyệt
+            </button>
           </div>
-        </main>
-      </form>
+        </div>
+      </div>
     </>
   )
 }
+
+export default Merchants

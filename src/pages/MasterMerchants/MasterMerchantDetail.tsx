@@ -1,12 +1,11 @@
 import React from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import _get from 'lodash/get'
-
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
-import { Checkbox, Table, Tag } from 'antd'
+import { Checkbox, Table, Tag, Switch } from 'antd'
 import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons'
+import AdminFeeTable from './components/AdminFeeTable'
 
 function InfoCard({
   title,
@@ -28,18 +27,17 @@ function InfoCard({
 export default function MasterMerchantDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['companyDetail', id],
     queryFn: async () => {
       const response = await axiosInstance.get(`/v1/admin/company/${id}`)
-      // Remap data if status is ACCEPT
       if (response.data.status_code === 'ACCEPT') {
         const company = response.data.data
-
         return {
           ...company,
-          company_name: company.name, // remapping name to company_name
-          tax_code: company.tax_number, // remapping tax_number to tax_code
+          company_name: company.name,
+          tax_code: company.tax_number,
         }
       } else {
         throw new Error('Failed to get company detail')
@@ -68,7 +66,7 @@ export default function MasterMerchantDetail() {
         response.data.reason_message || 'Failed to fetch limit list'
       )
     },
-    enabled: !!id, // only run query when company.id is available
+    enabled: !!id,
   })
 
   // New query: Fetch admin fees
@@ -93,11 +91,8 @@ export default function MasterMerchantDetail() {
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error loading detail.</div>
 
-  // Use the remapped company data
   const company = data || {}
-  console.log('Company detail:', company)
 
-  // Compute the status label and color based on company.status
   const statusLabel =
     company.status === 'P'
       ? 'Pending'
@@ -115,12 +110,11 @@ export default function MasterMerchantDetail() {
       ? 'red'
       : 'default'
 
-  // Map limitData response for daily and monthly limits
   const dailyLimit = limitData?.find(
-    (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
+    (limit: any) => limit.type === 'transaction_quota_daily'
   )?.amount
   const monthlyLimit = limitData?.find(
-    (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
+    (limit: any) => limit.type === 'transaction_monthly_quota'
   )?.amount
 
   // adminFeesData can now be used to display admin fee info
@@ -258,36 +252,45 @@ export default function MasterMerchantDetail() {
             Phí giao dịch
           </h4>
           <div className="mt-4">
-            <Table
-              columns={columns}
-              dataSource={feeDataSource}
-              pagination={false}
-            />
+            <AdminFeeTable id={Number(id)} />
           </div>
 
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4 mt-8">
             Cấu hình phê duyệt doanh nghiệp đại lý
           </h4>
-          <div>
-            <Checkbox
-              id="need_approve_new_store"
-              checked={company.need_approve_new_store}
-              disabled
-            />
-            <label htmlFor="need_approve_new_store" className="ml-2">
-              Yêu cầu phê duyệt cho việc đăng lý nhân viên
-            </label>
-          </div>
+          <div className="flex flex-col gap-4">
+            <div>
+              <Switch
+                id="need_approve_new_store"
+                checked={company.need_approve_new_store}
+                disabled
+              />
+              <label htmlFor="need_approve_new_store" className="ml-2">
+                Yêu cầu phê duyệt cho việc đăng lý nhân viên
+              </label>
+            </div>
 
-          <div>
-            <Checkbox
-              id="need_approve_new_staff"
-              checked={company.need_approve_new_staff}
-              disabled
-            />
-            <label htmlFor="need_approve_new_staff" className="ml-2">
-              HDBank thực hiện khai báo điểm đại lý và nhân viên đại lý
-            </label>
+            <div>
+              <Switch
+                id="need_approve_new_staff"
+                checked={company.need_approve_new_staff}
+                disabled
+              />
+              <label htmlFor="need_approve_new_staff" className="ml-2">
+                Yêu cầu phê duyệt cho việc đăng lý nhân viên
+              </label>
+            </div>
+
+            <div>
+              <Switch
+                id="hdb_can_manage"
+                checked={company.hdb_can_manage}
+                disabled
+              />
+              <label htmlFor="hdb_can_manage" className="ml-2">
+                HDBank thực hiện khai báo điểm đại lý và nhân viên đại lý
+              </label>
+            </div>
           </div>
         </InfoCard>
 
