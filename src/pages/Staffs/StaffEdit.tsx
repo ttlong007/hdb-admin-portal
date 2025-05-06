@@ -59,6 +59,56 @@ export default function EditStaff() {
     },
   })
 
+  // Use useQuery to fetch staff detail using the id from the route
+  const { data: staffDetail } = useQuery({
+    queryKey: ['staffDetail', id],
+    queryFn: async () => {
+      const response = await axiosInstance.get(`/v1/admin/staff/${id}`)
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch staff detail')
+    },
+    enabled: !!id,
+  })
+
+  // Once staffDetail is available, map API response to form fields
+  useEffect(() => {
+    if (staffDetail) {
+      reset({
+        company_id: staffDetail.company_id
+          ? { label: staffDetail.company?.name || 'N/A', value: staffDetail.company_id }
+          : null,
+        email: staffDetail.email,
+        name: staffDetail.name,
+        national_id_number: staffDetail.national_id_number,
+        phone_number: staffDetail.phone_number,
+        role: staffDetail.role
+          ? {
+              // Map role value to a human-friendly label if desired.
+              label: staffDetail.role === 'STORE_MANAGER' ? 'Quản lý' : 'Nhân viên',
+              value: staffDetail.role,
+            }
+          : null,
+        store_id: staffDetail.store_id
+          ? { label: staffDetail.store?.name || 'N/A', value: staffDetail.store_id }
+          : null,
+        expense_account: staffDetail.expense_account
+          ? { label: staffDetail.expense_account, value: Number(staffDetail.expense_account) }
+          : null,
+        income_account: staffDetail.income_account
+          ? { label: staffDetail.income_account, value: Number(staffDetail.income_account) }
+          : null,
+        transaction_monthly_quota: staffDetail.transaction_monthly_quota
+          ? String(staffDetail.transaction_monthly_quota)
+          : '',
+        transaction_daily_quota: staffDetail.transaction_daily_quota
+          ? String(staffDetail.transaction_daily_quota)
+          : '',
+      })
+    }
+  }, [staffDetail, reset])
+
   // Fetch companies
   const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
     queryKey: ['companies-all'],
