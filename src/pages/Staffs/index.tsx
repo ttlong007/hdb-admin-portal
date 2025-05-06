@@ -19,7 +19,13 @@ const Staffs: React.FC = () => {
     queryKey: ['staffs', page, limit, filter],
     queryFn: async () => {
       const { data } = await axiosInstance.get('/v1/admin/staff/list', {
-        params: { page, limit, ...(filter || {}) },
+        params: {
+          page,
+          limit,
+          order_by_column: 'created_at',
+          descending: true,
+          ...(filter || {}),
+        },
       })
       // If your API returns a status_code to indicate success:
       if (data.status_code === 'ACCEPT') {
@@ -56,8 +62,7 @@ const Staffs: React.FC = () => {
       title: 'Vai trò',
       dataIndex: 'role',
       key: 'role',
-      render: (role: string) =>
-        role ? role.replace('_', ' ') : '---',
+      render: (role: string) => (role ? role.replace('_', ' ') : '---'),
     },
     {
       title: 'CMND/CCCD',
@@ -88,8 +93,7 @@ const Staffs: React.FC = () => {
       title: 'Cửa hàng',
       dataIndex: 'store_id',
       key: 'store_id',
-      render: (storeId: number) =>
-        storeId ? `Store ${storeId}` : '---',
+      render: (storeId: number) => (storeId ? `Store ${storeId}` : '---'),
     },
     {
       title: 'Tác vụ',
@@ -109,7 +113,11 @@ const Staffs: React.FC = () => {
 
   const rowSelection: TableProps['rowSelection'] = {
     onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-      console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows:', selectedRows)
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        'selectedRows:',
+        selectedRows
+      )
     },
     getCheckboxProps: (record: any) => ({
       disabled: record.name === 'Disabled User',

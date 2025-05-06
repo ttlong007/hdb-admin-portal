@@ -244,13 +244,15 @@ const EditMerchant = () => {
     enabled: !!selectedDistrict,
   })
 
-  // Fetch dynamically the account list.
-  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<
-    Option[]
-  >({
-    queryKey: ['companyAccounts'],
+  // Watch the selected company from the form.
+  const selectedCompany = useWatch({ control, name: 'company_id' })
+
+  // Fetch dynamically the account list using the selected company id.
+  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<Option[]>({
+    queryKey: ['companyAccounts', selectedCompany?.value],
     queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/company/6')
+      if (!selectedCompany?.value) return []
+      const response = await axiosInstance.get(`/v1/admin/company/${selectedCompany.value}`)
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.accts.map((acc: any) => ({
           label: `${acc.acct_desc} (${acc.acct_no})`,
@@ -259,6 +261,7 @@ const EditMerchant = () => {
       }
       throw new Error('Failed to fetch accounts')
     },
+    enabled: !!selectedCompany?.value,
   })
 
   // Fetch companies for the select field.

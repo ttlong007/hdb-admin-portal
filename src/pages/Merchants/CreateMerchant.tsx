@@ -25,7 +25,7 @@ interface MerchantFormValues {
   transaction_daily_quota: number | string
   approveThreshold: number | string
   transactionTypes: number[]
-  company_id: Option | null  // Added property for company selection
+  company_id: Option | null // Added property for company selection
 }
 
 const defaultTransactionTypes = [
@@ -152,23 +152,6 @@ const CreateMerchant = () => {
     enabled: !!selectedDistrict,
   })
 
-  // Fetch account list dynamically
-  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<
-    Option[]
-  >({
-    queryKey: ['companyAccounts'],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/company/6')
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data.accts.map((acc: any) => ({
-          label: `${acc.acct_desc} (${acc.acct_no})`,
-          value: acc.acct_no,
-        }))
-      }
-      throw new Error('Failed to fetch accounts')
-    },
-  })
-
   // Fetch companies
   const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
     queryKey: ['companies-all'],
@@ -185,9 +168,29 @@ const CreateMerchant = () => {
   const companyOptions = companiesData
     ? companiesData.map((company: any) => ({
         label: company.name, // Adjust the field as needed
-        value: company.id,   // Adjust the field as needed
+        value: company.id, // Adjust the field as needed
       }))
     : []
+
+  // Watch the selected company from the form.
+  const selectedCompany = useWatch({ control, name: "company_id" })
+
+  // Fetch account list dynamically using the selected company id.
+  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<Option[]>({
+    queryKey: ['companyAccounts', selectedCompany?.value],
+    queryFn: async () => {
+      if (!selectedCompany?.value) return []
+      const response = await axiosInstance.get(`/v1/admin/company/${selectedCompany.value}`)
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data.accts.map((acc: any) => ({
+          label: `${acc.acct_desc} (${acc.acct_no})`,
+          value: acc.acct_no,
+        }))
+      }
+      throw new Error('Failed to fetch accounts')
+    },
+    enabled: !!selectedCompany?.value,
+  })
 
   // Create merchant mutation
   const createMerchantMutation = useMutation({
@@ -202,7 +205,7 @@ const CreateMerchant = () => {
       throw new Error('Creation failed')
     },
     onSuccess: () => {
-     toast.success('Tạo đại lý thành công!')
+      toast.success('Tạo đại lý thành công!')
       // Navigate or show success message as needed.
     },
     onError: (error: any) => {
