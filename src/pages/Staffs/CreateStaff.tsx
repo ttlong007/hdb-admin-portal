@@ -144,20 +144,34 @@ export default function CreateStaff() {
   })
 
   const onSubmit = (data: FormData) => {
+    // Check all required option fields
+    if (
+      !data.company_id ||
+      !data.role ||
+      !data.store_id ||
+      !data.expense_account ||
+      !data.income_account
+    ) {
+      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
+      return;
+    }
+
     const formattedData: StaffPayload = {
-      company_id: data.company_id?.value!, // using non-null assertion if you're sure it's set
+      company_id: data.company_id.value,
       email: data.email,
       name: data.name,
       national_id_number: data.national_id_number,
       phone_number: data.phone_number,
-      role: data.role?.value!, // adjust if role should be a string or number
-      store_id: data.store_id?.value!,
-      expense_account: data.expense_account?.value!,
-      income_account: data.income_account?.value!,
+      // Convert role value to string explicitly
+      role: String(data.role.value),
+      store_id: data.store_id.value,
+      expense_account: data.expense_account.value,
+      income_account: data.income_account.value,
       transaction_monthly_quota: data.transaction_monthly_quota,
       transaction_daily_quota: data.transaction_daily_quota,
-    }
-    createStaffMutation.mutate(formattedData)
+    };
+
+    createStaffMutation.mutate(formattedData);
   }
 
   return (
