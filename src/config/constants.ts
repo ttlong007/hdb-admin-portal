@@ -70,3 +70,17 @@ export const STAFF_ROLES = [
   { label: 'Staff', value: 'staff' },
   { label: 'Manager', value: 'manager' },
 ]
+
+export const TRANSACTION_STATUS = [
+  { label: 'Thành công', value: 'success' },
+  { label: 'Thất bại', value: 'failed' },
+  { label: 'Đang xử lý', value: 'pending' },
+  { label: 'Đã hủy', value: 'cancelled' },
+]
+
+export const TRANSACTION_TYPE = [
+  { label: 'Nạp tiền', value: 'deposit' },
+  { label: 'Rút tiền', value: 'withdraw' },
+  { label: 'Chuyển tiền', value: 'transfer' },
+  { label: 'Thanh toán', value: 'payment' },
+]

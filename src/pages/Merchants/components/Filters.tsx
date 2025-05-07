@@ -5,6 +5,7 @@ import { useForm, Controller } from 'react-hook-form'
 import Select from 'react-select'
 import { useQuery } from '@tanstack/react-query'
 import { CSVLink } from 'react-csv'
+import { toast } from 'react-toastify'
 
 import { MERCHANT_STATUS, MERCHANT_STATUS_MAP } from '@/config/constants'
 import axiosInstance from '@/config/axios'
@@ -60,10 +61,6 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
     setFilter(null)
   }
 
-  const handleDownload = () => {
-    console.log('Download triggered')
-  }
-
   // Fetch all companies (no limit/page)
   const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
     queryKey: ['companies-all'],
@@ -84,6 +81,27 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
     })) || []
 
   const exportMutation = useExportMerchants()
+  const [isExporting, setIsExporting] = React.useState(false)
+  const csvLinkRef = React.useRef<any>(null)
+
+  React.useEffect(() => {
+    if (exportMutation.data && csvLinkRef.current) {
+      csvLinkRef.current.link.click()
+    }
+  }, [exportMutation.data])
+
+  const handleExport = async () => {
+    try {
+      setIsExporting(true)
+      await exportMutation.mutateAsync()
+      toast.success('Xuất dữ liệu thành công!')
+    } catch (error) {
+      console.error('Export failed:', error)
+      toast.error('Xuất dữ liệu thất bại. Vui lòng thử lại sau.')
+    } finally {
+      setIsExporting(false)
+    }
+  }
 
   const csvHeaders = [
     { label: 'STT', key: 'stt' },
@@ -183,16 +201,28 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
           </div>
         </div>
         <div className="flex justify-end gap-4 w-full mt-4">
+          <button
+            type="button"
+            onClick={handleExport}
+            disabled={isExporting || exportMutation.isPending}
+            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <BsDownload
+              className={
+                isExporting || exportMutation.isPending ? 'animate-spin' : ''
+              }
+            />
+            {isExporting || exportMutation.isPending
+              ? 'Đang tải...'
+              : 'Xuất file'}
+          </button>
           <CSVLink
+            ref={csvLinkRef}
             data={exportMutation.data ? prepareCsvData(exportMutation.data) : []}
             headers={csvHeaders}
             filename="merchants.csv"
-            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
-            onClick={() => exportMutation.mutate()}
-          >
-            <BsDownload />
-            {exportMutation.isPending ? 'Đang tải...' : 'Tải xuống'}
-          </CSVLink>
+            className="hidden"
+          />
           <button
             type="submit"
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
