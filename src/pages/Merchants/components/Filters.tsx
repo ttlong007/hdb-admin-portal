@@ -4,9 +4,11 @@ import { BsDownload } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
 import Select from 'react-select'
 import { useQuery } from '@tanstack/react-query'
+import { CSVLink } from 'react-csv'
 
-import { MERCHANT_STATUS } from '@/config/constants'
+import { MERCHANT_STATUS, MERCHANT_STATUS_MAP } from '@/config/constants'
 import axiosInstance from '@/config/axios'
+import { useExportMerchants } from '@/hooks/useExportMerchants'
 
 interface FiltersFormValues {
   cif: string
@@ -80,6 +82,26 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
       label: company.name,
       value: company.id,
     })) || []
+
+  const exportMutation = useExportMerchants()
+
+  const csvHeaders = [
+    { label: 'STT', key: 'stt' },
+    { label: 'Mã điểm đại lý', key: 'code' },
+    { label: 'Tên điểm đại lý', key: 'name' },
+    { label: 'Địa chỉ', key: 'address' },
+    { label: 'Trạng thái duyệt', key: 'status' },
+  ]
+
+  const prepareCsvData = (data: any[]) => {
+    return data.map((item, index) => ({
+      stt: index + 1,
+      code: item.code || '---',
+      name: item.name || '---',
+      address: item.address || '---',
+      status: MERCHANT_STATUS_MAP[item.status?.toLowerCase()] || '---',
+    }))
+  }
 
   return (
     <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
@@ -161,13 +183,16 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
           </div>
         </div>
         <div className="flex justify-end gap-4 w-full mt-4">
-          <button
-            type="button"
-            onClick={handleDownload}
+          <CSVLink
+            data={exportMutation.data ? prepareCsvData(exportMutation.data) : []}
+            headers={csvHeaders}
+            filename="merchants.csv"
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+            onClick={() => exportMutation.mutate()}
           >
-            <BsDownload /> Tải xuống
-          </button>
+            <BsDownload />
+            {exportMutation.isPending ? 'Đang tải...' : 'Tải xuống'}
+          </CSVLink>
           <button
             type="submit"
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"

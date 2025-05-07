@@ -1,26 +1,28 @@
 import React, { useEffect } from 'react'
-import { NavLink, useNavigate, useParams } from 'react-router-dom'
+import { NavLink, useParams } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { Input } from 'rizzui'
 import ReactSelect from 'react-select'
-import { Button } from 'antd'
-import { useMutation, useQuery } from '@tanstack/react-query'
-import axiosInstance from '@/config/axios'
+import { useUpdateStaff } from '@/hooks/useUpdateStaff'
 import { toast } from 'react-toastify'
 import { routes } from '@/config/routes'
+import { useCompanies } from '@/hooks/useCompanies'
+import { useStores } from '@/hooks/useStores'
+import { useCompanyAccounts } from '@/hooks/useCompanyAccounts'
+import { useStaffDetail } from '@/hooks/useStaffDetail'
 
-type Option = { label: string; value: number }
+type Option<T> = { label: string; value: T }
 
 type FormData = {
-  company_id: Option | null
+  company_id: Option<number> | null
   email: string
   name: string
   national_id_number: string
   phone_number: string
-  role: Option | null
-  store_id: Option | null
-  expense_account: Option | null
-  income_account: Option | null
+  role: Option<string> | null
+  store_id: Option<number> | null
+  expense_account: Option<number> | null
+  income_account: Option<number> | null
   transaction_monthly_quota: string
   transaction_daily_quota: string
 }
@@ -39,9 +41,48 @@ type StaffPayload = {
   transaction_daily_quota: string;
 }
 
+// Add role options constant
+const ROLE_OPTIONS: Option<string>[] = [
+  { label: 'Quản lý', value: 'STORE_MANAGER' },
+  { label: 'Nhân viên', value: 'STORE_EMPLOYEE' },
+]
+
+// Helper to map staffDetail response to form default values
+function mapStaffToDefaultValues(staffDetail: any): FormData {
+  return {
+    company_id: staffDetail.company_id
+      ? { label: staffDetail.company?.name || 'N/A', value: staffDetail.company_id }
+      : null,
+    email: staffDetail.email,
+    name: staffDetail.name,
+    national_id_number: staffDetail.national_id_number,
+    phone_number: staffDetail.phone_number,
+    role: staffDetail.role
+      ? {
+          label: staffDetail.role === 'STORE_MANAGER' ? 'Quản lý' : 'Nhân viên',
+          value: staffDetail.role,
+        }
+      : null,
+    store_id: staffDetail.store_id
+      ? { label: staffDetail.store?.name || 'N/A', value: staffDetail.store_id }
+      : null,
+    expense_account: staffDetail.expense_account
+      ? { label: staffDetail.expense_account, value: Number(staffDetail.expense_account) }
+      : null,
+    income_account: staffDetail.income_account
+      ? { label: staffDetail.income_account, value: Number(staffDetail.income_account) }
+      : null,
+    transaction_monthly_quota: staffDetail.transaction_monthly_quota
+      ? String(staffDetail.transaction_monthly_quota)
+      : '',
+    transaction_daily_quota: staffDetail.transaction_daily_quota
+      ? String(staffDetail.transaction_daily_quota)
+      : '',
+  }
+}
+
 export default function EditStaff() {
   const { id } = useParams<{ id: string }>()
-  const navigate = useNavigate()
 
   const { control, handleSubmit, reset, watch, setValue } = useForm<FormData>({
     defaultValues: {
@@ -59,73 +100,18 @@ export default function EditStaff() {
     },
   })
 
-  // Use useQuery to fetch staff detail using the id from the route
-  const { data: staffDetail } = useQuery({
-    queryKey: ['staffDetail', id],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`/v1/admin/staff/${id}`)
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error('Failed to fetch staff detail')
-    },
-    enabled: !!id,
-  })
+  // Fetch staff detail using the id
+  const { data: staffDetail } = useStaffDetail(id)
 
   // Once staffDetail is available, map API response to form fields
   useEffect(() => {
     if (staffDetail) {
-      reset({
-        company_id: staffDetail.company_id
-          ? { label: staffDetail.company?.name || 'N/A', value: staffDetail.company_id }
-          : null,
-        email: staffDetail.email,
-        name: staffDetail.name,
-        national_id_number: staffDetail.national_id_number,
-        phone_number: staffDetail.phone_number,
-        role: staffDetail.role
-          ? {
-              // Map role value to a human-friendly label if desired.
-              label: staffDetail.role === 'STORE_MANAGER' ? 'Quản lý' : 'Nhân viên',
-              value: staffDetail.role,
-            }
-          : null,
-        store_id: staffDetail.store_id
-          ? { label: staffDetail.store?.name || 'N/A', value: staffDetail.store_id }
-          : null,
-        expense_account: staffDetail.expense_account
-          ? { label: staffDetail.expense_account, value: Number(staffDetail.expense_account) }
-          : null,
-        income_account: staffDetail.income_account
-          ? { label: staffDetail.income_account, value: Number(staffDetail.income_account) }
-          : null,
-        transaction_monthly_quota: staffDetail.transaction_monthly_quota
-          ? String(staffDetail.transaction_monthly_quota)
-          : '',
-        transaction_daily_quota: staffDetail.transaction_daily_quota
-          ? String(staffDetail.transaction_daily_quota)
-          : '',
-      })
+      reset(mapStaffToDefaultValues(staffDetail))
     }
   }, [staffDetail, reset])
 
-  // Fetch companies
-  const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
-    queryKey: ['companies-all'],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/company/list')
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error('Failed to fetch companies')
-    },
-  })
-
-  const companyOptions =
-    companiesData?.map((company: any) => ({
-      label: company.name,
-      value: company.id,
-    })) || []
+  // Fetch company options via custom hook
+  const { data: companyOptions = [], isLoading: isLoadingCompanies } = useCompanies()
 
   // Watch selected company_id to fetch stores
   const selectedCompany = watch('company_id')
@@ -135,63 +121,14 @@ export default function EditStaff() {
     setValue('store_id', null)
   }, [selectedCompany, setValue])
 
-  const { data: storesData, isLoading: isLoadingStores } = useQuery({
-    queryKey: ['stores', selectedCompany?.value],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/store/list', {
-        params: { company_id: selectedCompany?.value },
-      })
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error('Failed to fetch stores')
-    },
-    enabled: !!selectedCompany?.value,
-  })
+  // Fetch store options via custom hook
+  const { data: storeOptions = [], isLoading: isLoadingStores } = useStores(selectedCompany?.value)
 
-  const storeOptions =
-    storesData?.map((store: any) => ({
-      label: store.name,
-      value: store.id,
-    })) || []
+  // Fetch account options via custom hook
+  const { data: accountList = [], isLoading: isLoadingAccounts } = useCompanyAccounts(selectedCompany?.value)
 
-  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<
-    Option[]
-  >({
-    queryKey: ['companyAccounts', selectedCompany?.value],
-    queryFn: async () => {
-      if (!selectedCompany?.value) return []
-      const response = await axiosInstance.get(
-        `/v1/admin/company/${selectedCompany.value}`
-      )
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data.accts.map((acc: any) => ({
-          label: `${acc.acct_desc} (${acc.acct_no})`,
-          value: acc.acct_no,
-        }))
-      }
-      throw new Error('Failed to fetch accounts')
-    },
-    enabled: !!selectedCompany?.value,
-  })
-
-  const updateStaffMutation = useMutation({
-    mutationFn: async (data: StaffPayload) => {
-      const response = await axiosInstance.patch(`/v1/admin/staff/${id}`, data)
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data
-      }
-      throw new Error(response.data.reason_message || 'Update staff failed')
-    },
-    onSuccess: () => {
-      toast.success('Staff updated successfully!')
-      reset()
-      navigate(routes.staff)
-    },
-    onError: (error: any) => {
-      toast.error(error.message || 'An error occurred while updating staff')
-    },
-  })
+  // Use custom hook for updating staff
+  const updateStaffMutation = useUpdateStaff(id, () => reset())
 
   const onSubmit = (data: FormData) => {
     // Validate required fields
@@ -351,12 +288,7 @@ export default function EditStaff() {
                   </label>
                   <ReactSelect
                     {...field}
-                    options={
-                      [
-                        { label: 'Quản lý', value: 'STORE_MANAGER' },
-                        { label: 'Nhân viên', value: 'STORE_EMPLOYEE' },
-                      ] as unknown as Option[]
-                    }
+                    options={ROLE_OPTIONS}
                     placeholder="Chọn nhóm chức danh"
                   />
                 </div>

@@ -47,6 +47,7 @@
     "react-confetti": "^6.2.3",
     "react-countdown": "^2.3.6",
     "react-countup": "^6.5.3",
+    "react-csv": "^2.2.2",
     "react-datepicker": "8.1.0",
     "react-dom": "^19.0.0",
     "react-dropzone": "^14.3.8",

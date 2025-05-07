@@ -2,15 +2,13 @@ import React from 'react'
 import { NavLink, Link } from 'react-router-dom'
 import { Table, Tag, Space, Button } from 'antd'
 import { EditOutlined, EyeOutlined } from '@ant-design/icons'
-import type { TableProps } from 'antd'
-import _get from 'lodash/get'
-import { keepPreviousData, useQuery, useMutation } from '@tanstack/react-query'
+import { useMasterMerchants } from '@/hooks/useMasterMerchants'
+import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 
 import Filters from './components/Filters'
 import { routes } from '@/config/routes'
 import axiosInstance from '@/config/axios'
-import { PaginatedResponse } from '@/types'
 
 interface Data {
   id: string
@@ -27,24 +25,15 @@ const MasterMerchants: React.FC = () => {
   const [limit, setLimit] = React.useState(10)
   const [filter, setFilter] = React.useState<any>(null)
 
-  const { isPending, data, refetch } = useQuery<PaginatedResponse<Data>>({
-    queryKey: ['companies', page, limit, filter],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/company/list', {
-        params: { page, limit, order_by_column: 'updated_at', descending: true, ...filter },
-      })
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data
-      } else {
-        throw new Error('Failed to get master merchants')
-      }
-    },
-    placeholderData: keepPreviousData,
+  const { data, isPending, refetch } = useMasterMerchants({
+    page,
+    limit,
+    filter,
   })
 
   // Get list data and total count from the API response.
-  const dataSource = _get(data, 'data', [])
-  const total = _get(data, 'page_data.total', 0)
+  const dataSource = data?.data ?? []
+  const total = data?.page_data?.total ?? 0
 
   const columns = [
     {
@@ -88,7 +77,7 @@ const MasterMerchants: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => {
-        const statusLabel = status === 'P' ? 'Pending' : (status ? status : '---')
+        const statusLabel = status === 'P' ? 'Pending' : status ? status : '---'
         const statusColor = status === 'P' ? 'orange' : 'default'
         return <Tag color={statusColor}>{statusLabel}</Tag>
       },
@@ -133,28 +122,6 @@ const MasterMerchants: React.FC = () => {
     },
   })
 
-  // Mutation to export companies data.
-  const exportMutation = useMutation({
-    mutationFn: async () => {
-      const payload = { page, limit, ...filter }
-      const response = await axiosInstance.post(
-        '/v1/admin/store/export-data',
-        payload
-      )
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data
-      } else {
-        throw new Error('Export failed')
-      }
-    },
-    onSuccess: () => {
-      toast.success('Export successful!')
-    },
-    onError: () => {
-      toast.error('Failed to export companies.')
-    },
-  })
-
   return (
     <>
       {/* Breadcrumbs */}
@@ -185,8 +152,6 @@ const MasterMerchants: React.FC = () => {
         <Filters
           setFilter={setFilter}
           sync={() => syncMutation.mutate()}
-          export={() => exportMutation.mutate()}
-          exportLoading={exportMutation.isPending}
           syncLoading={syncMutation.isPending}
         />
 

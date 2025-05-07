@@ -1,8 +1,10 @@
 import React from 'react'
 import { Input } from 'rizzui'
-import { BsDownload } from 'react-icons/bs'
+import { BsArrowClockwise, BsDownload } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
+import { CSVLink } from 'react-csv'
 
+import { useExportMasterMerchants } from '@/hooks/useExportMasterMerchants'
 interface FiltersFormValues {
   cif: string
   name: string
@@ -13,11 +15,9 @@ interface Props {
   setFilter: (filter: any) => void
   sync: () => void
   syncLoading: boolean
-  export: () => void
-  exportLoading: boolean
 }
 
-const Filters: React.FC<Props> = ({ syncLoading, export: handleExport, exportLoading, setFilter, sync }) => {
+const Filters: React.FC<Props> = ({ syncLoading, setFilter, sync }) => {
   const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
     defaultValues: {
       cif: '',
@@ -38,6 +38,30 @@ const Filters: React.FC<Props> = ({ syncLoading, export: handleExport, exportLoa
 
   const handleReset = () => {
     reset()
+  }
+  const exportMutation = useExportMasterMerchants()
+
+  const csvHeaders = [
+    { label: 'STT', key: 'stt' },
+    { label: 'Mã CIF', key: 'cif' },
+    { label: 'Tên công ty', key: 'name' },
+    { label: 'Giấy phép kinh doanh', key: 'tax_number' },
+    { label: 'Tên đại diện', key: 'representative' },
+    { label: 'Số điểm đại lý', key: 'store_count' },
+    { label: 'Trạng thái', key: 'status' },
+  ]
+
+  const prepareCsvData = (data: any[]) => {
+    return data.map((item, index) => ({
+      stt: index + 1,
+      cif: item.cif || '---',
+      name: item.name || '---',
+      tax_number: item.tax_number || '---',
+      representative: item.representative || '---',
+      store_count:
+        item.store_count || item.store_count === 0 ? item.store_count : '---',
+      status: item.status === 'P' ? 'Pending' : item.status || '---',
+    }))
   }
 
   return (
@@ -82,21 +106,26 @@ const Filters: React.FC<Props> = ({ syncLoading, export: handleExport, exportLoa
           />
         </div>
         <div className="flex justify-end gap-4 w-full mt-4">
-          <button
-            type="button"
-            onClick={handleExport}
-            disabled={exportLoading}
+          <CSVLink
+            data={
+              exportMutation.data ? prepareCsvData(exportMutation.data) : []
+            }
+            headers={csvHeaders}
+            filename="master-merchants.csv"
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+            onClick={() => exportMutation.mutate()}
           >
-            <BsDownload />{' '}
-            {exportLoading ? 'Đang tải xuống...' : 'Tải xuống'}
-          </button>
+            <BsDownload />
+            {exportMutation.isPending ? 'Đang tải...' : 'Xuất file'}
+          </CSVLink>
+
           <button
             type="button"
             onClick={sync}
             disabled={syncLoading}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
+            <BsArrowClockwise />
             {syncLoading ? 'Đang đồng bộ...' : 'Đồng bộ công ty'}
           </button>
           <button

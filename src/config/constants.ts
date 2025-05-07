@@ -64,3 +64,9 @@ export const MERCHANT_STATUS_COLOR_MAP: Record<string, string> = {
   rejected: 'red',
   inactive: 'volcano',
 }
+
+export const STAFF_ROLES = [
+  { label: 'Admin', value: 'admin' },
+  { label: 'Staff', value: 'staff' },
+  { label: 'Manager', value: 'manager' },
+]
