@@ -34,8 +34,8 @@ type StaffPayload = {
   phone_number: string;
   role: string; // adjust if needed
   store_id: number;
-  expense_account: number;
-  income_account: number;
+  expense_account: string;
+  income_account: string;
   transaction_monthly_quota: string;
   transaction_daily_quota: string;
 }
@@ -117,7 +117,7 @@ export default function CreateStaff() {
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.accts.map((acc: any) => ({
           label: `${acc.acct_desc} (${acc.acct_no})`,
-          value: acc.acct_no,
+          value: acc.acct_no.toString(),
         }))
       }
       throw new Error('Failed to fetch accounts')
@@ -165,8 +165,8 @@ export default function CreateStaff() {
       // Convert role value to string explicitly
       role: String(data.role.value),
       store_id: data.store_id.value,
-      expense_account: data.expense_account.value,
-      income_account: data.income_account.value,
+      expense_account: data.expense_account.value.toString(),
+      income_account: data.income_account.value.toString(),
       transaction_monthly_quota: data.transaction_monthly_quota,
       transaction_daily_quota: data.transaction_daily_quota,
     };

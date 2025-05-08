@@ -3,7 +3,7 @@ import axiosInstance from '@/config/axios'
 
 export interface AccountOption {
   label: string
-  value: number
+  value: string
 }
 
 export function useCompanyAccounts(companyId?: number) {
@@ -19,7 +19,7 @@ export function useCompanyAccounts(companyId?: number) {
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.accts.map((acc: any) => ({
           label: `${acc.acct_desc} (${acc.acct_no})`,
-          value: acc.acct_no,
+          value: acc.acct_no.toString(),
         }))
       }
       throw new Error('Failed to fetch accounts')

@@ -21,8 +21,8 @@ type FormData = {
   phone_number: string
   role: Option<string> | null
   store_id: Option<number> | null
-  expense_account: Option<number> | null
-  income_account: Option<number> | null
+  expense_account: Option<string> | null
+  income_account: Option<string> | null
   transaction_monthly_quota: string
   transaction_daily_quota: string
 }
@@ -35,8 +35,8 @@ type StaffPayload = {
   phone_number: string;
   role: string;
   store_id: number;
-  expense_account: number;
-  income_account: number;
+  expense_account: string;
+  income_account: string;
   transaction_monthly_quota: string;
   transaction_daily_quota: string;
 }
@@ -67,10 +67,10 @@ function mapStaffToDefaultValues(staffDetail: any): FormData {
       ? { label: staffDetail.store?.name || 'N/A', value: staffDetail.store_id }
       : null,
     expense_account: staffDetail.expense_account
-      ? { label: staffDetail.expense_account, value: Number(staffDetail.expense_account) }
+      ? { label: staffDetail.expense_account, value: staffDetail.expense_account.toString() }
       : null,
     income_account: staffDetail.income_account
-      ? { label: staffDetail.income_account, value: Number(staffDetail.income_account) }
+      ? { label: staffDetail.income_account, value: staffDetail.income_account.toString() }
       : null,
     transaction_monthly_quota: staffDetail.transaction_monthly_quota
       ? String(staffDetail.transaction_monthly_quota)
@@ -151,8 +151,8 @@ export default function EditStaff() {
       phone_number: data.phone_number,
       role: String(data.role.value),
       store_id: data.store_id.value,
-      expense_account: data.expense_account.value,
-      income_account: data.income_account.value,
+      expense_account: data.expense_account.value.toString(),
+      income_account: data.income_account.value.toString(),
       transaction_monthly_quota: data.transaction_monthly_quota,
       transaction_daily_quota: data.transaction_daily_quota,
     };

@@ -12,8 +12,8 @@ export interface StaffPayload {
   phone_number: string
   role: string
   store_id: number
-  expense_account: number
-  income_account: number
+  expense_account: string
+  income_account: string
   transaction_monthly_quota: string
   transaction_daily_quota: string
 }
