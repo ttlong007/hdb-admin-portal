@@ -32,7 +32,7 @@ const Merchants: React.FC = () => {
           limit,
           order_by_column: sortField || 'updated_at',
           descending: sortOrder === 'descend',
-          ...filter
+          ...filter,
         },
       })
       if (response.data.status_code === 'ACCEPT') {
@@ -69,19 +69,12 @@ const Merchants: React.FC = () => {
       render: (text: string) => (text ? text : '---'),
     },
     {
-      title: 'Địa chỉ',
-      dataIndex: 'address',
-      key: 'address',
-      sorter: true,
-      render: (text: string) => (text ? text : '---'),
-    },
-    {
-      title: 'Trạng thái duyệt',
+      title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
       sorter: true,
       render: (status: string) => {
-        const statusKey = status.toLowerCase()
+        const statusKey = status
         const label = MERCHANT_STATUS_MAP[statusKey] || '---'
         const color = MERCHANT_STATUS_COLOR_MAP[statusKey] || 'default'
         return <Tag color={color}>{label}</Tag>
@@ -90,7 +83,7 @@ const Merchants: React.FC = () => {
     {
       title: 'Tác vụ',
       key: 'action',
-      render: (_, record: any) => (
+      render: (_: any, record: any) => (
         <Space size="middle">
           <Link to={routes.editMerchant.replace(':id', record.id)}>
             <Button type="text" icon={<EditOutlined />} />
@@ -123,19 +116,30 @@ const Merchants: React.FC = () => {
 
   const rowSelection: TableProps['rowSelection'] = {
     onChange: (selectedKeys: React.Key[], selectedRows: any[]) => {
-      console.log('Selected Row Keys:', selectedKeys, 'Selected Rows:', selectedRows)
+      console.log(
+        'Selected Row Keys:',
+        selectedKeys,
+        'Selected Rows:',
+        selectedRows
+      )
       setSelectedRowKeys(selectedKeys)
     },
     getCheckboxProps: (record: any) => ({
       // Hide the checkbox for rows whose status is not "waiting_approve"
-      style: record.status?.toLowerCase() !== 'waiting_approve' ? { display: 'none' } : {},
+      style:
+        record.status?.toLowerCase() !== 'waiting_approve'
+          ? { display: 'none' }
+          : {},
     }),
   }
 
   const approveMutation = useMutation({
     mutationFn: async (ids: React.Key[]) => {
       const payload = { ids }
-      const response = await axiosInstance.post('/v1/admin/store/approve-stores', payload)
+      const response = await axiosInstance.post(
+        '/v1/admin/store/approve-stores',
+        payload
+      )
       // Check if the HTTP status code is 204 or the response data has status_code "ACCEPT"
       if (response.status === 204) {
         return response
@@ -148,7 +152,9 @@ const Merchants: React.FC = () => {
       setSelectedRowKeys([]) // clear selection
     },
     onError: (error: any) => {
-      toast.error(error.message || 'An error occurred while approving merchants')
+      toast.error(
+        error.message || 'An error occurred while approving merchants'
+      )
       console.error('Approval error:', error)
     },
   })
@@ -164,7 +170,9 @@ const Merchants: React.FC = () => {
         <NavLink
           to={routes.merchant}
           className={({ isActive }) =>
-            `text-base font-semibold hover:underline ${!isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'}`
+            `text-base font-semibold hover:underline ${
+              !isActive ? 'text-[#A1AAB2]' : 'text-[#000000]'
+            }`
           }
         >
           Quản lý điểm đại lý

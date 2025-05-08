@@ -145,6 +145,7 @@ const Filters: React.FC<Props> = ({ syncLoading, setFilter, sync }) => {
                 </label>
                 <ReactSelect
                   {...field}
+                  isClearable
                   options={[
                     { value: '', label: 'Tất cả' },
                     ...MASTER_MERCHANT_STATUS,

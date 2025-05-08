@@ -152,7 +152,8 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
                   placeholder={
                     isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
                   }
-                  className="bg-white"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
                 />
               )}
             />
@@ -190,11 +191,12 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
                 <Select
                   {...field}
                   isClearable
-                  options={MERCHANT_STATUS}
+                  options={[{ value: '', label: 'Tất cả' }, ...MERCHANT_STATUS]}
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Chọn trạng thái"
-                  className="bg-white"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
                 />
               )}
             />
@@ -218,7 +220,9 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
           </button>
           <CSVLink
             ref={csvLinkRef}
-            data={exportMutation.data ? prepareCsvData(exportMutation.data) : []}
+            data={
+              exportMutation.data ? prepareCsvData(exportMutation.data) : []
+            }
             headers={csvHeaders}
             filename="merchants.csv"
             className="hidden"

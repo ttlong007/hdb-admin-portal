@@ -198,7 +198,8 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
                       ? 'Loading...'
                       : 'Chọn loại giao dịch'
                   }
-                  className="bg-white"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
                 />
               )}
             />
@@ -216,7 +217,8 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
                   options={statusOptions}
                   value={field.value}
                   onChange={field.onChange}
-                  className="bg-white"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
                   placeholder="Chọn trạng thái"
                 />
               )}
@@ -257,7 +259,9 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
           </button>
           <CSVLink
             ref={csvLinkRef}
-            data={exportMutation.data ? prepareCsvData(exportMutation.data) : []}
+            data={
+              exportMutation.data ? prepareCsvData(exportMutation.data) : []
+            }
             headers={csvHeaders}
             filename="transactions.csv"
             className="hidden"

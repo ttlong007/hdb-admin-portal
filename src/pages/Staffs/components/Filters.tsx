@@ -172,8 +172,11 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
                   options={companyOptions}
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder={isLoadingCompanies ? 'Loading...' : 'Chọn công ty'}
-                  className="bg-white"
+                  placeholder={
+                    isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
+                  }
+                  className="react-select-container"
+                  classNamePrefix="react-select"
                 />
               )}
             />
@@ -204,7 +207,8 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Chọn vai trò"
-                  className="bg-white"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
                 />
               )}
             />
@@ -223,7 +227,8 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Chọn trạng thái"
-                  className="bg-white"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
                 />
               )}
             />
@@ -261,7 +266,9 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
           </button>
           <CSVLink
             ref={csvLinkRef}
-            data={exportMutation.data ? prepareCsvData(exportMutation.data) : []}
+            data={
+              exportMutation.data ? prepareCsvData(exportMutation.data) : []
+            }
             headers={csvHeaders}
             filename="staffs.csv"
             className="hidden"
