@@ -116,7 +116,7 @@ const Transactions: React.FC = () => {
     {
       title: 'Tác vụ',
       key: 'action',
-      render: (_, record: any) => (
+      render: (_: any, record: any) => (
         <Space size="middle">
           <Link to={`/transactions/${record.id}`}>
             <Button type="text" icon={<BsEye />} />
@@ -125,20 +125,6 @@ const Transactions: React.FC = () => {
       ),
     },
   ]
-
-  const rowSelection: TableProps['rowSelection'] = {
-    onChange: (selectedRowKeys: React.Key[], selectedRows) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        'selectedRows',
-        selectedRows
-      )
-    },
-    getCheckboxProps: (record: any) => ({
-      disabled: record.name === 'Disabled User',
-      name: record.name,
-    }),
-  }
 
   const onPaginationChange = (pagination: any) => {
     setPage(pagination.current)
@@ -189,7 +175,6 @@ const Transactions: React.FC = () => {
 
         <div className="w-full">
           <Table
-            rowSelection={{ type: 'checkbox', ...rowSelection }}
             columns={columns}
             dataSource={dataSource}
             loading={isPending}
@@ -203,12 +188,6 @@ const Transactions: React.FC = () => {
             }}
             onChange={onTableChange}
           />
-
-          <div className="flex justify-end gap-4 w-full mt-8">
-            <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
-              Đồng ý duyệt
-            </button>
-          </div>
         </div>
       </div>
     </>
