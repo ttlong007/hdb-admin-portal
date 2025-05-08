@@ -37,7 +37,6 @@ export default function MasterMerchantDetail() {
         return {
           ...company,
           company_name: company.name,
-          tax_code: company.tax_number,
         }
       } else {
         throw new Error('Failed to get company detail')
@@ -204,7 +203,7 @@ export default function MasterMerchantDetail() {
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Số giấy phép ĐKKD</span>
               <span className="text-base font-semibold">
-                {company.tax_code || '---'}
+                {company.business_license || '---'}
               </span>
             </div>
 

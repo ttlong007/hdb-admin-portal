@@ -73,12 +73,6 @@ export const MERCHANT_STATUS_COLOR_MAP: Record<string, string> = {
   INACTIVE: 'volcano',
 }
 
-export const STAFF_ROLES = [
-  { label: 'Admin', value: 'ADMIN' },
-  { label: 'Staff', value: 'STAFF' },
-  { label: 'Manager', value: 'MANAGER' },
-]
-
 export const TRANSACTION_STATUS = [
   { label: 'Thành công', value: 'SUCCESSFUL' },
   { label: 'Thất bại', value: 'FAILED' },
@@ -90,10 +84,26 @@ export const TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
   WAITING_APPROVE: 'orange',
 }
 
-
 export const TRANSACTION_TYPE = [
   { label: 'Nạp tiền', value: 'DEPOSIT' },
   { label: 'Rút tiền', value: 'WITHDRAW' },
   { label: 'Chuyển tiền', value: 'TRANSFER' },
   { label: 'Thanh toán', value: 'PAYMENT' },
 ]
+
+export const STAFF_ROLES = [
+  { label: 'Quản lý', value: 'STORE_MANAGER' },
+  { label: 'Nhân viên', value: 'STORE_EMPLOYEE' },
+]
+
+export const STAFF_STATUS = [
+  { label: 'Chờ duyệt', value: 'WAITING_APPROVE' },
+  { label: 'Hoạt động', value: 'ACTIVE' },
+  { label: 'Ngưng hoạt động', value: 'INACTIVE' },
+]
+
+export const STAFF_STATUS_COLOR_MAP: Record<string, string> = {
+  WAITING_APPROVE: 'orange',
+  ACTIVE: 'green',
+  INACTIVE: 'volcano',
+}

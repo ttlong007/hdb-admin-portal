@@ -154,33 +154,12 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
             render={({ field }) => (
               <Input
                 {...field}
-                label="Mã"
+                label="ID nhân viên"
                 placeholder="Nhập mã"
                 inputClassName="bg-white"
               />
             )}
           />
-
-          <div>
-            <div className="text-sm text-[#000000] mb-2">Công ty</div>
-            <Controller
-              name="company_id"
-              control={control}
-              render={({ field }) => (
-                <ReactSelect
-                  {...field}
-                  options={companyOptions}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder={
-                    isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
-                  }
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                />
-              )}
-            />
-          </div>
 
           <Controller
             name="name"
@@ -188,31 +167,12 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
             render={({ field }) => (
               <Input
                 {...field}
-                label="Tên"
-                placeholder="Nhập tên"
+                label="Họ tên"
+                placeholder="Nhập họ tên"
                 inputClassName="bg-white"
               />
             )}
           />
-
-          <div>
-            <div className="text-sm text-[#000000] mb-2">Vai trò</div>
-            <Controller
-              name="role"
-              control={control}
-              render={({ field }) => (
-                <ReactSelect
-                  {...field}
-                  options={roleOptions}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Chọn vai trò"
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                />
-              )}
-            />
-          </div>
 
           <div>
             <div className="text-sm text-[#000000] mb-2">Trạng thái</div>
@@ -240,12 +200,52 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
             render={({ field }) => (
               <Input
                 {...field}
-                label="Mã cửa hàng"
-                placeholder="Nhập mã cửa hàng"
+                label="Mã đại lý - Tên đại lý"
+                placeholder="Nhập mã đại lý - tên đại lý"
                 inputClassName="bg-white"
               />
             )}
           />
+
+          <div>
+            <div className="text-sm text-[#000000] mb-2">Công ty</div>
+            <Controller
+              name="company_id"
+              control={control}
+              render={({ field }) => (
+                <ReactSelect
+                  {...field}
+                  options={companyOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder={
+                    isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
+                  }
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <div className="text-sm text-[#000000] mb-2">Nhóm chức vụ</div>
+            <Controller
+              name="role"
+              control={control}
+              render={({ field }) => (
+                <ReactSelect
+                  {...field}
+                  options={roleOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Chọn nhóm chức vụ"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
+              )}
+            />
+          </div>
         </div>
 
         <div className="flex justify-end gap-4 w-full mt-4">

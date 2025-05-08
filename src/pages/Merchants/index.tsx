@@ -67,6 +67,20 @@ const Merchants: React.FC = () => {
       render: (text: string) => (text ? text : '---'),
     },
     {
+      title: 'Tên quản lý',
+      dataIndex: ['staff', 'name'],
+      key: 'staff_name',
+      sorter: true,
+      render: (text: string) => (text ? text : '---'),
+    },
+    {
+      title: 'Mã nhân viên',
+      dataIndex: ['staff', 'code'],
+      key: 'staff_code',
+      sorter: true,
+      render: (text: string) => (text ? text : '---'),
+    },
+    {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',

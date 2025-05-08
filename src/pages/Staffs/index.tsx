@@ -9,6 +9,7 @@ import _get from 'lodash/get'
 import { routes } from '@/config/routes'
 import Filters from './components/Filters'
 import axiosInstance from '@/config/axios'
+import { STAFF_STATUS, STAFF_STATUS_COLOR_MAP, STAFF_ROLES } from '@/config/constants'
 
 const Staffs: React.FC = () => {
   const [page, setPage] = useState(1)
@@ -63,47 +64,43 @@ const Staffs: React.FC = () => {
       render: (text: string) => (text ? text : '---'),
     },
     {
-      title: 'Vai trò',
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      sorter: true,
+      render: (status: string) => {
+        const statusKey = status
+        const label =
+          STAFF_STATUS.find((item) => item.value === statusKey)?.label || '---'
+        const color = STAFF_STATUS_COLOR_MAP[statusKey] || 'default'
+        return <Tag color={color}>{label}</Tag>
+      },
+    },
+
+    {
+      title: 'Tên cửa hàng',
+      dataIndex: 'store_id',
+      key: 'store_id',
+      sorter: true,
+      render: (storeId: number) => (storeId ? `Store ${storeId}` : '---'),
+    },
+    {
+      title: 'Nhóm chức danh',
       dataIndex: 'role',
       key: 'role',
       sorter: true,
-      render: (role: string) => (role ? role.replace('_', ' ') : '---'),
+      render: (role: string) => {
+        const roleOption = STAFF_ROLES.find(r => r.value === role)
+        return roleOption ? roleOption.label : '---'
+      },
     },
     {
-      title: 'CMND/CCCD',
-      dataIndex: 'national_id_number',
-      key: 'national_id_number',
-      sorter: true,
-      render: (text: string) => (text ? text : '---'),
-    },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-      sorter: true,
-      render: (text: string) => (text ? text : '---'),
-    },
-    {
-      title: 'SĐT',
-      dataIndex: 'phone_number',
-      key: 'phone_number',
-      sorter: true,
-      render: (text: string) => (text ? text : '---'),
-    },
-    {
-      title: 'Công ty',
+      title: 'Đại lý tổng',
       dataIndex: 'company_id',
       key: 'company_id',
       sorter: true,
       render: (companyId: number) =>
         companyId ? `Company ${companyId}` : '---',
-    },
-    {
-      title: 'Cửa hàng',
-      dataIndex: 'store_id',
-      key: 'store_id',
-      sorter: true,
-      render: (storeId: number) => (storeId ? `Store ${storeId}` : '---'),
     },
     {
       title: 'Tác vụ',
