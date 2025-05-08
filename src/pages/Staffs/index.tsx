@@ -14,16 +14,18 @@ const Staffs: React.FC = () => {
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
   const [filter, setFilter] = useState<any>(null)
+  const [sortField, setSortField] = useState<string | null>(null)
+  const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
 
   const { isPending, data } = useQuery({
-    queryKey: ['staffs', page, limit, filter],
+    queryKey: ['staffs', page, limit, filter, sortField, sortOrder],
     queryFn: async () => {
       const { data } = await axiosInstance.get('/v1/admin/staff/list', {
         params: {
           page,
           limit,
-          order_by_column: 'created_at',
-          descending: true,
+          order_by_column: sortField || 'created_at',
+          descending: sortOrder === 'descend',
           ...(filter || {}),
         },
       })
@@ -50,42 +52,49 @@ const Staffs: React.FC = () => {
       title: 'Mã nhân viên',
       dataIndex: 'code',
       key: 'code',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Họ tên',
       dataIndex: 'name',
       key: 'name',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Vai trò',
       dataIndex: 'role',
       key: 'role',
+      sorter: true,
       render: (role: string) => (role ? role.replace('_', ' ') : '---'),
     },
     {
       title: 'CMND/CCCD',
       dataIndex: 'national_id_number',
       key: 'national_id_number',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'SĐT',
       dataIndex: 'phone_number',
       key: 'phone_number',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Công ty',
       dataIndex: 'company_id',
       key: 'company_id',
+      sorter: true,
       render: (companyId: number) =>
         companyId ? `Company ${companyId}` : '---',
     },
@@ -93,6 +102,7 @@ const Staffs: React.FC = () => {
       title: 'Cửa hàng',
       dataIndex: 'store_id',
       key: 'store_id',
+      sorter: true,
       render: (storeId: number) => (storeId ? `Store ${storeId}` : '---'),
     },
     {
@@ -128,6 +138,19 @@ const Staffs: React.FC = () => {
   const onPaginationChange = (pagination: any) => {
     setPage(pagination.current)
     setLimit(pagination.pageSize)
+  }
+
+  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
+    onPaginationChange(pagination)
+
+    // Handle sorting
+    if (sorter.field) {
+      setSortField(sorter.field)
+      setSortOrder(sorter.order)
+    } else {
+      setSortField(null)
+      setSortOrder(null)
+    }
   }
 
   return (
@@ -189,7 +212,7 @@ const Staffs: React.FC = () => {
               showTotal: (total: number) => `Có ${total} items`,
               pageSizeOptions: ['10', '20', '50', '100', '500'],
             }}
-            onChange={onPaginationChange}
+            onChange={onTableChange}
           />
 
           <div className="flex justify-end gap-4 w-full mt-8">

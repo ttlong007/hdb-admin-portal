@@ -24,11 +24,15 @@ const MasterMerchants: React.FC = () => {
   const [page, setPage] = React.useState(1)
   const [limit, setLimit] = React.useState(10)
   const [filter, setFilter] = React.useState<any>(null)
+  const [sortField, setSortField] = React.useState<string | null>(null)
+  const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(null)
 
   const { data, isPending, refetch } = useMasterMerchants({
     page,
     limit,
     filter,
+    sortField,
+    sortOrder,
   })
 
   // Get list data and total count from the API response.
@@ -46,36 +50,42 @@ const MasterMerchants: React.FC = () => {
       title: 'Mã CIF',
       dataIndex: 'cif',
       key: 'cif',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Tên công ty',
       dataIndex: 'name',
       key: 'name',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Giấy phép kinh doanh',
       dataIndex: 'tax_number',
       key: 'tax_number',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Tên đại diện',
       dataIndex: 'representative',
       key: 'representative',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Số điểm đại lý',
       dataIndex: 'store_count',
       key: 'store_count',
+      sorter: true,
       render: (value: any) => (value || value === 0 ? value : '---'),
     },
     {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
+      sorter: true,
       render: (status: string) => {
         const statusLabel = status === 'P' ? 'Pending' : status ? status : '---'
         const statusColor = status === 'P' ? 'orange' : 'default'
@@ -101,6 +111,19 @@ const MasterMerchants: React.FC = () => {
   const onPaginationChange = (pagination: any) => {
     setPage(pagination.current)
     setLimit(pagination.pageSize)
+  }
+
+  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
+    onPaginationChange(pagination)
+
+    // Handle sorting
+    if (sorter.field) {
+      setSortField(sorter.field)
+      setSortOrder(sorter.order)
+    } else {
+      setSortField(null)
+      setSortOrder(null)
+    }
   }
 
   // Mutation to sync companies.
@@ -169,7 +192,7 @@ const MasterMerchants: React.FC = () => {
               showTotal: (total) => `Có ${total} items`,
               pageSizeOptions: ['10', '20', '50', '100', '500'],
             }}
-            onChange={onPaginationChange}
+            onChange={onTableChange}
           />
         </div>
       </div>

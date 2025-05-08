@@ -20,12 +20,20 @@ const Merchants: React.FC = () => {
   const [limit, setLimit] = useState(10)
   const [filter, setFilter] = useState<any>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
+  const [sortField, setSortField] = useState<string | null>(null)
+  const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
 
   const { isPending, data, refetch } = useQuery({
-    queryKey: ['merchants', page, limit, filter],
+    queryKey: ['merchants', page, limit, filter, sortField, sortOrder],
     queryFn: async () => {
       const response = await axiosInstance.get('/v1/admin/store/list', {
-        params: { page, limit, order_by_column: 'updated_at', descending: true,  ...filter },
+        params: {
+          page,
+          limit,
+          order_by_column: sortField || 'updated_at',
+          descending: sortOrder === 'descend',
+          ...filter
+        },
       })
       if (response.data.status_code === 'ACCEPT') {
         return response.data
@@ -50,24 +58,28 @@ const Merchants: React.FC = () => {
       title: 'Mã điểm đại lý',
       dataIndex: 'code',
       key: 'code',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Tên điểm đại lý',
       dataIndex: 'name',
       key: 'name',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Địa chỉ',
       dataIndex: 'address',
       key: 'address',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Trạng thái duyệt',
       dataIndex: 'status',
       key: 'status',
+      sorter: true,
       render: (status: string) => {
         const statusKey = status.toLowerCase()
         const label = MERCHANT_STATUS_MAP[statusKey] || '---'
@@ -94,6 +106,19 @@ const Merchants: React.FC = () => {
   const onPaginationChange = (pagination: any) => {
     setPage(pagination.current)
     setLimit(pagination.pageSize)
+  }
+
+  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
+    onPaginationChange(pagination)
+
+    // Handle sorting
+    if (sorter.field) {
+      setSortField(sorter.field)
+      setSortOrder(sorter.order)
+    } else {
+      setSortField(null)
+      setSortOrder(null)
+    }
   }
 
   const rowSelection: TableProps['rowSelection'] = {
@@ -190,7 +215,7 @@ const Merchants: React.FC = () => {
               showTotal: (total) => `Có ${total} items`,
               pageSizeOptions: ['10', '20', '50', '100', '500'],
             }}
-            onChange={onPaginationChange}
+            onChange={onTableChange}
           />
 
           <div className="flex justify-end gap-4 w-full mt-8">

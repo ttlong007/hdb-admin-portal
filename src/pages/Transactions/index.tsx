@@ -15,13 +15,17 @@ const Transactions: React.FC = () => {
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
   const [filter, setFilter] = useState<any>(null)
+  const [sortField, setSortField] = useState<string | null>(null)
+  const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
 
   const { isPending, data } = useQuery({
-    queryKey: ['transactions', page, limit, filter],
+    queryKey: ['transactions', page, limit, filter, sortField, sortOrder],
     queryFn: async () => {
       const { data } = await axiosInstance.post('/v1/admin/transaction/list', {
         page,
         limit,
+        order_by_column: sortField || 'created_at',
+        descending: sortOrder === 'descend',
         ...filter,
       })
       return data
@@ -44,12 +48,14 @@ const Transactions: React.FC = () => {
       title: 'Mã giao dịch',
       dataIndex: 'code',
       key: 'code',
+      sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Số tiền',
       dataIndex: 'amount',
       key: 'amount',
+      sorter: true,
       render: (amount: number) =>
         amount ? amount.toLocaleString('vi-VN') : '---',
     },
@@ -57,6 +63,7 @@ const Transactions: React.FC = () => {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
+      sorter: true,
       render: (status: string) => {
         const color =
           status === 'SUCCESS' ? 'green' : status === 'FAILED' ? 'red' : 'blue'
@@ -67,6 +74,7 @@ const Transactions: React.FC = () => {
       title: 'Loại giao dịch',
       dataIndex: 'transaction_type',
       key: 'transaction_type',
+      sorter: true,
       render: (transactionType: any) =>
         transactionType && transactionType.name ? transactionType.name : 'N/A',
     },
@@ -74,12 +82,14 @@ const Transactions: React.FC = () => {
       title: 'Công ty',
       dataIndex: 'company_id',
       key: 'company_id',
+      sorter: true,
       render: (id: number) => (id ? `Company ${id}` : '---'),
     },
     {
       title: 'Cửa hàng',
       dataIndex: 'store',
       key: 'store',
+      sorter: true,
       render: (store: any) => (store && store.name ? store.name : '---'),
     },
     {
@@ -112,6 +122,19 @@ const Transactions: React.FC = () => {
   const onPaginationChange = (pagination: any) => {
     setPage(pagination.current)
     setLimit(pagination.pageSize)
+  }
+
+  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
+    onPaginationChange(pagination)
+
+    // Handle sorting
+    if (sorter.field) {
+      setSortField(sorter.field)
+      setSortOrder(sorter.order)
+    } else {
+      setSortField(null)
+      setSortOrder(null)
+    }
   }
 
   return (
@@ -157,7 +180,7 @@ const Transactions: React.FC = () => {
               showTotal: (total: number) => `Có ${total} items`,
               pageSizeOptions: ['10', '20', '50', '100', '500'],
             }}
-            onChange={onPaginationChange}
+            onChange={onTableChange}
           />
 
           <div className="flex justify-end gap-4 w-full mt-8">
