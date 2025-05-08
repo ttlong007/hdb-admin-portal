@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/store/authSlice/useAuth'
 import axiosInstance from '@/config/axios'
+import { useDispatch } from 'react-redux'
 
 export default function ProfileMenu({
   buttonClassName,
@@ -16,14 +17,18 @@ export default function ProfileMenu({
   avatarClassName?: string
   username?: boolean
 }) {
-  // Use React Query to fetch profile data
-  const { data: profile, isLoading, error } = useQuery({
+  const { setAuthState } = useAuth()
+  const {
+    data: profile,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
       const response = await axiosInstance.get('/v1/admin/profile/me')
       if (response.data.status_code === 'ACCEPT') {
         const profileData = response.data.data
-        return {
+        const userInfo = {
           id: profileData.id,
           // Use display_name if available; otherwise full_name
           name: profileData.display_name || profileData.full_name,
@@ -34,6 +39,9 @@ export default function ProfileMenu({
           status: profileData.status,
           role: profileData.role,
         }
+
+        setAuthState({ user: userInfo })
+        return userInfo
       }
       throw new Error(response.data.reason_message || 'Failed to fetch profile')
     },

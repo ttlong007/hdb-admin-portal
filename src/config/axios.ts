@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios'
 import { getEnv } from './env'
-import { store } from '@/store' // Correct import
+import { store } from '@/store'
+import { setState } from '../store/authSlice'
 
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: getEnv('VITE_API_URL', 'http://localhost:4000'),
@@ -32,17 +33,20 @@ axiosInstance.interceptors.response.use(
       error.response?.status === 401 &&
       !(error.config as any).__isRetryRequest
     ) {
-      (error.config as any).__isRetryRequest = true
+      ;(error.config as any).__isRetryRequest = true
 
       const { refreshToken } = store.getState().auth || {}
+      console.log('refreshToken', refreshToken)
       if (refreshToken) {
         try {
           const refreshResponse = await axiosInstance.post(
             '/v1/admin/auth/refresh-token',
             {
               refresh_token: refreshToken,
+              user_id: store.getState().auth?.user?.id,
             }
           )
+          console.log('refreshResponse', refreshResponse)
           if (refreshResponse.data.status_code === 'ACCEPT') {
             const newAccessToken = refreshResponse.data.data.access_token
 
@@ -53,14 +57,35 @@ axiosInstance.interceptors.response.use(
             }
 
             // Optionally update global axios default if you want
-            axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`
+            axiosInstance.defaults.headers.common[
+              'Authorization'
+            ] = `Bearer ${newAccessToken}`
 
             return axiosInstance.request(error.config as AxiosRequestConfig)
+          } else {
+            // Clear auth state and redirect to unauthorized page
+            store.dispatch(
+              setState({ accessToken: null, refreshToken: null, user: null })
+            )
+            window.location.href = '/unauthorize'
+            return Promise.reject(refreshResponse.data.reason_message)
           }
         } catch (refreshError) {
+          // Clear auth state and redirect to unauthorized page
+          store.dispatch(
+            setState({ accessToken: null, refreshToken: null, user: null })
+          )
+          window.location.href = '/unauthorize'
           console.error('Refresh token error:', refreshError)
           return Promise.reject(refreshError)
         }
+      } else {
+        // No refresh token available, clear auth and redirect
+        store.dispatch(
+          setState({ accessToken: null, refreshToken: null, user: null })
+        )
+        window.location.href = '/unauthorize'
+        return Promise.reject(error)
       }
     }
     return Promise.reject(error)
