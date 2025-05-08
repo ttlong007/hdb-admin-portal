@@ -40,11 +40,19 @@ export const ROLES = {
 } as const
 
 export const MERCHANT_STATUS = [
-  { value: 'draft', label: 'Nháp' },
-  { value: 'waiting_approve', label: 'Đang đợi duyệt' },
-  { value: 'active', label: 'Hoạt động' },
-  { value: 'rejected', label: 'Từ chối' },
-  { value: 'inactive', label: 'Ngưng hoạt động' },
+  { value: 'DRAFT', label: 'Nháp' },
+  { value: 'WAITING_APPROVE', label: 'Đang đợi duyệt' },
+  { value: 'ACTIVE', label: 'Hoạt động' },
+  { value: 'REJECTED', label: 'Từ chối' },
+  { value: 'INACTIVE', label: 'Ngưng hoạt động' },
+]
+
+export const MASTER_MERCHANT_STATUS = [
+  { value: 'DRAFT', label: 'Nháp' },
+  { value: 'WAITING_APPROVE', label: 'Đang đợi duyệt' },
+  { value: 'ACTIVE', label: 'Hoạt động' },
+  { value: 'REJECTED', label: 'Từ chối' },
+  { value: 'INACTIVE', label: 'Ngưng hoạt động' },
 ]
 
 export const MERCHANT_STATUS_MAP = MERCHANT_STATUS.reduce(
@@ -58,29 +66,29 @@ export const MERCHANT_STATUS_MAP = MERCHANT_STATUS.reduce(
 // Define color mapping for merchant statuses.
 // Adjust the color values based on your design requirements.
 export const MERCHANT_STATUS_COLOR_MAP: Record<string, string> = {
-  draft: '', // Defaults to Antd's standard tag styling when no color is provided.
-  waiting_approve: 'orange',
-  active: 'green',
-  rejected: 'red',
-  inactive: 'volcano',
+  DRAFT: '', // Defaults to Antd's standard tag styling when no color is provided.
+  WAITING_APPROVE: 'orange',
+  ACTIVE: 'green',
+  REJECTED: 'red',
+  INACTIVE: 'volcano',
 }
 
 export const STAFF_ROLES = [
-  { label: 'Admin', value: 'admin' },
-  { label: 'Staff', value: 'staff' },
-  { label: 'Manager', value: 'manager' },
+  { label: 'Admin', value: 'ADMIN' },
+  { label: 'Staff', value: 'STAFF' },
+  { label: 'Manager', value: 'MANAGER' },
 ]
 
 export const TRANSACTION_STATUS = [
-  { label: 'Thành công', value: 'success' },
-  { label: 'Thất bại', value: 'failed' },
-  { label: 'Đang xử lý', value: 'pending' },
-  { label: 'Đã hủy', value: 'cancelled' },
+  { label: 'Thành công', value: 'SUCCESS' },
+  { label: 'Thất bại', value: 'FAILED' },
+  { label: 'Đang xử lý', value: 'PENDING' },
+  { label: 'Đã hủy', value: 'CANCELLED' },
 ]
 
 export const TRANSACTION_TYPE = [
-  { label: 'Nạp tiền', value: 'deposit' },
-  { label: 'Rút tiền', value: 'withdraw' },
-  { label: 'Chuyển tiền', value: 'transfer' },
-  { label: 'Thanh toán', value: 'payment' },
+  { label: 'Nạp tiền', value: 'DEPOSIT' },
+  { label: 'Rút tiền', value: 'WITHDRAW' },
+  { label: 'Chuyển tiền', value: 'TRANSFER' },
+  { label: 'Thanh toán', value: 'PAYMENT' },
 ]

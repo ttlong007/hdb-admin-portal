@@ -1,15 +1,19 @@
 import React from 'react'
-import { Input } from 'rizzui'
+import { Input, Select } from 'rizzui'
 import { BsArrowClockwise, BsDownload } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
 import { CSVLink } from 'react-csv'
 import { toast } from 'react-toastify'
+import ReactSelect from 'react-select'
 
 import { useExportMasterMerchants } from '@/hooks/useExportMasterMerchants'
+import { MASTER_MERCHANT_STATUS } from '@/config/constants'
+
 interface FiltersFormValues {
   cif: string
   name: string
-  licenseNumber: string
+  business_license: string
+  status: { label: string; value: string } | null
 }
 
 interface Props {
@@ -23,13 +27,21 @@ const Filters: React.FC<Props> = ({ syncLoading, setFilter, sync }) => {
     defaultValues: {
       cif: '',
       name: '',
-      licenseNumber: '',
+      business_license: '',
+      status: null,
     },
   })
 
   const onSubmit = (data: FiltersFormValues) => {
     const payload = Object.entries(data).reduce((acc, [key, value]) => {
       if (value) {
+        if (key === 'status') {
+          // if value is all, then don't add to payload
+          if (value.value === '') {
+            return acc
+          }
+          return { ...acc, [key]: value.value }
+        }
         return { ...acc, [key]: value }
       }
       return acc
@@ -37,9 +49,6 @@ const Filters: React.FC<Props> = ({ syncLoading, setFilter, sync }) => {
     setFilter(payload)
   }
 
-  const handleReset = () => {
-    reset()
-  }
   const exportMutation = useExportMasterMerchants()
   const [isExporting, setIsExporting] = React.useState(false)
   const csvLinkRef = React.useRef<any>(null)
@@ -89,7 +98,7 @@ const Filters: React.FC<Props> = ({ syncLoading, setFilter, sync }) => {
   return (
     <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
-        <div className="grid grid-cols-3 gap-4 w-full">
+        <div className="grid grid-cols-4 gap-4 w-full">
           <Controller
             name="cif"
             control={control}
@@ -115,7 +124,7 @@ const Filters: React.FC<Props> = ({ syncLoading, setFilter, sync }) => {
             )}
           />
           <Controller
-            name="licenseNumber"
+            name="business_license"
             control={control}
             render={({ field }) => (
               <Input
@@ -124,6 +133,27 @@ const Filters: React.FC<Props> = ({ syncLoading, setFilter, sync }) => {
                 placeholder="Số giấy phép ĐKKD"
                 inputClassName="bg-white"
               />
+            )}
+          />
+          <Controller
+            name="status"
+            control={control}
+            render={({ field }) => (
+              <div className="w-full">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Trạng thái
+                </label>
+                <ReactSelect
+                  {...field}
+                  options={[
+                    { value: '', label: 'Tất cả' },
+                    ...MASTER_MERCHANT_STATUS,
+                  ]}
+                  placeholder="Chọn trạng thái"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
+              </div>
             )}
           />
         </div>
@@ -145,7 +175,9 @@ const Filters: React.FC<Props> = ({ syncLoading, setFilter, sync }) => {
           </button>
           <CSVLink
             ref={csvLinkRef}
-            data={exportMutation.data ? prepareCsvData(exportMutation.data) : []}
+            data={
+              exportMutation.data ? prepareCsvData(exportMutation.data) : []
+            }
             headers={csvHeaders}
             filename="master-merchants.csv"
             className="hidden"

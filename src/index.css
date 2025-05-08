@@ -1611,3 +1611,14 @@ div[style='z-index: 1000001;'],
 .ant-switch-checked {
   background: #da2128 !important;
 }
+
+/* allow the menu to overflow the header */
+.ant-table .ant-table-header,
+.ant-table .ant-table-body {
+  overflow: visible !important;
+}
+
+/* bump react-select’s menu above the header */
+.react-select__menu {
+  z-index: 9999 !important;
+}

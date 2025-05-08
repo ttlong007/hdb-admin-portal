@@ -9,6 +9,7 @@ import { toast } from 'react-toastify'
 import Filters from './components/Filters'
 import { routes } from '@/config/routes'
 import axiosInstance from '@/config/axios'
+import { MASTER_MERCHANT_STATUS, MERCHANT_STATUS_COLOR_MAP } from '@/config/constants'
 
 interface Data {
   id: string
@@ -62,8 +63,8 @@ const MasterMerchants: React.FC = () => {
     },
     {
       title: 'Giấy phép kinh doanh',
-      dataIndex: 'tax_number',
-      key: 'tax_number',
+      dataIndex: 'business_license',
+      key: 'business_license',
       sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
@@ -75,22 +76,23 @@ const MasterMerchants: React.FC = () => {
       render: (text: string) => (text ? text : '---'),
     },
     {
-      title: 'Số điểm đại lý',
-      dataIndex: 'store_count',
-      key: 'store_count',
-      sorter: true,
-      render: (value: any) => (value || value === 0 ? value : '---'),
-    },
-    {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
       sorter: true,
       render: (status: string) => {
-        const statusLabel = status === 'P' ? 'Pending' : status ? status : '---'
-        const statusColor = status === 'P' ? 'orange' : 'default'
+        const statusOption = MASTER_MERCHANT_STATUS.find(s => s.value === status)
+        const statusLabel = statusOption ? statusOption.label : '---'
+        const statusColor = MERCHANT_STATUS_COLOR_MAP[status] || 'default'
         return <Tag color={statusColor}>{statusLabel}</Tag>
       },
+    },
+    {
+      title: 'Số điểm đại lý',
+      dataIndex: 'store_count',
+      key: 'store_count',
+      sorter: true,
+      render: (value: any) => (value || value === 0 ? value : '---'),
     },
     {
       title: 'Tác vụ',
