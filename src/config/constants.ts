@@ -80,11 +80,16 @@ export const STAFF_ROLES = [
 ]
 
 export const TRANSACTION_STATUS = [
-  { label: 'Thành công', value: 'SUCCESS' },
+  { label: 'Thành công', value: 'SUCCESSFUL' },
   { label: 'Thất bại', value: 'FAILED' },
-  { label: 'Đang xử lý', value: 'PENDING' },
-  { label: 'Đã hủy', value: 'CANCELLED' },
+  { label: 'Đang đợi duyệt', value: 'WAITING_APPROVE' },
 ]
+export const TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
+  SUCCESSFUL: 'green',
+  FAILED: 'red',
+  WAITING_APPROVE: 'orange',
+}
+
 
 export const TRANSACTION_TYPE = [
   { label: 'Nạp tiền', value: 'DEPOSIT' },

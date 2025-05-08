@@ -3,8 +3,7 @@ import { Table, Tag, Space, Button } from 'antd'
 import { EditOutlined, EyeOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import { Link, NavLink } from 'react-router-dom'
-import { useQuery, useMutation, keepPreviousData } from '@tanstack/react-query'
-import _get from 'lodash/get'
+import { useMutation } from '@tanstack/react-query'
 
 import { routes } from '@/config/routes'
 import {
@@ -14,6 +13,7 @@ import {
 import Filters from './components/Filters'
 import axiosInstance from '@/config/axios'
 import { toast } from 'react-toastify'
+import { useMerchants } from '@/hooks/useMerchants'
 
 const Merchants: React.FC = () => {
   const [page, setPage] = useState(1)
@@ -23,29 +23,13 @@ const Merchants: React.FC = () => {
   const [sortField, setSortField] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
 
-  const { isPending, data, refetch } = useQuery({
-    queryKey: ['merchants', page, limit, filter, sortField, sortOrder],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/store/list', {
-        params: {
-          page,
-          limit,
-          order_by_column: sortField || 'updated_at',
-          descending: sortOrder === 'descend',
-          ...filter,
-        },
-      })
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data
-      } else {
-        throw new Error('Failed to get merchants')
-      }
-    },
-    placeholderData: keepPreviousData,
+  const { isPending, dataSource, total, refetch } = useMerchants({
+    page,
+    limit,
+    filter,
+    sortField,
+    sortOrder,
   })
-
-  const dataSource = _get(data, 'data', [])
-  const total = _get(data, 'page_data.total', 0)
 
   const columns = [
     {
@@ -53,6 +37,20 @@ const Merchants: React.FC = () => {
       key: 'stt',
       width: 70,
       render: (_: any, __: any, index: number) => index + 1,
+    },
+    {
+      title: 'Mã CIF',
+      dataIndex: ['company', 'cif'],
+      key: 'cif',
+      sorter: true,
+      render: (text: string) => (text ? text : '---'),
+    },
+    {
+      title: 'Tên công ty',
+      dataIndex: ['company', 'name'],
+      key: 'company_name',
+      sorter: true,
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Mã điểm đại lý',

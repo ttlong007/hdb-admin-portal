@@ -47,7 +47,7 @@ const TransactionDetail: React.FC = () => {
           income_account: data.store.income_account,
           expense_account: data.store.expense_account,
           created_at: data.store.created_at,
-          updated_at: data.store.updated_at,
+          created_at: data.store.created_at,
         }
       : null,
     company: data.company
@@ -79,7 +79,7 @@ const TransactionDetail: React.FC = () => {
     fromAccount: data.from_account,
     toAccount: data.to_account,
     createdAt: data.created_at,
-    updatedAt: data.updated_at,
+    updatedAt: data.created_at,
     totalAmount: data.total_amount,
     // Additional fields (if needed) can be mapped here.
   }

@@ -9,6 +9,10 @@ import Filters from './components/Filters'
 import { BsDownload, BsEye } from 'react-icons/bs'
 import { Link, NavLink } from 'react-router-dom'
 import { routes } from '@/config/routes'
+import {
+  TRANSACTION_STATUS,
+  TRANSACTION_STATUS_COLOR_MAP,
+} from '@/config/constants'
 
 const Transactions: React.FC = () => {
   // Pagination and filter state
@@ -45,9 +49,9 @@ const Transactions: React.FC = () => {
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
-      title: 'Mã giao dịch',
-      dataIndex: 'code',
-      key: 'code',
+      title: 'Mã tham chiếu',
+      dataIndex: 'ref_code',
+      key: 'ref_code',
       sorter: true,
       render: (text: string) => (text ? text : '---'),
     },
@@ -65,13 +69,14 @@ const Transactions: React.FC = () => {
       key: 'status',
       sorter: true,
       render: (status: string) => {
-        const color =
-          status === 'SUCCESS' ? 'green' : status === 'FAILED' ? 'red' : 'blue'
-        return <Tag color={color}>{status || '---'}</Tag>
+        const statusOption = TRANSACTION_STATUS.find((s) => s.value === status)
+        const label = statusOption ? statusOption.label : '---'
+        const color = TRANSACTION_STATUS_COLOR_MAP[status] || 'default'
+        return <Tag color={color}>{label}</Tag>
       },
     },
     {
-      title: 'Loại giao dịch',
+      title: 'Loại GD',
       dataIndex: 'transaction_type',
       key: 'transaction_type',
       sorter: true,
@@ -79,18 +84,34 @@ const Transactions: React.FC = () => {
         transactionType && transactionType.name ? transactionType.name : 'N/A',
     },
     {
-      title: 'Công ty',
-      dataIndex: 'company_id',
-      key: 'company_id',
+      title: 'Thời gian GD',
+      dataIndex: 'created_at',
+      key: 'created_at',
       sorter: true,
-      render: (id: number) => (id ? `Company ${id}` : '---'),
+      render: (date: string) =>
+        date ? new Date(date).toLocaleString('vi-VN') : '---',
     },
     {
-      title: 'Cửa hàng',
+      title: 'Mã - Tên điểm đại lý',
       dataIndex: 'store',
       key: 'store',
       sorter: true,
-      render: (store: any) => (store && store.name ? store.name : '---'),
+      render: (store: any) =>
+        store && store.code_name ? store.code_name : '---',
+    },
+    {
+      title: 'Mã nhân viên',
+      dataIndex: ['created_by_staff', 'code'],
+      key: 'staff_code',
+      sorter: true,
+      render: (text: string) => (text ? text : '---'),
+    },
+    {
+      title: 'Phí giao dịch',
+      dataIndex: 'transaction_fee',
+      key: 'transaction_fee',
+      sorter: true,
+      render: (fee: number) => (fee ? fee.toLocaleString('vi-VN') : '---'),
     },
     {
       title: 'Tác vụ',

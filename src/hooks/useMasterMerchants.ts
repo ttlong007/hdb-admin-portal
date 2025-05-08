@@ -24,7 +24,7 @@ export function useMasterMerchants({
         params: {
           page,
           limit,
-          order_by_column: sortField || 'updated_at',
+          order_by_column: sortField || 'created_at',
           descending: sortOrder === 'descend',
           ...filter
         },
