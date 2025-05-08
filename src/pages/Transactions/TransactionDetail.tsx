@@ -47,7 +47,6 @@ const TransactionDetail: React.FC = () => {
           income_account: data.store.income_account,
           expense_account: data.store.expense_account,
           created_at: data.store.created_at,
-          created_at: data.store.created_at,
         }
       : null,
     company: data.company
