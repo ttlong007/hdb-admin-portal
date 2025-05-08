@@ -53,7 +53,6 @@ axiosInstance.interceptors.response.use(
             store.dispatch(
               setState({
                 accessToken: newAccessToken,
-                refreshToken: refreshToken,
               })
             )
             // Update original request header before retrying
