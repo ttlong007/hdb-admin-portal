@@ -46,10 +46,16 @@ axiosInstance.interceptors.response.use(
               user_id: store.getState().auth?.user?.id,
             }
           )
-          console.log('refreshResponse', refreshResponse)
+
           if (refreshResponse.data.status_code === 'ACCEPT') {
             const newAccessToken = refreshResponse.data.data.access_token
-
+            // Update store
+            store.dispatch(
+              setState({
+                accessToken: newAccessToken,
+                refreshToken: refreshToken,
+              })
+            )
             // Update original request header before retrying
             if (error.config) {
               error.config.headers = error.config.headers || {}
