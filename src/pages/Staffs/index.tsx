@@ -16,6 +16,7 @@ import {
 } from '@/config/constants'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
+import { useAuth } from '@/store/authSlice/useAuth'
 
 const Staffs: React.FC = () => {
   const [page, setPage] = useState(1)
@@ -25,9 +26,7 @@ const Staffs: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
-  const { isApprover, isCreator } = useSelector(
-    (state: RootState) => state.auth.user || {}
-  )
+  const { isApprover, isCreator } = useAuth()
 
   const { isPending, data } = useQuery({
     queryKey: ['staffs', page, limit, filter, sortField, sortOrder],

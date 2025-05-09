@@ -129,24 +129,26 @@ const Merchants: React.FC = () => {
     }
   }
 
-  const rowSelection: TableProps['rowSelection'] = isApprover ? {
-    onChange: (selectedKeys: React.Key[], selectedRows: any[]) => {
-      console.log(
-        'Selected Row Keys:',
-        selectedKeys,
-        'Selected Rows:',
-        selectedRows
-      )
-      setSelectedRowKeys(selectedKeys)
-    },
-    getCheckboxProps: (record: any) => ({
-      // Hide the checkbox for rows whose status is not "waiting_approve"
-      style:
-        record.status?.toLowerCase() !== 'waiting_approve'
-          ? { display: 'none' }
-          : {},
-    }),
-  } : undefined
+  const rowSelection: TableProps['rowSelection'] = isApprover
+    ? {
+        onChange: (selectedKeys: React.Key[], selectedRows: any[]) => {
+          console.log(
+            'Selected Row Keys:',
+            selectedKeys,
+            'Selected Rows:',
+            selectedRows
+          )
+          setSelectedRowKeys(selectedKeys)
+        },
+        getCheckboxProps: (record: any) => ({
+          // Hide the checkbox for rows whose status is not "waiting_approve"
+          style:
+            record.status?.toLowerCase() !== 'waiting_approve'
+              ? { display: 'none' }
+              : {},
+        }),
+      }
+    : undefined
 
   const approveMutation = useMutation({
     mutationFn: async (ids: React.Key[]) => {

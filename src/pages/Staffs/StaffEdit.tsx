@@ -11,6 +11,10 @@ import { useStores } from '@/hooks/useStores'
 import { useCompanyAccounts } from '@/hooks/useCompanyAccounts'
 import { useStaffDetail } from '@/hooks/useStaffDetail'
 import { useAuth } from '@/store/authSlice/useAuth'
+import { CloseCircleOutlined } from '@ant-design/icons'
+import { useQuery } from '@tanstack/react-query'
+import axiosInstance from '@/config/axios'
+import { Checkbox } from 'antd'
 
 type Option<T> = { label: string; value: T }
 
@@ -26,20 +30,22 @@ type FormData = {
   income_account: Option<string> | null
   transaction_monthly_quota: string
   transaction_daily_quota: string
+  transactionTypes: number[]
 }
 
 type StaffPayload = {
-  company_id: number;
-  email: string;
-  name: string;
-  national_id_number: string;
-  phone_number: string;
-  role: string;
-  store_id: number;
-  expense_account: string;
-  income_account: string;
-  transaction_monthly_quota: string;
-  transaction_daily_quota: string;
+  company_id: number
+  email: string
+  name: string
+  national_id_number: string
+  phone_number: string
+  role: string
+  store_id: number
+  expense_account: string
+  income_account: string
+  transaction_monthly_quota: string
+  transaction_daily_quota: string
+  transaction_type_ids: number[]
 }
 
 // Add role options constant
@@ -48,11 +54,20 @@ const ROLE_OPTIONS: Option<string>[] = [
   { label: 'Nhân viên', value: 'STORE_EMPLOYEE' },
 ]
 
+const defaultTransactionTypes = [
+  { id: 1, name: 'Giao dịch 1' },
+  { id: 2, name: 'Giao dịch 2' },
+  { id: 3, name: 'Giao dịch 3' },
+]
+
 // Helper to map staffDetail response to form default values
 function mapStaffToDefaultValues(staffDetail: any): FormData {
   return {
     company_id: staffDetail.company_id
-      ? { label: staffDetail.company?.name || 'N/A', value: staffDetail.company_id }
+      ? {
+          label: staffDetail.company?.name || 'N/A',
+          value: staffDetail.company_id,
+        }
       : null,
     email: staffDetail.email,
     name: staffDetail.name,
@@ -68,10 +83,16 @@ function mapStaffToDefaultValues(staffDetail: any): FormData {
       ? { label: staffDetail.store?.name || 'N/A', value: staffDetail.store_id }
       : null,
     expense_account: staffDetail.expense_account
-      ? { label: staffDetail.expense_account, value: staffDetail.expense_account.toString() }
+      ? {
+          label: staffDetail.expense_account,
+          value: staffDetail.expense_account.toString(),
+        }
       : null,
     income_account: staffDetail.income_account
-      ? { label: staffDetail.income_account, value: staffDetail.income_account.toString() }
+      ? {
+          label: staffDetail.income_account,
+          value: staffDetail.income_account.toString(),
+        }
       : null,
     transaction_monthly_quota: staffDetail.transaction_monthly_quota
       ? String(staffDetail.transaction_monthly_quota)
@@ -79,6 +100,7 @@ function mapStaffToDefaultValues(staffDetail: any): FormData {
     transaction_daily_quota: staffDetail.transaction_daily_quota
       ? String(staffDetail.transaction_daily_quota)
       : '',
+    transactionTypes: staffDetail.transaction_types?.map((type: { id: number }) => type.id) || [],
   }
 }
 
@@ -94,6 +116,29 @@ export default function EditStaff() {
     }
   }, [isApprover, navigate])
 
+  const { data: transactionOptions, isLoading: isLoadingTransactionTypes } = useQuery({
+    queryKey: ['transaction-types'],
+    queryFn: async () => {
+      const response = await axiosInstance.get(
+        '/v1/admin/transaction/list-types'
+      )
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      } else {
+        throw new Error('Failed to fetch transaction types')
+      }
+    },
+  })
+
+  // Use fetched data if available; fallback to default list if needed.
+  const options =
+    transactionOptions && transactionOptions.length
+      ? transactionOptions.map((t: { id: number; name: string }) => ({
+          id: t.id,
+          name: t.name,
+        }))
+      : defaultTransactionTypes
+
   const { control, handleSubmit, reset, watch, setValue } = useForm<FormData>({
     defaultValues: {
       company_id: null,
@@ -107,6 +152,7 @@ export default function EditStaff() {
       income_account: null,
       transaction_monthly_quota: '',
       transaction_daily_quota: '',
+      transactionTypes: [],
     },
   })
 
@@ -121,7 +167,8 @@ export default function EditStaff() {
   }, [staffDetail, reset])
 
   // Fetch company options via custom hook
-  const { data: companyOptions = [], isLoading: isLoadingCompanies } = useCompanies()
+  const { data: companyOptions = [], isLoading: isLoadingCompanies } =
+    useCompanies()
 
   // Watch selected company_id to fetch stores
   const selectedCompany = watch('company_id')
@@ -132,10 +179,13 @@ export default function EditStaff() {
   }, [selectedCompany, setValue])
 
   // Fetch store options via custom hook
-  const { data: storeOptions = [], isLoading: isLoadingStores } = useStores(selectedCompany?.value)
+  const { data: storeOptions = [], isLoading: isLoadingStores } = useStores(
+    selectedCompany?.value
+  )
 
   // Fetch account options via custom hook
-  const { data: accountList = [], isLoading: isLoadingAccounts } = useCompanyAccounts(selectedCompany?.value)
+  const { data: accountList = [], isLoading: isLoadingAccounts } =
+    useCompanyAccounts(selectedCompany?.value)
 
   // Use custom hook for updating staff
   const updateStaffMutation = useUpdateStaff(id, () => reset())
@@ -149,8 +199,8 @@ export default function EditStaff() {
       !data.expense_account ||
       !data.income_account
     ) {
-      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
-      return;
+      toast.error('Vui lòng điền đầy đủ thông tin bắt buộc')
+      return
     }
 
     const formattedData: StaffPayload = {
@@ -165,9 +215,10 @@ export default function EditStaff() {
       income_account: data.income_account.value.toString(),
       transaction_monthly_quota: data.transaction_monthly_quota,
       transaction_daily_quota: data.transaction_daily_quota,
-    };
+      transaction_type_ids: data.transactionTypes || [],
+    }
 
-    updateStaffMutation.mutate(formattedData);
+    updateStaffMutation.mutate(formattedData)
   }
 
   return (
@@ -375,16 +426,50 @@ export default function EditStaff() {
             />
           </div>
         </section>
-
+        <section className="w-full border-b pb-8">
+          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
+            Loại giao dịch
+          </div>
+          <div>
+            <Controller
+              name="transactionTypes"
+              control={control}
+              render={({ field }) => (
+                <div className="grid grid-cols-4 gap-6 w-full mb-4">
+                  {isLoadingTransactionTypes ? (
+                    <div>Loading transaction types...</div>
+                  ) : (
+                    options.map((type: { id: number; name: string }) => (
+                      <Checkbox
+                        key={type.id}
+                        checked={field.value.includes(type.id)}
+                        value={type.id}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            field.onChange([...field.value, type.id])
+                          } else {
+                            field.onChange(
+                              field.value.filter((id: number) => id !== type.id)
+                            )
+                          }
+                        }}
+                      >
+                        {type.name}
+                      </Checkbox>
+                    ))
+                  )}
+                </div>
+              )}
+            />
+          </div>
+        </section>
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
+            onClick={() => navigate(-1)}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
-            onClick={() => {
-              // Optionally perform cancel actions here
-            }}
-            disabled={updateStaffMutation.isPending}
           >
+            <CloseCircleOutlined />
             Hủy bỏ
           </button>
           <button
@@ -396,7 +481,9 @@ export default function EditStaff() {
                 : ''
             }`}
           >
-            {updateStaffMutation.isPending ? 'Đang cập nhật...' : 'Cập nhật nhân viên'}
+            {updateStaffMutation.isPending
+              ? 'Đang cập nhật...'
+              : 'Cập nhật nhân viên'}
           </button>
         </div>
       </form>

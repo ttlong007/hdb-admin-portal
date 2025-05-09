@@ -3,7 +3,7 @@ import { NavLink, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { Input } from 'rizzui'
 import ReactSelect from 'react-select'
-import { Button } from 'antd'
+import { Checkbox } from 'antd'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { toast } from 'react-toastify'
@@ -24,22 +24,30 @@ type FormData = {
   income_account: Option | null
   transaction_monthly_quota: string
   transaction_daily_quota: string
+  transactionTypes: number[]
 }
 
 // Define a new type for the payload expected by the API.
 type StaffPayload = {
-  company_id: number;
-  email: string;
-  name: string;
-  national_id_number: string;
-  phone_number: string;
-  role: string; // adjust if needed
-  store_id: number;
-  expense_account: string;
-  income_account: string;
-  transaction_monthly_quota: string;
-  transaction_daily_quota: string;
+  company_id: number
+  email: string
+  name: string
+  national_id_number: string
+  phone_number: string
+  role: string // adjust if needed
+  store_id: number
+  expense_account: string
+  income_account: string
+  transaction_monthly_quota: string
+  transaction_daily_quota: string
+  transaction_type_ids: number[]
 }
+
+const defaultTransactionTypes = [
+  { id: 1, name: 'Giao dịch 1' },
+  { id: 2, name: 'Giao dịch 2' },
+  { id: 3, name: 'Giao dịch 3' },
+]
 
 export default function CreateStaff() {
   const navigate = useNavigate()
@@ -51,6 +59,30 @@ export default function CreateStaff() {
       navigate(routes.staff)
     }
   }, [isApprover, navigate])
+
+  const { data: transactionOptions, isLoading: isLoadingTransactionTypes } =
+    useQuery({
+      queryKey: ['transaction-types'],
+      queryFn: async () => {
+        const response = await axiosInstance.get(
+          '/v1/admin/transaction/list-types'
+        )
+        if (response.data.status_code === 'ACCEPT') {
+          return response.data.data
+        } else {
+          throw new Error('Failed to fetch transaction types')
+        }
+      },
+    })
+
+  // Use fetched data if available; fallback to default list if needed.
+  const options =
+    transactionOptions && transactionOptions.length
+      ? transactionOptions.map((t: { id: number; name: string }) => ({
+          id: t.id,
+          name: t.name,
+        }))
+      : defaultTransactionTypes
 
   const { control, handleSubmit, reset, watch, setValue } = useForm<FormData>({
     defaultValues: {
@@ -65,6 +97,7 @@ export default function CreateStaff() {
       income_account: null,
       transaction_monthly_quota: '',
       transaction_daily_quota: '',
+      transactionTypes: [],
     },
   })
 
@@ -161,8 +194,8 @@ export default function CreateStaff() {
       !data.expense_account ||
       !data.income_account
     ) {
-      toast.error("Vui lòng điền đầy đủ thông tin bắt buộc");
-      return;
+      toast.error('Vui lòng điền đầy đủ thông tin bắt buộc')
+      return
     }
 
     const formattedData: StaffPayload = {
@@ -178,9 +211,10 @@ export default function CreateStaff() {
       income_account: data.income_account.value.toString(),
       transaction_monthly_quota: data.transaction_monthly_quota,
       transaction_daily_quota: data.transaction_daily_quota,
-    };
+      transaction_type_ids: data.transactionTypes || [],
+    }
 
-    createStaffMutation.mutate(formattedData);
+    createStaffMutation.mutate(formattedData)
   }
 
   return (
@@ -394,6 +428,40 @@ export default function CreateStaff() {
           </div>
         </section>
 
+        <section className="w-full border-b pb-8">
+          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
+            Loại giao dịch
+          </div>
+
+          <div>
+            <Controller
+              name="transactionTypes"
+              control={control}
+              render={({ field }) => (
+                <div className="grid grid-cols-4 gap-6 w-full mb-4">
+                  {options.map((type: { id: number; name: string }) => (
+                    <Checkbox
+                      key={type.id}
+                      checked={field.value.includes(type.id)}
+                      value={type.id}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          field.onChange([...field.value, type.id])
+                        } else {
+                          field.onChange(
+                            field.value.filter((id: number) => id !== type.id)
+                          )
+                        }
+                      }}
+                    >
+                      {type.name}
+                    </Checkbox>
+                  ))}
+                </div>
+              )}
+            />
+          </div>
+        </section>
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
