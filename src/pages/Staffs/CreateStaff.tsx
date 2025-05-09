@@ -46,7 +46,7 @@ export default function CreateStaff() {
   const { isApprover } = useAuth()
 
   useEffect(() => {
-    if (!isApprover) {
+    if (isApprover) {
       toast.error('Bạn không có quyền truy cập trang này')
       navigate(routes.staff)
     }
