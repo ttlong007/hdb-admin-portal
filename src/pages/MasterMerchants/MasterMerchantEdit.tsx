@@ -340,7 +340,7 @@ export default function MasterMerchantEdit() {
                 <div>
                   <Switch {...field} checked={field.value} />
                   <label className="ml-2">
-                    Yêu cầu phê duyệt cho các địa điểm đại lý mới
+                    Mở điểm đại lý mới có phê duyệt
                   </label>
                 </div>
               )}
@@ -352,19 +352,7 @@ export default function MasterMerchantEdit() {
                 <div>
                   <Switch {...field} checked={field.value} />
                   <label className="ml-2">
-                    Yêu cầu phê duyệt cho việc đăng lý nhân viên
-                  </label>
-                </div>
-              )}
-            />
-            <Controller
-              name="hdb_can_manage"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <Switch {...field} checked={field.value} />
-                  <label className="ml-2">
-                    HDBank thực hiện khai báo điểm đại lý và nhân viên đại lý
+                    Khai báo nhân viên mới có phê duyệt
                   </label>
                 </div>
               )}

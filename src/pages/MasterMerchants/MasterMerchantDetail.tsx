@@ -6,7 +6,10 @@ import { routes } from '@/config/routes'
 import { Checkbox, Table, Tag, Switch } from 'antd'
 import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons'
 import AdminFeeTable from './components/AdminFeeTable'
-import { MASTER_MERCHANT_STATUS, MERCHANT_STATUS_COLOR_MAP } from '@/config/constants'
+import {
+  MASTER_MERCHANT_STATUS,
+  MERCHANT_STATUS_COLOR_MAP,
+} from '@/config/constants'
 
 function InfoCard({
   title,
@@ -93,7 +96,9 @@ export default function MasterMerchantDetail() {
 
   const company = data || {}
 
-  const statusOption = MASTER_MERCHANT_STATUS.find(s => s.value === company.status)
+  const statusOption = MASTER_MERCHANT_STATUS.find(
+    (s) => s.value === company.status
+  )
   const statusLabel = statusOption ? statusOption.label : '---'
   const statusColor = MERCHANT_STATUS_COLOR_MAP[company.status] || 'default'
 
@@ -254,7 +259,7 @@ export default function MasterMerchantDetail() {
                 disabled
               />
               <label htmlFor="need_approve_new_store" className="ml-2">
-                Yêu cầu phê duyệt cho việc đăng lý nhân viên
+                Mở điểm đại lý mới có phê duyệt
               </label>
             </div>
 
@@ -265,18 +270,7 @@ export default function MasterMerchantDetail() {
                 disabled
               />
               <label htmlFor="need_approve_new_staff" className="ml-2">
-                Yêu cầu phê duyệt cho việc đăng lý nhân viên
-              </label>
-            </div>
-
-            <div>
-              <Switch
-                id="hdb_can_manage"
-                checked={company.hdb_can_manage}
-                disabled
-              />
-              <label htmlFor="hdb_can_manage" className="ml-2">
-                HDBank thực hiện khai báo điểm đại lý và nhân viên đại lý
+                Khai báo nhân viên mới có phê duyệt
               </label>
             </div>
           </div>
