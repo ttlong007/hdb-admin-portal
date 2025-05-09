@@ -211,13 +211,15 @@ const Merchants: React.FC = () => {
               {/* SVG for download */}
               Tải lên theo danh sách
             </button>
-            <Link
-              to={routes.createMerchant}
-              className="rounded-sm flex justify-center items-center gap-2 bg-[#DA2128] px-3 py-2 font-medium text-[14px] text-white"
-            >
-              {/* SVG for create */}
-              Đăng ký điểm đại lý
-            </Link>
+            {!isApprover && (
+              <Link
+                to={routes.createMerchant}
+                className="rounded-sm flex justify-center items-center gap-2 bg-[#DA2128] px-3 py-2 font-medium text-[14px] text-white"
+              >
+                {/* SVG for create */}
+                Đăng ký điểm đại lý
+              </Link>
+            )}
           </div>
         </div>
 

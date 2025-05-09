@@ -191,13 +191,15 @@ const Staffs: React.FC = () => {
               {/* SVG icon */}
               Tải lên theo danh sách
             </button>
-            <Link
-              to={routes.createStaff}
-              className="rounded-sm flex justify-center items-center gap-2 bg-[#DA2128] px-3 py-2 font-medium text-[14px] text-white"
-            >
-              {/* SVG icon */}
-              Thêm mới nhân viên
-            </Link>
+            {!isApprover && (
+              <Link
+                to={routes.createStaff}
+                className="rounded-sm flex justify-center items-center gap-2 bg-[#DA2128] px-3 py-2 font-medium text-[14px] text-white"
+              >
+                {/* SVG icon */}
+                Thêm mới nhân viên
+              </Link>
+            )}
           </div>
         </div>
 
