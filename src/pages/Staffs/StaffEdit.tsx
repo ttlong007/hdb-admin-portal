@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { NavLink, useParams } from 'react-router-dom'
+import { NavLink, useParams, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { Input } from 'rizzui'
 import ReactSelect from 'react-select'
@@ -10,6 +10,7 @@ import { useCompanies } from '@/hooks/useCompanies'
 import { useStores } from '@/hooks/useStores'
 import { useCompanyAccounts } from '@/hooks/useCompanyAccounts'
 import { useStaffDetail } from '@/hooks/useStaffDetail'
+import { useAuth } from '@/store/authSlice/useAuth'
 
 type Option<T> = { label: string; value: T }
 
@@ -83,6 +84,15 @@ function mapStaffToDefaultValues(staffDetail: any): FormData {
 
 export default function EditStaff() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { isApprover } = useAuth()
+
+  useEffect(() => {
+    if (!isApprover) {
+      toast.error('Bạn không có quyền truy cập trang này')
+      navigate(routes.staff)
+    }
+  }, [isApprover, navigate])
 
   const { control, handleSubmit, reset, watch, setValue } = useForm<FormData>({
     defaultValues: {

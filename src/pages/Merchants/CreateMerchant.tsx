@@ -1,14 +1,15 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Checkbox, Button, Switch } from 'antd'
 import { Input } from 'rizzui'
 import Select from 'react-select'
 import { useForm, Controller, useWatch } from 'react-hook-form'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 
 import { useQuery, useMutation } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
+import { useAuth } from '@/store/authSlice/useAuth'
 
 type Option = { label: string; value: string }
 
@@ -35,6 +36,16 @@ const defaultTransactionTypes = [
 ]
 
 const CreateMerchant = () => {
+  const navigate = useNavigate()
+  const { isApprover } = useAuth()
+
+  useEffect(() => {
+    if (!isApprover) {
+      toast.error('Bạn không có quyền truy cập trang này')
+      navigate(routes.merchant)
+    }
+  }, [isApprover, navigate])
+
   const {
     handleSubmit,
     control,

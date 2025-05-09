@@ -8,6 +8,7 @@ import { useMutation, useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { toast } from 'react-toastify'
 import { routes } from '@/config/routes'
+import { useAuth } from '@/store/authSlice/useAuth'
 
 type Option = { label: string; value: number }
 
@@ -41,6 +42,16 @@ type StaffPayload = {
 }
 
 export default function CreateStaff() {
+  const navigate = useNavigate()
+  const { isApprover } = useAuth()
+
+  useEffect(() => {
+    if (!isApprover) {
+      toast.error('Bạn không có quyền truy cập trang này')
+      navigate(routes.staff)
+    }
+  }, [isApprover, navigate])
+
   const { control, handleSubmit, reset, watch, setValue } = useForm<FormData>({
     defaultValues: {
       company_id: null,
@@ -56,8 +67,6 @@ export default function CreateStaff() {
       transaction_daily_quota: '',
     },
   })
-
-  const navigate = useNavigate()
 
   // Fetch companies
   const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
