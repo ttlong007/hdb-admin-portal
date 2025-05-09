@@ -73,6 +73,14 @@ export const MERCHANT_STATUS_COLOR_MAP: Record<string, string> = {
   INACTIVE: 'volcano',
 }
 
+export const MASTER_MERCHANT_STATUS_COLOR_MAP: Record<string, string> = {
+  DRAFT: 'blue', // Defaults to Antd's standard tag styling when no color is provided.
+  WAITING_APPROVE: 'orange',
+  ACTIVE: 'green',
+  REJECTED: 'red',
+  INACTIVE: 'volcano',
+}
+
 export const TRANSACTION_STATUS = [
   { label: 'Thành công', value: 'SUCCESSFUL' },
   { label: 'Thất bại', value: 'FAILED' },

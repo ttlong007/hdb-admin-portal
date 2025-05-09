@@ -1,5 +1,5 @@
 import React from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import Card from '@/components/core/components/Card'
@@ -7,9 +7,24 @@ import { routes } from '@/config/routes'
 import { Tag } from 'antd'
 import { getStatusInfo } from '@/components/core/utils/status-utils'
 import { ROLE } from '@/config/enums'
+import {
+  ArrowLeftOutlined,
+  CheckCircleFilled,
+  CheckOutlined,
+  SendOutlined,
+} from '@ant-design/icons'
+import {
+  STAFF_STATUS,
+  STAFF_STATUS_COLOR_MAP,
+  MASTER_MERCHANT_STATUS,
+  MASTER_MERCHANT_STATUS_COLOR_MAP,
+} from '@/config/constants'
+import { useAuth } from '@/store/authSlice/useAuth'
 
 const StaffDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const { isCreator, isApprover } = useAuth()
   const { data, isLoading, error } = useQuery({
     queryKey: ['staffDetail', id],
     queryFn: async () => {
@@ -75,46 +90,48 @@ const StaffDetail: React.FC = () => {
 
       <div className="flex flex-col gap-6">
         <Card title="Thông tin công ty">
-          <div className="flex gap-6 mb-6 max-sm:flex-col">
-            <div className="flex flex-col flex-1 gap-2">
+          <div className="grid grid-cols-4 gap-6 mb-6">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Mã Cif</span>
               <span className="text-base font-semibold">
                 {company.cif || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Tên công ty</span>
               <span className="text-base font-semibold">
                 {company.company_name || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Người đại diện</span>
               <span className="text-base font-semibold">
                 {company.representative || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Số giấy phép ĐKKD</span>
               <span className="text-base font-semibold">
                 {company.tax_code || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Số điểm đại lý</span>
               <span className="text-base font-semibold">
                 {company.store_count || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Trạng thái</span>
-              <Tag color={statusColor} className="w-fit">
-                {statusLabel}
+              <Tag color={MASTER_MERCHANT_STATUS_COLOR_MAP[company.status]}>
+                {MASTER_MERCHANT_STATUS.find(
+                  (status) => status.value === company.status
+                )?.label || '---'}
               </Tag>
             </div>
           </div>
@@ -130,57 +147,167 @@ const StaffDetail: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex gap-6 mb-6 max-sm:flex-col">
-            <div className="flex flex-col flex-1 gap-2">
+          <div className="grid grid-cols-4 gap-6 mb-6">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Mã nhân viên</span>
               <span className="text-base font-semibold">
                 {staff.code || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Số điện thoại</span>
               <span className="text-base font-semibold">
                 {staff.phone_number || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Số CCCD</span>
               <span className="text-base font-semibold">
                 {staff.national_id_number || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Email</span>
               <span className="text-base font-semibold">
                 {staff.email || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Tên cửa hàng</span>
               <span className="text-base font-semibold">
-                {staff.store_id || '---'}
+                {staff.store?.name || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Mã cửa hàng</span>
               <span className="text-base font-semibold">
-                {staff.store_id || '---'}
+                {staff.store?.code || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
+            <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Trạng thái</span>
-              <span className="text-base font-semibold">
-                {staff.status || '---'}
-              </span>
+              <Tag color={STAFF_STATUS_COLOR_MAP[staff.status]}>
+                {STAFF_STATUS.find((status) => status.value === staff.status)
+                  ?.label || '---'}
+              </Tag>
             </div>
           </div>
         </Card>
+
+        <div className="grid grid-cols-3 gap-6">
+          <div className="col-span-2">
+            <Card title="Thông tin TK thanh toán">
+              <div className="grid grid-cols-3 gap-6">
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">
+                    Tài khoản chuyên thu
+                  </span>
+                  <span className="text-base font-semibold">
+                    {staff.income_account || '---'}
+                  </span>
+                </div>
+
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">
+                    Tài khoản chuyên chi
+                  </span>
+                  <span className="text-base font-semibold">
+                    {staff.expense_account || '---'}
+                  </span>
+                </div>
+              </div>
+            </Card>
+
+            <div className="mt-4">
+              <Card title="Hạn mức giao dịch">
+                <div className="grid grid-cols-3 gap-6">
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">
+                      Hạn mức giao dịch trong tháng
+                    </span>
+                    <span className="text-base font-semibold">
+                      {staff.transaction_monthly_quota
+                        ? `${Number(
+                            staff.transaction_monthly_quota
+                          ).toLocaleString('vi-VN')} VND`
+                        : '---'}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">
+                      Hạn mức giao dịch trong ngày
+                    </span>
+                    <span className="text-base font-semibold">
+                      {staff.transaction_daily_quota
+                        ? `${Number(
+                            staff.transaction_daily_quota
+                          ).toLocaleString('vi-VN')} VND`
+                        : '---'}
+                    </span>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          </div>
+
+          <div className="col-span-1">
+            <Card title="Loại giao dịch">
+              <div className="flex flex-col gap-4">
+                {staff.transaction_types &&
+                staff.transaction_types.length > 0 ? (
+                  staff.transaction_types.map(
+                    (type: { id: number; name: string; code: string }) => (
+                      <div key={type.id} className="flex items-center gap-2">
+                        <CheckOutlined />
+                        <span className="text-base font-semibold">
+                          {type.name}
+                        </span>
+                      </div>
+                    )
+                  )
+                ) : (
+                  <span className="text-base font-semibold">---</span>
+                )}
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-end gap-4 w-full mt-8">
+        <button
+          type="button"
+          onClick={() => navigate(-1)}
+          className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+        >
+          <ArrowLeftOutlined />
+          Quay lại
+        </button>
+        {isCreator ? (
+          <button
+            type="button"
+            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+          >
+            <SendOutlined />
+            Gửi duyệt
+          </button>
+        ) : null}
+        {isApprover ? (
+          <button
+            type="button"
+            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+          >
+            <CheckCircleFilled />
+            Đồng ý duyệt
+          </button>
+        ) : null}
       </div>
     </>
   )
