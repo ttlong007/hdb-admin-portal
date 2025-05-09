@@ -9,7 +9,11 @@ import _get from 'lodash/get'
 import { routes } from '@/config/routes'
 import Filters from './components/Filters'
 import axiosInstance from '@/config/axios'
-import { STAFF_STATUS, STAFF_STATUS_COLOR_MAP, STAFF_ROLES } from '@/config/constants'
+import {
+  STAFF_STATUS,
+  STAFF_STATUS_COLOR_MAP,
+  STAFF_ROLES,
+} from '@/config/constants'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store'
 
@@ -21,7 +25,9 @@ const Staffs: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
-  const { isApprover, isCreator } = useSelector((state: RootState) => state.auth.user || {})
+  const { isApprover, isCreator } = useSelector(
+    (state: RootState) => state.auth.user || {}
+  )
 
   const { isPending, data } = useQuery({
     queryKey: ['staffs', page, limit, filter, sortField, sortOrder],
@@ -81,13 +87,12 @@ const Staffs: React.FC = () => {
         return <Tag color={color}>{label}</Tag>
       },
     },
-
     {
       title: 'Tên cửa hàng',
-      dataIndex: 'store_id',
-      key: 'store_id',
+      dataIndex: ['store', 'name'],
+      key: 'store_name',
       sorter: true,
-      render: (storeId: number) => (storeId ? `Store ${storeId}` : '---'),
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Nhóm chức danh',
@@ -95,17 +100,16 @@ const Staffs: React.FC = () => {
       key: 'role',
       sorter: true,
       render: (role: string) => {
-        const roleOption = STAFF_ROLES.find(r => r.value === role)
+        const roleOption = STAFF_ROLES.find((r) => r.value === role)
         return roleOption ? roleOption.label : '---'
       },
     },
     {
       title: 'Đại lý tổng',
-      dataIndex: 'company_id',
-      key: 'company_id',
+      dataIndex: ['company', 'name'],
+      key: 'company_name',
       sorter: true,
-      render: (companyId: number) =>
-        companyId ? `Company ${companyId}` : '---',
+      render: (text: string) => (text ? text : '---'),
     },
     {
       title: 'Tác vụ',
@@ -125,20 +129,22 @@ const Staffs: React.FC = () => {
     },
   ]
 
-  const rowSelection: TableProps['rowSelection'] = isApprover ? {
-    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-      setSelectedRowKeys(selectedRowKeys)
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        'selectedRows:',
-        selectedRows
-      )
-    },
-    getCheckboxProps: (record: any) => ({
-      disabled: record.name === 'Disabled User',
-      name: record.name,
-    }),
-  } : undefined
+  const rowSelection: TableProps['rowSelection'] = isApprover
+    ? {
+        onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+          setSelectedRowKeys(selectedRowKeys)
+          console.log(
+            `selectedRowKeys: ${selectedRowKeys}`,
+            'selectedRows:',
+            selectedRows
+          )
+        },
+        getCheckboxProps: (record: any) => ({
+          disabled: record.name === 'Disabled User',
+          name: record.name,
+        }),
+      }
+    : undefined
 
   const onPaginationChange = (pagination: any) => {
     setPage(pagination.current)
