@@ -127,7 +127,7 @@ const Merchants: React.FC = () => {
     }
   }
 
-  const rowSelection: TableProps['rowSelection'] = {
+  const rowSelection: TableProps['rowSelection'] = isApprover ? {
     onChange: (selectedKeys: React.Key[], selectedRows: any[]) => {
       console.log(
         'Selected Row Keys:',
@@ -144,7 +144,7 @@ const Merchants: React.FC = () => {
           ? { display: 'none' }
           : {},
     }),
-  }
+  } : undefined
 
   const approveMutation = useMutation({
     mutationFn: async (ids: React.Key[]) => {
@@ -224,7 +224,7 @@ const Merchants: React.FC = () => {
         <div className="w-full">
           <Table
             rowKey="id"
-            rowSelection={{ type: 'checkbox', ...rowSelection }}
+            rowSelection={rowSelection}
             columns={columns}
             dataSource={dataSource}
             loading={isPending}
@@ -239,14 +239,16 @@ const Merchants: React.FC = () => {
             onChange={onTableChange}
           />
 
-          <div className="flex justify-end gap-4 w-full mt-8">
-            <button
-              onClick={handleApprove}
-              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
-            >
-              Đồng ý duyệt
-            </button>
-          </div>
+          {isApprover && (
+            <div className="flex justify-end gap-4 w-full mt-8">
+              <button
+                onClick={handleApprove}
+                className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+              >
+                Đồng ý duyệt
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>
