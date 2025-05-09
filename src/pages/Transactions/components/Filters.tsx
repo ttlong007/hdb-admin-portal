@@ -146,7 +146,7 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
   }
 
   return (
-    <div className="p-6 bg-[#F8FAFC] rounded-md w-full">
+    <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="grid grid-cols-3 gap-4 w-full">
           <div>

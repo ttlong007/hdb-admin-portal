@@ -234,6 +234,7 @@ const Merchants: React.FC = () => {
             columns={columns}
             dataSource={dataSource}
             loading={isPending}
+            scroll={{ x: 2080 }}
             pagination={{
               total,
               pageSize: limit,

@@ -1,10 +1,9 @@
 import React from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
 import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons'
-import { Table } from 'antd'
+import { useAuth } from '@/store/authSlice/useAuth'
+import { useMerchantDetail } from '@/hooks/useMerchantDetail'
 
 function InfoCard({
   title,
@@ -26,55 +25,12 @@ function InfoCard({
 export default function MasterMerchantDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { isCreator, isApprover } = useAuth()
+  const { merchant, isLoading, error, monthlyLimit, dailyLimit } = useMerchantDetail(id)
 
-  // Fetch store details using id from route params.
-  const {
-    data: storeData,
-    isLoading: isLoadingStore,
-    error,
-  } = useQuery<any, Error>({
-    queryKey: ['storeDetail', id],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`/v1/admin/store/${id}`)
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error('Failed to fetch store details')
-    },
-    enabled: !!id,
-  })
-
-  if (isLoadingStore) return <div>Loading...</div>
+  if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error loading detail.</div>
-
-  const merchant = {
-    id: storeData.id,
-    code: storeData.code,
-    name: storeData.name,
-    address: storeData.address,
-    status: storeData.status,
-    income_account: storeData.income_account,
-    expense_account: storeData.expense_account,
-    company: storeData.company
-      ? {
-          id: storeData.company.id,
-          name: storeData.company.name,
-          cif: storeData.company.cif,
-          tax_number: storeData.company.tax_number,
-          representative: storeData.company.representative,
-          status: storeData.company.status,
-        }
-      : null,
-    // map additional fields if needed...
-  }
-
-  // Example: Calculate limits (ensure this is defined before the return block)
-  const monthlyLimit = storeData.limits?.find(
-    (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
-  )?.amount
-  const dailyLimit = storeData.limits?.find(
-    (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
-  )?.amount
+  if (!merchant) return <div>No merchant found.</div>
 
   return (
     <>
@@ -94,7 +50,7 @@ export default function MasterMerchantDetail() {
         <div className="flex gap-4">
           <div id="A" className="w-2/3 flex flex-col gap-4">
             <InfoCard title="Thông tin công ty">
-              <div className="grid grid-cols-3">
+              <div className="grid grid-cols-4 gap-6">
                 <div className="flex flex-col flex-1 gap-2">
                   <span className="text-sm text-gray-400">Mã Cif</span>
                   <span className="text-base text-gray-800">
@@ -135,7 +91,7 @@ export default function MasterMerchantDetail() {
             </InfoCard>
 
             <InfoCard title="Thông tin điểm đại lý">
-              <div className="grid grid-cols-3">
+              <div className="grid grid-cols-4 gap-6">
                 {/* Mã điểm địa lý */}
                 <div className="flex flex-col flex-1 gap-2">
                   <span className="text-sm text-gray-400">Mã điểm địa lý</span>
@@ -191,7 +147,7 @@ export default function MasterMerchantDetail() {
             </InfoCard>
 
             <InfoCard title="Hạn mức giao dịch">
-              <div className="grid grid-cols-3">
+              <div className="grid grid-cols-4 gap-6">
                 {/* Hạn mức trong tháng */}
                 <div className="flex flex-col flex-1 gap-2">
                   <span className="text-sm text-gray-400">
@@ -232,16 +188,26 @@ export default function MasterMerchantDetail() {
             <ArrowLeftOutlined />
             Quay lại
           </button>
-          <button
-            type="button"
-            onClick={() =>
-              navigate(routes.editMerchant.replace(':id', id || ''))
-            }
-            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
-          >
-            <EditOutlined />
-            Chỉnh sửa
-          </button>
+          {isCreator && (
+            <button
+              type="button"
+              onClick={() =>
+                navigate(routes.editMerchant.replace(':id', id || ''))
+              }
+              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            >
+              <EditOutlined />
+              Chỉnh sửa
+            </button>
+          )}
+          {isApprover && (
+            <button
+              type="submit"
+              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            >
+              Duyệt
+            </button>
+          )}
         </div>
       </section>
     </>

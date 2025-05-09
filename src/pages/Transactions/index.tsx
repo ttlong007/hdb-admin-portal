@@ -1,45 +1,27 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Table, Tag, Space, Button } from 'antd'
 import type { TableProps } from 'antd'
-import _get from 'lodash/get'
-import { useQuery, keepPreviousData } from '@tanstack/react-query'
-import axiosInstance from '@/config/axios'
-
-import Filters from './components/Filters'
-import { BsDownload, BsEye } from 'react-icons/bs'
+import { BsEye } from 'react-icons/bs'
 import { Link, NavLink } from 'react-router-dom'
 import { routes } from '@/config/routes'
 import {
   TRANSACTION_STATUS,
   TRANSACTION_STATUS_COLOR_MAP,
 } from '@/config/constants'
+import { useTransactions } from '@/hooks/useTransactions'
+import Filters from './components/Filters'
 
 const Transactions: React.FC = () => {
-  // Pagination and filter state
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(10)
-  const [filter, setFilter] = useState<any>(null)
-  const [sortField, setSortField] = useState<string | null>(null)
-  const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
-
-  const { isPending, data } = useQuery({
-    queryKey: ['transactions', page, limit, filter, sortField, sortOrder],
-    queryFn: async () => {
-      const { data } = await axiosInstance.post('/v1/admin/transaction/list', {
-        page,
-        limit,
-        order_by_column: sortField || 'created_at',
-        descending: sortOrder === 'descend',
-        ...filter,
-      })
-      return data
-    },
-    placeholderData: keepPreviousData,
-  })
-
-  // Extract data array and total count from response
-  const dataSource = _get(data, 'data', [])
-  const total = _get(data, 'page_data.total', 0)
+  const {
+    page,
+    limit,
+    filter,
+    setFilter,
+    isPending,
+    dataSource,
+    total,
+    onTableChange,
+  } = useTransactions()
 
   const columns = [
     {
@@ -124,24 +106,6 @@ const Transactions: React.FC = () => {
     },
   ]
 
-  const onPaginationChange = (pagination: any) => {
-    setPage(pagination.current)
-    setLimit(pagination.pageSize)
-  }
-
-  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
-    onPaginationChange(pagination)
-
-    // Handle sorting
-    if (sorter.field) {
-      setSortField(sorter.field)
-      setSortOrder(sorter.order)
-    } else {
-      setSortField(null)
-      setSortOrder(null)
-    }
-  }
-
   return (
     <>
       {/* Breadcrumbs */}
@@ -176,6 +140,7 @@ const Transactions: React.FC = () => {
             columns={columns}
             dataSource={dataSource}
             loading={isPending}
+            scroll={{ x: 2080 }}
             pagination={{
               total,
               current: page,

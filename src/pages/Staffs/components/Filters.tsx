@@ -217,6 +217,7 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
                   {...field}
                   options={companyOptions}
                   value={field.value}
+                  isClearable
                   onChange={field.onChange}
                   placeholder={
                     isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
@@ -238,6 +239,7 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
                   {...field}
                   options={roleOptions}
                   value={field.value}
+                  isClearable
                   onChange={field.onChange}
                   placeholder="Chọn nhóm chức vụ"
                   className="react-select-container"

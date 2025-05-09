@@ -3,54 +3,31 @@ import { Button, Space, Table, Tag } from 'antd'
 import { EditOutlined, EyeOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import { Link, NavLink } from 'react-router-dom'
-import { useQuery, keepPreviousData } from '@tanstack/react-query'
-import _get from 'lodash/get'
 
 import { routes } from '@/config/routes'
 import Filters from './components/Filters'
-import axiosInstance from '@/config/axios'
 import {
   STAFF_STATUS,
   STAFF_STATUS_COLOR_MAP,
   STAFF_ROLES,
 } from '@/config/constants'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/store'
 import { useAuth } from '@/store/authSlice/useAuth'
+import { useStaffs } from '@/hooks/useStaffs'
 
 const Staffs: React.FC = () => {
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(10)
-  const [filter, setFilter] = useState<any>(null)
-  const [sortField, setSortField] = useState<string | null>(null)
-  const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-
   const { isApprover, isCreator } = useAuth()
 
-  const { isPending, data } = useQuery({
-    queryKey: ['staffs', page, limit, filter, sortField, sortOrder],
-    queryFn: async () => {
-      const { data } = await axiosInstance.get('/v1/admin/staff/list', {
-        params: {
-          page,
-          limit,
-          order_by_column: sortField || 'created_at',
-          descending: sortOrder === 'descend',
-          ...(filter || {}),
-        },
-      })
-      // If your API returns a status_code to indicate success:
-      if (data.status_code === 'ACCEPT') {
-        return data
-      }
-      throw new Error('Failed to get staffs')
-    },
-    placeholderData: keepPreviousData,
-  })
-
-  const dataSource = _get(data, 'data', [])
-  const total = _get(data, 'page_data.total', 0)
+  const {
+    page,
+    limit,
+    filter,
+    setFilter,
+    isPending,
+    dataSource,
+    total,
+    onTableChange,
+  } = useStaffs()
 
   const columns = [
     {
@@ -145,24 +122,6 @@ const Staffs: React.FC = () => {
       }
     : undefined
 
-  const onPaginationChange = (pagination: any) => {
-    setPage(pagination.current)
-    setLimit(pagination.pageSize)
-  }
-
-  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
-    onPaginationChange(pagination)
-
-    // Handle sorting
-    if (sorter.field) {
-      setSortField(sorter.field)
-      setSortOrder(sorter.order)
-    } else {
-      setSortField(null)
-      setSortOrder(null)
-    }
-  }
-
   return (
     <>
       {/* Breadcrumbs */}
@@ -216,6 +175,7 @@ const Staffs: React.FC = () => {
             columns={columns}
             dataSource={dataSource}
             loading={isPending}
+            scroll={{ x: 2080 }}
             pagination={{
               total,
               current: page,

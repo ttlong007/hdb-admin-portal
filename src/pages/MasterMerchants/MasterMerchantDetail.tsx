@@ -1,15 +1,15 @@
 import React from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
-import { Checkbox, Table, Tag, Switch } from 'antd'
+import { Tag, Switch } from 'antd'
 import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons'
 import AdminFeeTable from './components/AdminFeeTable'
 import {
   MASTER_MERCHANT_STATUS,
   MERCHANT_STATUS_COLOR_MAP,
 } from '@/config/constants'
+import { useMasterMerchantDetail } from '@/hooks/useMasterMerchantDetail'
+import { useAuth } from '@/store/authSlice/useAuth'
 
 function InfoCard({
   title,
@@ -31,130 +31,24 @@ function InfoCard({
 export default function MasterMerchantDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['companyDetail', id],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`/v1/admin/company/${id}`)
-      if (response.data.status_code === 'ACCEPT') {
-        const company = response.data.data
-        return {
-          ...company,
-          company_name: company.name,
-        }
-      } else {
-        throw new Error('Failed to get company detail')
-      }
-    },
-    enabled: !!id,
-  })
+  const { isCreator, isApprover } = useAuth()
 
   const {
-    data: limitData,
-    isLoading: isLimitLoading,
-    error: limitError,
-  } = useQuery({
-    queryKey: ['limitList', id],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/limit/list', {
-        params: {
-          entity_id: id,
-          entity_type: 'COMPANY',
-        },
-      })
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error(
-        response.data.reason_message || 'Failed to fetch limit list'
-      )
-    },
-    enabled: !!id,
-  })
-
-  // New query: Fetch admin fees
-  const {
-    data: adminFeesData,
-    isLoading: isAdminFeesLoading,
-    error: adminFeesError,
-  } = useQuery({
-    queryKey: ['adminFees', id],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`/v1/admin/company/${id}/fees`)
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error(
-        response.data.reason_message || 'Failed to fetch admin fees'
-      )
-    },
-    enabled: !!id,
-  })
+    company,
+    dailyLimit,
+    monthlyLimit,
+    isLoading,
+    error,
+  } = useMasterMerchantDetail(id)
 
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error loading detail.</div>
-
-  const company = data || {}
 
   const statusOption = MASTER_MERCHANT_STATUS.find(
     (s) => s.value === company.status
   )
   const statusLabel = statusOption ? statusOption.label : '---'
   const statusColor = MERCHANT_STATUS_COLOR_MAP[company.status] || 'default'
-
-  const dailyLimit = limitData?.find(
-    (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
-  )?.amount
-  const monthlyLimit = limitData?.find(
-    (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
-  )?.amount
-
-  console.log('limitData', limitData)
-  // adminFeesData can now be used to display admin fee info
-  // Map the adminFeesData to match table columns
-  const feeDataSource =
-    adminFeesData?.map((fee: any, index: number) => ({
-      key: (index + 1).toString(),
-      transactionType: fee.transaction_type, // adjust based on API structure
-      fixedFee: fee.fixed_fee,
-      transactionFeePercent: fee.transaction_fee_percent,
-      minFee: fee.min_fee,
-      maxFee: fee.max_fee,
-      afterHoursFee: fee.after_hours_fee,
-    })) || []
-
-  const columns = [
-    {
-      title: 'Loại giao dịch',
-      dataIndex: 'transactionType',
-      key: 'transactionType',
-    },
-    {
-      title: 'Phí cố định',
-      dataIndex: 'fixedFee',
-      key: 'fixedFee',
-    },
-    {
-      title: 'Phí phần trăm theo giao dịch',
-      dataIndex: 'transactionFeePercent',
-      key: 'transactionFeePercent',
-    },
-    {
-      title: 'Phí tối thiểu',
-      dataIndex: 'minFee',
-      key: 'minFee',
-    },
-    {
-      title: 'Phí tối đa',
-      dataIndex: 'maxFee',
-      key: 'maxFee',
-    },
-    {
-      title: 'Phí dịch vụ ngoài giờ',
-      dataIndex: 'afterHoursFee',
-      key: 'afterHoursFee',
-    },
-  ]
 
   return (
     <>
@@ -285,16 +179,26 @@ export default function MasterMerchantDetail() {
             <ArrowLeftOutlined />
             Quay lại
           </button>
-          <button
-            type="submit"
-            onClick={() =>
-              navigate(routes.editMasterMerchant.replace(':id', id || ''))
-            }
-            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
-          >
-            <EditOutlined />
-            Chỉnh sửa
-          </button>
+          {isCreator && (
+            <button
+              type="submit"
+              onClick={() =>
+                navigate(routes.editMasterMerchant.replace(':id', id || ''))
+              }
+              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            >
+              <EditOutlined />
+              Chỉnh sửa
+            </button>
+          )}
+          {isApprover && (
+            <button
+              type="submit"
+              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            >
+              Duyệt
+            </button>
+          )}
         </div>
       </section>
     </>

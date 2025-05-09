@@ -12,6 +12,7 @@ import {
   CheckCircleFilled,
   CheckOutlined,
   SendOutlined,
+  EditOutlined,
 } from '@ant-design/icons'
 import {
   STAFF_STATUS,
@@ -290,24 +291,25 @@ const StaffDetail: React.FC = () => {
           <ArrowLeftOutlined />
           Quay lại
         </button>
-        {isCreator ? (
+        {isCreator && (
           <button
             type="button"
+            onClick={() => navigate(routes.editStaff.replace(':id', id || ''))}
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
-            <SendOutlined />
-            Gửi duyệt
+            <EditOutlined />
+            Chỉnh sửa
           </button>
-        ) : null}
-        {isApprover ? (
+        )}
+        {isApprover && (
           <button
-            type="button"
+            type="submit"
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
             <CheckCircleFilled />
-            Đồng ý duyệt
+            Duyệt
           </button>
-        ) : null}
+        )}
       </div>
     </>
   )
