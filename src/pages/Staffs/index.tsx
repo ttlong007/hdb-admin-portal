@@ -10,6 +10,8 @@ import { routes } from '@/config/routes'
 import Filters from './components/Filters'
 import axiosInstance from '@/config/axios'
 import { STAFF_STATUS, STAFF_STATUS_COLOR_MAP, STAFF_ROLES } from '@/config/constants'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/store'
 
 const Staffs: React.FC = () => {
   const [page, setPage] = useState(1)
@@ -17,6 +19,9 @@ const Staffs: React.FC = () => {
   const [filter, setFilter] = useState<any>(null)
   const [sortField, setSortField] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
+
+  const { isApprover } = useSelector((state: RootState) => state.auth.user || {})
 
   const { isPending, data } = useQuery({
     queryKey: ['staffs', page, limit, filter, sortField, sortOrder],
@@ -118,8 +123,9 @@ const Staffs: React.FC = () => {
     },
   ]
 
-  const rowSelection: TableProps['rowSelection'] = {
+  const rowSelection: TableProps['rowSelection'] = isApprover ? {
     onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+      setSelectedRowKeys(selectedRowKeys)
       console.log(
         `selectedRowKeys: ${selectedRowKeys}`,
         'selectedRows:',
@@ -130,7 +136,7 @@ const Staffs: React.FC = () => {
       disabled: record.name === 'Disabled User',
       name: record.name,
     }),
-  }
+  } : undefined
 
   const onPaginationChange = (pagination: any) => {
     setPage(pagination.current)
@@ -197,7 +203,7 @@ const Staffs: React.FC = () => {
 
         <div className="w-full">
           <Table
-            rowSelection={{ type: 'checkbox', ...rowSelection }}
+            rowSelection={rowSelection}
             columns={columns}
             dataSource={dataSource}
             loading={isPending}
@@ -212,11 +218,13 @@ const Staffs: React.FC = () => {
             onChange={onTableChange}
           />
 
-          <div className="flex justify-end gap-4 w-full mt-8">
-            <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
-              Đồng ý duyệt
-            </button>
-          </div>
+          {isApprover && (
+            <div className="flex justify-end gap-4 w-full mt-8">
+              <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
+                Đồng ý duyệt
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </>

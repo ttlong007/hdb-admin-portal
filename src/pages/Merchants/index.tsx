@@ -14,6 +14,7 @@ import Filters from './components/Filters'
 import axiosInstance from '@/config/axios'
 import { toast } from 'react-toastify'
 import { useMerchants } from '@/hooks/useMerchants'
+import { useAuth } from '@/store/authSlice/useAuth'
 
 const Merchants: React.FC = () => {
   const [page, setPage] = useState(1)
@@ -22,7 +23,7 @@ const Merchants: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [sortField, setSortField] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
-
+  const { isApprover } = useAuth()
   const { isPending, dataSource, total, refetch } = useMerchants({
     page,
     limit,

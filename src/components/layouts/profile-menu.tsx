@@ -47,7 +47,6 @@ export default function ProfileMenu({
     },
   })
 
-  console.log('Profile data:', profile)
   return (
     <ProfileMenuPopover>
       <Popover.Trigger>
