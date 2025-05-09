@@ -88,7 +88,7 @@ const Staffs: React.FC = () => {
     },
     {
       title: 'Tên cửa hàng',
-      dataIndex: ['store', 'name'],
+      dataIndex: 'store_name',
       key: 'store_name',
       sorter: true,
       render: (text: string) => (text ? text : '---'),
@@ -99,13 +99,13 @@ const Staffs: React.FC = () => {
       key: 'role',
       sorter: true,
       render: (role: string) => {
-        const roleOption = STAFF_ROLES.find((r) => r.value === role)
+        const roleOption = STAFF_ROLES.find((r) => r.value === role.toUpperCase())
         return roleOption ? roleOption.label : '---'
       },
     },
     {
       title: 'Đại lý tổng',
-      dataIndex: ['company', 'name'],
+      dataIndex: 'company_name',
       key: 'company_name',
       sorter: true,
       render: (text: string) => (text ? text : '---'),
