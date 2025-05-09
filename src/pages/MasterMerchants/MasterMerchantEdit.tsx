@@ -9,7 +9,11 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 import AdminFeeEditTable from './components/AdminFeeEditTable'
 import { toast } from 'react-toastify'
 import { Input } from 'rizzui'
-import { MASTER_MERCHANT_STATUS, MERCHANT_STATUS_COLOR_MAP } from '@/config/constants'
+import {
+  MASTER_MERCHANT_STATUS,
+  MERCHANT_STATUS_COLOR_MAP,
+} from '@/config/constants'
+import { useAuth } from '@/store/authSlice/useAuth'
 
 const { Option } = Select
 
@@ -44,6 +48,14 @@ interface FormData {
 export default function MasterMerchantEdit() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { isApprover } = useAuth()
+
+  useEffect(() => {
+    if (isApprover) {
+      toast.error('Bạn không có quyền truy cập trang này')
+      navigate(routes.masterMerchant)
+    }
+  }, [isApprover, navigate])
 
   const {
     control,
@@ -106,27 +118,27 @@ export default function MasterMerchantEdit() {
     enabled: !!id,
   })
 
+  const company = data || {}
+
   // Map limitData response for daily and monthly limits
-  const dailyLimit = limitData?.find(
-    (limit: any) => limit.type === 'transaction_quota_daily'
+  const dailyLimit = company.limits?.find(
+    (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
   )?.amount
-  const monthlyLimit = limitData?.find(
+  const monthlyLimit = company.limits?.find(
     (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
   )?.amount
 
-  const company = data || {}
-
-  const statusOption = MASTER_MERCHANT_STATUS.find(s => s.value === company.status)
+  const statusOption = MASTER_MERCHANT_STATUS.find(
+    (s) => s.value === company.status
+  )
   const statusLabel = statusOption ? statusOption.label : '---'
   const statusColor = MERCHANT_STATUS_COLOR_MAP[company.status] || 'default'
 
   useEffect(() => {
     if (data) {
-      // Reset react-hook-form with fetched data.
       reset({
-        transaction_monthly_quota:
-          monthlyLimit || company.transaction_monthly_quota,
-        transaction_daily_quota: dailyLimit || company.transaction_daily_quota,
+        transaction_monthly_quota: monthlyLimit,
+        transaction_daily_quota: dailyLimit,
         need_approve_new_store: company.need_approve_new_store,
         need_approve_new_staff: company.need_approve_new_staff,
         hdb_can_manage: company.hdb_can_manage,

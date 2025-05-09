@@ -23,7 +23,7 @@ const Merchants: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const [sortField, setSortField] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
-  const { isApprover } = useAuth()
+  const { isApprover, isCreator } = useAuth()
   const { isPending, dataSource, total, refetch } = useMerchants({
     page,
     limit,
@@ -98,9 +98,11 @@ const Merchants: React.FC = () => {
       key: 'action',
       render: (_: any, record: any) => (
         <Space size="middle">
-          <Link to={routes.editMerchant.replace(':id', record.id)}>
-            <Button type="text" icon={<EditOutlined />} />
-          </Link>
+          {isCreator && (
+            <Link to={routes.editMerchant.replace(':id', record.id)}>
+              <Button type="text" icon={<EditOutlined />} />
+            </Link>
+          )}
           <Link to={routes.merchantDetail.replace(':id', record.id)}>
             <Button type="text" icon={<EyeOutlined />} />
           </Link>

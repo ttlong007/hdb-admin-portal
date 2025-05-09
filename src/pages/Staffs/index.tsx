@@ -21,7 +21,7 @@ const Staffs: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
 
-  const { isApprover } = useSelector((state: RootState) => state.auth.user || {})
+  const { isApprover, isCreator } = useSelector((state: RootState) => state.auth.user || {})
 
   const { isPending, data } = useQuery({
     queryKey: ['staffs', page, limit, filter, sortField, sortOrder],
@@ -110,11 +110,13 @@ const Staffs: React.FC = () => {
     {
       title: 'Tác vụ',
       key: 'action',
-      render: (_, record: any) => (
+      render: (_: any, record: any) => (
         <Space size="middle">
-          <Link to={routes.editStaff.replace(':id', record.id)}>
-            <Button type="text" icon={<EditOutlined />} />
-          </Link>
+          {isCreator && (
+            <Link to={routes.editStaff.replace(':id', record.id)}>
+              <Button type="text" icon={<EditOutlined />} />
+            </Link>
+          )}
           <Link to={routes.staffDetail.replace(':id', record.id)}>
             <Button type="text" icon={<EyeOutlined />} />
           </Link>

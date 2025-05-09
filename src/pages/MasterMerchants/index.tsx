@@ -5,6 +5,7 @@ import { EditOutlined, EyeOutlined } from '@ant-design/icons'
 import { useMasterMerchants } from '@/hooks/useMasterMerchants'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
+import { useAuth } from '@/store/authSlice/useAuth'
 
 import Filters from './components/Filters'
 import { routes } from '@/config/routes'
@@ -27,6 +28,7 @@ const MasterMerchants: React.FC = () => {
   const [filter, setFilter] = React.useState<any>(null)
   const [sortField, setSortField] = React.useState<string | null>(null)
   const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(null)
+  const { isCreator } = useAuth()
 
   const { data, isPending, refetch } = useMasterMerchants({
     page,
@@ -99,9 +101,11 @@ const MasterMerchants: React.FC = () => {
       key: 'action',
       render: (_, record: any) => (
         <Space size="middle">
-          <Link to={routes.editMasterMerchant.replace(':id', record.id)}>
-            <Button type="text" icon={<EditOutlined />} />
-          </Link>
+          {isCreator && (
+            <Link to={routes.editMasterMerchant.replace(':id', record.id)}>
+              <Button type="text" icon={<EditOutlined />} />
+            </Link>
+          )}
           <Link to={routes.masterMerchantDetail.replace(':id', record.id)}>
             <Button type="text" icon={<EyeOutlined />} />
           </Link>
