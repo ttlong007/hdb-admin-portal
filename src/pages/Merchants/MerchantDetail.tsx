@@ -2,8 +2,15 @@ import React from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { routes } from '@/config/routes'
 import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons'
+import { Tag } from 'antd'
 import { useAuth } from '@/store/authSlice/useAuth'
 import { useMerchantDetail } from '@/hooks/useMerchantDetail'
+import {
+  MERCHANT_STATUS,
+  MERCHANT_STATUS_COLOR_MAP,
+  MASTER_MERCHANT_STATUS,
+  MASTER_MERCHANT_STATUS_COLOR_MAP,
+} from '@/config/constants'
 
 function InfoCard({
   title,
@@ -83,9 +90,13 @@ export default function MasterMerchantDetail() {
 
                 <div className="flex flex-col flex-1 gap-2">
                   <span className="text-sm text-gray-400">Trạng thái</span>
-                  <span className="text-base text-gray-800">
-                    {merchant.company?.status || '---'}
-                  </span>
+                  <div className="inline-flex">
+                    <Tag color={MASTER_MERCHANT_STATUS_COLOR_MAP[merchant.company?.status || '']}>
+                      {MASTER_MERCHANT_STATUS.find(
+                        (status) => status.value === merchant.company?.status
+                      )?.label || '---'}
+                    </Tag>
+                  </div>
                 </div>
               </div>
             </InfoCard>
@@ -139,9 +150,13 @@ export default function MasterMerchantDetail() {
                 {/* Trạng thái */}
                 <div className="flex flex-col flex-1 gap-2">
                   <span className="text-sm text-gray-400">Trạng thái</span>
-                  <span className="text-base text-gray-800">
-                    {merchant.status || '---'}
-                  </span>
+                  <div className="inline-flex">
+                    <Tag color={MERCHANT_STATUS_COLOR_MAP[merchant.status || '']}>
+                      {MERCHANT_STATUS.find(
+                        (status) => status.value === merchant.status
+                      )?.label || '---'}
+                    </Tag>
+                  </div>
                 </div>
               </div>
             </InfoCard>

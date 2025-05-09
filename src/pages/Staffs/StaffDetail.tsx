@@ -129,11 +129,13 @@ const StaffDetail: React.FC = () => {
 
             <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Trạng thái</span>
-              <Tag color={MASTER_MERCHANT_STATUS_COLOR_MAP[company.status]}>
-                {MASTER_MERCHANT_STATUS.find(
-                  (status) => status.value === company.status
-                )?.label || '---'}
-              </Tag>
+              <div className="inline-flex">
+                <Tag color={MASTER_MERCHANT_STATUS_COLOR_MAP[company.status]}>
+                  {MASTER_MERCHANT_STATUS.find(
+                    (status) => status.value === company.status
+                  )?.label || '---'}
+                </Tag>
+              </div>
             </div>
           </div>
         </Card>
@@ -193,10 +195,12 @@ const StaffDetail: React.FC = () => {
 
             <div className="flex flex-col gap-2">
               <span className="text-sm text-gray-400">Trạng thái</span>
-              <Tag color={STAFF_STATUS_COLOR_MAP[staff.status]}>
-                {STAFF_STATUS.find((status) => status.value === staff.status)
-                  ?.label || '---'}
-              </Tag>
+              <div className="inline-flex">
+                <Tag color={STAFF_STATUS_COLOR_MAP[staff.status]}>
+                  {STAFF_STATUS.find((status) => status.value === staff.status)
+                    ?.label || '---'}
+                </Tag>
+              </div>
             </div>
           </div>
         </Card>

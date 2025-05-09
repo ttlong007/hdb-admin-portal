@@ -1,10 +1,19 @@
 import React from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
+import { Tag } from 'antd'
+import { ArrowLeftOutlined } from '@ant-design/icons'
+import {
+  TRANSACTION_STATUS,
+  TRANSACTION_STATUS_COLOR_MAP,
+  MASTER_MERCHANT_STATUS,
+  MASTER_MERCHANT_STATUS_COLOR_MAP,
+} from '@/config/constants'
 
 const TransactionDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['transactionDetail', id],
@@ -23,18 +32,16 @@ const TransactionDetail: React.FC = () => {
 
   const transaction = {
     id: data.id,
+    company_id: data.company_id,
+    store_id: data.store_id,
+    ref_code: data.ref_code,
     code: data.code,
     amount: data.amount,
+    transaction_type_id: data.transaction_type_id,
     status: data.status,
+    transaction_type_name: data.transaction_type_name,
     channel: data.channel,
-    transactionType: data.transaction_type
-      ? {
-          id: data.transaction_type.id,
-          code: data.transaction_type.code,
-          name: data.transaction_type.name,
-          description: data.transaction_type.description,
-        }
-      : null,
+    content: data.content,
     store: data.store
       ? {
           id: data.store.id,
@@ -46,7 +53,10 @@ const TransactionDetail: React.FC = () => {
           status: data.store.status,
           income_account: data.store.income_account,
           expense_account: data.store.expense_account,
+          location_id: data.store.location_id,
           created_at: data.store.created_at,
+          updated_at: data.store.updated_at,
+          deleted_at: data.store.deleted_at,
         }
       : null,
     company: data.company
@@ -54,33 +64,56 @@ const TransactionDetail: React.FC = () => {
           id: data.company.id,
           name: data.company.name,
           cif: data.company.cif,
-          tax_number: data.company.tax_number,
-          status: data.company.status,
+          business_license: data.company.business_license,
+          parent_id: data.company.parent_id,
           representative: data.company.representative,
+          status: data.company.status,
+          need_approve_new_store: data.company.need_approve_new_store,
+          need_approve_new_staff: data.company.need_approve_new_staff,
+          hdb_can_manage: data.company.hdb_can_manage,
+          accts: data.company.accts,
+          store_count: data.company.store_count,
+          partner_status: data.company.partner_status,
+          created_at: data.company.created_at,
+          updated_at: data.company.updated_at,
+          deleted_at: data.company.deleted_at,
         }
       : null,
-    approvedAt: data.approved_at,
-    approvedByStaff: data.approved_by_staff
-      ? {
-          id: data.approved_by_staff.id,
-          name: data.approved_by_staff.name,
-          role: data.approved_by_staff.role,
-        }
-      : null,
-    createdByStaff: data.created_by_staff
+    approved_at: data.approved_at,
+    approved_by_id: data.approved_by_id,
+    created_by_id: data.created_by_id,
+    transaction_fee: data.transaction_fee,
+    from_account: data.from_account,
+    to_account: data.to_account,
+    approval_method: data.approval_method,
+    debit_credit_indicator: data.debit_credit_indicator,
+    customer: data.customer,
+    created_by_staff: data.created_by_staff
       ? {
           id: data.created_by_staff.id,
           name: data.created_by_staff.name,
+          company_id: data.created_by_staff.company_id,
+          store_id: data.created_by_staff.store_id,
+          code: data.created_by_staff.code,
           role: data.created_by_staff.role,
+          national_id_number: data.created_by_staff.national_id_number,
+          cif: data.created_by_staff.cif,
+          status: data.created_by_staff.status,
+          email: data.created_by_staff.email,
+          phone_number: data.created_by_staff.phone_number,
+          income_account: data.created_by_staff.income_account,
+          expense_account: data.created_by_staff.expense_account,
+          limits: data.created_by_staff.limits,
+          created_at: data.created_by_staff.created_at,
+          updated_at: data.created_by_staff.updated_at,
+          deleted_at: data.created_by_staff.deleted_at,
         }
       : null,
-    transactionFee: data.transaction_fee,
-    fromAccount: data.from_account,
-    toAccount: data.to_account,
-    createdAt: data.created_at,
-    updatedAt: data.created_at,
-    totalAmount: data.total_amount,
-    // Additional fields (if needed) can be mapped here.
+    approved_by_staff: data.approved_by_staff,
+    total_amount: data.total_amount,
+    created_at: data.created_at,
+    updated_at: data.updated_at,
+    deleted_at: data.deleted_at,
   }
 
   return (
@@ -120,7 +153,7 @@ const TransactionDetail: React.FC = () => {
               Tax ID
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.company?.tax_number || '---'}
+              {transaction.company?.business_license || '---'}
             </span>
           </div>
 
@@ -128,11 +161,19 @@ const TransactionDetail: React.FC = () => {
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
               Trạng thái
             </label>
-            <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.company?.status === 'ACTIVE'
-                ? 'Đang hoạt động'
-                : transaction.company?.status}
-            </span>
+            <div className="inline-flex">
+              <Tag
+                color={
+                  MASTER_MERCHANT_STATUS_COLOR_MAP[
+                    transaction.company?.status || ''
+                  ]
+                }
+              >
+                {MASTER_MERCHANT_STATUS.find(
+                  (status) => status.value === transaction.company?.status
+                )?.label || '---'}
+              </Tag>
+            </div>
           </div>
         </div>
       </div>
@@ -168,7 +209,7 @@ const TransactionDetail: React.FC = () => {
               Nhân viên thực hiện giao dịch
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.createdByStaff?.name || '---'}
+              {transaction.created_by_staff?.name || '---'}
             </span>
           </div>
 
@@ -178,8 +219,8 @@ const TransactionDetail: React.FC = () => {
               Thời gian giao dịch
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.createdAt
-                ? new Date(transaction.createdAt).toLocaleString()
+              {transaction.created_at
+                ? new Date(transaction.created_at).toLocaleString()
                 : '---'}
             </span>
           </div>
@@ -190,7 +231,7 @@ const TransactionDetail: React.FC = () => {
               Người phê duyệt
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.approvedByStaff?.name || '---'}
+              {transaction.approved_by_staff?.name || '---'}
             </span>
           </div>
 
@@ -200,17 +241,17 @@ const TransactionDetail: React.FC = () => {
               Tên khách hàng
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {/* {transaction.customerName || '---'} */}
+              {transaction.customer || '---'}
             </span>
           </div>
 
-          {/* Nhân viên thực hiện */}
+          {/* Nội dung giao dịch */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
-              Nhân viên thực hiện
+              Nội dung giao dịch
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.createdByStaff?.name || '---'}
+              {transaction.content || '---'}
             </span>
           </div>
         </div>
@@ -222,6 +263,16 @@ const TransactionDetail: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-5 gap-4 w-full">
+          {/* Mã tham chiếu */}
+          <div className="flex flex-col">
+            <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
+              Mã tham chiếu
+            </label>
+            <span className="text-[#344054] text-[16px] font-medium leading-normal">
+              {transaction.ref_code || '---'}
+            </span>
+          </div>
+
           {/* Mã giao dịch */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
@@ -238,8 +289,8 @@ const TransactionDetail: React.FC = () => {
               Tổng tiền
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.totalAmount
-                ? transaction.totalAmount.toLocaleString('vi-VN') + ' VND'
+              {transaction.total_amount
+                ? transaction.total_amount.toLocaleString('vi-VN') + ' VND'
                 : '---'}
             </span>
           </div>
@@ -262,17 +313,7 @@ const TransactionDetail: React.FC = () => {
               Loại giao dịch
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.transactionType?.name || '---'}
-            </span>
-          </div>
-
-          {/* Trạng thái */}
-          <div className="flex flex-col">
-            <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
-              Trạng thái
-            </label>
-            <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.status || '---'}
+              {transaction.transaction_type_name || '---'}
             </span>
           </div>
 
@@ -282,7 +323,7 @@ const TransactionDetail: React.FC = () => {
               Số tài khoản nguồn
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.fromAccount || '---'}
+              {transaction.from_account || '---'}
             </span>
           </div>
 
@@ -292,7 +333,7 @@ const TransactionDetail: React.FC = () => {
               Số tài khoản nhận
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.toAccount || '---'}
+              {transaction.to_account || '---'}
             </span>
           </div>
 
@@ -302,8 +343,8 @@ const TransactionDetail: React.FC = () => {
               Thời gian giao dịch
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.createdAt
-                ? new Date(transaction.createdAt).toLocaleString('vi-VN')
+              {transaction.created_at
+                ? new Date(transaction.created_at).toLocaleString('vi-VN')
                 : '---'}
             </span>
           </div>
@@ -314,10 +355,26 @@ const TransactionDetail: React.FC = () => {
               Phí giao dịch
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.transactionFee !== undefined
-                ? transaction.transactionFee.toLocaleString('vi-VN') + ' VND'
+              {transaction.transaction_fee !== undefined
+                ? transaction.transaction_fee.toLocaleString('vi-VN') + ' VND'
                 : '---'}
             </span>
+          </div>
+
+          {/* Trạng thái */}
+          <div className="flex flex-col">
+            <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
+              Trạng thái
+            </label>
+            <div className="inline-flex">
+              <Tag
+                color={TRANSACTION_STATUS_COLOR_MAP[transaction.status || '']}
+              >
+                {TRANSACTION_STATUS.find(
+                  (status) => status.value === transaction.status
+                )?.label || '---'}
+              </Tag>
+            </div>
           </div>
         </div>
       </div>
@@ -325,22 +382,10 @@ const TransactionDetail: React.FC = () => {
       <div className="flex items-center justify-end gap-4 w-full mt-8">
         <button
           type="button"
+          onClick={() => navigate(-1)}
           className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-          >
-            <path
-              fillRule="evenodd"
-              clipRule="evenodd"
-              d="M13.1665 8C13.1665 7.72386 12.9426 7.5 12.6665 7.5L4.54033 7.5L7.68677 4.35355C7.88204 4.15829 7.88203 3.84171 7.68677 3.64645C7.49151 3.45118 7.17493 3.45118 6.97967 3.64645L2.97967 7.64645C2.78441 7.84171 2.78441 8.15829 2.97967 8.35355L6.97967 12.3536C7.17493 12.5488 7.49151 12.5488 7.68677 12.3536C7.88204 12.1583 7.88204 11.8417 7.68677 11.6464L4.54033 8.5L12.6665 8.5C12.9426 8.5 13.1665 8.27614 13.1665 8Z"
-              fill="#242729"
-            />
-          </svg>
+          <ArrowLeftOutlined />
           Quay lại
         </button>
       </div>
