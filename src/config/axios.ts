@@ -3,6 +3,18 @@ import { getEnv } from './env'
 import { store } from '@/store'
 import { setState } from '../store/authSlice'
 
+interface ErrorResponse {
+  status_code: string
+  reason_code: string
+  reason_message: string
+}
+
+// Create a navigation utility
+let navigate: any = null
+export const setNavigate = (nav: any) => {
+  navigate = nav
+}
+
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: getEnv('VITE_API_URL', 'http://localhost:4000'),
   headers: {
@@ -28,7 +40,20 @@ axiosInstance.interceptors.request.use(
 // Add a response interceptor to handle token refresh
 axiosInstance.interceptors.response.use(
   (response) => response,
-  async (error: AxiosError) => {
+  async (error: AxiosError<ErrorResponse>) => {
+    // Handle 403 unauthorized access
+    // if (
+    //   error.response?.status === 403 &&
+    //   error.response?.data?.status_code === 'REJECT' &&
+    //   error.response?.data?.reason_code === 'unauthorized'
+    // ) {
+    //   store.dispatch(
+    //     setState({ accessToken: null, refreshToken: null, user: null })
+    //   )
+    //   navigate?.('/unauthorize')
+    //   return Promise.reject(error)
+    // }
+
     if (
       error.response?.status === 401 &&
       !(error.config as any).__isRetryRequest
@@ -72,7 +97,7 @@ axiosInstance.interceptors.response.use(
             store.dispatch(
               setState({ accessToken: null, refreshToken: null, user: null })
             )
-            window.location.href = '/unauthorize'
+            navigate?.('/unauthorize')
             return Promise.reject(refreshResponse.data.reason_message)
           }
         } catch (refreshError) {
@@ -80,7 +105,7 @@ axiosInstance.interceptors.response.use(
           store.dispatch(
             setState({ accessToken: null, refreshToken: null, user: null })
           )
-          window.location.href = '/unauthorize'
+          navigate?.('/unauthorize')
           console.error('Refresh token error:', refreshError)
           return Promise.reject(refreshError)
         }
@@ -89,10 +114,11 @@ axiosInstance.interceptors.response.use(
         store.dispatch(
           setState({ accessToken: null, refreshToken: null, user: null })
         )
-        window.location.href = '/unauthorize'
+        navigate?.('/unauthorize')
         return Promise.reject(error)
       }
     }
+
     return Promise.reject(error)
   }
 )

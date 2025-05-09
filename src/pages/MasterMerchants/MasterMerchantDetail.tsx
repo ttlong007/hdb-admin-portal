@@ -6,6 +6,7 @@ import { routes } from '@/config/routes'
 import { Checkbox, Table, Tag, Switch } from 'antd'
 import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons'
 import AdminFeeTable from './components/AdminFeeTable'
+import { MASTER_MERCHANT_STATUS, MERCHANT_STATUS_COLOR_MAP } from '@/config/constants'
 
 function InfoCard({
   title,
@@ -92,22 +93,9 @@ export default function MasterMerchantDetail() {
 
   const company = data || {}
 
-  const statusLabel =
-    company.status === 'P'
-      ? 'Pending'
-      : company.status === 'ACTIVE'
-      ? 'Active'
-      : company.status === 'INACTIVE'
-      ? 'Inactive'
-      : company.status || '---'
-  const statusColor =
-    company.status === 'P'
-      ? 'orange'
-      : company.status === 'ACTIVE'
-      ? 'green'
-      : company.status === 'INACTIVE'
-      ? 'red'
-      : 'default'
+  const statusOption = MASTER_MERCHANT_STATUS.find(s => s.value === company.status)
+  const statusLabel = statusOption ? statusOption.label : '---'
+  const statusColor = MERCHANT_STATUS_COLOR_MAP[company.status] || 'default'
 
   const dailyLimit = limitData?.find(
     (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
@@ -116,6 +104,7 @@ export default function MasterMerchantDetail() {
     (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
   )?.amount
 
+  console.log('limitData', limitData)
   // adminFeesData can now be used to display admin fee info
   // Map the adminFeesData to match table columns
   const feeDataSource =

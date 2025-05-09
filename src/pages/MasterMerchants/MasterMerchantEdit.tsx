@@ -9,6 +9,7 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 import AdminFeeEditTable from './components/AdminFeeEditTable'
 import { toast } from 'react-toastify'
 import { Input } from 'rizzui'
+import { MASTER_MERCHANT_STATUS, MERCHANT_STATUS_COLOR_MAP } from '@/config/constants'
 
 const { Option } = Select
 
@@ -69,8 +70,6 @@ export default function MasterMerchantEdit() {
         return {
           ...company,
           company_name: company.name,
-          tax_code: company.tax_number,
-          // Removed transaction_monthly_quota and transaction_daily_quota
           need_approve_new_store: company.need_approve_new_store,
           need_approve_new_staff: company.need_approve_new_staff,
           hdb_can_manage: company.hdb_can_manage,
@@ -117,22 +116,9 @@ export default function MasterMerchantEdit() {
 
   const company = data || {}
 
-  const statusLabel =
-    company.status === 'P'
-      ? 'Pending'
-      : company.status === 'ACTIVE'
-      ? 'Active'
-      : company.status === 'INACTIVE'
-      ? 'Inactive'
-      : company.status || '---'
-  const statusColor =
-    company.status === 'P'
-      ? 'orange'
-      : company.status === 'ACTIVE'
-      ? 'green'
-      : company.status === 'INACTIVE'
-      ? 'red'
-      : 'default'
+  const statusOption = MASTER_MERCHANT_STATUS.find(s => s.value === company.status)
+  const statusLabel = statusOption ? statusOption.label : '---'
+  const statusColor = MERCHANT_STATUS_COLOR_MAP[company.status] || 'default'
 
   useEffect(() => {
     if (data) {
@@ -216,6 +202,7 @@ export default function MasterMerchantEdit() {
     onSuccess: () => {
       toast.success('Cập nhật thành công!')
       refetch()
+      navigate(-1)
     },
     onError: (error: any) => {
       toast.error(error.message || 'Có lỗi xảy ra khi cập nhật')
@@ -274,7 +261,7 @@ export default function MasterMerchantEdit() {
             <div className="flex flex-col flex-1 gap-2">
               <span className="text-sm text-gray-400">Số giấy phép ĐKKD</span>
               <span className="text-base font-semibold">
-                {company.tax_code || '---'}
+                {company.business_license || '---'}
               </span>
             </div>
             <div className="flex flex-col flex-1 gap-2">
