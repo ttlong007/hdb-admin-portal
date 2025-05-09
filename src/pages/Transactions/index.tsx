@@ -77,11 +77,10 @@ const Transactions: React.FC = () => {
     },
     {
       title: 'Loại GD',
-      dataIndex: 'transaction_type',
-      key: 'transaction_type',
+      dataIndex: 'transaction_type_name',
+      key: 'transaction_type_name',
       sorter: true,
-      render: (transactionType: any) =>
-        transactionType && transactionType.name ? transactionType.name : 'N/A',
+      render: (name: string) => name || '---',
     },
     {
       title: 'Thời gian GD',
@@ -93,18 +92,17 @@ const Transactions: React.FC = () => {
     },
     {
       title: 'Mã - Tên điểm đại lý',
-      dataIndex: 'store',
-      key: 'store',
+      dataIndex: 'store_code_name',
+      key: 'store_code_name',
       sorter: true,
-      render: (store: any) =>
-        store && store.code_name ? store.code_name : '---',
+      render: (text: string) => text || '---',
     },
     {
       title: 'Mã nhân viên',
-      dataIndex: ['created_by_staff', 'code'],
-      key: 'staff_code',
+      dataIndex: 'created_by_staff_code',
+      key: 'created_by_staff_code',
       sorter: true,
-      render: (text: string) => (text ? text : '---'),
+      render: (text: string) => text || '---',
     },
     {
       title: 'Phí giao dịch',

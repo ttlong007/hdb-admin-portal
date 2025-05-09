@@ -46,33 +46,6 @@ const CreateMerchant = () => {
     }
   }, [isApprover, navigate])
 
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = useForm<MerchantFormValues>({
-    defaultValues: {
-      name: '',
-      code: '',
-      address: '',
-      city: null,
-      district: null,
-      ward: null,
-      expense_account: null,
-      income_account: null,
-      transaction_monthly_quota: '',
-      transaction_daily_quota: '',
-      approveThreshold: '',
-      transactionTypes: [],
-    },
-  })
-
-  const [needApprove, setNeedApprove] = React.useState(false)
-
-  const handleApporveChange = (checked: boolean) => {
-    setNeedApprove(checked)
-  }
-
   const { data: transactionOptions, isLoading } = useQuery({
     queryKey: ['transaction-types'],
     queryFn: async () => {
@@ -95,6 +68,33 @@ const CreateMerchant = () => {
           name: t.name,
         }))
       : defaultTransactionTypes
+
+  const {
+    handleSubmit,
+    control,
+    formState: { errors },
+  } = useForm<MerchantFormValues>({
+    defaultValues: {
+      name: '',
+      code: '',
+      address: '',
+      city: null,
+      district: null,
+      ward: null,
+      expense_account: null,
+      income_account: null,
+      transaction_monthly_quota: '',
+      transaction_daily_quota: '',
+      approveThreshold: '',
+      transactionTypes: options.map((type: { id: number }) => type.id),
+    },
+  })
+
+  const [needApprove, setNeedApprove] = React.useState(true)
+
+  const handleApporveChange = (checked: boolean) => {
+    setNeedApprove(checked)
+  }
 
   // Fetch provinces (cities)
   const { data: provinces, isLoading: isLoadingProvinces } = useQuery<Option[]>(
@@ -184,14 +184,18 @@ const CreateMerchant = () => {
     : []
 
   // Watch the selected company from the form.
-  const selectedCompany = useWatch({ control, name: "company_id" })
+  const selectedCompany = useWatch({ control, name: 'company_id' })
 
   // Fetch account list dynamically using the selected company id.
-  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<Option[]>({
+  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<
+    Option[]
+  >({
     queryKey: ['companyAccounts', selectedCompany?.value],
     queryFn: async () => {
       if (!selectedCompany?.value) return []
-      const response = await axiosInstance.get(`/v1/admin/company/${selectedCompany.value}`)
+      const response = await axiosInstance.get(
+        `/v1/admin/company/${selectedCompany.value}`
+      )
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.accts.map((acc: any) => ({
           label: `${acc.acct_desc} (${acc.acct_no})`,

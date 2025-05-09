@@ -99,7 +99,7 @@ export default function CreateStaff() {
       income_account: null,
       transaction_monthly_quota: '',
       transaction_daily_quota: '',
-      transactionTypes: [],
+      transactionTypes: options.map((type: { id: number }) => type.id),
     },
   })
 
