@@ -34,12 +34,14 @@ type StaffPayload = {
   name: string
   national_id_number: string
   phone_number: string
-  role: string // adjust if needed
+  role: string
   store_id: number
   expense_account: string
   income_account: string
-  transaction_monthly_quota: string
-  transaction_daily_quota: string
+  limits: {
+    amount: number
+    type: 'TRANSACTION_QUOTA_DAILY' | 'TRANSACTION_QUOTA_MONTHLY'
+  }[]
   transaction_type_ids: number[]
 }
 
@@ -204,13 +206,20 @@ export default function CreateStaff() {
       name: data.name,
       national_id_number: data.national_id_number,
       phone_number: data.phone_number,
-      // Convert role value to string explicitly
       role: String(data.role.value),
       store_id: data.store_id.value,
       expense_account: data.expense_account.value.toString(),
       income_account: data.income_account.value.toString(),
-      transaction_monthly_quota: data.transaction_monthly_quota,
-      transaction_daily_quota: data.transaction_daily_quota,
+      limits: [
+        {
+          amount: Number(data.transaction_daily_quota),
+          type: 'TRANSACTION_QUOTA_DAILY',
+        },
+        {
+          amount: Number(data.transaction_monthly_quota),
+          type: 'TRANSACTION_QUOTA_MONTHLY',
+        },
+      ],
       transaction_type_ids: data.transactionTypes || [],
     }
 

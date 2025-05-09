@@ -14,8 +14,11 @@ export interface StaffPayload {
   store_id: number
   expense_account: string
   income_account: string
-  transaction_monthly_quota: string
-  transaction_daily_quota: string
+  limits: {
+    amount: number
+    type: 'TRANSACTION_QUOTA_DAILY' | 'TRANSACTION_QUOTA_MONTHLY'
+  }[]
+  transaction_type_ids: number[]
 }
 
 export function useUpdateStaff(

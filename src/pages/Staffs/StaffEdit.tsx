@@ -43,8 +43,10 @@ type StaffPayload = {
   store_id: number
   expense_account: string
   income_account: string
-  transaction_monthly_quota: string
-  transaction_daily_quota: string
+  limits: {
+    amount: number
+    type: 'TRANSACTION_QUOTA_DAILY' | 'TRANSACTION_QUOTA_MONTHLY'
+  }[]
   transaction_type_ids: number[]
 }
 
@@ -62,6 +64,14 @@ const defaultTransactionTypes = [
 
 // Helper to map staffDetail response to form default values
 function mapStaffToDefaultValues(staffDetail: any): FormData {
+  // Find daily and monthly quotas from limits array
+  const dailyQuota = staffDetail.limits?.find(
+    (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
+  )
+  const monthlyQuota = staffDetail.limits?.find(
+    (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
+  )
+
   return {
     company_id: staffDetail.company_id
       ? {
@@ -80,7 +90,10 @@ function mapStaffToDefaultValues(staffDetail: any): FormData {
         }
       : null,
     store_id: staffDetail.store_id
-      ? { label: staffDetail.store?.name || 'N/A', value: staffDetail.store_id }
+      ? {
+          label: staffDetail.store?.name || 'N/A',
+          value: staffDetail.store_id,
+        }
       : null,
     expense_account: staffDetail.expense_account
       ? {
@@ -94,13 +107,11 @@ function mapStaffToDefaultValues(staffDetail: any): FormData {
           value: staffDetail.income_account.toString(),
         }
       : null,
-    transaction_monthly_quota: staffDetail.transaction_monthly_quota
-      ? String(staffDetail.transaction_monthly_quota)
-      : '',
-    transaction_daily_quota: staffDetail.transaction_daily_quota
-      ? String(staffDetail.transaction_daily_quota)
-      : '',
-    transactionTypes: staffDetail.transaction_types?.map((type: { id: number }) => type.id) || [],
+    transaction_monthly_quota: monthlyQuota ? String(monthlyQuota.amount) : '',
+    transaction_daily_quota: dailyQuota ? String(dailyQuota.amount) : '',
+    transactionTypes:
+      staffDetail.transaction_types?.map((type: { id: number }) => type.id) ||
+      [],
   }
 }
 
@@ -116,19 +127,20 @@ export default function EditStaff() {
     }
   }, [isApprover, navigate])
 
-  const { data: transactionOptions, isLoading: isLoadingTransactionTypes } = useQuery({
-    queryKey: ['transaction-types'],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        '/v1/admin/transaction/list-types'
-      )
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      } else {
-        throw new Error('Failed to fetch transaction types')
-      }
-    },
-  })
+  const { data: transactionOptions, isLoading: isLoadingTransactionTypes } =
+    useQuery({
+      queryKey: ['transaction-types'],
+      queryFn: async () => {
+        const response = await axiosInstance.get(
+          '/v1/admin/transaction/list-types'
+        )
+        if (response.data.status_code === 'ACCEPT') {
+          return response.data.data
+        } else {
+          throw new Error('Failed to fetch transaction types')
+        }
+      },
+    })
 
   // Use fetched data if available; fallback to default list if needed.
   const options =
@@ -163,8 +175,32 @@ export default function EditStaff() {
   useEffect(() => {
     if (staffDetail) {
       reset(mapStaffToDefaultValues(staffDetail))
+
+      // Fetch stores for the company when staff detail is loaded
+      if (staffDetail.company_id && staffDetail.store_id) {
+        const fetchStores = async () => {
+          try {
+            const response = await axiosInstance.get('/v1/admin/store/list', {
+              params: { company_id: staffDetail.company_id },
+            })
+            if (response.data.status_code === 'ACCEPT') {
+              const storeOptions = response.data.data.map((store: any) => ({
+                label: store.name,
+                value: store.id,
+              }))
+              setValue('store_id', {
+                label: staffDetail.store?.name || 'N/A',
+                value: staffDetail.store_id as number,
+              })
+            }
+          } catch (error) {
+            console.error('Failed to fetch stores:', error)
+          }
+        }
+        fetchStores()
+      }
     }
-  }, [staffDetail, reset])
+  }, [staffDetail, reset, setValue])
 
   // Fetch company options via custom hook
   const { data: companyOptions = [], isLoading: isLoadingCompanies } =
@@ -213,8 +249,16 @@ export default function EditStaff() {
       store_id: data.store_id.value,
       expense_account: data.expense_account.value.toString(),
       income_account: data.income_account.value.toString(),
-      transaction_monthly_quota: data.transaction_monthly_quota,
-      transaction_daily_quota: data.transaction_daily_quota,
+      limits: [
+        {
+          amount: Number(data.transaction_daily_quota),
+          type: 'TRANSACTION_QUOTA_DAILY',
+        },
+        {
+          amount: Number(data.transaction_monthly_quota),
+          type: 'TRANSACTION_QUOTA_MONTHLY',
+        },
+      ],
       transaction_type_ids: data.transactionTypes || [],
     }
 
