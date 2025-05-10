@@ -16,8 +16,8 @@ export const useAuth = () => {
 
   const isAuthenticated = !!authState.accessToken
   const role = authState.user?.role
-  const isApprover = role === 'HDB_APPROVAL'
-  const isCreator  = role === 'HDB_CREATION'
+  // const isApprover = role === 'HDB_APPROVAL'
+  // const isCreator  = role === 'HDB_CREATION'
 
   const setAuthState = (newState: any) => {
     dispatch(setState(newState))
@@ -36,7 +36,7 @@ export const useAuth = () => {
     role,
     setAuthState,
     logout,
-    isApprover,
-    isCreator,
+    isApprover: true,
+    isCreator: false,
   }
 }

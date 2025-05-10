@@ -1,16 +1,24 @@
 import React from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { routes } from '@/config/routes'
-import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons'
-import { Tag } from 'antd'
+import {
+  ArrowLeftOutlined,
+  EditOutlined,
+  CloseCircleOutlined,
+  CheckCircleOutlined,
+} from '@ant-design/icons'
+import { Tag, message } from 'antd'
 import { useAuth } from '@/store/authSlice/useAuth'
 import { useMerchantDetail } from '@/hooks/useMerchantDetail'
+import axiosInstance from '@/config/axios'
 import {
   MERCHANT_STATUS,
   MERCHANT_STATUS_COLOR_MAP,
   MASTER_MERCHANT_STATUS,
   MASTER_MERCHANT_STATUS_COLOR_MAP,
 } from '@/config/constants'
+import { toast } from 'react-toastify'
+import { useMutation } from '@tanstack/react-query'
 
 function InfoCard({
   title,
@@ -33,7 +41,27 @@ export default function MasterMerchantDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { isCreator, isApprover } = useAuth()
-  const { merchant, isLoading, error, monthlyLimit, dailyLimit } = useMerchantDetail(id)
+  const { merchant, isLoading, error, monthlyLimit, dailyLimit } =
+    useMerchantDetail(id)
+
+  const rejectMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post('/v1/admin/store/reject-stores', {
+        id: [Number(id)]
+      })
+      if (response.data.status_code !== 'ACCEPT') {
+        throw new Error(response.data.reason_message || 'Từ chối thất bại')
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Từ chối thành công')
+      navigate(-1)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi từ chối')
+    }
+  })
 
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error loading detail.</div>
@@ -91,7 +119,13 @@ export default function MasterMerchantDetail() {
                 <div className="flex flex-col flex-1 gap-2">
                   <span className="text-sm text-gray-400">Trạng thái</span>
                   <div className="inline-flex">
-                    <Tag color={MASTER_MERCHANT_STATUS_COLOR_MAP[merchant.company?.status || '']}>
+                    <Tag
+                      color={
+                        MASTER_MERCHANT_STATUS_COLOR_MAP[
+                          merchant.company?.status || ''
+                        ]
+                      }
+                    >
                       {MASTER_MERCHANT_STATUS.find(
                         (status) => status.value === merchant.company?.status
                       )?.label || '---'}
@@ -151,7 +185,9 @@ export default function MasterMerchantDetail() {
                 <div className="flex flex-col flex-1 gap-2">
                   <span className="text-sm text-gray-400">Trạng thái</span>
                   <div className="inline-flex">
-                    <Tag color={MERCHANT_STATUS_COLOR_MAP[merchant.status || '']}>
+                    <Tag
+                      color={MERCHANT_STATUS_COLOR_MAP[merchant.status || '']}
+                    >
                       {MERCHANT_STATUS.find(
                         (status) => status.value === merchant.status
                       )?.label || '---'}
@@ -216,12 +252,24 @@ export default function MasterMerchantDetail() {
             </button>
           )}
           {isApprover && (
-            <button
-              type="submit"
-              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
-            >
-              Duyệt
-            </button>
+            <>
+              <button
+                type="button"
+                onClick={() => rejectMutation.mutate()}
+                disabled={rejectMutation.isPending}
+                className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+              >
+                <CloseCircleOutlined />
+                {rejectMutation.isPending ? 'Đang xử lý...' : 'Từ chối'}
+              </button>
+              <button
+                type="submit"
+                className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+              >
+                <CheckCircleOutlined />
+                Duyệt
+              </button>
+            </>
           )}
         </div>
       </section>
