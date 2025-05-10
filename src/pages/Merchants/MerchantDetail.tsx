@@ -47,7 +47,7 @@ export default function MasterMerchantDetail() {
   const rejectMutation = useMutation({
     mutationFn: async () => {
       const response = await axiosInstance.post('/v1/admin/store/reject-stores', {
-        id: [Number(id)]
+        ids: [Number(id)]
       })
       if (response.data.status_code !== 'ACCEPT') {
         throw new Error(response.data.reason_message || 'Từ chối thất bại')
@@ -60,6 +60,25 @@ export default function MasterMerchantDetail() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Có lỗi xảy ra khi từ chối')
+    }
+  })
+
+  const approveMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post('/v1/admin/store/approve-stores', {
+        ids: [Number(id)]
+      })
+      if (response.data.status_code !== 'ACCEPT') {
+        throw new Error(response.data.reason_message || 'Duyệt thất bại')
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Duyệt thành công')
+      navigate(-1)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi duyệt')
     }
   })
 
@@ -263,11 +282,13 @@ export default function MasterMerchantDetail() {
                 {rejectMutation.isPending ? 'Đang xử lý...' : 'Từ chối'}
               </button>
               <button
-                type="submit"
+                type="button"
+                onClick={() => approveMutation.mutate()}
+                disabled={approveMutation.isPending}
                 className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
               >
                 <CheckCircleOutlined />
-                Duyệt
+                {approveMutation.isPending ? 'Đang xử lý...' : 'Duyệt'}
               </button>
             </>
           )}
