@@ -1,6 +1,6 @@
 import React from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import Card from '@/components/core/components/Card'
 import { routes } from '@/config/routes'
@@ -13,6 +13,8 @@ import {
   CheckOutlined,
   SendOutlined,
   EditOutlined,
+  CloseCircleOutlined,
+  CheckCircleOutlined,
 } from '@ant-design/icons'
 import {
   STAFF_STATUS,
@@ -21,11 +23,54 @@ import {
   MASTER_MERCHANT_STATUS_COLOR_MAP,
 } from '@/config/constants'
 import { useAuth } from '@/store/authSlice/useAuth'
+import { toast } from 'react-toastify'
 
 const StaffDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { isCreator, isApprover } = useAuth()
+  const queryClient = useQueryClient()
+
+  const rejectMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post('/v1/admin/staff/reject-staffs', {
+        ids: [Number(id)]
+      })
+      if (response.status !== 204) {
+        throw new Error('Từ chối thất bại')
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Từ chối thành công')
+      queryClient.invalidateQueries({ queryKey: ['staffDetail', id] })
+      navigate(-1)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi từ chối')
+    }
+  })
+
+  const approveMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post('/v1/admin/staff/approve-staffs', {
+        ids: [Number(id)]
+      })
+      if (response.status !== 204) {
+        throw new Error('Duyệt thất bại')
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Duyệt thành công')
+      queryClient.invalidateQueries({ queryKey: ['staffDetail', id] })
+      navigate(-1)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi duyệt')
+    }
+  })
+
   const { data, isLoading, error } = useQuery({
     queryKey: ['staffDetail', id],
     queryFn: async () => {
@@ -305,14 +350,27 @@ const StaffDetail: React.FC = () => {
             Chỉnh sửa
           </button>
         )}
-        {isApprover && (
-          <button
-            type="submit"
-            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
-          >
-            <CheckCircleFilled />
-            Duyệt
-          </button>
+        {isApprover && staff.status === 'WAITING_APPROVE' && (
+          <>
+            <button
+              type="button"
+              onClick={() => rejectMutation.mutate()}
+              disabled={rejectMutation.isPending}
+              className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+            >
+              <CloseCircleOutlined />
+              {rejectMutation.isPending ? 'Đang xử lý...' : 'Từ chối'}
+            </button>
+            <button
+              type="button"
+              onClick={() => approveMutation.mutate()}
+              disabled={approveMutation.isPending}
+              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            >
+              <CheckCircleOutlined />
+              {approveMutation.isPending ? 'Đang xử lý...' : 'Duyệt'}
+            </button>
+          </>
         )}
       </div>
     </>

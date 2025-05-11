@@ -2,7 +2,7 @@ import React from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { routes } from '@/config/routes'
 import { Tag, Switch } from 'antd'
-import { ArrowLeftOutlined, EditOutlined } from '@ant-design/icons'
+import { ArrowLeftOutlined, EditOutlined, CloseCircleOutlined, CheckCircleOutlined } from '@ant-design/icons'
 import AdminFeeTable from './components/AdminFeeTable'
 import {
   MASTER_MERCHANT_STATUS,
@@ -10,6 +10,9 @@ import {
 } from '@/config/constants'
 import { useMasterMerchantDetail } from '@/hooks/useMasterMerchantDetail'
 import { useAuth } from '@/store/authSlice/useAuth'
+import axiosInstance from '@/config/axios'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'react-toastify'
 
 function InfoCard({
   title,
@@ -32,6 +35,7 @@ export default function MasterMerchantDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { isCreator, isApprover } = useAuth()
+  const queryClient = useQueryClient()
 
   const {
     company,
@@ -40,6 +44,46 @@ export default function MasterMerchantDetail() {
     isLoading,
     error,
   } = useMasterMerchantDetail(id)
+
+  const rejectMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post('/v1/admin/company/reject-companies', {
+        ids: [Number(id)]
+      })
+      if (response.status !== 204) {
+        throw new Error('Từ chối thất bại')
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Từ chối thành công')
+      queryClient.invalidateQueries({ queryKey: ['masterMerchantDetail', id] })
+      navigate(-1)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi từ chối')
+    }
+  })
+
+  const approveMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post('/v1/admin/company/approve-companies', {
+        ids: [Number(id)]
+      })
+      if (response.status !== 204) {
+        throw new Error('Duyệt thất bại')
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Duyệt thành công')
+      queryClient.invalidateQueries({ queryKey: ['masterMerchantDetail', id] })
+      navigate(-1)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi duyệt')
+    }
+  })
 
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error loading detail.</div>
@@ -181,7 +225,7 @@ export default function MasterMerchantDetail() {
           </button>
           {isCreator && (
             <button
-              type="submit"
+              type="button"
               onClick={() =>
                 navigate(routes.editMasterMerchant.replace(':id', id || ''))
               }
@@ -191,13 +235,27 @@ export default function MasterMerchantDetail() {
               Chỉnh sửa
             </button>
           )}
-          {isApprover && (
-            <button
-              type="submit"
-              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
-            >
-              Duyệt
-            </button>
+          {isApprover && company.status === 'WAITING_APPROVE' && (
+            <>
+              <button
+                type="button"
+                onClick={() => rejectMutation.mutate()}
+                disabled={rejectMutation.isPending}
+                className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+              >
+                <CloseCircleOutlined />
+                {rejectMutation.isPending ? 'Đang xử lý...' : 'Từ chối'}
+              </button>
+              <button
+                type="button"
+                onClick={() => approveMutation.mutate()}
+                disabled={approveMutation.isPending}
+                className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+              >
+                <CheckCircleOutlined />
+                {approveMutation.isPending ? 'Đang xử lý...' : 'Duyệt'}
+              </button>
+            </>
           )}
         </div>
       </section>

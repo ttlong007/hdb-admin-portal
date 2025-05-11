@@ -18,7 +18,7 @@ import {
   MASTER_MERCHANT_STATUS_COLOR_MAP,
 } from '@/config/constants'
 import { toast } from 'react-toastify'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 function InfoCard({
   title,
@@ -41,6 +41,7 @@ export default function MasterMerchantDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { isCreator, isApprover } = useAuth()
+  const queryClient = useQueryClient()
   const { merchant, isLoading, error, monthlyLimit, dailyLimit } =
     useMerchantDetail(id)
 
@@ -49,13 +50,14 @@ export default function MasterMerchantDetail() {
       const response = await axiosInstance.post('/v1/admin/store/reject-stores', {
         ids: [Number(id)]
       })
-      if (response.data.status_code !== 'ACCEPT') {
-        throw new Error(response.data.reason_message || 'Từ chối thất bại')
+      if (response.status !== 204) {
+        throw new Error('Từ chối thất bại')
       }
       return response.data
     },
     onSuccess: () => {
       toast.success('Từ chối thành công')
+      queryClient.invalidateQueries({ queryKey: ['merchantDetail', id] })
       navigate(-1)
     },
     onError: (error: Error) => {
@@ -68,13 +70,14 @@ export default function MasterMerchantDetail() {
       const response = await axiosInstance.post('/v1/admin/store/approve-stores', {
         ids: [Number(id)]
       })
-      if (response.data.status_code !== 'ACCEPT') {
-        throw new Error(response.data.reason_message || 'Duyệt thất bại')
+      if (response.status !== 204) {
+        throw new Error('Duyệt thất bại')
       }
       return response.data
     },
     onSuccess: () => {
       toast.success('Duyệt thành công')
+      queryClient.invalidateQueries({ queryKey: ['merchantDetail', id] })
       navigate(-1)
     },
     onError: (error: Error) => {
@@ -270,7 +273,7 @@ export default function MasterMerchantDetail() {
               Chỉnh sửa
             </button>
           )}
-          {isApprover && (
+          {isApprover && merchant.status === 'WAITING_APPROVE' && (
             <>
               <button
                 type="button"
