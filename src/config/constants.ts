@@ -105,13 +105,25 @@ export const STAFF_ROLES = [
 ]
 
 export const STAFF_STATUS = [
-  { label: 'Chờ duyệt', value: 'WAITING_APPROVE' },
-  { label: 'Hoạt động', value: 'ACTIVE' },
-  { label: 'Ngưng hoạt động', value: 'INACTIVE' },
+  { value: 'DRAFT', label: 'Nháp' },
+  { value: 'WAITING_APPROVE', label: 'Đang đợi duyệt' },
+  { value: 'ACTIVE', label: 'Hoạt động' },
+  { value: 'REJECTED', label: 'Từ chối' },
+  { value: 'INACTIVE', label: 'Ngưng hoạt động' },
 ]
 
+export const STAFF_STATUS_MAP: Record<string, string> = {
+  DRAFT: 'Nháp',
+  WAITING_APPROVE: 'Đang đợi duyệt',
+  ACTIVE: 'Hoạt động',
+  REJECTED: 'Từ chối',
+  INACTIVE: 'Ngưng hoạt động',
+}
+
 export const STAFF_STATUS_COLOR_MAP: Record<string, string> = {
+  DRAFT: 'blue',
   WAITING_APPROVE: 'orange',
   ACTIVE: 'green',
+  REJECTED: 'red',
   INACTIVE: 'volcano',
 }

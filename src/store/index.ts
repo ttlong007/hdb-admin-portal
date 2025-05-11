@@ -12,9 +12,9 @@ import {
 import storage from 'redux-persist/lib/storage'
 
 import authReducer from './authSlice'
-import storeReducer from './store'
-
-const PERSISTED_KEYS: string[] = ['auth', 'store']
+import layoutReducer from './layoutSlice'
+import filterReducer from './filterSlice'
+const PERSISTED_KEYS: string[] = ['auth', 'filter']
 
 const persistConfig = {
   key: 'root',
@@ -24,7 +24,8 @@ const persistConfig = {
 
 const combinedReducer = combineReducers({
   auth: authReducer,
-  store: storeReducer,
+  layout: layoutReducer,
+  filter: filterReducer,
 })
 
 const rootReducer = (state: any, action: any) => {

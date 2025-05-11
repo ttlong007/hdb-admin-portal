@@ -1,7 +1,7 @@
 import React from 'react'
 import { Input } from 'rizzui'
 import Select from 'react-select'
-import { BsDownload } from 'react-icons/bs'
+import { BsDownload, BsArrowClockwise } from 'react-icons/bs'
 import { DatePicker } from 'antd'
 import { useForm, Controller } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
@@ -9,29 +9,29 @@ import { CSVLink } from 'react-csv'
 import axiosInstance from '@/config/axios'
 import { useExportTransactions } from '@/hooks/useExportTransactions'
 import { toast } from 'react-toastify'
+import { TRANSACTION_STATUS } from '@/config/constants'
+import { useFilter } from '@/store/filterSlice/useFilter'
 
 const { RangePicker } = DatePicker
 
 interface FiltersFormValues {
   code: string
-  transaction_type_id: any
+  transaction_type: any
   status: any
   store_code: string
   duration: any
 }
 
-interface Props {
-  setFilter: (filter: any) => void
-}
+const Filters: React.FC = () => {
+  const { transactionFilters, setTransactionFilters, resetTransactionFilters } = useFilter()
 
-const Filters: React.FC<Props> = ({ setFilter }) => {
   const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
     defaultValues: {
-      code: '',
-      transaction_type_id: null,
-      status: null,
-      store_code: '',
-      duration: null,
+      code: transactionFilters.code || '',
+      transaction_type: transactionFilters.transaction_type ? { value: transactionFilters.transaction_type } : null,
+      status: transactionFilters.status ? TRANSACTION_STATUS.find(s => s.value === transactionFilters.status) || null : null,
+      store_code: transactionFilters.store_code || '',
+      duration: transactionFilters.duration || null,
     },
   })
 
@@ -57,11 +57,8 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
       value: type.id,
     })) || []
 
-  // Example status options.
-  const statusOptions = [
-    { label: 'Thành công', value: 'success' },
-    { label: 'Thất bại', value: 'failed' },
-  ]
+  // Map status options from constants
+  const statusOptions = [{ value: '', label: 'Tất cả' }, ...TRANSACTION_STATUS]
 
   const exportMutation = useExportTransactions()
   const [isExporting, setIsExporting] = React.useState(false)
@@ -88,7 +85,7 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
       stt: index + 1,
       code: item.code || '---',
       amount: item.amount ? item.amount.toLocaleString('vi-VN') : '---',
-      status: item.status || '---',
+      status: item.status ? TRANSACTION_STATUS.find(s => s.value === item.status)?.label || '---' : '---',
       transaction_type: item.transaction_type?.name || '---',
       company_id: item.company_id ? `Company ${item.company_id}` : '---',
       store: item.store?.name || '---',
@@ -99,8 +96,8 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
     // Transform select fields to only use their 'value'
     const processedData = {
       ...data,
-      transaction_type_id: data.transaction_type_id
-        ? data.transaction_type_id.value
+      transaction_type: data.transaction_type
+        ? data.transaction_type.value
         : null,
       status: data.status ? data.status.value : null,
     }
@@ -110,26 +107,39 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
       // Assuming Moment objects, format them to 'YYYY-MM-DD'
       const startDate = processedData.duration[0].format('YYYY-MM-DD')
       const endDate = processedData.duration[1].format('YYYY-MM-DD')
-      // Remove raw duration array if not needed
-      delete processedData.duration
-
       processedData.duration = [startDate, endDate]
     }
 
     // Remove keys with null, empty, or undefined values.
     const filteredData = Object.fromEntries(
       Object.entries(processedData).filter(
-        ([, value]) => value !== null && value !== '' && value !== undefined
+        ([key, value]) => {
+          // Remove status if it's empty string
+          if (key === 'status' && value === '') {
+            return false
+          }
+          return value !== null && value !== '' && value !== undefined
+        }
       )
     )
 
-    console.log('Form Data Submitted:', filteredData)
-    setFilter(filteredData)
+    setTransactionFilters({
+      ...transactionFilters,
+      ...filteredData,
+      page: transactionFilters.page,
+      limit: transactionFilters.limit
+    })
   }
 
   const handleReset = () => {
-    reset()
-    setFilter(null)
+    reset({
+      code: '',
+      transaction_type: null,
+      status: null,
+      store_code: '',
+      duration: null
+    })
+    resetTransactionFilters()
   }
 
   const handleExport = async () => {
@@ -185,11 +195,12 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
             <div className="text-sm text-[#000000] mb-2">Loại giao dịch</div>
 
             <Controller
-              name="transaction_type_id"
+              name="transaction_type"
               control={control}
               render={({ field }) => (
                 <Select
                   {...field}
+                  isClearable
                   options={transactionTypeOptions}
                   value={field.value}
                   onChange={field.onChange}
@@ -214,6 +225,7 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
               render={({ field }) => (
                 <Select
                   {...field}
+                  isClearable
                   options={statusOptions}
                   value={field.value}
                   onChange={field.onChange}
@@ -266,6 +278,14 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
             filename="transactions.csv"
             className="hidden"
           />
+          <button
+            type="button"
+            onClick={handleReset}
+            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+          >
+            <BsArrowClockwise />
+            Xóa bộ lọc
+          </button>
           <button
             type="submit"
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"

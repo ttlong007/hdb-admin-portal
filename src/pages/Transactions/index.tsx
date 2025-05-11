@@ -13,14 +13,12 @@ import Filters from './components/Filters'
 
 const Transactions: React.FC = () => {
   const {
-    page,
-    limit,
-    filter,
-    setFilter,
     isPending,
     dataSource,
     total,
     onTableChange,
+    page,
+    limit,
   } = useTransactions()
 
   const columns = [
@@ -35,7 +33,7 @@ const Transactions: React.FC = () => {
       dataIndex: 'ref_code',
       key: 'ref_code',
       sorter: true,
-      render: (text: string) => (text ? text : '---'),
+      render: (text: string) => text || '---',
     },
     {
       title: 'Số tiền',
@@ -51,9 +49,9 @@ const Transactions: React.FC = () => {
       key: 'status',
       sorter: true,
       render: (status: string) => {
-        const statusOption = TRANSACTION_STATUS.find((s) => s.value === status)
-        const label = statusOption ? statusOption.label : '---'
-        const color = TRANSACTION_STATUS_COLOR_MAP[status] || 'default'
+        const statusKey = status?.toUpperCase()
+        const label = TRANSACTION_STATUS.find(s => s.value === statusKey)?.label || '---'
+        const color = TRANSACTION_STATUS_COLOR_MAP[statusKey] || 'default'
         return <Tag color={color}>{label}</Tag>
       },
     },
@@ -96,6 +94,8 @@ const Transactions: React.FC = () => {
     {
       title: 'Tác vụ',
       key: 'action',
+      width: 100,
+      fixed: 'right' as const,
       render: (_: any, record: any) => (
         <Space size="middle">
           <Link to={`/transactions/${record.id}`}>
@@ -133,7 +133,7 @@ const Transactions: React.FC = () => {
           </div>
         </div>
 
-        <Filters setFilter={setFilter} />
+        <Filters />
 
         <div className="w-full">
           <Table
@@ -150,6 +150,7 @@ const Transactions: React.FC = () => {
               pageSizeOptions: ['10', '20', '50', '100', '500'],
             }}
             onChange={onTableChange}
+            rowKey="id"
           />
         </div>
       </div>

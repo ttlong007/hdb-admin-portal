@@ -1,68 +1,80 @@
-import { useState } from 'react'
-import { useQuery, keepPreviousData } from '@tanstack/react-query'
-import _get from 'lodash/get'
+import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
+import { useFilter } from '@/store/filterSlice/useFilter'
 
-interface UseTransactionsProps {
+interface TransactionRequestBody {
   page?: number
   limit?: number
-  filter?: any
+  status?: string
+  from_date?: string
+  to_date?: string
+  company_id?: number
+  store_id?: number
+  staff_id?: number
+  code?: string
+  transaction_type?: string
+  store_code?: string
+  order_by_column: string
+  descending: boolean
 }
 
-export const useTransactions = ({
-  page: initialPage = 1,
-  limit: initialLimit = 10,
-  filter: initialFilter = null,
-}: UseTransactionsProps = {}) => {
-  const [page, setPage] = useState(initialPage)
-  const [limit, setLimit] = useState(initialLimit)
-  const [filter, setFilter] = useState(initialFilter)
-  const [sortField, setSortField] = useState<string | null>(null)
-  const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
+export const useTransactions = () => {
+  const { transactionFilters, setTransactionFilters } = useFilter()
 
   const { isPending, data } = useQuery({
-    queryKey: ['transactions', page, limit, filter, sortField, sortOrder],
+    queryKey: ['transactions', transactionFilters],
     queryFn: async () => {
-      const { data } = await axiosInstance.post('/v1/admin/transaction/list', {
-        page,
-        limit,
-        order_by_column: sortField || 'created_at',
-        descending: sortOrder === 'descend',
-        ...filter,
-      })
-      return data
+      // Create request body and remove empty values
+      const requestBody: TransactionRequestBody = {
+        page: transactionFilters.page,
+        limit: transactionFilters.limit,
+        from_date: transactionFilters.duration?.[0],
+        to_date: transactionFilters.duration?.[1],
+        company_id: transactionFilters.company_id,
+        store_id: transactionFilters.store_id,
+        staff_id: transactionFilters.staff_id,
+        code: transactionFilters.code,
+        transaction_type: transactionFilters.transaction_type,
+        store_code: transactionFilters.store_code,
+        order_by_column: transactionFilters.sortField || 'created_at',
+        descending: transactionFilters.sortOrder === 'descend',
+      }
+
+      // Only add status if it's not empty
+      if (transactionFilters.status) {
+        requestBody.status = transactionFilters.status
+      }
+
+      const response = await axiosInstance.post('/v1/admin/transaction/list', requestBody)
+      if (response.data.status_code === 'ACCEPT') {
+        return {
+          data: response.data.data,
+          total: response.data.total,
+        }
+      }
+      throw new Error('Failed to fetch transactions')
     },
-    placeholderData: keepPreviousData,
   })
 
-  const dataSource = _get(data, 'data', [])
-  const total = _get(data, 'page_data.total', 0)
-
-  const onPaginationChange = (pagination: any) => {
-    setPage(pagination.current)
-    setLimit(pagination.pageSize)
-  }
+  const dataSource = data?.data || []
+  const total = data?.total || 0
 
   const onTableChange = (pagination: any, _filters: any, sorter: any) => {
-    onPaginationChange(pagination)
-
-    if (sorter.field) {
-      setSortField(sorter.field)
-      setSortOrder(sorter.order)
-    } else {
-      setSortField(null)
-      setSortOrder(null)
-    }
+    setTransactionFilters({
+      ...transactionFilters,
+      page: pagination.current,
+      limit: pagination.pageSize,
+      sortField: sorter.field,
+      sortOrder: sorter.order,
+    })
   }
 
   return {
-    page,
-    limit,
-    filter,
-    setFilter,
     isPending,
     dataSource,
     total,
     onTableChange,
+    page: transactionFilters.page,
+    limit: transactionFilters.limit,
   }
 }

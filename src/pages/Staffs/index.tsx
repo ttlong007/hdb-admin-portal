@@ -3,6 +3,8 @@ import { Button, Space, Table, Tag } from 'antd'
 import { EditOutlined, EyeOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import { Link, NavLink } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
+import { useFilter } from '@/store/filterSlice/useFilter'
 
 import { routes } from '@/config/routes'
 import Filters from './components/Filters'
@@ -10,24 +12,55 @@ import {
   STAFF_STATUS,
   STAFF_STATUS_COLOR_MAP,
   STAFF_ROLES,
+  STAFF_STATUS_MAP,
 } from '@/config/constants'
 import { useAuth } from '@/store/authSlice/useAuth'
-import { useStaffs } from '@/hooks/useStaffs'
+import axiosInstance from '@/config/axios'
+
+interface Staff {
+  id: number
+  code: string
+  name: string
+  status: string
+  store_name: string
+  role: string
+  company_name: string
+}
 
 const Staffs: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { isApprover, isCreator } = useAuth()
+  const { staffFilters, setStaffFilters } = useFilter()
 
-  const {
-    page,
-    limit,
-    filter,
-    setFilter,
-    isPending,
-    dataSource,
-    total,
-    onTableChange,
-  } = useStaffs()
+  const { isPending, data } = useQuery({
+    queryKey: ['staffs', staffFilters],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/staff/list', {
+        params: {
+          page: staffFilters.page,
+          limit: staffFilters.limit,
+          status: staffFilters.status,
+          cif: staffFilters.cif,
+          company_id: staffFilters.company_id,
+          store_id: staffFilters.store_id,
+          code: staffFilters.code,
+          name: staffFilters.name,
+          sort_field: staffFilters.sortField,
+          sort_order: staffFilters.sortOrder,
+        },
+      })
+      if (response.data.status_code === 'ACCEPT') {
+        return {
+          data: response.data.data,
+          total: response.data.total,
+        }
+      }
+      throw new Error('Failed to fetch staffs')
+    },
+  })
+
+  const dataSource = data?.data || []
+  const total = data?.total || 0
 
   const columns = [
     {
@@ -56,9 +89,8 @@ const Staffs: React.FC = () => {
       key: 'status',
       sorter: true,
       render: (status: string) => {
-        const statusKey = status
-        const label =
-          STAFF_STATUS.find((item) => item.value === statusKey)?.label || '---'
+        const statusKey = status?.toUpperCase()
+        const label = STAFF_STATUS_MAP[statusKey] || '---'
         const color = STAFF_STATUS_COLOR_MAP[statusKey] || 'default'
         return <Tag color={color}>{label}</Tag>
       },
@@ -122,6 +154,16 @@ const Staffs: React.FC = () => {
       }
     : undefined
 
+  const onTableChange: TableProps['onChange'] = (pagination, _filters, sorter: any) => {
+    setStaffFilters({
+      ...staffFilters,
+      page: pagination.current,
+      limit: pagination.pageSize,
+      sortField: sorter.field,
+      sortOrder: sorter.order,
+    })
+  }
+
   return (
     <>
       {/* Breadcrumbs */}
@@ -167,7 +209,7 @@ const Staffs: React.FC = () => {
           </div>
         </div>
 
-        <Filters setFilter={setFilter} />
+        <Filters />
 
         <div className="w-full">
           <Table
@@ -178,8 +220,8 @@ const Staffs: React.FC = () => {
             scroll={{ x: 2080 }}
             pagination={{
               total,
-              current: page,
-              pageSize: limit,
+              current: staffFilters.page,
+              pageSize: staffFilters.limit,
               showSizeChanger: true,
               showTotal: (total: number) => `Có ${total} items`,
               pageSizeOptions: ['10', '20', '50', '100', '500'],

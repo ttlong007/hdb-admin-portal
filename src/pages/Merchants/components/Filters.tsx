@@ -1,11 +1,12 @@
 import React from 'react'
 import { Input } from 'rizzui'
-import { BsDownload } from 'react-icons/bs'
+import { BsDownload, BsArrowClockwise } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
 import Select from 'react-select'
 import { useQuery } from '@tanstack/react-query'
 import { CSVLink } from 'react-csv'
 import { toast } from 'react-toastify'
+import { useFilter } from '@/store/filterSlice/useFilter'
 
 import { MERCHANT_STATUS, MERCHANT_STATUS_MAP } from '@/config/constants'
 import axiosInstance from '@/config/axios'
@@ -19,18 +20,18 @@ interface FiltersFormValues {
   status: any
 }
 
-interface Props {
-  setFilter: (filter: any) => void
-}
+const Filters: React.FC = () => {
+  const { merchantFilters, setMerchantFilters, resetMerchantFilters } = useFilter()
 
-const Filters: React.FC<Props> = ({ setFilter }) => {
   const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
     defaultValues: {
-      cif: '',
-      company_id: null,
-      code: '',
-      name: '',
-      status: null,
+      cif: merchantFilters.cif || '',
+      company_id: merchantFilters.company_id ? { value: merchantFilters.company_id } : null,
+      code: merchantFilters.code || '',
+      name: merchantFilters.name || '',
+      status: merchantFilters.status
+        ? MERCHANT_STATUS.find(s => s.value === merchantFilters.status) || null
+        : null,
     },
   })
 
@@ -52,13 +53,23 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
       {} as Partial<FiltersFormValues>
     )
 
-    setFilter(payload)
+    setMerchantFilters({
+      ...merchantFilters,
+      ...payload,
+      page: merchantFilters.page,
+      limit: merchantFilters.limit
+    })
   }
 
   const handleReset = () => {
-    reset()
-    // Optionally clear filter in the parent:
-    setFilter(null)
+    reset({
+      cif: '',
+      company_id: null,
+      code: '',
+      name: '',
+      status: null
+    })
+    resetMerchantFilters()
   }
 
   // Fetch all companies (no limit/page)
@@ -227,6 +238,14 @@ const Filters: React.FC<Props> = ({ setFilter }) => {
             filename="merchants.csv"
             className="hidden"
           />
+          <button
+            type="button"
+            onClick={handleReset}
+            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+          >
+            <BsArrowClockwise />
+            Xóa bộ lọc
+          </button>
           <button
             type="submit"
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"

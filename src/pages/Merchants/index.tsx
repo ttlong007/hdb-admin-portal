@@ -15,21 +15,26 @@ import axiosInstance from '@/config/axios'
 import { toast } from 'react-toastify'
 import { useMerchants } from '@/hooks/useMerchants'
 import { useAuth } from '@/store/authSlice/useAuth'
+import { useFilter } from '@/store/filterSlice/useFilter'
 
 const Merchants: React.FC = () => {
-  const [page, setPage] = useState(1)
-  const [limit, setLimit] = useState(10)
-  const [filter, setFilter] = useState<any>(null)
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const [sortField, setSortField] = useState<string | null>(null)
-  const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
   const { isApprover, isCreator } = useAuth()
+  const { merchantFilters, setMerchantFilters, resetMerchantFilters } =
+    useFilter()
+
   const { isPending, dataSource, total, refetch } = useMerchants({
-    page,
-    limit,
-    filter,
-    sortField,
-    sortOrder,
+    page: merchantFilters.page || 1,
+    limit: merchantFilters.limit || 10,
+    filter: {
+      status: merchantFilters.status,
+      cif: merchantFilters.cif,
+      company_id: merchantFilters.company_id,
+      code: merchantFilters.code,
+      name: merchantFilters.name,
+    },
+    sortField: merchantFilters.sortField || null,
+    sortOrder: merchantFilters.sortOrder || null,
   })
 
   const columns = [
@@ -112,8 +117,11 @@ const Merchants: React.FC = () => {
   ]
 
   const onPaginationChange = (pagination: any) => {
-    setPage(pagination.current)
-    setLimit(pagination.pageSize)
+    setMerchantFilters({
+      ...merchantFilters,
+      page: pagination.current,
+      limit: pagination.pageSize,
+    })
   }
 
   const onTableChange = (pagination: any, _filters: any, sorter: any) => {
@@ -121,11 +129,17 @@ const Merchants: React.FC = () => {
 
     // Handle sorting
     if (sorter.field) {
-      setSortField(sorter.field)
-      setSortOrder(sorter.order)
+      setMerchantFilters({
+        ...merchantFilters,
+        sortField: sorter.field,
+        sortOrder: sorter.order,
+      })
     } else {
-      setSortField(null)
-      setSortOrder(null)
+      setMerchantFilters({
+        ...merchantFilters,
+        sortField: null,
+        sortOrder: null,
+      })
     }
   }
 
@@ -225,7 +239,7 @@ const Merchants: React.FC = () => {
           </div>
         </div>
 
-        <Filters setFilter={setFilter} />
+        <Filters />
 
         <div className="w-full">
           <Table
@@ -237,8 +251,8 @@ const Merchants: React.FC = () => {
             scroll={{ x: 2080 }}
             pagination={{
               total,
-              pageSize: limit,
-              current: page,
+              pageSize: merchantFilters.limit || 10,
+              current: merchantFilters.page || 1,
               showSizeChanger: true,
               showTotal: (total) => `Có ${total} items`,
               pageSizeOptions: ['10', '20', '50', '100', '500'],

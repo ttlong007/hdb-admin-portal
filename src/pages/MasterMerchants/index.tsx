@@ -6,6 +6,7 @@ import { useMasterMerchants } from '@/hooks/useMasterMerchants'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { useAuth } from '@/store/authSlice/useAuth'
+import { useFilter } from '@/store/filterSlice/useFilter'
 
 import Filters from './components/Filters'
 import { routes } from '@/config/routes'
@@ -23,17 +24,20 @@ interface Data {
 }
 
 const MasterMerchants: React.FC = () => {
-  const [page, setPage] = React.useState(1)
-  const [limit, setLimit] = React.useState(10)
-  const [filter, setFilter] = React.useState<any>(null)
+  const { masterMerchantFilters, setMasterMerchantFilters } = useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
   const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(null)
   const { isCreator } = useAuth()
 
   const { data, isPending, refetch } = useMasterMerchants({
-    page,
-    limit,
-    filter,
+    page: masterMerchantFilters.page || 1,
+    limit: masterMerchantFilters.limit || 10,
+    filter: {
+      status: masterMerchantFilters.status,
+      cif: masterMerchantFilters.cif,
+      name: masterMerchantFilters.name,
+      business_license: masterMerchantFilters.business_license
+    },
     sortField,
     sortOrder,
   })
@@ -115,8 +119,11 @@ const MasterMerchants: React.FC = () => {
   ]
 
   const onPaginationChange = (pagination: any) => {
-    setPage(pagination.current)
-    setLimit(pagination.pageSize)
+    setMasterMerchantFilters({
+      ...masterMerchantFilters,
+      page: pagination.current,
+      limit: pagination.pageSize
+    })
   }
 
   const onTableChange = (pagination: any, _filters: any, sorter: any) => {
@@ -179,7 +186,6 @@ const MasterMerchants: React.FC = () => {
         </div>
 
         <Filters
-          setFilter={setFilter}
           sync={() => syncMutation.mutate()}
           syncLoading={syncMutation.isPending}
         />
@@ -193,8 +199,8 @@ const MasterMerchants: React.FC = () => {
             scroll={{ x: 2080 }}
             pagination={{
               total,
-              pageSize: limit,
-              current: page,
+              pageSize: masterMerchantFilters.limit,
+              current: masterMerchantFilters.page,
               showSizeChanger: true,
               showTotal: (total) => `Có ${total} items`,
               pageSizeOptions: ['10', '20', '50', '100', '500'],

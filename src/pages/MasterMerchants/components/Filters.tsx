@@ -8,6 +8,7 @@ import ReactSelect from 'react-select'
 
 import { useExportMasterMerchants } from '@/hooks/useExportMasterMerchants'
 import { MASTER_MERCHANT_STATUS } from '@/config/constants'
+import { useFilter } from '@/store/filterSlice/useFilter'
 
 interface FiltersFormValues {
   cif: string
@@ -17,18 +18,27 @@ interface FiltersFormValues {
 }
 
 interface Props {
-  setFilter: (filter: any) => void
   sync: () => void
   syncLoading: boolean
 }
 
-const Filters: React.FC<Props> = ({ syncLoading, setFilter, sync }) => {
+const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
+  const {
+    masterMerchantFilters,
+    setMasterMerchantFilters,
+    resetMasterMerchantFilters,
+  } = useFilter()
+
   const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
     defaultValues: {
-      cif: '',
-      name: '',
-      business_license: '',
-      status: null,
+      cif: masterMerchantFilters.cif || '',
+      name: masterMerchantFilters.name || '',
+      business_license: masterMerchantFilters.business_license || '',
+      status: masterMerchantFilters.status
+        ? MASTER_MERCHANT_STATUS.find(
+            (s) => s.value === masterMerchantFilters.status
+          ) || null
+        : null,
     },
   })
 
@@ -46,7 +56,27 @@ const Filters: React.FC<Props> = ({ syncLoading, setFilter, sync }) => {
       }
       return acc
     }, {} as Partial<FiltersFormValues>)
-    setFilter(payload)
+
+    // Update filters with proper typing
+    setMasterMerchantFilters({
+      ...masterMerchantFilters,
+      status: payload.status as string | undefined,
+      cif: payload.cif,
+      name: payload.name,
+      business_license: payload.business_license,
+      page: masterMerchantFilters.page,
+      limit: masterMerchantFilters.limit,
+    })
+  }
+
+  const handleReset = () => {
+    reset({
+      cif: '',
+      name: '',
+      business_license: '',
+      status: null
+    })
+    resetMasterMerchantFilters()
   }
 
   const exportMutation = useExportMasterMerchants()
@@ -192,7 +222,14 @@ const Filters: React.FC<Props> = ({ syncLoading, setFilter, sync }) => {
             <BsArrowClockwise />
             {syncLoading ? 'Đang đồng bộ...' : 'Đồng bộ công ty'}
           </button>
-
+          <button
+            type="button"
+            onClick={handleReset}
+            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+          >
+            <BsArrowClockwise />
+            Xóa bộ lọc
+          </button>
           <button
             type="submit"
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
