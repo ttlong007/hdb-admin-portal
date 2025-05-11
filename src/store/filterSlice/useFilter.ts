@@ -13,6 +13,7 @@ import {
   resetTransactionFilter,
   resetAllFilters
 } from '.'
+import { setState } from '../authSlice'
 
 export const useAuthState = () => {
   const authState = useSelector((state: RootState) => state.auth)
