@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Input } from 'rizzui'
 import { BsDownload, BsArrowClockwise } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
@@ -23,10 +23,10 @@ interface FiltersFormValues {
 const Filters: React.FC = () => {
   const { merchantFilters, setMerchantFilters, resetMerchantFilters } = useFilter()
 
-  const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
+  const { control, handleSubmit, reset, setValue } = useForm<FiltersFormValues>({
     defaultValues: {
       cif: merchantFilters.cif || '',
-      company_id: merchantFilters.company_id ? { value: merchantFilters.company_id } : null,
+      company_id: null,
       code: merchantFilters.code || '',
       name: merchantFilters.name || '',
       status: merchantFilters.status
@@ -34,6 +34,35 @@ const Filters: React.FC = () => {
         : null,
     },
   })
+
+  // Fetch all companies (no limit/page)
+  const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
+    queryKey: ['companies-all'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/company/list')
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch companies')
+    },
+  })
+
+  // Transform fetched companies into select options
+  const companyOptions =
+    companiesData?.map((company: any) => ({
+      label: company.name,
+      value: company.id,
+    })) || []
+
+  // Update company_id when companies data is loaded
+  useEffect(() => {
+    if (companiesData && merchantFilters.company_id) {
+      const company = companiesData.find((c: any) => c.id === merchantFilters.company_id)
+      if (company) {
+        setValue('company_id', { label: company.name, value: company.id })
+      }
+    }
+  }, [companiesData, merchantFilters.company_id, setValue])
 
   const onSubmit = (data: FiltersFormValues) => {
     // Transform field values to just their "value" if needed.
@@ -71,25 +100,6 @@ const Filters: React.FC = () => {
     })
     resetMerchantFilters()
   }
-
-  // Fetch all companies (no limit/page)
-  const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
-    queryKey: ['companies-all'],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/company/list')
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error('Failed to fetch companies')
-    },
-  })
-
-  // Transform fetched companies into select options
-  const companyOptions =
-    companiesData?.map((company: any) => ({
-      label: company.name,
-      value: company.id,
-    })) || []
 
   const exportMutation = useExportMerchants()
   const [isExporting, setIsExporting] = React.useState(false)
