@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react'
 import { NavLink, useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
-import { Select, Tag, Switch, Button } from 'antd'
+import { Select, Tag, Switch, Button, Spin } from 'antd'
 import { CloseCircleOutlined, SaveOutlined } from '@ant-design/icons'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 import AdminFeeEditTable from './components/AdminFeeEditTable'
@@ -14,6 +14,7 @@ import {
   MERCHANT_STATUS_COLOR_MAP,
 } from '@/config/constants'
 import { useAuth } from '@/store/authSlice/useAuth'
+import { useMasterMerchantDetail } from '@/hooks/useMasterMerchantDetail'
 
 const { Option } = Select
 
@@ -49,6 +50,10 @@ export default function MasterMerchantEdit() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { isApprover } = useAuth()
+  const queryClient = useQueryClient()
+
+  const { company, dailyLimit, monthlyLimit, isLoading, error } =
+    useMasterMerchantDetail(id)
 
   useEffect(() => {
     if (isApprover) {
@@ -61,7 +66,7 @@ export default function MasterMerchantEdit() {
     control,
     handleSubmit,
     reset,
-    formState: { isSubmitting },
+    formState: { isSubmitting, dirtyFields },
   } = useForm<FormData>({
     defaultValues: {
       transaction_monthly_quota: '',
@@ -73,138 +78,48 @@ export default function MasterMerchantEdit() {
     },
   })
 
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['companyDetail', id],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`/v1/admin/company/${id}`)
-      if (response.data.status_code === 'ACCEPT') {
-        const company = response.data.data
-        return {
-          ...company,
-          company_name: company.name,
-          need_approve_new_store: company.need_approve_new_store,
-          need_approve_new_staff: company.need_approve_new_staff,
-          hdb_can_manage: company.hdb_can_manage,
-          active: company.active,
-        }
-      } else {
-        throw new Error('Failed to get company detail')
-      }
-    },
-    enabled: !!id,
-  })
-
-  const {
-    data: limitData,
-    isLoading: isLimitLoading,
-    error: limitError,
-    refetch: refetchLimit,
-  } = useQuery({
-    queryKey: ['limitList', id],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/limit/list', {
-        params: {
-          entity_id: id,
-          entity_type: 'COMPANY',
-        },
-      })
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error(
-        response.data.reason_message || 'Failed to fetch limit list'
-      )
-    },
-    enabled: !!id,
-  })
-
-  const company = data || {}
-
-  // Get the latest limit values by sorting by id in descending order
-  const getLatestLimit = (type: string) => {
-    const limits = company.limits?.filter((limit: any) => limit.type === type) || []
-    if (limits.length === 0) return 0
-    // Sort by id in descending order to get the latest one
-    return limits.sort((a: any, b: any) => b.id - a.id)[0].amount
-  }
-
-  // Map limitData response for daily and monthly limits
-  const dailyLimit = getLatestLimit('TRANSACTION_QUOTA_DAILY')
-  const monthlyLimit = getLatestLimit('TRANSACTION_QUOTA_MONTHLY')
-
-  const statusOption = MASTER_MERCHANT_STATUS.find(
-    (s) => s.value === company.status
-  )
-  const statusLabel = statusOption ? statusOption.label : '---'
-  const statusColor = MERCHANT_STATUS_COLOR_MAP[company.status] || 'default'
-
   useEffect(() => {
-    if (data) {
+    if (company) {
       reset({
-        transaction_monthly_quota: monthlyLimit,
-        transaction_daily_quota: dailyLimit,
+        transaction_monthly_quota: monthlyLimit?.toString() || '',
+        transaction_daily_quota: dailyLimit?.toString() || '',
         need_approve_new_store: company.need_approve_new_store,
         need_approve_new_staff: company.need_approve_new_staff,
-        hdb_can_manage: company.hdb_can_manage,
         active: company.status === 'ACTIVE',
       })
     }
-  }, [data, monthlyLimit, dailyLimit, reset, company])
-
-  // Add the mutation to create limits
-  const createLimitsMutation = useMutation({
-    mutationFn: async (payload: any) => {
-      const { data } = await axiosInstance.post(
-        '/v1/admin/limit/create-batch',
-        payload
-      )
-      if (data.status_code === 'ACCEPT') {
-        return data
-      } else {
-        throw new Error('Creation failed')
-      }
-    },
-    onSuccess: () => {
-      // Refetch the limit list after successful limit creation
-      refetchLimit()
-    },
-  })
-
-  function updateList(values: FormData) {
-    // Only update limits if they have changed compared to the fetched values.
-    // Ensure you compare the values as strings.
-    if (
-      values.transaction_daily_quota !== String(dailyLimit || '') ||
-      values.transaction_monthly_quota !== String(monthlyLimit || '')
-    ) {
-      const limitsPayload = {
-        limits: [
-          {
-            entity_id: Number(id),
-            entity_type: 'COMPANY',
-            type: 'TRANSACTION_QUOTA_DAILY',
-            amount: Number(values.transaction_daily_quota),
-          },
-          {
-            entity_id: Number(id),
-            entity_type: 'COMPANY',
-            type: 'TRANSACTION_QUOTA_MONTHLY',
-            amount: Number(values.transaction_monthly_quota),
-          },
-        ],
-      }
-      createLimitsMutation.mutateAsync(limitsPayload)
-    }
-  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [company, monthlyLimit, dailyLimit])
 
   const updateCompanyMutation = useMutation({
     mutationFn: async (values: FormData) => {
-      const payload = {
+      const payload: any = {
         status: values.active ? 'ACTIVE' : 'INACTIVE',
         need_approve_new_store: values.need_approve_new_store,
         need_approve_new_staff: values.need_approve_new_staff,
         hdb_can_manage: values.hdb_can_manage,
       }
+
+      // Handle limits if either daily or monthly quotas changed
+      if (
+        dirtyFields.transaction_daily_quota ||
+        dirtyFields.transaction_monthly_quota
+      ) {
+        payload.limits = []
+        if (dirtyFields.transaction_daily_quota && values.transaction_daily_quota) {
+          payload.limits.push({
+            amount: Number(values.transaction_daily_quota),
+            type: 'TRANSACTION_QUOTA_DAILY',
+          })
+        }
+        if (dirtyFields.transaction_monthly_quota && values.transaction_monthly_quota) {
+          payload.limits.push({
+            amount: Number(values.transaction_monthly_quota),
+            type: 'TRANSACTION_QUOTA_MONTHLY',
+          })
+        }
+      }
+
       const response = await axiosInstance.patch(
         `/v1/admin/company/${id}`,
         payload
@@ -217,7 +132,7 @@ export default function MasterMerchantEdit() {
     },
     onSuccess: () => {
       toast.success('Cập nhật thành công!')
-      refetch()
+      queryClient.invalidateQueries({ queryKey: ['masterMerchantDetail', id] })
       navigate(-1)
     },
     onError: (error: any) => {
@@ -227,11 +142,16 @@ export default function MasterMerchantEdit() {
 
   const onFinish: SubmitHandler<FormData> = async (values) => {
     updateCompanyMutation.mutate(values)
-    updateList(values)
   }
 
-  if (isLoading) return <div>Loading...</div>
+  if (isLoading) return <Spin />
   if (error) return <div>Error loading detail.</div>
+
+  const statusOption = MASTER_MERCHANT_STATUS.find(
+    (s) => s.value === company.status
+  )
+  const statusLabel = statusOption ? statusOption.label : '---'
+  const statusColor = MERCHANT_STATUS_COLOR_MAP[company.status] || 'default'
 
   return (
     <>
