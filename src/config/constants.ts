@@ -41,6 +41,7 @@ export const ROLES = {
 
 export const MERCHANT_STATUS = [
   { value: 'WAITING_APPROVE', label: 'Đang đợi duyệt' },
+  { value: 'WAITING_APPROVE_FOR_EDIT', label: 'Chờ duyệt chỉnh sửa' },
   { value: 'ACTIVE', label: 'Hoạt động' },
   { value: 'REJECTED', label: 'Từ chối' },
   { value: 'INACTIVE', label: 'Ngưng hoạt động' },
@@ -48,6 +49,7 @@ export const MERCHANT_STATUS = [
 
 export const MASTER_MERCHANT_STATUS = [
   { value: 'WAITING_APPROVE', label: 'Đang đợi duyệt' },
+  { value: 'WAITING_APPROVE_FOR_EDIT', label: 'Chờ duyệt chỉnh sửa' },
   { value: 'ACTIVE', label: 'Hoạt động' },
   { value: 'REJECTED', label: 'Từ chối' },
   { value: 'INACTIVE', label: 'Ngưng hoạt động' },
@@ -64,16 +66,16 @@ export const MERCHANT_STATUS_MAP = MERCHANT_STATUS.reduce(
 // Define color mapping for merchant statuses.
 // Adjust the color values based on your design requirements.
 export const MERCHANT_STATUS_COLOR_MAP: Record<string, string> = {
-  DRAFT: '', // Defaults to Antd's standard tag styling when no color is provided.
   WAITING_APPROVE: 'orange',
+  WAITING_APPROVE_FOR_EDIT: 'orange',
   ACTIVE: 'green',
   REJECTED: 'red',
   INACTIVE: 'volcano',
 }
 
 export const MASTER_MERCHANT_STATUS_COLOR_MAP: Record<string, string> = {
-  DRAFT: 'blue', // Defaults to Antd's standard tag styling when no color is provided.
   WAITING_APPROVE: 'orange',
+  WAITING_APPROVE_FOR_EDIT: 'orange',
   ACTIVE: 'green',
   REJECTED: 'red',
   INACTIVE: 'volcano',
@@ -104,6 +106,7 @@ export const STAFF_ROLES = [
 
 export const STAFF_STATUS = [
   { value: 'WAITING_APPROVE', label: 'Đang đợi duyệt' },
+  { value: 'WAITING_APPROVE_FOR_EDIT', label: 'Chờ duyệt chỉnh sửa' },
   { value: 'ACTIVE', label: 'Hoạt động' },
   { value: 'REJECTED', label: 'Từ chối' },
   { value: 'INACTIVE', label: 'Ngưng hoạt động' },
@@ -112,6 +115,7 @@ export const STAFF_STATUS = [
 export const STAFF_STATUS_MAP: Record<string, string> = {
   DRAFT: 'Nháp',
   WAITING_APPROVE: 'Đang đợi duyệt',
+  WAITING_APPROVE_FOR_EDIT: 'Chờ duyệt chỉnh sửa',
   ACTIVE: 'Hoạt động',
   REJECTED: 'Từ chối',
   INACTIVE: 'Ngưng hoạt động',
@@ -120,6 +124,7 @@ export const STAFF_STATUS_MAP: Record<string, string> = {
 export const STAFF_STATUS_COLOR_MAP: Record<string, string> = {
   DRAFT: 'blue',
   WAITING_APPROVE: 'orange',
+  WAITING_APPROVE_FOR_EDIT: 'orange',
   ACTIVE: 'green',
   REJECTED: 'red',
   INACTIVE: 'volcano',
