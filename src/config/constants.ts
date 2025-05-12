@@ -124,3 +124,8 @@ export const STAFF_STATUS_COLOR_MAP: Record<string, string> = {
   REJECTED: 'red',
   INACTIVE: 'volcano',
 }
+
+export const SYSTEM_ROLES = {
+  HDB_CREATION: 'chỉnh sửa',
+  HDB_APPROVAL: 'duyệt',
+}

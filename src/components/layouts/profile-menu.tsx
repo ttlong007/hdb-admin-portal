@@ -1,12 +1,11 @@
 import { Title, Text, Avatar, Button, Popover } from 'rizzui'
 import cn from '@core/utils/class-names'
-import { Link } from 'react-router-dom'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/store/authSlice/useAuth'
 import axiosInstance from '@/config/axios'
-import { useDispatch } from 'react-redux'
+import { SYSTEM_ROLES } from '@/config/constants'
 
 export default function ProfileMenu({
   buttonClassName,
@@ -128,6 +127,7 @@ function DropdownMenu({ profile }: DropdownMenuProps) {
     logout()
   }
 
+  console.log('profile', profile)
   return (
     <div className="w-64 text-left rtl:text-right">
       <div className="flex items-center border-b border-gray-300 px-6 pb-5 pt-6">
@@ -143,6 +143,13 @@ function DropdownMenu({ profile }: DropdownMenuProps) {
           <Text className="text-gray-600">
             {profile?.email || 'email@example.com'}
           </Text>
+
+          {profile?.role ? (
+            <Text className="text-gray-600">
+              <strong>Quyền: </strong>
+              {SYSTEM_ROLES[profile?.role]}
+            </Text>
+          ) : null}
         </div>
       </div>
       <div className="border-t border-gray-300 px-6 pb-6 pt-5">
