@@ -213,7 +213,7 @@ const Filters: React.FC = () => {
                 <Select
                   {...field}
                   isClearable
-                  options={[{ value: '', label: 'Tất cả' }, ...MERCHANT_STATUS]}
+                  options={MERCHANT_STATUS}
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Chọn trạng thái"

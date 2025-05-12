@@ -35,7 +35,12 @@ export const useStaffs = ({
     queryFn: async () => {
       const cleanFilter: StaffFilters = {}
       Object.entries(initialFilter).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
+        if (
+          value !== undefined &&
+          value !== null &&
+          !(typeof value === 'string' && value.trim() === '') &&
+          !(Array.isArray(value) && value.length === 0)
+        ) {
           cleanFilter[key] = value
         }
       })

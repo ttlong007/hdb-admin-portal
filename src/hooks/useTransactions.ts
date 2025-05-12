@@ -26,7 +26,7 @@ export const useTransactions = () => {
     queryKey: ['transactions', transactionFilters],
     queryFn: async () => {
       // Create request body and remove empty values
-      const requestBody: TransactionRequestBody = {
+      let requestBody: TransactionRequestBody = {
         page: transactionFilters.page,
         limit: transactionFilters.limit,
         from_date: transactionFilters.duration?.[0],
@@ -46,6 +46,16 @@ export const useTransactions = () => {
       if (transactionFilters.status) {
         requestBody.status = transactionFilters.status
       }
+
+      // Remove empty/null/blank/empty array fields
+      requestBody = Object.fromEntries(
+        Object.entries(requestBody).filter(([_, value]) => {
+          if (value === null || value === undefined) return false
+          if (typeof value === 'string' && value.trim() === '') return false
+          if (Array.isArray(value) && value.length === 0) return false
+          return true
+        })
+      ) as TransactionRequestBody
 
       const response = await axiosInstance.post(
         '/v1/admin/transaction/list',

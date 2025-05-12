@@ -24,13 +24,20 @@ interface FiltersFormValues {
 }
 
 const Filters: React.FC = () => {
-  const { transactionFilters, setTransactionFilters, resetTransactionFilters } = useFilter()
+  const { transactionFilters, setTransactionFilters, resetTransactionFilters } =
+    useFilter()
 
   const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
     defaultValues: {
       code: transactionFilters.code || '',
-      transaction_type: transactionFilters.transaction_type ? { value: transactionFilters.transaction_type } : null,
-      status: transactionFilters.status ? TRANSACTION_STATUS.find(s => s.value === transactionFilters.status) || null : null,
+      transaction_type: transactionFilters.transaction_type
+        ? { value: transactionFilters.transaction_type }
+        : null,
+      status: transactionFilters.status
+        ? TRANSACTION_STATUS.find(
+            (s) => s.value === transactionFilters.status
+          ) || null
+        : null,
       store_code: transactionFilters.store_code || '',
       duration: transactionFilters.duration || null,
       created_by_staff_code: transactionFilters.created_by_staff_code || '',
@@ -60,7 +67,7 @@ const Filters: React.FC = () => {
     })) || []
 
   // Map status options from constants
-  const statusOptions = [{ value: '', label: 'Tất cả' }, ...TRANSACTION_STATUS]
+  const statusOptions = TRANSACTION_STATUS
 
   const exportMutation = useExportTransactions()
   const [isExporting, setIsExporting] = React.useState(false)
@@ -87,7 +94,10 @@ const Filters: React.FC = () => {
       stt: index + 1,
       code: item.code || '---',
       amount: item.amount ? item.amount.toLocaleString('vi-VN') : '---',
-      status: item.status ? TRANSACTION_STATUS.find(s => s.value === item.status)?.label || '---' : '---',
+      status: item.status
+        ? TRANSACTION_STATUS.find((s) => s.value === item.status)?.label ||
+          '---'
+        : '---',
       transaction_type: item.transaction_type?.name || '---',
       company_id: item.company_id ? `Company ${item.company_id}` : '---',
       store: item.store?.name || '---',
@@ -112,32 +122,11 @@ const Filters: React.FC = () => {
       processedData.duration = [startDate, endDate]
     }
 
-    // Remove keys with null, empty, or undefined values.
-    const filteredData = Object.fromEntries(
-      Object.entries(processedData).filter(
-        ([key, value]) => {
-          // Remove status if it's empty string
-          if (key === 'status' && value === '') {
-            return false
-          }
-          return value !== null && value !== '' && value !== undefined
-        }
-      )
-    )
-
-    // Check if there are any filter values
-    const hasFilterValues = Object.keys(filteredData).length > 0
-
-    if (!hasFilterValues) {
-      toast.warning('Vui lòng nhập ít nhất một điều kiện lọc')
-      return
-    }
-
     setTransactionFilters({
       ...transactionFilters,
-      ...filteredData,
+      ...processedData,
       page: transactionFilters.page,
-      limit: transactionFilters.limit
+      limit: transactionFilters.limit,
     })
   }
 
@@ -148,7 +137,7 @@ const Filters: React.FC = () => {
       status: null,
       store_code: '',
       duration: null,
-      created_by_staff_code: ''
+      created_by_staff_code: '',
     })
     resetTransactionFilters()
   }

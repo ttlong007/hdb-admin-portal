@@ -176,10 +176,7 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
                 <ReactSelect
                   {...field}
                   isClearable
-                  options={[
-                    { value: '', label: 'Tất cả' },
-                    ...MASTER_MERCHANT_STATUS,
-                  ]}
+                  options={MASTER_MERCHANT_STATUS}
                   placeholder="Chọn trạng thái"
                   className="react-select-container"
                   classNamePrefix="react-select"

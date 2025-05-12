@@ -260,7 +260,7 @@ const Filters: React.FC = () => {
                 <Select
                   {...field}
                   isClearable
-                  options={[{ value: '', label: 'Tất cả' }, ...STAFF_STATUS]}
+                  options={STAFF_STATUS}
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Chọn trạng thái"
@@ -279,7 +279,7 @@ const Filters: React.FC = () => {
                 <Select
                   {...field}
                   isClearable
-                  options={[{ value: '', label: 'Tất cả' }, ...STAFF_ROLES]}
+                  options={STAFF_ROLES}
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Chọn nhóm chức danh"

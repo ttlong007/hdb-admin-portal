@@ -108,13 +108,13 @@ export default function MasterMerchantEdit() {
         payload.limits = []
         if (dirtyFields.transaction_daily_quota && values.transaction_daily_quota) {
           payload.limits.push({
-            amount: Number(values.transaction_daily_quota),
+            amount: Number(values.transaction_daily_quota.replace(/,/g, '')),
             type: 'TRANSACTION_QUOTA_DAILY',
           })
         }
         if (dirtyFields.transaction_monthly_quota && values.transaction_monthly_quota) {
           payload.limits.push({
-            amount: Number(values.transaction_monthly_quota),
+            amount: Number(values.transaction_monthly_quota.replace(/,/g, '')),
             type: 'TRANSACTION_QUOTA_MONTHLY',
           })
         }
