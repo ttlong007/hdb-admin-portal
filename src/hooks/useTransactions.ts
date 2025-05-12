@@ -45,11 +45,14 @@ export const useTransactions = () => {
         requestBody.status = transactionFilters.status
       }
 
-      const response = await axiosInstance.post('/v1/admin/transaction/list', requestBody)
+      const response = await axiosInstance.post(
+        '/v1/admin/transaction/list',
+        requestBody
+      )
       if (response.data.status_code === 'ACCEPT') {
         return {
           data: response.data.data,
-          total: response.data.total,
+          total: response.data.page_data.total,
         }
       }
       throw new Error('Failed to fetch transactions')

@@ -52,7 +52,7 @@ const Staffs: React.FC = () => {
       if (response.data.status_code === 'ACCEPT') {
         return {
           data: response.data.data,
-          total: response.data.total,
+          total: response.data.page_data.total,
         }
       }
       throw new Error('Failed to fetch staffs')
@@ -108,7 +108,9 @@ const Staffs: React.FC = () => {
       key: 'role',
       sorter: true,
       render: (role: string) => {
-        const roleOption = STAFF_ROLES.find((r) => r.value === role.toUpperCase())
+        const roleOption = STAFF_ROLES.find(
+          (r) => r.value === role.toUpperCase()
+        )
         return roleOption ? roleOption.label : '---'
       },
     },
@@ -154,7 +156,11 @@ const Staffs: React.FC = () => {
       }
     : undefined
 
-  const onTableChange: TableProps['onChange'] = (pagination, _filters, sorter: any) => {
+  const onTableChange: TableProps['onChange'] = (
+    pagination,
+    _filters,
+    sorter: any
+  ) => {
     setStaffFilters({
       ...staffFilters,
       page: pagination.current,
