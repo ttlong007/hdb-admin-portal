@@ -2,43 +2,63 @@ import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { PaginatedResponse } from '@/types'
 
-export interface UseMasterMerchantsParams {
+interface MasterMerchantFilters {
+  status?: string
+  cif?: string
+  name?: string
+  business_license?: string
+}
+
+interface MasterMerchantRequestParams {
   page: number
   limit: number
-  filter?: Record<string, any>
+  filter?: MasterMerchantFilters
   sortField?: string | null
   sortOrder?: 'ascend' | 'descend' | null
 }
 
-export function useMasterMerchants({
+export const useMasterMerchants = ({
   page,
   limit,
-  filter = {},
+  filter,
   sortField,
-  sortOrder
-}: UseMasterMerchantsParams) {
-  const query = useQuery<PaginatedResponse<any>>({
-    queryKey: ['masterMerchants', page, limit, filter, sortField, sortOrder],
+  sortOrder,
+}: MasterMerchantRequestParams) => {
+  return useQuery({
+    queryKey: ['masterMerchants', { page, limit, filter, sortField, sortOrder }],
     queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/company/list', {
-        params: {
-          page,
-          limit,
-          order_by_column: sortField || 'created_at',
-          descending: sortOrder === 'descend',
-          ...filter
-        },
-      })
+      // Create filter object and remove empty values
+      const cleanFilter: MasterMerchantFilters = {}
+
+      if (filter?.status) {
+        cleanFilter.status = filter.status
+      }
+      if (filter?.cif) {
+        cleanFilter.cif = filter.cif
+      }
+      if (filter?.name) {
+        cleanFilter.name = filter.name
+      }
+      if (filter?.business_license) {
+        cleanFilter.business_license = filter.business_license
+      }
+
+      const params = {
+        page,
+        limit,
+        ...cleanFilter,
+        order_by_column: sortField || 'created_at',
+        descending: sortOrder === 'descend',
+      }
+
+      const response = await axiosInstance.get('/v1/admin/company/list', { params })
       if (response.data.status_code === 'ACCEPT') {
-        return response.data as PaginatedResponse<any>
+        return {
+          data: response.data.data,
+          page_data: response.data.page_data,
+        }
       }
       throw new Error('Failed to fetch master merchants')
     },
   })
-
-  return {
-    data: query.data,
-    isPending: query.isFetching,
-    refetch: query.refetch,
-  }
 }

@@ -3,8 +3,8 @@ import { Button, Space, Table, Tag } from 'antd'
 import { EditOutlined, EyeOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import { Link, NavLink } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import { useFilter } from '@/store/filterSlice/useFilter'
+import { useStaffs } from '@/hooks/useStaffs'
 
 import { routes } from '@/config/routes'
 import Filters from './components/Filters'
@@ -15,7 +15,6 @@ import {
   STAFF_STATUS_MAP,
 } from '@/config/constants'
 import { useAuth } from '@/store/authSlice/useAuth'
-import axiosInstance from '@/config/axios'
 
 interface Staff {
   id: number
@@ -32,35 +31,23 @@ const Staffs: React.FC = () => {
   const { isApprover, isCreator } = useAuth()
   const { staffFilters, setStaffFilters } = useFilter()
 
-  const { isPending, data } = useQuery({
-    queryKey: ['staffs', staffFilters],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/staff/list', {
-        params: {
-          page: staffFilters.page,
-          limit: staffFilters.limit,
-          status: staffFilters.status,
-          cif: staffFilters.cif,
-          company_id: staffFilters.company_id,
-          store_id: staffFilters.store_id,
-          code: staffFilters.code,
-          name: staffFilters.name,
-          sort_field: staffFilters.sortField,
-          sort_order: staffFilters.sortOrder,
-        },
-      })
-      if (response.data.status_code === 'ACCEPT') {
-        return {
-          data: response.data.data,
-          total: response.data.page_data.total,
-        }
-      }
-      throw new Error('Failed to fetch staffs')
+  const {
+    isPending,
+    dataSource,
+    total,
+    onTableChange: handleTableChange,
+  } = useStaffs({
+    page: staffFilters.page,
+    limit: staffFilters.limit,
+    filter: {
+      status: staffFilters.status,
+      cif: staffFilters.cif,
+      company_id: staffFilters.company_id,
+      store_id: staffFilters.store_id,
+      code: staffFilters.code,
+      name: staffFilters.name,
     },
   })
-
-  const dataSource = data?.data || []
-  const total = data?.total || 0
 
   const columns = [
     {
@@ -168,6 +155,7 @@ const Staffs: React.FC = () => {
       sortField: sorter.field,
       sortOrder: sorter.order,
     })
+    handleTableChange(pagination, _filters, sorter)
   }
 
   return (
