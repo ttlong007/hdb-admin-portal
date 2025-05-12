@@ -29,6 +29,7 @@ interface FilterState {
     store_id?: number
     code?: string
     name?: string
+    role?: string
     sortField?: string | null
     sortOrder?: 'ascend' | 'descend' | null
   }
@@ -67,7 +68,7 @@ const initialState: FilterState = {
     code: '',
     name: '',
     sortField: null,
-    sortOrder: null
+    sortOrder: null,
   },
   staff: {
     status: '',
@@ -78,8 +79,9 @@ const initialState: FilterState = {
     store_id: undefined,
     code: '',
     name: '',
+    role: '',
     sortField: null,
-    sortOrder: null
+    sortOrder: null,
   },
   transaction: {
     status: '',
@@ -94,7 +96,7 @@ const initialState: FilterState = {
     store_code: '',
     created_by_staff_code: '',
     sortField: null,
-    sortOrder: null
+    sortOrder: null,
   },
 }
 
@@ -139,16 +141,16 @@ const filterSlice = createSlice({
       }
     },
     resetMasterMerchantFilter: (state) => {
-      state.masterMerchant = {}
+      state.masterMerchant = initialState.masterMerchant
     },
     resetMerchantFilter: (state) => {
-      state.merchant = {}
+      state.merchant = initialState.merchant
     },
     resetStaffFilter: (state) => {
-      state.staff = {}
+      state.staff = initialState.staff
     },
     resetTransactionFilter: (state) => {
-      state.transaction = {}
+      state.transaction = initialState.transaction
     },
     resetAllFilters: () => {
       return initialState

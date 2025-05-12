@@ -8,34 +8,41 @@ import { CSVLink } from 'react-csv'
 import { toast } from 'react-toastify'
 import { useFilter } from '@/store/filterSlice/useFilter'
 
-import { STAFF_STATUS, STAFF_STATUS_MAP } from '@/config/constants'
+import { STAFF_STATUS, STAFF_STATUS_MAP, STAFF_ROLES } from '@/config/constants'
 import axiosInstance from '@/config/axios'
 import { useExportStaffs } from '@/hooks/useExportStaffs'
 
 interface FiltersFormValues {
-  cif: string
   company_id: any
   store_id: any
   code: string
   name: string
   status: any
+  role: any
 }
 
 const Filters: React.FC = () => {
   const { staffFilters, setStaffFilters, resetStaffFilters } = useFilter()
 
-  const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
+  const { control, handleSubmit, reset, watch } = useForm<FiltersFormValues>({
     defaultValues: {
-      cif: staffFilters.cif || '',
-      company_id: staffFilters.company_id ? { value: staffFilters.company_id } : null,
+      company_id: staffFilters.company_id
+        ? { value: staffFilters.company_id }
+        : null,
       store_id: staffFilters.store_id ? { value: staffFilters.store_id } : null,
       code: staffFilters.code || '',
       name: staffFilters.name || '',
       status: staffFilters.status
-        ? STAFF_STATUS.find(s => s.value === staffFilters.status) || null
+        ? STAFF_STATUS.find((s) => s.value === staffFilters.status) || null
+        : null,
+      role: staffFilters.role
+        ? STAFF_ROLES.find((r) => r.value === staffFilters.role) || null
         : null,
     },
   })
+
+  // Watch company_id changes
+  const selectedCompanyId = watch('company_id')
 
   const onSubmit = (data: FiltersFormValues) => {
     // Transform field values to just their "value" if needed.
@@ -44,34 +51,42 @@ const Filters: React.FC = () => {
       company_id: data.company_id ? data.company_id.value : null,
       store_id: data.store_id ? data.store_id.value : null,
       status: data.status ? data.status.value : null,
+      role: data.role ? data.role.value.toUpperCase() : null,
     }
 
-    const payload = Object.entries(processedData).reduce(
-      (acc, [key, value]) => {
-        if (value) {
-          return { ...acc, [key]: value }
-        }
-        return acc
-      },
-      {} as Partial<FiltersFormValues>
+    // Remove empty values (null, undefined, empty string, empty array)
+    const filteredData = Object.fromEntries(
+      Object.entries(processedData).filter(([_, value]) => {
+        if (value === null || value === undefined) return false
+        if (typeof value === 'string' && value.trim() === '') return false
+        if (Array.isArray(value) && value.length === 0) return false
+        return true
+      })
     )
+
+    // Check if there are any filter values
+    const hasFilterValues = Object.keys(filteredData).length > 0
+
+    if (!hasFilterValues) {
+      return
+    }
 
     setStaffFilters({
       ...staffFilters,
-      ...payload,
-      page: staffFilters.page,
-      limit: staffFilters.limit
+      ...filteredData,
+      page: 1,
+      limit: staffFilters.limit,
     })
   }
 
   const handleReset = () => {
     reset({
-      cif: '',
       company_id: null,
       store_id: null,
       code: '',
       name: '',
-      status: null
+      status: null,
+      role: null,
     })
     resetStaffFilters()
   }
@@ -90,12 +105,12 @@ const Filters: React.FC = () => {
 
   // Fetch stores based on selected company
   const { data: storesData, isLoading: isLoadingStores } = useQuery({
-    queryKey: ['stores-by-company', staffFilters.company_id],
+    queryKey: ['stores-by-company', selectedCompanyId?.value],
     queryFn: async () => {
-      if (!staffFilters.company_id) return []
+      if (!selectedCompanyId?.value) return []
       const response = await axiosInstance.get(`/v1/admin/store/list`, {
         params: {
-          company_id: staffFilters.company_id,
+          company_id: selectedCompanyId.value,
         },
       })
       if (response.data.status_code === 'ACCEPT') {
@@ -103,7 +118,7 @@ const Filters: React.FC = () => {
       }
       throw new Error('Failed to fetch stores')
     },
-    enabled: !!staffFilters.company_id,
+    enabled: !!selectedCompanyId?.value,
   })
 
   // Transform fetched companies into select options
@@ -164,19 +179,7 @@ const Filters: React.FC = () => {
   return (
     <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
-        <div className="grid grid-cols-5 gap-4 w-full">
-          <Controller
-            name="cif"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label="Mã CIF"
-                placeholder="Mã CIF"
-                inputClassName="bg-white"
-              />
-            )}
-          />
+        <div className="grid grid-cols-3 gap-4 w-full">
           <div>
             <div className="text-sm text-[#000000] mb-2">Công ty</div>
             <Controller
@@ -217,7 +220,7 @@ const Filters: React.FC = () => {
                   placeholder={
                     isLoadingStores ? 'Loading...' : 'Chọn điểm đại lý'
                   }
-                  isDisabled={!staffFilters.company_id}
+                  isDisabled={!selectedCompanyId?.value}
                   className="react-select-container"
                   classNamePrefix="react-select"
                 />
@@ -261,6 +264,25 @@ const Filters: React.FC = () => {
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Chọn trạng thái"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
+              )}
+            />
+          </div>
+          <div>
+            <div className="text-sm text-[#000000] mb-2">Nhóm chức danh</div>
+            <Controller
+              name="role"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  isClearable
+                  options={[{ value: '', label: 'Tất cả' }, ...STAFF_ROLES]}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Chọn nhóm chức danh"
                   className="react-select-container"
                   classNamePrefix="react-select"
                 />

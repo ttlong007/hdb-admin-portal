@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import _get from 'lodash/get'
 import axiosInstance from '@/config/axios'
+import React from 'react'
 
 interface StaffFilters {
   status?: string
@@ -10,6 +11,7 @@ interface StaffFilters {
   store_id?: number
   code?: string
   name?: string
+  role?: string
   [key: string]: any
 }
 
@@ -29,6 +31,11 @@ export const useStaffs = ({
   const [filter, setFilter] = useState<StaffFilters>(initialFilter)
   const [sortField, setSortField] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
+
+  // Update filter when initialFilter changes
+  React.useEffect(() => {
+    setFilter(initialFilter)
+  }, [initialFilter])
 
   const { isPending, data } = useQuery({
     queryKey: ['staffs', page, limit, filter, sortField, sortOrder],

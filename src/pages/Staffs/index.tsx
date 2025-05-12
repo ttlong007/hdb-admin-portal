@@ -31,6 +31,7 @@ const Staffs: React.FC = () => {
   const { isApprover, isCreator } = useAuth()
   const { staffFilters, setStaffFilters } = useFilter()
 
+  console.log('staffFilters', staffFilters)
   const {
     isPending,
     dataSource,
@@ -41,11 +42,11 @@ const Staffs: React.FC = () => {
     limit: staffFilters.limit,
     filter: {
       status: staffFilters.status,
-      cif: staffFilters.cif,
       company_id: staffFilters.company_id,
       store_id: staffFilters.store_id,
       code: staffFilters.code,
       name: staffFilters.name,
+      role: staffFilters.role,
     },
   })
 
