@@ -7,10 +7,16 @@ import { PiCaretDownBold } from 'react-icons/pi'
 import { menuItems } from '@layouts/hydrogen/menu-items'
 import StatusBadge from '@core/components/get-status-badge'
 import { Link } from 'react-router-dom'
+import { useFilter } from '@/store/filterSlice/useFilter'
 
 export function SidebarMenu() {
   const location = useLocation()
   const pathname = location.pathname
+  const { resetAll } = useFilter()
+
+  const handleMenuClick = () => {
+    resetAll()
+  }
 
   return (
     <div className="mt-4 pb-3 3xl:mt-6">
@@ -76,6 +82,7 @@ export function SidebarMenu() {
                           <Link
                             to={dropdownItem?.href}
                             key={dropdownItem?.name + index}
+                            onClick={handleMenuClick}
                             className={cn(
                               'mx-3.5 mb-0.5 flex items-center justify-between rounded-md px-3.5 py-2 font-medium capitalize last-of-type:mb-1 lg:last-of-type:mb-2 2xl:mx-5',
                               isChildActive
@@ -107,6 +114,7 @@ export function SidebarMenu() {
                 ) : (
                   <Link
                     to={item?.href}
+                    onClick={handleMenuClick}
                     className={cn(
                       'group relative mx-3 my-0.5 flex items-center justify-between rounded-md px-3 py-2 font-medium capitalize lg:my-1 2xl:mx-5 2xl:my-2',
                       isActive
