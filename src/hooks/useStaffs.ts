@@ -27,23 +27,18 @@ export const useStaffs = ({
 }: UseStaffsProps = {}) => {
   const [page, setPage] = useState(initialPage)
   const [limit, setLimit] = useState(initialLimit)
-  const [filter, setFilter] = useState<StaffFilters>(initialFilter)
   const [sortField, setSortField] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
 
   const { isPending, data } = useQuery({
-    queryKey: ['staffs', page, limit, filter, sortField, sortOrder],
+    queryKey: ['staffs', page, limit, initialFilter, sortField, sortOrder],
     queryFn: async () => {
-      // Create clean filter object and remove empty values
       const cleanFilter: StaffFilters = {}
-
-      // Only add non-empty values to cleanFilter
-      Object.entries(filter).forEach(([key, value]) => {
+      Object.entries(initialFilter).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
           cleanFilter[key] = value
         }
       })
-
       const { data } = await axiosInstance.get('/v1/admin/staff/list', {
         params: {
           page,
@@ -84,8 +79,8 @@ export const useStaffs = ({
   return {
     page,
     limit,
-    filter,
-    setFilter,
+    filter: initialFilter,
+    setFilter: () => {},
     isPending,
     dataSource,
     total,
