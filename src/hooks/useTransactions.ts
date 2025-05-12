@@ -14,6 +14,7 @@ interface TransactionRequestBody {
   code?: string
   transaction_type?: string
   store_code?: string
+  created_by_staff_code?: string
   order_by_column: string
   descending: boolean
 }
@@ -36,6 +37,7 @@ export const useTransactions = () => {
         code: transactionFilters.code,
         transaction_type: transactionFilters.transaction_type,
         store_code: transactionFilters.store_code,
+        created_by_staff_code: transactionFilters.created_by_staff_code,
         order_by_column: transactionFilters.sortField || 'created_at',
         descending: transactionFilters.sortOrder === 'descend',
       }

@@ -20,6 +20,7 @@ interface FiltersFormValues {
   status: any
   store_code: string
   duration: any
+  created_by_staff_code: string
 }
 
 const Filters: React.FC = () => {
@@ -32,6 +33,7 @@ const Filters: React.FC = () => {
       status: transactionFilters.status ? TRANSACTION_STATUS.find(s => s.value === transactionFilters.status) || null : null,
       store_code: transactionFilters.store_code || '',
       duration: transactionFilters.duration || null,
+      created_by_staff_code: transactionFilters.created_by_staff_code || '',
     },
   })
 
@@ -123,6 +125,14 @@ const Filters: React.FC = () => {
       )
     )
 
+    // Check if there are any filter values
+    const hasFilterValues = Object.keys(filteredData).length > 0
+
+    if (!hasFilterValues) {
+      toast.warning('Vui lòng nhập ít nhất một điều kiện lọc')
+      return
+    }
+
     setTransactionFilters({
       ...transactionFilters,
       ...filteredData,
@@ -137,7 +147,8 @@ const Filters: React.FC = () => {
       transaction_type: null,
       status: null,
       store_code: '',
-      duration: null
+      duration: null,
+      created_by_staff_code: ''
     })
     resetTransactionFilters()
   }
@@ -246,6 +257,21 @@ const Filters: React.FC = () => {
                   {...field}
                   label="Mã cửa hàng"
                   placeholder="Mã cửa hàng"
+                  inputClassName="bg-white"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <Controller
+              name="created_by_staff_code"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="Mã nhân viên"
+                  placeholder="Mã nhân viên"
                   inputClassName="bg-white"
                 />
               )}
