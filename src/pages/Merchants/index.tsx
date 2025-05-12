@@ -106,11 +106,11 @@ const Merchants: React.FC = () => {
       fixed: 'right' as const,
       render: (_: any, record: any) => (
         <Space size="middle">
-          {isCreator && (
+          {isCreator && record.status === 'ACTIVE' ? (
             <Link to={routes.editMerchant.replace(':id', record.id)}>
               <Button type="text" icon={<EditOutlined />} />
             </Link>
-          )}
+          ) : null}
           <Link to={routes.merchantDetail.replace(':id', record.id)}>
             <Button type="text" icon={<EyeOutlined />} />
           </Link>

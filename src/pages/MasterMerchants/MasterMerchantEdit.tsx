@@ -9,6 +9,8 @@ import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 import AdminFeeEditTable from './components/AdminFeeEditTable'
 import { toast } from 'react-toastify'
 import { Input, NumberInput } from 'rizzui'
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
 import {
   MASTER_MERCHANT_STATUS,
   MERCHANT_STATUS_COLOR_MAP,
@@ -37,14 +39,47 @@ function InfoCard({
   )
 }
 
-interface FormData {
-  transaction_monthly_quota: string
-  transaction_daily_quota: string
-  need_approve_new_store: boolean
-  need_approve_new_staff: boolean
-  hdb_can_manage: boolean
-  active: boolean
-}
+const schema = yup.object().shape({
+  transaction_monthly_quota: yup
+    .string()
+    .transform((value) => (value ? value.replace(/,/g, '') : ''))
+    .required('Hạn mức tháng là bắt buộc')
+    .test(
+      'is-number',
+      'Hạn mức tháng phải là số',
+      (value) => !value || !isNaN(Number(value))
+    )
+    .test(
+      'max-monthly',
+      'Hạn mức tháng tối đa là 5,000,000,000',
+      (value) => !value || Number(value) <= 5000000000
+    ),
+  transaction_daily_quota: yup
+    .string()
+    .transform((value) => (value ? value.replace(/,/g, '') : ''))
+    .required('Hạn mức ngày là bắt buộc')
+    .test(
+      'is-number',
+      'Hạn mức ngày phải là số',
+      (value) => !value || !isNaN(Number(value))
+    )
+    .test(
+      'max-daily',
+      'Hạn mức ngày tối đa là 200,000,000',
+      (value) => !value || Number(value) <= 200000000
+    )
+    .test(
+      'less-than-monthly',
+      'Hạn mức ngày phải nhỏ hơn hoặc bằng hạn mức tháng',
+      function (value) {
+        const monthlyQuota = this.parent.transaction_monthly_quota
+        if (!value || !monthlyQuota) {
+          return true // Skip validation if either is empty
+        }
+        return Number(value) <= Number(monthlyQuota)
+      }
+    ),
+})
 
 export default function MasterMerchantEdit() {
   const { id } = useParams<{ id: string }>()
@@ -66,8 +101,8 @@ export default function MasterMerchantEdit() {
     control,
     handleSubmit,
     reset,
-    formState: { isSubmitting, dirtyFields },
-  } = useForm<FormData>({
+    formState: { errors, isSubmitting, dirtyFields },
+  } = useForm<any>({
     defaultValues: {
       transaction_monthly_quota: '',
       transaction_daily_quota: '',
@@ -76,6 +111,7 @@ export default function MasterMerchantEdit() {
       hdb_can_manage: false,
       active: false,
     },
+    resolver: yupResolver(schema),
   })
 
   useEffect(() => {
@@ -88,11 +124,11 @@ export default function MasterMerchantEdit() {
         active: company.status === 'ACTIVE',
       })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [company, monthlyLimit, dailyLimit])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(company)])
 
   const updateCompanyMutation = useMutation({
-    mutationFn: async (values: FormData) => {
+    mutationFn: async (values: any) => {
       const payload: any = {
         status: values.active ? 'ACTIVE' : 'INACTIVE',
         need_approve_new_store: values.need_approve_new_store,
@@ -106,13 +142,19 @@ export default function MasterMerchantEdit() {
         dirtyFields.transaction_monthly_quota
       ) {
         payload.limits = []
-        if (dirtyFields.transaction_daily_quota && values.transaction_daily_quota) {
+        if (
+          dirtyFields.transaction_daily_quota &&
+          values.transaction_daily_quota
+        ) {
           payload.limits.push({
             amount: Number(values.transaction_daily_quota.replace(/,/g, '')),
             type: 'TRANSACTION_QUOTA_DAILY',
           })
         }
-        if (dirtyFields.transaction_monthly_quota && values.transaction_monthly_quota) {
+        if (
+          dirtyFields.transaction_monthly_quota &&
+          values.transaction_monthly_quota
+        ) {
           payload.limits.push({
             amount: Number(values.transaction_monthly_quota.replace(/,/g, '')),
             type: 'TRANSACTION_QUOTA_MONTHLY',
@@ -140,7 +182,7 @@ export default function MasterMerchantEdit() {
     },
   })
 
-  const onFinish: SubmitHandler<FormData> = async (values) => {
+  const onFinish: SubmitHandler<any> = async (values) => {
     updateCompanyMutation.mutate(values)
   }
 
@@ -153,6 +195,7 @@ export default function MasterMerchantEdit() {
   const statusLabel = statusOption ? statusOption.label : '---'
   const statusColor = MERCHANT_STATUS_COLOR_MAP[company.status] || 'default'
 
+  console.log('errors', errors)
   return (
     <>
       {/* Breadcrumbs */}
@@ -219,39 +262,54 @@ export default function MasterMerchantEdit() {
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4">
             Hạn mức giao dịch
           </h4>
-          <div className="flex gap-6 mb-6 max-sm:flex-col w-1/2">
-            <Controller
-              name="transaction_monthly_quota"
-              control={control}
-              render={({ field }) => (
-                <NumberInput
-                  formatType="numeric"
-                  displayType="input"
-                  customInput={Input as React.ComponentType<unknown>}
-                  thousandSeparator=","
-                  {...{ label: 'Hạn mức trong tháng' }}
-                  {...field}
-                  placeholder="Nhập hạn mức trong tháng"
-                  className="w-full"
-                />
-              )}
-            />
-            <Controller
-              name="transaction_daily_quota"
-              control={control}
-              render={({ field }) => (
-                <NumberInput
-                  formatType="numeric"
-                  displayType="input"
-                  customInput={Input as React.ComponentType<unknown>}
-                  thousandSeparator=","
-                  {...{ label: 'Hạn mức giao dịch hàng ngày' }}
-                  {...field}
-                  placeholder="Nhập hạn mức giao dịch hàng ngày"
-                  className="w-full"
-                />
-              )}
-            />
+          <div className="flex gap-4 w-2/3">
+            <div className="flex-1">
+              <Controller
+                name="transaction_monthly_quota"
+                control={control}
+                render={({ field }) => (
+                  <NumberInput
+                    formatType="numeric"
+                    displayType="input"
+                    customInput={Input as React.ComponentType<unknown>}
+                    thousandSeparator=","
+                    {...{ label: 'Hạn mức trong tháng' }}
+                    {...field}
+                    placeholder="Nhập hạn mức trong tháng"
+                    className="w-full"
+                  />
+                )}
+              />
+              {errors.transaction_monthly_quota?.message ? (
+                <span className="text-red-500 text-sm">
+                  {`${errors?.transaction_monthly_quota?.message}`}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="flex-1">
+              <Controller
+                name="transaction_daily_quota"
+                control={control}
+                render={({ field }) => (
+                  <NumberInput
+                    formatType="numeric"
+                    displayType="input"
+                    customInput={Input as React.ComponentType<unknown>}
+                    thousandSeparator=","
+                    {...{ label: 'Hạn mức giao dịch hàng ngày' }}
+                    {...field}
+                    placeholder="Nhập hạn mức giao dịch hàng ngày"
+                    className="w-full"
+                  />
+                )}
+              />
+              {errors.transaction_daily_quota?.message ? (
+                <span className="text-red-500 text-sm">
+                  {`${errors?.transaction_daily_quota?.message}`}
+                </span>
+              ) : null}
+            </div>
           </div>
 
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4 mt-8">

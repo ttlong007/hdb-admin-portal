@@ -40,7 +40,6 @@ export const ROLES = {
 } as const
 
 export const MERCHANT_STATUS = [
-  { value: 'DRAFT', label: 'Nháp' },
   { value: 'WAITING_APPROVE', label: 'Đang đợi duyệt' },
   { value: 'ACTIVE', label: 'Hoạt động' },
   { value: 'REJECTED', label: 'Từ chối' },
@@ -48,7 +47,6 @@ export const MERCHANT_STATUS = [
 ]
 
 export const MASTER_MERCHANT_STATUS = [
-  { value: 'DRAFT', label: 'Nháp' },
   { value: 'WAITING_APPROVE', label: 'Đang đợi duyệt' },
   { value: 'ACTIVE', label: 'Hoạt động' },
   { value: 'REJECTED', label: 'Từ chối' },
@@ -105,7 +103,6 @@ export const STAFF_ROLES = [
 ]
 
 export const STAFF_STATUS = [
-  { value: 'DRAFT', label: 'Nháp' },
   { value: 'WAITING_APPROVE', label: 'Đang đợi duyệt' },
   { value: 'ACTIVE', label: 'Hoạt động' },
   { value: 'REJECTED', label: 'Từ chối' },

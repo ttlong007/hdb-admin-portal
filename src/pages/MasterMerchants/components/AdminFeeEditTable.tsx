@@ -91,7 +91,7 @@ interface AdminFeeEditTableProps {
 
 const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({ id }) => {
   const [form] = Form.useForm()
-  const [data, setData] = useState<DataType[]>(initialData)
+  const [data, setData] = useState<DataType[]>([])
   const [editingKey, setEditingKey] = useState('')
 
   // Fetch fee types from the API (fallback if needed)
@@ -116,54 +116,24 @@ const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({ id }) => {
     enabled: !!id,
   })
 
-  // Map company fees to table rows if available; otherwise fallback to feeTypes mapping.
+  // Combine feeTypes and companyFees into table rows
   useEffect(() => {
-    if (companyFees && companyFees.length) {
-      const mappedFees = companyFees.map((fee: any) => ({
-        key: fee.fee_transaction_type_id.toString(),
-        // You may replace below with a lookup for fee type name if available.
-        transactionType: `Type ${fee.fee_transaction_type_id}`,
-        fixedFee: fee.fixed_fee?.toString() || '',
-        transactionFeePercent: fee.percentage_fee_per_txn?.toString() || '',
-        minFee: fee.min_fee?.toString() || '',
-        maxFee: fee.max_fee?.toString() || '',
-        afterHoursFee: fee.overtime_fee?.toString() || '',
-      }))
-      setData(mappedFees)
-    } else if (feeTypes && feeTypes.length) {
-      const mappedData = feeTypes.map((ft: any) => ({
+    if (!feeTypes?.length) return           // do nothing if no feeTypes
+    const mergedData = feeTypes.map((ft: any) => {
+      const fee = companyFees?.find(
+        (f: any) => f.fee_transaction_type_id === ft.id
+      )
+      return {
         key: ft.id.toString(),
         transactionType: ft.name,
-        fixedFee: '',
-        transactionFeePercent: '',
-        minFee: '',
-        maxFee: '',
-        afterHoursFee: '',
-      }))
-      setData(mappedData)
-    }
-  }, [companyFees, feeTypes])
-
-  useEffect(() => {
-    if (feeTypes && feeTypes.length) {
-      // Map feeTypes and try to find corresponding fee information from companyFees.
-      const mappedData = feeTypes.map((ft: any) => {
-        // find matching fee from companyFees (if available)
-        const fee = companyFees?.find(
-          (f: any) => f.fee_transaction_type_id === ft.id
-        );
-        return {
-          key: ft.id.toString(),
-          transactionType: ft.name,
-          fixedFee: fee ? fee.fixed_fee?.toString() || '' : '',
-          transactionFeePercent: fee ? fee.percentage_fee_per_txn?.toString() || '' : '',
-          minFee: fee ? fee.min_fee?.toString() || '' : '',
-          maxFee: fee ? fee.max_fee?.toString() || '' : '',
-          afterHoursFee: fee ? fee.overtime_fee?.toString() || '' : '',
-        }
-      })
-      setData(mappedData)
-    }
+        fixedFee: fee?.fixed_fee?.toString() || '',
+        transactionFeePercent: fee?.percentage_fee_per_txn?.toString() || '',
+        minFee: fee?.min_fee?.toString() || '',
+        maxFee: fee?.max_fee?.toString() || '',
+        afterHoursFee: fee?.overtime_fee?.toString() || '',
+      }
+    })
+    setData(mergedData)
   }, [companyFees, feeTypes])
 
   const isEditing = (record: DataType) => record.key === editingKey
@@ -293,7 +263,7 @@ const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({ id }) => {
     if (!col.editable) {
       return col
     }
-    let inputType: 'number' | 'text' | 'select' = 'text'
+    const inputType: 'number' | 'text' | 'select' = 'text'
     return {
       ...col,
       onCell: (record: DataType) => ({
