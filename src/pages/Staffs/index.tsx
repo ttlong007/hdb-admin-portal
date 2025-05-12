@@ -112,7 +112,7 @@ const Staffs: React.FC = () => {
       title: 'Tác vụ',
       key: 'action',
       width: 100,
-      align: 'center',
+      align: 'center' as const,
       fixed: 'right' as const,
       render: (_: any, record: any) => (
         <Space size="middle">

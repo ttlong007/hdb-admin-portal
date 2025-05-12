@@ -112,7 +112,7 @@ const MasterMerchants: React.FC = () => {
       key: 'action',
       fixed: 'right' as const,
       width: 100,
-      align: 'center',
+      align: 'center' as const,
       render: (_: any, record: any) => (
         <Space size="middle">
           {isCreator && (
