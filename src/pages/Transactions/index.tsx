@@ -12,14 +12,8 @@ import { useTransactions } from '@/hooks/useTransactions'
 import Filters from './components/Filters'
 
 const Transactions: React.FC = () => {
-  const {
-    isPending,
-    dataSource,
-    total,
-    onTableChange,
-        page,
-        limit,
-  } = useTransactions()
+  const { isPending, dataSource, total, onTableChange, page, limit } =
+    useTransactions()
 
   const columns = [
     {
@@ -50,7 +44,8 @@ const Transactions: React.FC = () => {
       sorter: true,
       render: (status: string) => {
         const statusKey = status?.toUpperCase()
-        const label = TRANSACTION_STATUS.find(s => s.value === statusKey)?.label || '---'
+        const label =
+          TRANSACTION_STATUS.find((s) => s.value === statusKey)?.label || '---'
         const color = TRANSACTION_STATUS_COLOR_MAP[statusKey] || 'default'
         return <Tag color={color}>{label}</Tag>
       },
@@ -95,6 +90,7 @@ const Transactions: React.FC = () => {
       title: 'Tác vụ',
       key: 'action',
       width: 100,
+      align: 'center',
       fixed: 'right' as const,
       render: (_: any, record: any) => (
         <Space size="middle">

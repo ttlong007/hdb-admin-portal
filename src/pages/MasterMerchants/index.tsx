@@ -11,7 +11,10 @@ import { useFilter } from '@/store/filterSlice/useFilter'
 import Filters from './components/Filters'
 import { routes } from '@/config/routes'
 import axiosInstance from '@/config/axios'
-import { MASTER_MERCHANT_STATUS, MERCHANT_STATUS_COLOR_MAP } from '@/config/constants'
+import {
+  MASTER_MERCHANT_STATUS,
+  MERCHANT_STATUS_COLOR_MAP,
+} from '@/config/constants'
 
 interface Data {
   id: string
@@ -26,7 +29,9 @@ interface Data {
 const MasterMerchants: React.FC = () => {
   const { masterMerchantFilters, setMasterMerchantFilters } = useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
-  const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(null)
+  const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
+    null
+  )
   const { isCreator } = useAuth()
 
   const { data, isPending, refetch } = useMasterMerchants({
@@ -36,7 +41,7 @@ const MasterMerchants: React.FC = () => {
       status: masterMerchantFilters.status,
       cif: masterMerchantFilters.cif,
       name: masterMerchantFilters.name,
-      business_license: masterMerchantFilters.business_license
+      business_license: masterMerchantFilters.business_license,
     },
     sortField,
     sortOrder,
@@ -87,7 +92,9 @@ const MasterMerchants: React.FC = () => {
       key: 'status',
       sorter: true,
       render: (status: string) => {
-        const statusOption = MASTER_MERCHANT_STATUS.find(s => s.value === status)
+        const statusOption = MASTER_MERCHANT_STATUS.find(
+          (s) => s.value === status
+        )
         const statusLabel = statusOption ? statusOption.label : '---'
         const statusColor = MERCHANT_STATUS_COLOR_MAP[status] || 'default'
         return <Tag color={statusColor}>{statusLabel}</Tag>
@@ -103,12 +110,15 @@ const MasterMerchants: React.FC = () => {
     {
       title: 'Tác vụ',
       key: 'action',
-      render: (_, record: any) => (
+      fixed: 'right' as const,
+      width: 100,
+      align: 'center',
+      render: (_: any, record: any) => (
         <Space size="middle">
           {isCreator && (
-          <Link to={routes.editMasterMerchant.replace(':id', record.id)}>
-            <Button type="text" icon={<EditOutlined />} />
-          </Link>
+            <Link to={routes.editMasterMerchant.replace(':id', record.id)}>
+              <Button type="text" icon={<EditOutlined />} />
+            </Link>
           )}
           <Link to={routes.masterMerchantDetail.replace(':id', record.id)}>
             <Button type="text" icon={<EyeOutlined />} />
@@ -122,7 +132,7 @@ const MasterMerchants: React.FC = () => {
     setMasterMerchantFilters({
       ...masterMerchantFilters,
       page: pagination.current,
-      limit: pagination.pageSize
+      limit: pagination.pageSize,
     })
   }
 
