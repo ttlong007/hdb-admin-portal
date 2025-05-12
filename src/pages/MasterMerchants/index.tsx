@@ -106,9 +106,9 @@ const MasterMerchants: React.FC = () => {
       render: (_, record: any) => (
         <Space size="middle">
           {isCreator && (
-            <Link to={routes.editMasterMerchant.replace(':id', record.id)}>
-              <Button type="text" icon={<EditOutlined />} />
-            </Link>
+          <Link to={routes.editMasterMerchant.replace(':id', record.id)}>
+            <Button type="text" icon={<EditOutlined />} />
+          </Link>
           )}
           <Link to={routes.masterMerchantDetail.replace(':id', record.id)}>
             <Button type="text" icon={<EyeOutlined />} />

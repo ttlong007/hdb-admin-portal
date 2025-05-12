@@ -31,7 +31,6 @@ const Staffs: React.FC = () => {
   const { isApprover, isCreator } = useAuth()
   const { staffFilters, setStaffFilters } = useFilter()
 
-  console.log('staffFilters', staffFilters)
   const {
     isPending,
     dataSource,
@@ -115,9 +114,9 @@ const Staffs: React.FC = () => {
       render: (_: any, record: any) => (
         <Space size="middle">
           {isCreator && (
-            <Link to={routes.editStaff.replace(':id', record.id)}>
-              <Button type="text" icon={<EditOutlined />} />
-            </Link>
+          <Link to={routes.editStaff.replace(':id', record.id)}>
+            <Button type="text" icon={<EditOutlined />} />
+          </Link>
           )}
           <Link to={routes.staffDetail.replace(':id', record.id)}>
             <Button type="text" icon={<EyeOutlined />} />
@@ -129,19 +128,19 @@ const Staffs: React.FC = () => {
 
   const rowSelection: TableProps['rowSelection'] = isApprover
     ? {
-        onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
+    onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
           setSelectedRowKeys(selectedRowKeys)
-          console.log(
-            `selectedRowKeys: ${selectedRowKeys}`,
-            'selectedRows:',
-            selectedRows
-          )
-        },
-        getCheckboxProps: (record: any) => ({
-          disabled: record.name === 'Disabled User',
-          name: record.name,
-        }),
-      }
+      console.log(
+        `selectedRowKeys: ${selectedRowKeys}`,
+        'selectedRows:',
+        selectedRows
+      )
+    },
+    getCheckboxProps: (record: any) => ({
+      disabled: record.name === 'Disabled User',
+      name: record.name,
+    }),
+  }
     : undefined
 
   const onTableChange: TableProps['onChange'] = (
@@ -193,13 +192,13 @@ const Staffs: React.FC = () => {
               Tải lên theo danh sách
             </button>
             {!isApprover && (
-              <Link
-                to={routes.createStaff}
-                className="rounded-sm flex justify-center items-center gap-2 bg-[#DA2128] px-3 py-2 font-medium text-[14px] text-white"
-              >
-                {/* SVG icon */}
-                Thêm mới nhân viên
-              </Link>
+            <Link
+              to={routes.createStaff}
+              className="rounded-sm flex justify-center items-center gap-2 bg-[#DA2128] px-3 py-2 font-medium text-[14px] text-white"
+            >
+              {/* SVG icon */}
+              Thêm mới nhân viên
+            </Link>
             )}
           </div>
         </div>
@@ -225,11 +224,11 @@ const Staffs: React.FC = () => {
           />
 
           {isApprover && (
-            <div className="flex justify-end gap-4 w-full mt-8">
-              <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
-                Đồng ý duyệt
-              </button>
-            </div>
+          <div className="flex justify-end gap-4 w-full mt-8">
+            <button className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white">
+              Đồng ý duyệt
+            </button>
+          </div>
           )}
         </div>
       </div>

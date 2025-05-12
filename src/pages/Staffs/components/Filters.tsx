@@ -87,7 +87,7 @@ const Filters: React.FC = () => {
       name: '',
       status: null,
       role: null,
-    })
+  })
     resetStaffFilters()
   }
 

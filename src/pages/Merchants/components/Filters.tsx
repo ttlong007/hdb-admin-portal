@@ -62,7 +62,8 @@ const Filters: React.FC = () => {
         setValue('company_id', { label: company.name, value: company.id })
       }
     }
-  }, [companiesData, merchantFilters.company_id, setValue])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [companiesData, merchantFilters.company_id])
 
   const onSubmit = (data: FiltersFormValues) => {
     // Transform field values to just their "value" if needed.

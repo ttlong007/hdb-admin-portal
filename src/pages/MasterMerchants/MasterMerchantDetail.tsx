@@ -224,16 +224,16 @@ export default function MasterMerchantDetail() {
             Quay lại
           </button>
           {isCreator && (
-            <button
+          <button
               type="button"
-              onClick={() =>
-                navigate(routes.editMasterMerchant.replace(':id', id || ''))
-              }
-              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
-            >
-              <EditOutlined />
-              Chỉnh sửa
-            </button>
+            onClick={() =>
+              navigate(routes.editMasterMerchant.replace(':id', id || ''))
+            }
+            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+          >
+            <EditOutlined />
+            Chỉnh sửa
+          </button>
           )}
           {isApprover && company.status === 'WAITING_APPROVE' && (
             <>

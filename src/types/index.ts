@@ -3,7 +3,7 @@ export interface PaginatedResponse<T> {
   data: T[] // The array of data (generic type)
   // Pagination metadata returned from API
   page_data?: {
-    total: number // Total number of records
+  total: number // Total number of records
     [key: string]: any
   }
   // Optional total field

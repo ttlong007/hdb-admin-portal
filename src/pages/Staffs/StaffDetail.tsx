@@ -179,7 +179,7 @@ const StaffDetail: React.FC = () => {
                   {MASTER_MERCHANT_STATUS.find(
                     (status) => status.value === company.status
                   )?.label || '---'}
-                </Tag>
+              </Tag>
               </div>
             </div>
           </div>
@@ -316,9 +316,9 @@ const StaffDetail: React.FC = () => {
                     (type: { id: number; name: string; code: string }) => (
                       <div key={type.id} className="flex items-center gap-2">
                         <CheckOutlined />
-                        <span className="text-base font-semibold">
+                <span className="text-base font-semibold">
                           {type.name}
-                        </span>
+                </span>
                       </div>
                     )
                   )

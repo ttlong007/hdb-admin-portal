@@ -17,8 +17,8 @@ const Transactions: React.FC = () => {
     dataSource,
     total,
     onTableChange,
-    page,
-    limit,
+        page,
+        limit,
   } = useTransactions()
 
   const columns = [

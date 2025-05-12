@@ -8,7 +8,7 @@ import { CloseCircleOutlined, SaveOutlined } from '@ant-design/icons'
 import { useForm, Controller, SubmitHandler } from 'react-hook-form'
 import AdminFeeEditTable from './components/AdminFeeEditTable'
 import { toast } from 'react-toastify'
-import { Input } from 'rizzui'
+import { Input, NumberInput } from 'rizzui'
 import {
   MASTER_MERCHANT_STATUS,
   MERCHANT_STATUS_COLOR_MAP,
@@ -120,13 +120,17 @@ export default function MasterMerchantEdit() {
 
   const company = data || {}
 
+  // Get the latest limit values by sorting by id in descending order
+  const getLatestLimit = (type: string) => {
+    const limits = company.limits?.filter((limit: any) => limit.type === type) || []
+    if (limits.length === 0) return 0
+    // Sort by id in descending order to get the latest one
+    return limits.sort((a: any, b: any) => b.id - a.id)[0].amount
+  }
+
   // Map limitData response for daily and monthly limits
-  const dailyLimit = company.limits?.find(
-    (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
-  )?.amount
-  const monthlyLimit = company.limits?.find(
-    (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
-  )?.amount
+  const dailyLimit = getLatestLimit('TRANSACTION_QUOTA_DAILY')
+  const monthlyLimit = getLatestLimit('TRANSACTION_QUOTA_MONTHLY')
 
   const statusOption = MASTER_MERCHANT_STATUS.find(
     (s) => s.value === company.status
@@ -300,9 +304,13 @@ export default function MasterMerchantEdit() {
               name="transaction_monthly_quota"
               control={control}
               render={({ field }) => (
-                <Input
+                <NumberInput
+                  formatType="numeric"
+                  displayType="input"
+                  customInput={Input as React.ComponentType<unknown>}
+                  thousandSeparator=","
+                  {...{ label: 'Hạn mức trong tháng' }}
                   {...field}
-                  label="Hạn mức trong tháng"
                   placeholder="Nhập hạn mức trong tháng"
                   className="w-full"
                 />
@@ -312,9 +320,13 @@ export default function MasterMerchantEdit() {
               name="transaction_daily_quota"
               control={control}
               render={({ field }) => (
-                <Input
+                <NumberInput
+                  formatType="numeric"
+                  displayType="input"
+                  customInput={Input as React.ComponentType<unknown>}
+                  thousandSeparator=","
+                  {...{ label: 'Hạn mức giao dịch hàng ngày' }}
                   {...field}
-                  label="Hạn mức giao dịch hàng ngày"
                   placeholder="Nhập hạn mức giao dịch hàng ngày"
                   className="w-full"
                 />
