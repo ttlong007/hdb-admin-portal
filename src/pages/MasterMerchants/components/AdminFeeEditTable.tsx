@@ -87,9 +87,13 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
 
 interface AdminFeeEditTableProps {
   id: number
+  onFeesChange: (fees: any[]) => void
 }
 
-const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({ id }) => {
+const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({
+  id,
+  onFeesChange,
+}) => {
   const [form] = Form.useForm()
   const [data, setData] = useState<DataType[]>([])
   const [editingKey, setEditingKey] = useState('')
@@ -104,21 +108,27 @@ const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({ id }) => {
   })
 
   // Fetch company fees from the API
-  const { data: companyFees, isLoading: isFeesLoading, error: feesError } = useQuery({
+  const {
+    data: companyFees,
+    isLoading: isFeesLoading,
+    error: feesError,
+  } = useQuery({
     queryKey: ['companyFees', id],
     queryFn: async () => {
       const response = await axiosInstance.get(`/v1/admin/company/${id}/fees`)
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data
       }
-      throw new Error(response.data.reason_message || 'Failed to fetch company fees')
+      throw new Error(
+        response.data.reason_message || 'Failed to fetch company fees'
+      )
     },
     enabled: !!id,
   })
 
   // Combine feeTypes and companyFees into table rows
   useEffect(() => {
-    if (!feeTypes?.length) return           // do nothing if no feeTypes
+    if (!feeTypes?.length) return // do nothing if no feeTypes
     const mergedData = feeTypes.map((ft: any) => {
       const fee = companyFees?.find(
         (f: any) => f.fee_transaction_type_id === ft.id
@@ -166,28 +176,21 @@ const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({ id }) => {
           ...row,
         }
 
-        // Build the payload – replace company_id with actual company id if needed.
-        const feePayload = {
-          fees: [
-            {
-              company_id: id,
-              fee_transaction_type_id: Number(updatedRow.key),
-              fixed_fee: Number(updatedRow.fixedFee),
-              max_fee: Number(updatedRow.maxFee),
-              min_fee: Number(updatedRow.minFee),
-              overtime_fee: Number(updatedRow.afterHoursFee),
-              percentage_fee_per_txn: Number(updatedRow.transactionFeePercent),
-            },
-          ],
-        }
-
-        // Call POST /v1/admin/fee/upsert-batch with the payload.
-        await axiosInstance.post('/v1/admin/fee/upsert-batch', feePayload)
-
         // Update local state
         newData.splice(index, 1, updatedRow)
         setData(newData)
         setEditingKey('')
+
+        // Notify parent component of fee changes
+        const updatedFees = newData.map((item) => ({
+          fee_transaction_type_id: Number(item.key),
+          fixed_fee: Number(item.fixedFee) || 0,
+          max_fee: Number(item.maxFee) || 0,
+          min_fee: Number(item.minFee) || 0,
+          overtime_fee: Number(item.afterHoursFee) || 0,
+          percentage_fee_per_txn: Number(item.transactionFeePercent) || 0,
+        }))
+        onFeesChange(updatedFees)
       } else {
         newData.push(row)
         setData(newData)
@@ -243,7 +246,10 @@ const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({ id }) => {
         const editable = isEditing(record)
         return editable ? (
           <span>
-            <Typography.Link onClick={() => save(record.key)} style={{ marginInlineEnd: 8 }}>
+            <Typography.Link
+              onClick={() => save(record.key)}
+              style={{ marginInlineEnd: 8 }}
+            >
               Lưu
             </Typography.Link>
             <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
@@ -251,7 +257,10 @@ const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({ id }) => {
             </Popconfirm>
           </span>
         ) : (
-          <Typography.Link disabled={editingKey !== ''} onClick={() => edit(record)}>
+          <Typography.Link
+            disabled={editingKey !== ''}
+            onClick={() => edit(record)}
+          >
             Sửa
           </Typography.Link>
         )

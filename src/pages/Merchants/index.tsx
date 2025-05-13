@@ -130,16 +130,13 @@ const Merchants: React.FC = () => {
   const onTableChange = (pagination: any, _filters: any, sorter: any) => {
     onPaginationChange(pagination)
 
-    // Handle sorting
     if (sorter.field) {
       setMerchantFilters({
-        ...merchantFilters,
         sortField: sorter.field,
         sortOrder: sorter.order,
       })
     } else {
       setMerchantFilters({
-        ...merchantFilters,
         sortField: null,
         sortOrder: null,
       })

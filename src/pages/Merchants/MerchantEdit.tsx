@@ -2,11 +2,13 @@ import React, { useEffect } from 'react'
 import { useParams, NavLink, useNavigate } from 'react-router-dom'
 import { useForm, Controller, useWatch } from 'react-hook-form'
 import { useQuery, useMutation } from '@tanstack/react-query'
-import { Checkbox, Button, Switch } from 'antd'
-import { Input } from 'rizzui'
+import { Checkbox, Switch } from 'antd'
+import { Input, NumberInput } from 'rizzui'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
 import { useAuth } from '@/store/authSlice/useAuth'
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
 
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
@@ -35,6 +37,90 @@ const defaultTransactionTypes = [
   { id: 3, name: 'Giao dịch 3' },
 ]
 
+const schema = yup.object().shape({
+  name: yup.string().required('Tên điểm đại lý là bắt buộc'),
+  code: yup.string().required('Mã điểm đại lý là bắt buộc'),
+  address: yup.string().required('Địa chỉ là bắt buộc'),
+  city: yup.object().nullable().required('Tỉnh/Thành phố là bắt buộc'),
+  district: yup.object().nullable().required('Quận/Huyện là bắt buộc'),
+  ward: yup.object().nullable().required('Phường/Xã là bắt buộc'),
+  expense_account: yup
+    .object()
+    .nullable()
+    .required('Tài khoản chuyên chi là bắt buộc'),
+  income_account: yup
+    .object()
+    .nullable()
+    .required('Tài khoản chuyên thu là bắt buộc'),
+  company_id: yup.object().nullable().required('Công ty là bắt buộc'),
+  transaction_monthly_quota: yup
+    .string()
+    .transform((value) => (value ? value.replace(/,/g, '') : ''))
+    .required('Hạn mức tháng là bắt buộc')
+    .test(
+      'is-number',
+      'Hạn mức tháng phải là số',
+      (value) => !value || !isNaN(Number(value))
+    )
+    .test(
+      'max-monthly',
+      'Hạn mức tháng tối đa là 5,000,000,000',
+      (value) => !value || Number(value) <= 5000000000
+    ),
+  transaction_daily_quota: yup
+    .string()
+    .transform((value) => (value ? value.replace(/,/g, '') : ''))
+    .required('Hạn mức ngày là bắt buộc')
+    .test(
+      'is-number',
+      'Hạn mức ngày phải là số',
+      (value) => !value || !isNaN(Number(value))
+    )
+    .test(
+      'max-daily',
+      'Hạn mức ngày tối đa là 200,000,000',
+      (value) => !value || Number(value) <= 200000000
+    )
+    .test(
+      'less-than-monthly',
+      'Hạn mức ngày phải nhỏ hơn hoặc bằng hạn mức tháng',
+      function (value) {
+        const monthlyQuota = this.parent.transaction_monthly_quota
+        if (!value || !monthlyQuota) {
+          return true // Skip validation if either is empty
+        }
+        return Number(value) <= Number(monthlyQuota)
+      }
+    ),
+  approveThreshold: yup
+    .string()
+    .transform((value) => (value ? value.replace(/,/g, '') : ''))
+    .required('Ngưỡng giá trị cần duyệt là bắt buộc')
+    .test(
+      'is-number',
+      'Ngưỡng giá trị cần duyệt phải là số',
+      (value) => !value || !isNaN(Number(value))
+    ),
+  transactionTypes: yup
+    .array()
+    .of(yup.mixed())
+    .test(
+      'required-if-approveThreshold',
+      'Chọn ít nhất một loại giao dịch cần duyệt',
+      function (value) {
+        const approveThreshold = this.parent.approveThreshold
+        if (
+          approveThreshold !== undefined &&
+          approveThreshold !== null &&
+          approveThreshold !== ''
+        ) {
+          return value && value.length > 0
+        }
+        return true
+      }
+    ),
+})
+
 const EditMerchant = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -52,7 +138,7 @@ const EditMerchant = () => {
     control,
     reset,
     formState: { errors, dirtyFields },
-  } = useForm<MerchantFormValues>({
+  } = useForm<any>({
     defaultValues: {
       name: '',
       code: '',
@@ -68,6 +154,8 @@ const EditMerchant = () => {
       transactionTypes: [],
       company_id: null,
     },
+    resolver: yupResolver(schema),
+    mode: 'all',
   })
 
   // Fetch store details using id from route params.
@@ -259,11 +347,15 @@ const EditMerchant = () => {
   const selectedCompany = useWatch({ control, name: 'company_id' })
 
   // Fetch dynamically the account list using the selected company id.
-  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<Option[]>({
+  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<
+    Option[]
+  >({
     queryKey: ['companyAccounts', selectedCompany?.value],
     queryFn: async () => {
       if (!selectedCompany?.value) return []
-      const response = await axiosInstance.get(`/v1/admin/company/${selectedCompany.value}`)
+      const response = await axiosInstance.get(
+        `/v1/admin/company/${selectedCompany.value}`
+      )
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.accts.map((acc: any) => ({
           label: `${acc.acct_desc} (${acc.acct_no})`,
@@ -394,7 +486,8 @@ const EditMerchant = () => {
       const selectedIds = (data.transactionTypes as any)
         .map((code) => {
           const option = options.find(
-            (opt: { id: number; code: string; name: string }) => opt.code === code
+            (opt: { id: number; code: string; name: string }) =>
+              opt.code === code
           )
           return option ? option.id : null
         })
@@ -476,11 +569,11 @@ const EditMerchant = () => {
                       placeholder="Nhập tên điểm đại lý"
                       className="w-full"
                     />
-                    {errors.name && (
+                    {errors.name?.message ? (
                       <p className="text-red-500 text-sm">
-                        {errors.name.message}
+                        {errors.name?.message?.toString()}
                       </p>
-                    )}
+                    ) : null}
                   </>
                 )}
               />
@@ -499,11 +592,11 @@ const EditMerchant = () => {
                       placeholder="Nhập mã điểm đại lý"
                       className="w-full"
                     />
-                    {errors.code && (
+                    {errors.code?.message ? (
                       <p className="text-red-500 text-sm">
-                        {errors.code.message}
+                        {errors.code?.message?.toString()}˝
                       </p>
-                    )}
+                    ) : null}
                   </>
                 )}
               />
@@ -522,11 +615,11 @@ const EditMerchant = () => {
                       placeholder="Nhập địa chỉ"
                       className="w-full"
                     />
-                    {errors.address && (
+                    {errors.address?.message ? (
                       <p className="text-red-500 text-sm">
-                        {errors.address.message}
+                        {errors.address?.message?.toString()}
                       </p>
-                    )}
+                    ) : null}
                   </>
                 )}
               />
@@ -550,11 +643,11 @@ const EditMerchant = () => {
                       isLoading={isLoadingProvinces}
                       value={field.value}
                     />
-                    {errors.city && (
+                    {errors.city?.message ? (
                       <p className="text-red-500 text-sm">
-                        {errors.city.message}
+                        {errors.city?.message?.toString()}
                       </p>
-                    )}
+                    ) : null}
                   </>
                 )}
               />
@@ -578,11 +671,11 @@ const EditMerchant = () => {
                       isLoading={isLoadingDistrict}
                       value={field.value}
                     />
-                    {errors.district && (
+                    {errors.district?.message ? (
                       <p className="text-red-500 text-sm">
-                        {errors.district.message}
+                        {errors.district?.message?.toString()}
                       </p>
-                    )}
+                    ) : null}
                   </>
                 )}
               />
@@ -606,11 +699,11 @@ const EditMerchant = () => {
                       isLoading={isLoadingWard}
                       value={field.value}
                     />
-                    {errors.ward && (
+                    {errors.ward?.message ? (
                       <p className="text-red-500 text-sm">
-                        {errors.ward.message}
+                        {errors.ward?.message?.toString()}
                       </p>
-                    )}
+                    ) : null}
                   </>
                 )}
               />
@@ -634,11 +727,11 @@ const EditMerchant = () => {
                       isLoading={isLoadingAccounts}
                       value={field.value}
                     />
-                    {errors.expense_account && (
+                    {errors.expense_account?.message ? (
                       <p className="text-red-500 text-sm">
-                        {errors.expense_account.message}
+                        {errors.expense_account?.message?.toString()}
                       </p>
-                    )}
+                    ) : null}
                   </>
                 )}
               />
@@ -662,11 +755,11 @@ const EditMerchant = () => {
                       isLoading={isLoadingAccounts}
                       value={field.value}
                     />
-                    {errors.income_account && (
+                    {errors.income_account?.message ? (
                       <p className="text-red-500 text-sm">
-                        {errors.income_account.message}
+                        {errors.income_account?.message?.toString()}
                       </p>
-                    )}
+                    ) : null}
                   </>
                 )}
               />
@@ -678,33 +771,54 @@ const EditMerchant = () => {
           <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
             Hạn mức giao dịch
           </div>
-          <div className="grid grid-cols-3 gap-6 w-full">
-            <Controller
-              name="transaction_monthly_quota"
-              control={control}
-              rules={{ required: 'Hạn mức trong tháng là bắt buộc' }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Hạn mức trong tháng *"
-                  placeholder="Nhập hạn mức trong tháng"
-                  className="w-full"
-                />
-              )}
-            />
-            <Controller
-              name="transaction_daily_quota"
-              control={control}
-              rules={{ required: 'Hạn mức giao dịch hàng ngày là bắt buộc' }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Hạn mức giao dịch hàng ngày *"
-                  placeholder="Nhập hạn mức giao dịch hàng ngày"
-                  className="w-full"
-                />
-              )}
-            />
+          <div className="flex gap-4 w-2/3">
+            <div className="flex-1">
+              <Controller
+                name="transaction_monthly_quota"
+                control={control}
+                render={({ field }) => (
+                  <NumberInput
+                    formatType="numeric"
+                    displayType="input"
+                    customInput={Input as React.ComponentType<unknown>}
+                    thousandSeparator=","
+                    {...{ label: 'Hạn mức trong tháng' }}
+                    {...field}
+                    placeholder="Nhập hạn mức trong tháng"
+                    className="w-full"
+                  />
+                )}
+              />
+              {errors.transaction_monthly_quota?.message ? (
+                <span className="text-red-500 text-sm">
+                  {errors.transaction_monthly_quota?.message?.toString()}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="flex-1">
+              <Controller
+                name="transaction_daily_quota"
+                control={control}
+                render={({ field }) => (
+                  <NumberInput
+                    formatType="numeric"
+                    displayType="input"
+                    customInput={Input as React.ComponentType<unknown>}
+                    thousandSeparator=","
+                    {...{ label: 'Hạn mức giao dịch hàng ngày' }}
+                    {...field}
+                    placeholder="Nhập hạn mức giao dịch hàng ngày"
+                    className="w-full"
+                  />
+                )}
+              />
+              {errors.transaction_daily_quota?.message ? (
+                <span className="text-red-500 text-sm">
+                  {errors.transaction_daily_quota?.message?.toString()}
+                </span>
+              ) : null}
+            </div>
           </div>
         </section>
 
@@ -731,14 +845,23 @@ const EditMerchant = () => {
                   name="approveThreshold"
                   control={control}
                   render={({ field }) => (
-                    <Input
+                    <NumberInput
+                      formatType="numeric"
+                      displayType="input"
+                      customInput={Input as React.ComponentType<unknown>}
+                      thousandSeparator=","
+                      {...{ label: 'Ngưỡng giá trị cần duyệt *' }}
                       {...field}
-                      label="Ngưỡng giá trị cần duyệt *"
                       placeholder="Nhập ngưỡng giá trị cần duyệt"
                       className="w-full"
                     />
                   )}
                 />
+                {errors.approveThreshold?.message ? (
+                  <span className="text-red-500 text-sm">
+                    {errors.approveThreshold?.message?.toString()}
+                  </span>
+                ) : null}
               </div>
 
               <div>

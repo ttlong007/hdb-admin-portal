@@ -81,6 +81,31 @@ const schema = yup.object().shape({
     ),
 })
 
+interface ProposedChanges {
+  status?: string;
+  need_approve_new_store?: boolean;
+  need_approve_new_staff?: boolean;
+  hdb_can_manage?: boolean;
+  fees?: Array<{
+    fee_transaction_type_id: number;
+    fixed_fee: number;
+    max_fee: number;
+    min_fee: number;
+    overtime_fee: number;
+    percentage_fee_per_txn: number;
+  }>;
+  limits?: Array<{
+    type: string;
+    amount: number;
+  }>;
+}
+
+interface UpdatePayload {
+  entity_id: number;
+  entity_type: string;
+  proposed_changes: ProposedChanges;
+}
+
 export default function MasterMerchantEdit() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
@@ -101,6 +126,7 @@ export default function MasterMerchantEdit() {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting, dirtyFields },
   } = useForm<any>({
     defaultValues: {
@@ -112,6 +138,7 @@ export default function MasterMerchantEdit() {
       active: false,
     },
     resolver: yupResolver(schema),
+    mode: 'all',
   })
 
   useEffect(() => {
@@ -129,11 +156,32 @@ export default function MasterMerchantEdit() {
 
   const updateCompanyMutation = useMutation({
     mutationFn: async (values: any) => {
-      const payload: any = {
-        status: values.active ? 'ACTIVE' : 'INACTIVE',
-        need_approve_new_store: values.need_approve_new_store,
-        need_approve_new_staff: values.need_approve_new_staff,
-        hdb_can_manage: values.hdb_can_manage,
+      const payload: UpdatePayload = {
+        entity_id: Number(id),
+        entity_type: "COMPANY",
+        proposed_changes: {}
+      }
+
+      // Only include status if it was changed
+      if (dirtyFields.active) {
+        payload.proposed_changes.status = values.active ? 'ACTIVE' : 'INACTIVE'
+      }
+
+      // Only include approval settings if they were changed
+      if (dirtyFields.need_approve_new_store) {
+        payload.proposed_changes.need_approve_new_store = values.need_approve_new_store
+      }
+      if (dirtyFields.need_approve_new_staff) {
+        payload.proposed_changes.need_approve_new_staff = values.need_approve_new_staff
+      }
+      if (dirtyFields.hdb_can_manage) {
+        payload.proposed_changes.hdb_can_manage = values.hdb_can_manage
+      }
+
+      // include fees from form if they exist
+      const fees = values.fees as Array<any>
+      if (fees && fees.length) {
+        payload.proposed_changes.fees = fees
       }
 
       // Handle limits if either daily or monthly quotas changed
@@ -141,12 +189,12 @@ export default function MasterMerchantEdit() {
         dirtyFields.transaction_daily_quota ||
         dirtyFields.transaction_monthly_quota
       ) {
-        payload.limits = []
+        payload.proposed_changes.limits = []
         if (
           dirtyFields.transaction_daily_quota &&
           values.transaction_daily_quota
         ) {
-          payload.limits.push({
+          payload.proposed_changes.limits.push({
             amount: Number(values.transaction_daily_quota.replace(/,/g, '')),
             type: 'TRANSACTION_QUOTA_DAILY',
           })
@@ -155,15 +203,20 @@ export default function MasterMerchantEdit() {
           dirtyFields.transaction_monthly_quota &&
           values.transaction_monthly_quota
         ) {
-          payload.limits.push({
+          payload.proposed_changes.limits.push({
             amount: Number(values.transaction_monthly_quota.replace(/,/g, '')),
             type: 'TRANSACTION_QUOTA_MONTHLY',
           })
         }
       }
 
-      const response = await axiosInstance.patch(
-        `/v1/admin/company/${id}`,
+      // Only proceed if there are actual changes
+      if (Object.keys(payload.proposed_changes).length === 0) {
+        throw new Error('Không có thay đổi nào được thực hiện')
+      }
+
+      const response = await axiosInstance.post(
+        '/v1/admin/change-request/create',
         payload
       )
       if (response.data.status_code === 'ACCEPT') {
@@ -195,10 +248,8 @@ export default function MasterMerchantEdit() {
   const statusLabel = statusOption ? statusOption.label : '---'
   const statusColor = MERCHANT_STATUS_COLOR_MAP[company.status] || 'default'
 
-  console.log('errors', errors)
   return (
     <>
-      {/* Breadcrumbs */}
       <div className="flex justify-start items-center gap-2 mb-4">
         <NavLink
           to={routes.masterMerchant}
@@ -316,7 +367,10 @@ export default function MasterMerchantEdit() {
             Phí giao dịch
           </h4>
           <div className="mt-4">
-            <AdminFeeEditTable id={Number(id)} />
+            <AdminFeeEditTable
+              id={Number(id)}
+              onFeesChange={(fees) => setValue('fees', fees)}
+            />
           </div>
 
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4 mt-8">

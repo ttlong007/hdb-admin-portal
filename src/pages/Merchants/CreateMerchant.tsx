@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { Checkbox, Button, Switch } from 'antd'
-import { Input } from 'rizzui'
+import { Input, NumberInput } from 'rizzui'
 import Select from 'react-select'
 import { useForm, Controller, useWatch } from 'react-hook-form'
 import { NavLink, useNavigate } from 'react-router-dom'
@@ -10,6 +10,8 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
 import { useAuth } from '@/store/authSlice/useAuth'
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
 
 type Option = { label: string; value: string }
 
@@ -29,11 +31,72 @@ interface MerchantFormValues {
   company_id: Option | null // Added property for company selection
 }
 
-const defaultTransactionTypes = [
-  { id: 1, name: 'Giao dịch 1' },
-  { id: 2, name: 'Giao dịch 2' },
-  { id: 3, name: 'Giao dịch 3' },
-]
+const defaultTransactionTypes = []
+
+const schema = yup.object({
+  name: yup.string().required('Tên điểm đại lý là bắt buộc'),
+  code: yup.string().required('Mã điểm đại lý là bắt buộc'),
+  address: yup.string().required('Địa chỉ là bắt buộc'),
+  city: yup.object().nullable().required('Tỉnh/Thành phố là bắt buộc'),
+  district: yup.object().nullable().required('Quận/Huyện là bắt buộc'),
+  ward: yup.object().nullable().required('Phường/Xã là bắt buộc'),
+  expense_account: yup
+    .object()
+    .nullable()
+    .required('Tài khoản chuyên chi là bắt buộc'),
+  income_account: yup
+    .object()
+    .nullable()
+    .required('Tài khoản chuyên thu là bắt buộc'),
+  company_id: yup.object().nullable().required('Công ty là bắt buộc'),
+  transaction_monthly_quota: yup
+    .string()
+    .transform((value) => (value ? value.replace(/,/g, '') : ''))
+    .required('Hạn mức tháng là bắt buộc')
+    .test(
+      'is-number',
+      'Hạn mức tháng phải là số',
+      (value) => !value || !isNaN(Number(value))
+    )
+    .test(
+      'max-monthly',
+      'Hạn mức tháng tối đa là 5,000,000,000',
+      (value) => !value || Number(value) <= 5000000000
+    ),
+  transaction_daily_quota: yup
+    .string()
+    .transform((value) => (value ? value.replace(/,/g, '') : ''))
+    .required('Hạn mức ngày là bắt buộc')
+    .test(
+      'is-number',
+      'Hạn mức ngày phải là số',
+      (value) => !value || !isNaN(Number(value))
+    )
+    .test(
+      'max-daily',
+      'Hạn mức ngày tối đa là 200,000,000',
+      (value) => !value || Number(value) <= 200000000
+    )
+    .test(
+      'less-than-monthly',
+      'Hạn mức ngày phải nhỏ hơn hoặc bằng hạn mức tháng',
+      function (value) {
+        const monthlyQuota = this.parent.transaction_monthly_quota
+        if (!value || !monthlyQuota) return true
+        return Number(value) <= Number(monthlyQuota)
+      }
+    ),
+  approveThreshold: yup
+    .string()
+    .transform((value) => (value ? value.replace(/,/g, '') : ''))
+    .required('Ngưỡng giá trị cần duyệt là bắt buộc')
+    .test(
+      'is-number',
+      'Ngưỡng giá trị cần duyệt phải là số',
+      (value) => !value || !isNaN(Number(value))
+    ),
+  transactionTypes: yup.array().of(yup.mixed()),
+})
 
 const CreateMerchant = () => {
   const navigate = useNavigate()
@@ -73,7 +136,7 @@ const CreateMerchant = () => {
     handleSubmit,
     control,
     formState: { errors },
-  } = useForm<MerchantFormValues>({
+  } = useForm<any>({
     defaultValues: {
       name: '',
       code: '',
@@ -87,7 +150,10 @@ const CreateMerchant = () => {
       transaction_daily_quota: '',
       approveThreshold: '',
       transactionTypes: options.map((type: { id: number }) => type.id),
+      company_id: null,
     },
+    resolver: yupResolver(schema),
+    mode: 'all',
   })
 
   const [needApprove, setNeedApprove] = React.useState(true)
@@ -230,6 +296,7 @@ const CreateMerchant = () => {
   })
 
   const onSubmit = (data: MerchantFormValues) => {
+    debugger
     const payload = {
       name: data.name,
       code: data.code,
@@ -326,7 +393,7 @@ const CreateMerchant = () => {
                     />
                     {errors.name && (
                       <p className="text-red-500 text-sm">
-                        {errors.name.message}
+                        {errors.name?.message?.toString()}
                       </p>
                     )}
                   </>
@@ -349,7 +416,7 @@ const CreateMerchant = () => {
                     />
                     {errors.code && (
                       <p className="text-red-500 text-sm">
-                        {errors.code.message}
+                        {errors.code?.message?.toString()}
                       </p>
                     )}
                   </>
@@ -372,7 +439,7 @@ const CreateMerchant = () => {
                     />
                     {errors.address && (
                       <p className="text-red-500 text-sm">
-                        {errors.address.message}
+                        {errors.address?.message?.toString()}
                       </p>
                     )}
                   </>
@@ -400,7 +467,7 @@ const CreateMerchant = () => {
                     />
                     {errors.city && (
                       <p className="text-red-500 text-sm">
-                        {errors.city.message}
+                        {errors.city?.message?.toString()}
                       </p>
                     )}
                   </>
@@ -428,7 +495,7 @@ const CreateMerchant = () => {
                     />
                     {errors.district && (
                       <p className="text-red-500 text-sm">
-                        {errors.district.message}
+                        {errors.district?.message?.toString()}
                       </p>
                     )}
                   </>
@@ -456,7 +523,7 @@ const CreateMerchant = () => {
                     />
                     {errors.ward && (
                       <p className="text-red-500 text-sm">
-                        {errors.ward.message}
+                        {errors.ward?.message?.toString()}
                       </p>
                     )}
                   </>
@@ -484,7 +551,7 @@ const CreateMerchant = () => {
                     />
                     {errors.expense_account && (
                       <p className="text-red-500 text-sm">
-                        {errors.expense_account.message}
+                        {errors.expense_account?.message?.toString()}
                       </p>
                     )}
                   </>
@@ -512,7 +579,7 @@ const CreateMerchant = () => {
                     />
                     {errors.income_account && (
                       <p className="text-red-500 text-sm">
-                        {errors.income_account.message}
+                        {errors.income_account?.message?.toString()}
                       </p>
                     )}
                   </>
@@ -526,33 +593,54 @@ const CreateMerchant = () => {
           <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
             Hạn mức giao dịch
           </div>
-          <div className="grid grid-cols-3 gap-6 w-full">
-            <Controller
-              name="transaction_monthly_quota"
-              control={control}
-              rules={{ required: 'Hạn mức trong tháng là bắt buộc' }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Hạn mức trong tháng *"
-                  placeholder="Nhập hạn mức trong tháng"
-                  className="w-full"
-                />
-              )}
-            />
-            <Controller
-              name="transaction_daily_quota"
-              control={control}
-              rules={{ required: 'Hạn mức giao dịch hàng ngày là bắt buộc' }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Hạn mức giao dịch hàng ngày *"
-                  placeholder="Nhập hạn mức giao dịch hàng ngày"
-                  className="w-full"
-                />
-              )}
-            />
+          <div className="flex gap-4 w-2/3">
+            <div className="flex-1">
+              <Controller
+                name="transaction_monthly_quota"
+                control={control}
+                render={({ field }) => (
+                  <NumberInput
+                    formatType="numeric"
+                    displayType="input"
+                    customInput={Input as React.ComponentType<unknown>}
+                    thousandSeparator=","
+                    {...{ label: 'Hạn mức trong tháng' }}
+                    {...field}
+                    placeholder="Nhập hạn mức trong tháng"
+                    className="w-full"
+                  />
+                )}
+              />
+              {errors.transaction_monthly_quota?.message ? (
+                <span className="text-red-500 text-sm">
+                  {errors.transaction_monthly_quota?.message?.toString()}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="flex-1">
+              <Controller
+                name="transaction_daily_quota"
+                control={control}
+                render={({ field }) => (
+                  <NumberInput
+                    formatType="numeric"
+                    displayType="input"
+                    customInput={Input as React.ComponentType<unknown>}
+                    thousandSeparator=","
+                    {...{ label: 'Hạn mức giao dịch hàng ngày' }}
+                    {...field}
+                    placeholder="Nhập hạn mức giao dịch hàng ngày"
+                    className="w-full"
+                  />
+                )}
+              />
+              {errors.transaction_daily_quota?.message ? (
+                <span className="text-red-500 text-sm">
+                  {errors.transaction_daily_quota?.message?.toString()}
+                </span>
+              ) : null}
+            </div>
           </div>
         </section>
 
@@ -579,14 +667,23 @@ const CreateMerchant = () => {
                   name="approveThreshold"
                   control={control}
                   render={({ field }) => (
-                    <Input
+                    <NumberInput
+                      formatType="numeric"
+                      displayType="input"
+                      customInput={Input as React.ComponentType<unknown>}
+                      thousandSeparator=","
+                      {...{ label: 'Ngưỡng giá trị cần duyệt *' }}
                       {...field}
-                      label="Ngưỡng giá trị cần duyệt *"
                       placeholder="Nhập ngưỡng giá trị cần duyệt"
                       className="w-full"
                     />
                   )}
                 />
+                {errors.approveThreshold?.message ? (
+                  <span className="text-red-500 text-sm">
+                    {errors.approveThreshold?.message?.toString()}
+                  </span>
+                ) : null}
               </div>
 
               <div>
