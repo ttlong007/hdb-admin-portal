@@ -184,7 +184,7 @@ const MasterMerchants: React.FC = () => {
         </NavLink>
         <div className="text-base font-semibold text-[#A1AAB2]">/</div>
         <span className="text-base font-semibold text-[#A1AAB2]">
-          Danh sách đại lý
+          Danh sách đại lý tổng
         </span>
       </div>
 

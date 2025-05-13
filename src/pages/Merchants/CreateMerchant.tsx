@@ -135,6 +135,7 @@ const CreateMerchant = () => {
   const {
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<any>({
     defaultValues: {
@@ -149,12 +150,19 @@ const CreateMerchant = () => {
       transaction_monthly_quota: '',
       transaction_daily_quota: '',
       approveThreshold: '',
-      transactionTypes: options.map((type: { id: number }) => type.id), // default all checked
+      transactionTypes: [], // Initialize as empty array
       company_id: null,
     },
     resolver: yupResolver(schema),
     mode: 'all',
   })
+
+  // Set all transaction types as checked when options are loaded
+  useEffect(() => {
+    if (options.length > 0) {
+      setValue('transactionTypes', options.map((type) => type.id))
+    }
+  }, [options, setValue])
 
   const [needApprove, setNeedApprove] = React.useState(true)
 
@@ -296,7 +304,6 @@ const CreateMerchant = () => {
   })
 
   const onSubmit = (data: MerchantFormValues) => {
-    debugger
     const payload = {
       name: data.name,
       code: data.code,

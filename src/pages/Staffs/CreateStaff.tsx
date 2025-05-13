@@ -1,7 +1,8 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
-import { Input } from 'rizzui'
+import { Input, NumberInput } from 'rizzui'
 import ReactSelect from 'react-select'
 import { Checkbox } from 'antd'
 import { useMutation, useQuery } from '@tanstack/react-query'
@@ -9,6 +10,8 @@ import axiosInstance from '@/config/axios'
 import { toast } from 'react-toastify'
 import { routes } from '@/config/routes'
 import { useAuth } from '@/store/authSlice/useAuth'
+import * as yup from 'yup'
+import { yupResolver } from '@hookform/resolvers/yup'
 
 type Option = { label: string; value: number }
 
@@ -20,8 +23,6 @@ type FormData = {
   phone_number: string
   role: Option | null
   store_id: Option | null
-  expense_account: Option | null
-  income_account: Option | null
   transaction_monthly_quota: string
   transaction_daily_quota: string
   transactionTypes: number[]
@@ -36,8 +37,6 @@ type StaffPayload = {
   phone_number: string
   role: string
   store_id: number
-  expense_account: string
-  income_account: string
   limits: {
     amount: number
     type: 'TRANSACTION_QUOTA_DAILY' | 'TRANSACTION_QUOTA_MONTHLY'
@@ -45,11 +44,64 @@ type StaffPayload = {
   transaction_type_ids: number[]
 }
 
-const defaultTransactionTypes = [
-  { id: 1, name: 'Giao dịch 1' },
-  { id: 2, name: 'Giao dịch 2' },
-  { id: 3, name: 'Giao dịch 3' },
-]
+const schema = yup.object().shape({
+  name: yup.string().required('Họ tên là bắt buộc'),
+  email: yup.string().email('Email không hợp lệ').required('Email là bắt buộc'),
+  phone_number: yup
+    .string()
+    .matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số')
+    .min(10, 'Số điện thoại phải có ít nhất 10 số')
+    .max(11, 'Số điện thoại không được vượt quá 11 số')
+    .required('Số điện thoại là bắt buộc'),
+  national_id_number: yup
+    .string()
+    .matches(/^[0-9]+$/, 'Số CCCD chỉ được chứa số')
+    .length(12, 'Số CCCD phải có đúng 12 số')
+    .required('Số CCCD là bắt buộc'),
+  company_id: yup.mixed<Option>().nullable().required('Công ty là bắt buộc'),
+  role: yup.mixed<Option>().nullable().required('Nhóm chức danh là bắt buộc'),
+  store_id: yup.mixed<Option>().nullable().required('Cửa hàng là bắt buộc'),
+  transaction_monthly_quota: yup
+    .string()
+    .transform((value) => (value ? value.replace(/,/g, '') : ''))
+    .required('Hạn mức tháng là bắt buộc')
+    .test(
+      'is-number',
+      'Hạn mức tháng phải là số',
+      (value) => !value || !isNaN(Number(value))
+    )
+    .test(
+      'max-monthly',
+      'Hạn mức tháng tối đa là 5,000,000,000',
+      (value) => !value || Number(value) <= 5000000000
+    ),
+  transaction_daily_quota: yup
+    .string()
+    .transform((value) => (value ? value.replace(/,/g, '') : ''))
+    .required('Hạn mức ngày là bắt buộc')
+    .test(
+      'is-number',
+      'Hạn mức ngày phải là số',
+      (value) => !value || !isNaN(Number(value))
+    )
+    .test(
+      'max-daily',
+      'Hạn mức ngày tối đa là 200,000,000',
+      (value) => !value || Number(value) <= 200000000
+    )
+    .test(
+      'less-than-monthly',
+      'Hạn mức ngày phải nhỏ hơn hoặc bằng hạn mức tháng',
+      function (value) {
+        const monthlyQuota = this.parent.transaction_monthly_quota
+        if (!value || !monthlyQuota) return true
+        return Number(value) <= Number(monthlyQuota)
+      }
+    ),
+  transactionTypes: yup.array().of(yup.mixed()),
+}) as yup.ObjectSchema<FormData>
+
+const defaultTransactionTypes = []
 
 export default function CreateStaff() {
   const navigate = useNavigate()
@@ -77,7 +129,6 @@ export default function CreateStaff() {
       },
     })
 
-  // Use fetched data if available; fallback to default list if needed.
   const options =
     transactionOptions && transactionOptions.length
       ? transactionOptions.map((t: { id: number; name: string }) => ({
@@ -86,7 +137,14 @@ export default function CreateStaff() {
         }))
       : defaultTransactionTypes
 
-  const { control, handleSubmit, reset, watch, setValue } = useForm<FormData>({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    watch,
+    setValue,
+    formState: { errors },
+  } = useForm<FormData>({
     defaultValues: {
       company_id: null,
       email: '',
@@ -95,13 +153,23 @@ export default function CreateStaff() {
       phone_number: '',
       role: null,
       store_id: null,
-      expense_account: null,
-      income_account: null,
       transaction_monthly_quota: '',
       transaction_daily_quota: '',
-      transactionTypes: options.map((type: { id: number }) => type.id),
+      transactionTypes: [], // Initialize as empty array
     },
+    resolver: yupResolver(schema),
+    mode: 'all',
   })
+
+  // Set all transaction types as checked when options are loaded
+  useEffect(() => {
+    if (options.length > 0) {
+      setValue(
+        'transactionTypes',
+        options.map((type) => type.id)
+      )
+    }
+  }, [options])
 
   // Fetch companies
   const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
@@ -149,26 +217,6 @@ export default function CreateStaff() {
       value: store.id,
     })) || []
 
-  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<
-    Option[]
-  >({
-    queryKey: ['companyAccounts', selectedCompany?.value],
-    queryFn: async () => {
-      if (!selectedCompany?.value) return []
-      const response = await axiosInstance.get(
-        `/v1/admin/company/${selectedCompany.value}`
-      )
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data.accts.map((acc: any) => ({
-          label: `${acc.acct_desc} (${acc.acct_no})`,
-          value: acc.acct_no.toString(),
-        }))
-      }
-      throw new Error('Failed to fetch accounts')
-    },
-    enabled: !!selectedCompany?.value,
-  })
-
   const createStaffMutation = useMutation({
     mutationFn: async (data: StaffPayload) => {
       const response = await axiosInstance.post('/v1/admin/staff/create', data)
@@ -188,28 +236,14 @@ export default function CreateStaff() {
   })
 
   const onSubmit = (data: FormData) => {
-    // Check all required option fields
-    if (
-      !data.company_id ||
-      !data.role ||
-      !data.store_id ||
-      !data.expense_account ||
-      !data.income_account
-    ) {
-      toast.error('Vui lòng điền đầy đủ thông tin bắt buộc')
-      return
-    }
-
     const formattedData: StaffPayload = {
-      company_id: data.company_id.value,
+      company_id: data.company_id!.value,
       email: data.email,
       name: data.name,
       national_id_number: data.national_id_number,
       phone_number: data.phone_number,
-      role: String(data.role.value),
-      store_id: data.store_id.value,
-      expense_account: data.expense_account.value.toString(),
-      income_account: data.income_account.value.toString(),
+      role: String(data.role!.value),
+      store_id: data.store_id!.value,
       limits: [
         {
           amount: Number(data.transaction_daily_quota),
@@ -256,20 +290,19 @@ export default function CreateStaff() {
             <Controller
               name="name"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <Input
                   {...field}
                   label="Họ tên *"
                   placeholder="Nhập họ tên"
                   className="w-full"
+                  error={errors.name?.message}
                 />
               )}
             />
             <Controller
               name="company_id"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <div className="w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -282,13 +315,17 @@ export default function CreateStaff() {
                       isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
                     }
                   />
+                  {errors.company_id && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.company_id.message}
+                    </p>
+                  )}
                 </div>
               )}
             />
             <Controller
               name="store_id"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <div className="w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -301,52 +338,56 @@ export default function CreateStaff() {
                       isLoadingStores ? 'Loading stores...' : 'Chọn cửa hàng'
                     }
                   />
+                  {errors.store_id && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.store_id.message}
+                    </p>
+                  )}
                 </div>
               )}
             />
             <Controller
               name="phone_number"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <Input
                   {...field}
                   label="Số điện thoại *"
                   placeholder="Nhập số điện thoại"
                   className="w-full"
+                  error={errors.phone_number?.message}
                 />
               )}
             />
             <Controller
               name="national_id_number"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <Input
                   {...field}
                   label="Số CCCD *"
                   placeholder="Nhập số CCCD"
                   className="w-full"
+                  error={errors.national_id_number?.message}
                 />
               )}
             />
             <Controller
               name="email"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <Input
                   {...field}
                   label="Email *"
                   placeholder="Nhập email"
                   className="w-full"
+                  error={errors.email?.message}
                 />
               )}
             />
             <Controller
               name="role"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <div className="w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -362,42 +403,11 @@ export default function CreateStaff() {
                     }
                     placeholder="Chọn nhóm chức danh"
                   />
-                </div>
-              )}
-            />
-            <Controller
-              name="expense_account"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <div className="w-full">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tài khoản chuyên chi *
-                  </label>
-                  <ReactSelect
-                    {...field}
-                    options={accountList || []}
-                    isLoading={isLoadingAccounts}
-                    placeholder="Chọn tài khoản chuyên chi"
-                  />
-                </div>
-              )}
-            />
-            <Controller
-              name="income_account"
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <div className="w-full">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Tài khoản chuyên thu *
-                  </label>
-                  <ReactSelect
-                    {...field}
-                    options={accountList || []}
-                    isLoading={isLoadingAccounts}
-                    placeholder="Chọn tài khoản chuyên thu"
-                  />
+                  {errors.role && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.role.message}
+                    </p>
+                  )}
                 </div>
               )}
             />
@@ -407,33 +417,54 @@ export default function CreateStaff() {
           <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
             Hạn mức giao dịch
           </div>
-          <div className="grid grid-cols-3 gap-6 w-full">
-            <Controller
-              name="transaction_monthly_quota"
-              control={control}
-              rules={{ required: 'Hạn mức trong tháng là bắt buộc' }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Hạn mức trong tháng *"
-                  placeholder="Nhập hạn mức trong tháng"
-                  className="w-full"
-                />
-              )}
-            />
-            <Controller
-              name="transaction_daily_quota"
-              control={control}
-              rules={{ required: 'Hạn mức giao dịch hàng ngày là bắt buộc' }}
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  label="Hạn mức giao dịch hàng ngày *"
-                  placeholder="Nhập hạn mức giao dịch hàng ngày"
-                  className="w-full"
-                />
-              )}
-            />
+          <div className="flex gap-4 w-2/3">
+            <div className="flex-1">
+              <Controller
+                name="transaction_monthly_quota"
+                control={control}
+                render={({ field }) => (
+                  <NumberInput
+                    formatType="numeric"
+                    displayType="input"
+                    customInput={Input as React.ComponentType<unknown>}
+                    thousandSeparator=","
+                    {...{ label: 'Hạn mức trong tháng' }}
+                    {...field}
+                    placeholder="Nhập hạn mức trong tháng"
+                    className="w-full"
+                  />
+                )}
+              />
+              {errors.transaction_monthly_quota?.message ? (
+                <span className="text-red-500 text-sm">
+                  {errors.transaction_monthly_quota?.message?.toString()}
+                </span>
+              ) : null}
+            </div>
+
+            <div className="flex-1">
+              <Controller
+                name="transaction_daily_quota"
+                control={control}
+                render={({ field }) => (
+                  <NumberInput
+                    formatType="numeric"
+                    displayType="input"
+                    customInput={Input as React.ComponentType<unknown>}
+                    thousandSeparator=","
+                    {...{ label: 'Hạn mức giao dịch hàng ngày' }}
+                    {...field}
+                    placeholder="Nhập hạn mức giao dịch hàng ngày"
+                    className="w-full"
+                  />
+                )}
+              />
+              {errors.transaction_daily_quota?.message ? (
+                <span className="text-red-500 text-sm">
+                  {errors.transaction_daily_quota?.message?.toString()}
+                </span>
+              ) : null}
+            </div>
           </div>
         </section>
 
@@ -469,6 +500,11 @@ export default function CreateStaff() {
                 </div>
               )}
             />
+            {errors.transactionTypes && (
+              <p className="mt-1 text-sm text-red-600">
+                {errors.transactionTypes.message}
+              </p>
+            )}
           </div>
         </section>
         <div className="flex items-center justify-end gap-4 w-full mt-8">

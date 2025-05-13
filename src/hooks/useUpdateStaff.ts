@@ -12,8 +12,6 @@ export interface StaffPayload {
   phone_number: string
   role: string
   store_id: number
-  expense_account: string
-  income_account: string
   limits: {
     amount: number
     type: 'TRANSACTION_QUOTA_DAILY' | 'TRANSACTION_QUOTA_MONTHLY'

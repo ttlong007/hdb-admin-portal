@@ -85,6 +85,7 @@ const StaffDetail: React.FC = () => {
     enabled: !!id,
   })
   const staff = data || {}
+  console.log('staff', staff)
   const {
     data: dataCompany,
     isLoading: isLoadingCompany,
@@ -282,9 +283,9 @@ const StaffDetail: React.FC = () => {
                       Hạn mức giao dịch trong tháng
                     </span>
                     <span className="text-base font-semibold">
-                      {staff.transaction_monthly_quota
+                      {staff.limits?.find(limit => limit.type === 'TRANSACTION_QUOTA_MONTHLY')?.amount
                         ? `${Number(
-                            staff.transaction_monthly_quota
+                            staff.limits.find(limit => limit.type === 'TRANSACTION_QUOTA_MONTHLY')?.amount
                           ).toLocaleString('vi-VN')} VND`
                         : '---'}
                     </span>
@@ -295,9 +296,9 @@ const StaffDetail: React.FC = () => {
                       Hạn mức giao dịch trong ngày
                     </span>
                     <span className="text-base font-semibold">
-                      {staff.transaction_daily_quota
+                      {staff.limits?.find(limit => limit.type === 'TRANSACTION_QUOTA_DAILY')?.amount
                         ? `${Number(
-                            staff.transaction_daily_quota
+                            staff.limits.find(limit => limit.type === 'TRANSACTION_QUOTA_DAILY')?.amount
                           ).toLocaleString('vi-VN')} VND`
                         : '---'}
                     </span>
