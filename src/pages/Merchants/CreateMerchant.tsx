@@ -149,7 +149,7 @@ const CreateMerchant = () => {
       transaction_monthly_quota: '',
       transaction_daily_quota: '',
       approveThreshold: '',
-      transactionTypes: options.map((type: { id: number }) => type.id),
+      transactionTypes: options.map((type: { id: number }) => type.id), // default all checked
       company_id: null,
     },
     resolver: yupResolver(schema),
@@ -662,7 +662,7 @@ const CreateMerchant = () => {
 
           {needApprove ? (
             <>
-              <div className="grid grid-cols-3 gap-6 w-full mb-4">
+              <div className="w-1/2 mb-4">
                 <Controller
                   name="approveThreshold"
                   control={control}
@@ -680,9 +680,9 @@ const CreateMerchant = () => {
                   )}
                 />
                 {errors.approveThreshold?.message ? (
-                  <span className="text-red-500 text-sm">
+                  <div className="text-red-500 text-sm mt-1">
                     {errors.approveThreshold?.message?.toString()}
-                  </span>
+                  </div>
                 ) : null}
               </div>
 
