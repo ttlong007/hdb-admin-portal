@@ -2,7 +2,12 @@ import React from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { routes } from '@/config/routes'
 import { Tag, Switch } from 'antd'
-import { ArrowLeftOutlined, EditOutlined, CloseCircleOutlined, CheckCircleOutlined } from '@ant-design/icons'
+import {
+  ArrowLeftOutlined,
+  EditOutlined,
+  CloseCircleOutlined,
+  CheckCircleOutlined,
+} from '@ant-design/icons'
 import AdminFeeTable from './components/AdminFeeTable'
 import {
   MASTER_MERCHANT_STATUS,
@@ -11,21 +16,35 @@ import {
 import { useMasterMerchantDetail } from '@/hooks/useMasterMerchantDetail'
 import { useAuth } from '@/store/authSlice/useAuth'
 import axiosInstance from '@/config/axios'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
+import { ChangedInfo } from './components/ChangedInfo'
 
 function InfoCard({
+  showBadge = false,
+  badgeText = '',
+  badgeColor = 'blue',
   title,
   children,
 }: {
+  showBadge?: boolean
+  badgeText?: string
+  badgeColor?: string
   title: string
   children: React.ReactNode
 }) {
   return (
     <section className="p-6 bg-white rounded-lg shadow-[0_1px_4px_rgba(51,49,65,0.25)]">
-      <h2 className="mb-6 text-3xl font-bold text-gray-800 max-sm:text-2xl">
-        {title}
-      </h2>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-3xl font-bold text-gray-800 max-sm:text-2xl">
+          {title}
+        </h2>
+        {showBadge && (
+          <Tag color={badgeColor} className="w-fit">
+            {badgeText}
+          </Tag>
+        )}
+      </div>
       {children}
     </section>
   )
@@ -37,19 +56,47 @@ export default function MasterMerchantDetail() {
   const { isCreator, isApprover } = useAuth()
   const queryClient = useQueryClient()
 
-  const {
-    company,
-    dailyLimit,
-    monthlyLimit,
-    isLoading,
-    error,
-  } = useMasterMerchantDetail(id)
+  const { company, dailyLimit, monthlyLimit, isLoading, error } =
+    useMasterMerchantDetail(id)
+
+  const isWaitingApprovalForEdit =
+    company.status === 'WAITING_APPROVAL_FOR_EDIT'
+
+  // Fetch change request details if company is waiting for approval
+  const { data: changeRequestData } = useQuery({
+    queryKey: ['changeRequest', id],
+    queryFn: async () => {
+      const response = await axiosInstance.get(
+        '/v1/admin/change-request/detail',
+        {
+          params: {
+            entity_id: id,
+            entity_type: 'COMPANY',
+          },
+        }
+      )
+      if (response.data.status_code === 'ACCEPT') {
+        const proposedChanges = response?.data?.data?.proposed_changes
+        const changedId = response?.data?.data?.id
+
+        return {
+          proposedChanges,
+          changedId,
+        }
+      }
+      throw new Error('Failed to fetch change request details')
+    },
+    enabled: isWaitingApprovalForEdit && !!id,
+  })
 
   const rejectMutation = useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.post('/v1/admin/company/reject-companies', {
-        ids: [Number(id)]
-      })
+      const response = await axiosInstance.post(
+        '/v1/admin/change-request/reject',
+        {
+          id: Number(changeRequestData?.changedId),
+        }
+      )
       if (response.status !== 204) {
         throw new Error('Từ chối thất bại')
       }
@@ -62,14 +109,17 @@ export default function MasterMerchantDetail() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Có lỗi xảy ra khi từ chối')
-    }
+    },
   })
 
   const approveMutation = useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.post('/v1/admin/company/approve-companies', {
-        ids: [Number(id)]
-      })
+      const response = await axiosInstance.post(
+        '/v1/admin/change-request/approve',
+        {
+          id: Number(changeRequestData?.changedId),
+        }
+      )
       if (response.status !== 204) {
         throw new Error('Duyệt thất bại')
       }
@@ -82,7 +132,7 @@ export default function MasterMerchantDetail() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Có lỗi xảy ra khi duyệt')
-    }
+    },
   })
 
   if (isLoading) return <div>Loading...</div>
@@ -155,7 +205,12 @@ export default function MasterMerchantDetail() {
           </div>
         </InfoCard>
 
-        <InfoCard title="Thông tin cấu hình nghiệp vụ Ngân hàng đại lý">
+        <InfoCard
+          title="Thông tin cấu hình nghiệp vụ Ngân hàng đại lý"
+          showBadge={isWaitingApprovalForEdit}
+          badgeText="Thông tin cũ"
+          badgeColor="green"
+        >
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4">
             Hạn mức giao dịch
           </h4>
@@ -183,7 +238,7 @@ export default function MasterMerchantDetail() {
             Phí giao dịch
           </h4>
           <div className="mt-4">
-            <AdminFeeTable id={Number(id)} />
+            <AdminFeeTable companyFees={company.fees} />
           </div>
 
           <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4 mt-8">
@@ -214,6 +269,11 @@ export default function MasterMerchantDetail() {
           </div>
         </InfoCard>
 
+        <ChangedInfo
+          isWaitingApprovalForEdit={isWaitingApprovalForEdit}
+          changeRequestData={changeRequestData?.proposedChanges}
+        />
+
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
@@ -224,19 +284,20 @@ export default function MasterMerchantDetail() {
             Quay lại
           </button>
           {isCreator && (
-          <button
+            <button
               type="button"
-            onClick={() =>
-              navigate(routes.editMasterMerchant.replace(':id', id || ''))
-            }
-            disabled={company.status !== 'ACTIVE'}
-            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <EditOutlined />
-            Chỉnh sửa
-          </button>
+              onClick={() =>
+                navigate(routes.editMasterMerchant.replace(':id', id || ''))
+              }
+              disabled={company.status !== 'ACTIVE'}
+              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <EditOutlined />
+              Chỉnh sửa
+            </button>
           )}
-          {isApprover && company.status === 'WAITING_APPROVE' && (
+
+          {isApprover && company.status === 'WAITING_APPROVAL_FOR_EDIT' && (
             <>
               <button
                 type="button"

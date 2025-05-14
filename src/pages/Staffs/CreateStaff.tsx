@@ -12,6 +12,7 @@ import { routes } from '@/config/routes'
 import { useAuth } from '@/store/authSlice/useAuth'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useStores } from '@/hooks/useStores'
 
 type Option = { label: string; value: number }
 
@@ -197,25 +198,10 @@ export default function CreateStaff() {
     setValue('store_id', null)
   }, [selectedCompany, setValue])
 
-  const { data: storesData, isLoading: isLoadingStores } = useQuery({
-    queryKey: ['stores', selectedCompany?.value],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/store/list', {
-        params: { company_id: selectedCompany?.value },
-      })
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error('Failed to fetch stores')
-    },
-    enabled: !!selectedCompany?.value,
-  })
-
-  const storeOptions =
-    storesData?.map((store: any) => ({
-      label: store.name,
-      value: store.id,
-    })) || []
+  // Use the useStores hook
+  const { data: storeOptions = [], isLoading: isLoadingStores } = useStores(
+    selectedCompany?.value
+  )
 
   const createStaffMutation = useMutation({
     mutationFn: async (data: StaffPayload) => {

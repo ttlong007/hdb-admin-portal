@@ -16,6 +16,7 @@ interface MasterMerchantDetail {
   }>
   need_approve_new_store: boolean
   need_approve_new_staff: boolean
+  fees: any
 }
 
 interface AdminFee {
@@ -77,15 +78,16 @@ export const useMasterMerchantDetail = (id: string | undefined) => {
     (limit) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
   )?.amount
 
-  const feeDataSource = adminFeesData?.map((fee, index) => ({
-    key: (index + 1).toString(),
-    transactionType: fee.transaction_type,
-    fixedFee: fee.fixed_fee,
-    transactionFeePercent: fee.transaction_fee_percent,
-    minFee: fee.min_fee,
-    maxFee: fee.max_fee,
-    afterHoursFee: fee.after_hours_fee,
-  })) || []
+  const feeDataSource =
+    adminFeesData?.map((fee, index) => ({
+      key: (index + 1).toString(),
+      transactionType: fee.transaction_type,
+      fixedFee: fee.fixed_fee,
+      transactionFeePercent: fee.transaction_fee_percent,
+      minFee: fee.min_fee,
+      maxFee: fee.max_fee,
+      afterHoursFee: fee.after_hours_fee,
+    })) || []
 
   return {
     company,

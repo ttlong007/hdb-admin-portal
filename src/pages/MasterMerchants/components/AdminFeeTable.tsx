@@ -17,10 +17,10 @@ interface DataType {
 const initialData: DataType[] = []
 
 interface AdminFeeTableProps {
-  id: number
+  companyFees: any
 }
 
-const AdminFeeTable: React.FC<AdminFeeTableProps> = ({ id }) => {
+const AdminFeeTable: React.FC<AdminFeeTableProps> = ({ companyFees }) => {
   const [data, setData] = useState<DataType[]>(initialData)
 
   // Fetch fee types from the API (fallback if needed)
@@ -32,31 +32,22 @@ const AdminFeeTable: React.FC<AdminFeeTableProps> = ({ id }) => {
     },
   })
 
-  // Fetch company fees from the API
-  const { data: companyFees } = useQuery({
-    queryKey: ['companyFees', id],
-    queryFn: async () => {
-      const response = await axiosInstance.get(`/v1/admin/company/${id}/fees`)
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error(response.data.reason_message || 'Failed to fetch company fees')
-    },
-    enabled: !!id,
-  })
-
   // Map company fees to table rows if available; otherwise fallback to feeTypes mapping.
   useEffect(() => {
     if (feeTypes && feeTypes.length) {
       // Map feeTypes and try to find corresponding fee information from companyFees.
       const mappedData = feeTypes.map((ft: any) => {
         // find matching fee from companyFees (if available)
-        const fee = companyFees?.find((f: any) => f.fee_transaction_type_id === ft.id)
+        const fee = companyFees?.find(
+          (f: any) => f.fee_transaction_type_id === ft.id
+        )
         return {
           key: ft.id.toString(),
           transactionType: ft.name,
           fixedFee: fee ? fee.fixed_fee?.toString() || '' : '',
-          transactionFeePercent: fee ? fee.percentage_fee_per_txn?.toString() || '' : '',
+          transactionFeePercent: fee
+            ? fee.percentage_fee_per_txn?.toString() || ''
+            : '',
           minFee: fee ? fee.min_fee?.toString() || '' : '',
           maxFee: fee ? fee.max_fee?.toString() || '' : '',
           afterHoursFee: fee ? fee.overtime_fee?.toString() || '' : '',
