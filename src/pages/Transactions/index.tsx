@@ -10,10 +10,19 @@ import {
 } from '@/config/constants'
 import { useTransactions } from '@/hooks/useTransactions'
 import Filters from './components/Filters'
+import { useFilter } from '@/store/filterSlice/useFilter'
 
 const Transactions: React.FC = () => {
-  const { isPending, dataSource, total, onTableChange, page, limit } =
-    useTransactions()
+  const { transactionFilters, setTransactionFilters } = useFilter()
+  const [sortField, setSortField] = React.useState<string | null>(null)
+  const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
+    null
+  )
+
+  const { isPending, dataSource, total, page, limit } = useTransactions({
+    sortField,
+    sortOrder,
+  })
 
   const columns = [
     {
@@ -101,6 +110,26 @@ const Transactions: React.FC = () => {
       ),
     },
   ]
+
+  const onPaginationChange = (pagination: any) => {
+    setTransactionFilters({
+      ...transactionFilters,
+      page: pagination.current,
+      limit: pagination.pageSize,
+    })
+  }
+
+  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
+    onPaginationChange(pagination)
+
+    if (sorter.field) {
+      setSortField(sorter.field)
+      setSortOrder(sorter.order)
+    } else {
+      setSortField(null)
+      setSortOrder(null)
+    }
+  }
 
   return (
     <>

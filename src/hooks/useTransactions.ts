@@ -19,8 +19,16 @@ interface TransactionRequestBody {
   descending: boolean
 }
 
-export const useTransactions = () => {
-  const { transactionFilters, setTransactionFilters } = useFilter()
+interface TransactionRequestParams {
+  sortField?: string | null
+  sortOrder?: 'ascend' | 'descend' | null
+}
+
+export const useTransactions = ({
+  sortField,
+  sortOrder,
+}: TransactionRequestParams) => {
+  const { transactionFilters } = useFilter()
 
   const { isPending, data } = useQuery({
     queryKey: ['transactions', transactionFilters],
@@ -38,8 +46,8 @@ export const useTransactions = () => {
         transaction_type: transactionFilters.transaction_type,
         store_code: transactionFilters.store_code,
         created_by_staff_code: transactionFilters.created_by_staff_code,
-        order_by_column: transactionFilters.sortField || 'created_at',
-        descending: transactionFilters.sortOrder === 'descend',
+        order_by_column: sortField || 'created_at',
+        descending: sortOrder === 'descend',
       }
 
       // Only add status if it's not empty
@@ -74,21 +82,10 @@ export const useTransactions = () => {
   const dataSource = data?.data || []
   const total = data?.total || 0
 
-  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
-    setTransactionFilters({
-      ...transactionFilters,
-      page: pagination.current,
-      limit: pagination.pageSize,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
-    })
-  }
-
   return {
     isPending,
     dataSource,
     total,
-    onTableChange,
     page: transactionFilters.page,
     limit: transactionFilters.limit,
   }

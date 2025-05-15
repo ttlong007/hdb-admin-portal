@@ -41,8 +41,6 @@ interface FilterState {
     transaction_type?: string
     store_code?: string
     created_by_staff_code?: string
-    sortField?: string | null
-    sortOrder?: 'ascend' | 'descend' | null
   }
 }
 
@@ -87,8 +85,6 @@ const initialState: FilterState = {
     transaction_type: '',
     store_code: '',
     created_by_staff_code: '',
-    sortField: null,
-    sortOrder: null,
   },
 }
 
