@@ -1,5 +1,5 @@
-import { Tag } from 'antd'
 import React from 'react'
+import { Tag } from 'antd'
 
 interface InfoCardProps {
   showBadge?: boolean
@@ -9,19 +9,22 @@ interface InfoCardProps {
   children: React.ReactNode
 }
 
-export default function InfoCard({
+const InfoCard: React.FC<InfoCardProps> = ({
   showBadge = false,
   badgeText = '',
   badgeColor = 'blue',
   title,
   children,
-}: InfoCardProps) {
+}) => {
   return (
     <section className="p-6 bg-white rounded-lg shadow-[0_1px_4px_rgba(51,49,65,0.25)]">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold text-gray-800 max-sm:text-2xl">
-          {title}
-        </h2>
+        {title ? (
+          <h2 className="text-3xl font-bold text-gray-800 max-sm:text-2xl">
+            {title}
+          </h2>
+        ) : null}
+
         {showBadge && (
           <Tag color={badgeColor} className="w-fit">
             {badgeText}
@@ -32,3 +35,5 @@ export default function InfoCard({
     </section>
   )
 }
+
+export default InfoCard

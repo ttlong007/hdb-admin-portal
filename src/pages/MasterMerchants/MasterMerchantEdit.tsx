@@ -17,27 +17,9 @@ import {
 } from '@/config/constants'
 import { useAuth } from '@/store/authSlice/useAuth'
 import { useMasterMerchantDetail } from '@/hooks/useMasterMerchantDetail'
+import InfoCard from '@/components/core/components/InfoCard'
 
 const { Option } = Select
-
-function InfoCard({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="p-6 bg-white rounded-lg shadow-[0_1px_4px_rgba(51,49,65,0.25)]">
-      {title && (
-        <h2 className="mb-6 text-3xl font-bold text-gray-800 max-sm:text-2xl">
-          {title}
-        </h2>
-      )}
-      {children}
-    </section>
-  )
-}
 
 const schema = yup.object().shape({
   transaction_monthly_quota: yup
@@ -82,28 +64,28 @@ const schema = yup.object().shape({
 })
 
 interface ProposedChanges {
-  status?: string;
-  need_approve_new_store?: boolean;
-  need_approve_new_staff?: boolean;
-  hdb_can_manage?: boolean;
+  status?: string
+  need_approve_new_store?: boolean
+  need_approve_new_staff?: boolean
+  hdb_can_manage?: boolean
   fees?: Array<{
-    fee_transaction_type_id: number;
-    fixed_fee: number;
-    max_fee: number;
-    min_fee: number;
-    overtime_fee: number;
-    percentage_fee_per_txn: number;
-  }>;
+    fee_transaction_type_id: number
+    fixed_fee: number
+    max_fee: number
+    min_fee: number
+    overtime_fee: number
+    percentage_fee_per_txn: number
+  }>
   limits?: Array<{
-    type: string;
-    amount: number;
-  }>;
+    type: string
+    amount: number
+  }>
 }
 
 interface UpdatePayload {
-  entity_id: number;
-  entity_type: string;
-  proposed_changes: ProposedChanges;
+  entity_id: number
+  entity_type: string
+  proposed_changes: ProposedChanges
 }
 
 export default function MasterMerchantEdit() {
@@ -158,8 +140,8 @@ export default function MasterMerchantEdit() {
     mutationFn: async (values: any) => {
       const payload: UpdatePayload = {
         entity_id: Number(id),
-        entity_type: "COMPANY",
-        proposed_changes: {}
+        entity_type: 'COMPANY',
+        proposed_changes: {},
       }
 
       // Only include status if it was changed
@@ -169,10 +151,12 @@ export default function MasterMerchantEdit() {
 
       // Only include approval settings if they were changed
       if (dirtyFields.need_approve_new_store) {
-        payload.proposed_changes.need_approve_new_store = values.need_approve_new_store
+        payload.proposed_changes.need_approve_new_store =
+          values.need_approve_new_store
       }
       if (dirtyFields.need_approve_new_staff) {
-        payload.proposed_changes.need_approve_new_staff = values.need_approve_new_staff
+        payload.proposed_changes.need_approve_new_staff =
+          values.need_approve_new_staff
       }
       if (dirtyFields.hdb_can_manage) {
         payload.proposed_changes.hdb_can_manage = values.hdb_can_manage

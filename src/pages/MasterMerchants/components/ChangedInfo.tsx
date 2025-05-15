@@ -1,5 +1,5 @@
 import { Switch } from 'antd'
-import InfoCard from './InfoCard'
+import InfoCard from '@/components/core/components/InfoCard'
 import AdminFeeTable from './AdminFeeTable'
 
 interface ChangedInfoProps {

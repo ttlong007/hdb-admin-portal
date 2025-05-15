@@ -19,36 +19,8 @@ import axiosInstance from '@/config/axios'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { ChangedInfo } from './components/ChangedInfo'
-
-function InfoCard({
-  showBadge = false,
-  badgeText = '',
-  badgeColor = 'blue',
-  title,
-  children,
-}: {
-  showBadge?: boolean
-  badgeText?: string
-  badgeColor?: string
-  title: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="p-6 bg-white rounded-lg shadow-[0_1px_4px_rgba(51,49,65,0.25)]">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold text-gray-800 max-sm:text-2xl">
-          {title}
-        </h2>
-        {showBadge && (
-          <Tag color={badgeColor} className="w-fit">
-            {badgeText}
-          </Tag>
-        )}
-      </div>
-      {children}
-    </section>
-  )
-}
+import InfoCard from '@/components/core/components/InfoCard'
+import { useChangeRequestDetail } from '@/hooks/useChangeRequestDetail'
 
 export default function MasterMerchantDetail() {
   const { id } = useParams<{ id: string }>()
@@ -62,31 +34,10 @@ export default function MasterMerchantDetail() {
   const isWaitingApprovalForEdit =
     company.status === 'WAITING_APPROVAL_FOR_EDIT'
 
-  // Fetch change request details if company is waiting for approval
-  const { data: changeRequestData } = useQuery({
-    queryKey: ['changeRequest', id],
-    queryFn: async () => {
-      const response = await axiosInstance.get(
-        '/v1/admin/change-request/detail',
-        {
-          params: {
-            entity_id: id,
-            entity_type: 'COMPANY',
-          },
-        }
-      )
-      if (response.data.status_code === 'ACCEPT') {
-        const proposedChanges = response?.data?.data?.proposed_changes
-        const changedId = response?.data?.data?.id
-
-        return {
-          proposedChanges,
-          changedId,
-        }
-      }
-      throw new Error('Failed to fetch change request details')
-    },
-    enabled: isWaitingApprovalForEdit && !!id,
+  const { data: changeRequestData } = useChangeRequestDetail({
+    id: id || '',
+    entityType: 'COMPANY',
+    isWaitingApprovalForEdit,
   })
 
   const rejectMutation = useMutation({

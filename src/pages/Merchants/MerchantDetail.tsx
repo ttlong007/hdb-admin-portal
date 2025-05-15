@@ -19,23 +19,7 @@ import {
 } from '@/config/constants'
 import { toast } from 'react-toastify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-
-function InfoCard({
-  title,
-  children,
-}: {
-  title: string
-  children: React.ReactNode
-}) {
-  return (
-    <section className="p-6 bg-white rounded-lg shadow-[0_1px_4px_rgba(51,49,65,0.25)]">
-      <h2 className="mb-6 text-3xl font-bold text-gray-800 max-sm:text-2xl">
-        {title}
-      </h2>
-      {children}
-    </section>
-  )
-}
+import InfoCard from '@/components/core/components/InfoCard'
 
 export default function MasterMerchantDetail() {
   const { id } = useParams<{ id: string }>()
@@ -47,9 +31,12 @@ export default function MasterMerchantDetail() {
 
   const rejectMutation = useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.post('/v1/admin/store/reject-stores', {
-        ids: [Number(id)]
-      })
+      const response = await axiosInstance.post(
+        '/v1/admin/store/reject-stores',
+        {
+          ids: [Number(id)],
+        }
+      )
       if (response.status !== 204) {
         throw new Error('Từ chối thất bại')
       }
@@ -62,14 +49,17 @@ export default function MasterMerchantDetail() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Có lỗi xảy ra khi từ chối')
-    }
+    },
   })
 
   const approveMutation = useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.post('/v1/admin/store/approve-stores', {
-        ids: [Number(id)]
-      })
+      const response = await axiosInstance.post(
+        '/v1/admin/store/approve-stores',
+        {
+          ids: [Number(id)],
+        }
+      )
       if (response.status !== 204) {
         throw new Error('Duyệt thất bại')
       }
@@ -82,7 +72,7 @@ export default function MasterMerchantDetail() {
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Có lỗi xảy ra khi duyệt')
-    }
+    },
   })
 
   if (isLoading) return <div>Loading...</div>
@@ -262,17 +252,17 @@ export default function MasterMerchantDetail() {
             Quay lại
           </button>
           {isCreator && (
-          <button
-            type="button"
-            onClick={() =>
-              navigate(routes.editMerchant.replace(':id', id || ''))
-            }
-            disabled={merchant.status !== 'ACTIVE'}
-            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <EditOutlined />
-            Chỉnh sửa
-          </button>
+            <button
+              type="button"
+              onClick={() =>
+                navigate(routes.editMerchant.replace(':id', id || ''))
+              }
+              disabled={merchant.status !== 'ACTIVE'}
+              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <EditOutlined />
+              Chỉnh sửa
+            </button>
           )}
           {isApprover && merchant.status === 'WAITING_APPROVE' && (
             <>
