@@ -11,7 +11,7 @@ import { useExportTransactions } from '@/hooks/useExportTransactions'
 import { toast } from 'react-toastify'
 import { TRANSACTION_STATUS } from '@/config/constants'
 import { useFilter } from '@/store/filterSlice/useFilter'
-
+import dayjs from 'dayjs'
 const { RangePicker } = DatePicker
 
 interface FiltersFormValues {
@@ -27,6 +27,7 @@ const Filters: React.FC = () => {
   const { transactionFilters, setTransactionFilters, resetTransactionFilters } =
     useFilter()
 
+  console.log(transactionFilters)
   const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
     defaultValues: {
       code: transactionFilters.code || '',
@@ -39,7 +40,12 @@ const Filters: React.FC = () => {
           ) || null
         : null,
       store_code: transactionFilters.store_code || '',
-      duration: transactionFilters.duration || null,
+      duration: transactionFilters.duration
+        ? [
+            dayjs(transactionFilters.duration[0]),
+            dayjs(transactionFilters.duration[1]),
+          ]
+        : null,
       staff_code: transactionFilters.staff_code || '',
     },
   })
