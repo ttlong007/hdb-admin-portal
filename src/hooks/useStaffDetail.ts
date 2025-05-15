@@ -15,6 +15,14 @@ export interface StaffDetail {
   income_account?: string
   transaction_monthly_quota?: number
   transaction_daily_quota?: number
+  limits?: {
+    amount: number
+    type: 'TRANSACTION_QUOTA_DAILY' | 'TRANSACTION_QUOTA_MONTHLY'
+  }[]
+  transaction_types?: {
+    id: number
+    name: string
+  }[]
 }
 
 export function useStaffDetail(id?: string) {
