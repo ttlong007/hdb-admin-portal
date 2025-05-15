@@ -18,12 +18,15 @@ import { useAuth } from '@/store/authSlice/useAuth'
 import { useFilter } from '@/store/filterSlice/useFilter'
 
 const Merchants: React.FC = () => {
+  const { merchantFilters, setMerchantFilters } = useFilter()
+  const [sortField, setSortField] = React.useState<string | null>(null)
+  const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
+    null
+  )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { isApprover, isCreator } = useAuth()
-  const { merchantFilters, setMerchantFilters, resetMerchantFilters } =
-    useFilter()
 
-  const { isPending, dataSource, total, refetch } = useMerchants({
+  const { data, isPending, refetch } = useMerchants({
     page: merchantFilters.page || 1,
     limit: merchantFilters.limit || 10,
     filter: {
@@ -33,9 +36,12 @@ const Merchants: React.FC = () => {
       code: merchantFilters.code,
       name: merchantFilters.name,
     },
-    sortField: merchantFilters.sortField || null,
-    sortOrder: merchantFilters.sortOrder || null,
+    sortField,
+    sortOrder,
   })
+
+  const dataSource = data?.data ?? []
+  const total = data?.page_data?.total ?? 0
 
   const columns = [
     {
@@ -131,15 +137,11 @@ const Merchants: React.FC = () => {
     onPaginationChange(pagination)
 
     if (sorter.field) {
-      setMerchantFilters({
-        sortField: sorter.field,
-        sortOrder: sorter.order,
-      })
+      setSortField(sorter.field)
+      setSortOrder(sorter.order)
     } else {
-      setMerchantFilters({
-        sortField: null,
-        sortOrder: null,
-      })
+      setSortField(null)
+      setSortOrder(null)
     }
   }
 

@@ -3,7 +3,7 @@ import axiosInstance from '@/config/axios'
 import { PaginatedResponse } from '@/types'
 
 interface MasterMerchantFilters {
-  status?: string
+  status?: any
   cif?: string
   name?: string
   business_license?: string
@@ -25,13 +25,16 @@ export const useMasterMerchants = ({
   sortOrder,
 }: MasterMerchantRequestParams) => {
   return useQuery({
-    queryKey: ['masterMerchants', { page, limit, filter, sortField, sortOrder }],
+    queryKey: [
+      'masterMerchants',
+      { page, limit, filter, sortField, sortOrder },
+    ],
     queryFn: async () => {
-      // Create filter object and remove empty values
+      console.log('filter', JSON.stringify(filter))
       const cleanFilter: MasterMerchantFilters = {}
 
-      if (filter?.status) {
-        cleanFilter.status = filter.status
+      if (filter?.status?.value) {
+        cleanFilter.status = filter.status.value
       }
       if (filter?.cif) {
         cleanFilter.cif = filter.cif
@@ -51,7 +54,9 @@ export const useMasterMerchants = ({
         descending: sortOrder === 'descend',
       }
 
-      const response = await axiosInstance.get('/v1/admin/company/list', { params })
+      const response = await axiosInstance.get('/v1/admin/company/list', {
+        params,
+      })
       if (response.data.status_code === 'ACCEPT') {
         return {
           data: response.data.data,

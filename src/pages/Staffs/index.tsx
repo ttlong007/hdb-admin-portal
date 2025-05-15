@@ -30,15 +30,14 @@ const Staffs: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { isApprover, isCreator } = useAuth()
   const { staffFilters, setStaffFilters } = useFilter()
+  const [sortField, setSortField] = React.useState<string | null>(null)
+  const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
+    null
+  )
 
-  const {
-    isPending,
-    dataSource,
-    total,
-    onTableChange: handleTableChange,
-  } = useStaffs({
-    page: staffFilters.page,
-    limit: staffFilters.limit,
+  const { data, isPending, refetch } = useStaffs({
+    page: staffFilters.page || 1,
+    limit: staffFilters.limit || 10,
     filter: {
       status: staffFilters.status,
       company_id: staffFilters.company_id,
@@ -47,7 +46,12 @@ const Staffs: React.FC = () => {
       name: staffFilters.name,
       role: staffFilters.role,
     },
+    sortField,
+    sortOrder,
   })
+
+  const dataSource = data?.data ?? []
+  const total = data?.page_data?.total ?? 0
 
   const columns = [
     {
@@ -146,19 +150,24 @@ const Staffs: React.FC = () => {
       }
     : undefined
 
-  const onTableChange: TableProps['onChange'] = (
-    pagination,
-    _filters,
-    sorter: any
-  ) => {
+  const onPaginationChange = (pagination: any) => {
     setStaffFilters({
       ...staffFilters,
       page: pagination.current,
       limit: pagination.pageSize,
-      sortField: sorter.field,
-      sortOrder: sorter.order,
     })
-    handleTableChange(pagination, _filters, sorter)
+  }
+
+  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
+    onPaginationChange(pagination)
+
+    if (sorter.field) {
+      setSortField(sorter.field)
+      setSortOrder(sorter.order)
+    } else {
+      setSortField(null)
+      setSortOrder(null)
+    }
   }
 
   return (

@@ -6,7 +6,7 @@ import ReactSelect from 'react-select'
 import { useUpdateStaff } from '@/hooks/useUpdateStaff'
 import { toast } from 'react-toastify'
 import { routes } from '@/config/routes'
-import { useCompanies } from '@/hooks/useCompanies'
+import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 import { useStores } from '@/hooks/useStores'
 import { useCompanyAccounts } from '@/hooks/useCompanyAccounts'
 import { useStaffDetail } from '@/hooks/useStaffDetail'
@@ -247,7 +247,7 @@ export default function EditStaff() {
 
   // Fetch company options via custom hook
   const { data: companyOptions = [], isLoading: isLoadingCompanies } =
-    useCompanies()
+    useCompaniesOptions()
 
   // Watch selected company_id to fetch stores
   const selectedCompany = watch('company_id')

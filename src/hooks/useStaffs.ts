@@ -4,91 +4,71 @@ import _get from 'lodash/get'
 import axiosInstance from '@/config/axios'
 
 interface StaffFilters {
-  status?: string
-  cif?: string
-  company_id?: number
-  store_id?: number
+  status?: any
+  company_id?: any
+  store_id?: any
   code?: string
   name?: string
-  role?: string
-  [key: string]: any
+  role?: any
 }
 
 interface UseStaffsProps {
-  page?: number
-  limit?: number
-  filter?: StaffFilters
+  page: number
+  limit: number
+  filter: StaffFilters
+  sortField: string | null
+  sortOrder: 'ascend' | 'descend' | null
 }
 
 export const useStaffs = ({
-  page: initialPage = 1,
-  limit: initialLimit = 10,
-  filter: initialFilter = {},
-}: UseStaffsProps = {}) => {
-  const [page, setPage] = useState(initialPage)
-  const [limit, setLimit] = useState(initialLimit)
-  const [sortField, setSortField] = useState<string | null>(null)
-  const [sortOrder, setSortOrder] = useState<'ascend' | 'descend' | null>(null)
-
-  const { isPending, data } = useQuery({
-    queryKey: ['staffs', page, limit, initialFilter, sortField, sortOrder],
+  page,
+  limit,
+  filter,
+  sortField,
+  sortOrder,
+}: UseStaffsProps) => {
+  return useQuery({
+    queryKey: ['staffs', { page, limit, filter, sortField, sortOrder }],
     queryFn: async () => {
       const cleanFilter: StaffFilters = {}
-      Object.entries(initialFilter).forEach(([key, value]) => {
-        if (
-          value !== undefined &&
-          value !== null &&
-          !(typeof value === 'string' && value.trim() === '') &&
-          !(Array.isArray(value) && value.length === 0)
-        ) {
-          cleanFilter[key] = value
-        }
-      })
-      const { data } = await axiosInstance.get('/v1/admin/staff/list', {
-        params: {
-          page,
-          limit,
-          order_by_column: sortField || 'created_at',
-          descending: sortOrder === 'descend',
-          ...cleanFilter,
-        },
-      })
-      if (data.status_code === 'ACCEPT') {
-        return data
+
+      if (filter?.status?.value) {
+        cleanFilter.status = filter.status.value
       }
-      throw new Error('Failed to get staffs')
+      if (filter?.company_id?.value) {
+        cleanFilter.company_id = filter.company_id.value
+      }
+      if (filter?.store_id?.value) {
+        cleanFilter.store_id = filter.store_id.value
+      }
+      if (filter?.code) {
+        cleanFilter.code = filter.code
+      }
+      if (filter?.name) {
+        cleanFilter.name = filter.name
+      }
+      if (filter?.role?.value) {
+        cleanFilter.role = filter.role.value
+      }
+
+      const params = {
+        page,
+        limit,
+        ...cleanFilter,
+        order_by_column: sortField || 'created_at',
+        descending: sortOrder === 'descend',
+      }
+
+      const response = await axiosInstance.get('/v1/admin/staff/list', {
+        params,
+      })
+      if (response.data.status_code === 'ACCEPT') {
+        return {
+          data: response.data.data,
+          page_data: response.data.page_data,
+        }
+      }
+      throw new Error('Failed to fetch merchants')
     },
-    placeholderData: keepPreviousData,
   })
-
-  const dataSource = _get(data, 'data', [])
-  const total = _get(data, 'page_data.total', 0)
-
-  const onPaginationChange = (pagination: any) => {
-    setPage(pagination.current)
-    setLimit(pagination.pageSize)
-  }
-
-  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
-    onPaginationChange(pagination)
-
-    if (sorter.field) {
-      setSortField(sorter.field)
-      setSortOrder(sorter.order)
-    } else {
-      setSortField(null)
-      setSortOrder(null)
-    }
-  }
-
-  return {
-    page,
-    limit,
-    filter: initialFilter,
-    setFilter: () => {},
-    isPending,
-    dataSource,
-    total,
-    onTableChange,
-  }
 }

@@ -47,7 +47,6 @@ const MasterMerchants: React.FC = () => {
     sortOrder,
   })
 
-  // Get list data and total count from the API response.
   const dataSource = data?.data ?? []
   const total = data?.page_data?.total ?? 0
 
@@ -139,7 +138,6 @@ const MasterMerchants: React.FC = () => {
   const onTableChange = (pagination: any, _filters: any, sorter: any) => {
     onPaginationChange(pagination)
 
-    // Handle sorting
     if (sorter.field) {
       setSortField(sorter.field)
       setSortOrder(sorter.order)

@@ -13,6 +13,7 @@ import { useAuth } from '@/store/authSlice/useAuth'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useStores } from '@/hooks/useStores'
+import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 
 type Option = { label: string; value: number }
 
@@ -172,23 +173,8 @@ export default function CreateStaff() {
     }
   }, [options])
 
-  // Fetch companies
-  const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
-    queryKey: ['companies-all'],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/company/list')
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error('Failed to fetch companies')
-    },
-  })
-
-  const companyOptions =
-    companiesData?.map((company: any) => ({
-      label: company.name,
-      value: company.id,
-    })) || []
+  const { data: companyOptions, isLoading: isLoadingCompanies } =
+    useCompaniesOptions()
 
   // Watch selected company_id to fetch stores
   const selectedCompany = watch('company_id')

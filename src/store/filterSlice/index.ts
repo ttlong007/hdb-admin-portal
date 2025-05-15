@@ -17,8 +17,6 @@ interface FilterState {
     company_id?: number
     code?: string
     name?: string
-    sortField?: string | null
-    sortOrder?: 'ascend' | 'descend' | null
   }
   staff: {
     status?: string
@@ -30,8 +28,6 @@ interface FilterState {
     code?: string
     name?: string
     role?: string
-    sortField?: string | null
-    sortOrder?: 'ascend' | 'descend' | null
   }
   transaction: {
     status?: string
@@ -67,8 +63,6 @@ const initialState: FilterState = {
     company_id: undefined,
     code: '',
     name: '',
-    sortField: null,
-    sortOrder: null,
   },
   staff: {
     status: '',
@@ -80,8 +74,6 @@ const initialState: FilterState = {
     code: '',
     name: '',
     role: '',
-    sortField: null,
-    sortOrder: null,
   },
   transaction: {
     status: '',

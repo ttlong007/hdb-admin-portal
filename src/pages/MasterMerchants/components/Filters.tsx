@@ -45,13 +45,6 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
   const onSubmit = (data: FiltersFormValues) => {
     const payload = Object.entries(data).reduce((acc, [key, value]) => {
       if (value) {
-        if (key === 'status') {
-          // if value is all, then don't add to payload
-          if (value.value === '') {
-            return acc
-          }
-          return { ...acc, [key]: value.value }
-        }
         return { ...acc, [key]: value }
       }
       return acc

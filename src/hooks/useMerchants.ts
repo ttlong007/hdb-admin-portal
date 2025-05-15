@@ -3,14 +3,11 @@ import _get from 'lodash/get'
 import axiosInstance from '@/config/axios'
 
 interface MerchantFilters {
-  status?: string
+  status?: any
   cif?: string
   name?: string
-  business_license?: string
-  company_id?: number
-  staff_id?: number
-  store_code?: string
-  [key: string]: any
+  company_id?: any
+  code?: string
 }
 
 interface UseMerchantsParams {
@@ -28,44 +25,45 @@ export const useMerchants = ({
   sortField,
   sortOrder,
 }: UseMerchantsParams) => {
-  const { isPending, data, refetch } = useQuery({
-    queryKey: ['merchants', page, limit, filter, sortField, sortOrder],
+  return useQuery({
+    queryKey: ['merchants', { page, limit, filter, sortField, sortOrder }],
     queryFn: async () => {
-      // Create clean filter object and remove empty values
       const cleanFilter: MerchantFilters = {}
 
-      // Only add non-empty values to cleanFilter
-      Object.entries(filter).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== '') {
-          cleanFilter[key] = value
-        }
-      })
+      if (filter?.status?.value) {
+        cleanFilter.status = filter.status.value
+      }
+      if (filter?.cif) {
+        cleanFilter.cif = filter.cif
+      }
+      if (filter?.name) {
+        cleanFilter.name = filter.name
+      }
+      if (filter?.company_id?.value) {
+        cleanFilter.company_id = filter.company_id.value
+      }
+      if (filter?.code) {
+        cleanFilter.code = filter.code
+      }
+
+      const params = {
+        page,
+        limit,
+        ...cleanFilter,
+        order_by_column: sortField || 'created_at',
+        descending: sortOrder === 'descend',
+      }
 
       const response = await axiosInstance.get('/v1/admin/store/list', {
-        params: {
-          page,
-          limit,
-          order_by_column: sortField || 'created_at',
-          descending: sortOrder === 'descend',
-          ...cleanFilter,
-        },
+        params,
       })
       if (response.data.status_code === 'ACCEPT') {
-        return response.data
-      } else {
-        throw new Error('Failed to get merchants')
+        return {
+          data: response.data.data,
+          page_data: response.data.page_data,
+        }
       }
+      throw new Error('Failed to fetch merchants')
     },
-    placeholderData: keepPreviousData,
   })
-
-  const dataSource = _get(data, 'data', [])
-  const total = _get(data, 'page_data.total', 0)
-
-  return {
-    isPending,
-    dataSource,
-    total,
-    refetch,
-  }
 }

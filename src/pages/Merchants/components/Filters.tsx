@@ -3,14 +3,13 @@ import { Input } from 'rizzui'
 import { BsDownload, BsArrowClockwise } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
 import Select from 'react-select'
-import { useQuery } from '@tanstack/react-query'
 import { CSVLink } from 'react-csv'
 import { toast } from 'react-toastify'
 import { useFilter } from '@/store/filterSlice/useFilter'
 
 import { MERCHANT_STATUS, MERCHANT_STATUS_MAP } from '@/config/constants'
-import axiosInstance from '@/config/axios'
 import { useExportMerchants } from '@/hooks/useExportMerchants'
+import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 
 interface FiltersFormValues {
   cif: string
@@ -21,73 +20,57 @@ interface FiltersFormValues {
 }
 
 const Filters: React.FC = () => {
-  const { merchantFilters, setMerchantFilters, resetMerchantFilters } = useFilter()
+  const { merchantFilters, setMerchantFilters, resetMerchantFilters } =
+    useFilter()
 
-  const { control, handleSubmit, reset, setValue } = useForm<FiltersFormValues>({
-    defaultValues: {
-      cif: merchantFilters.cif || '',
-      company_id: null,
-      code: merchantFilters.code || '',
-      name: merchantFilters.name || '',
-      status: merchantFilters.status
-        ? MERCHANT_STATUS.find(s => s.value === merchantFilters.status) || null
-        : null,
-    },
-  })
+  const { control, handleSubmit, reset, setValue } = useForm<FiltersFormValues>(
+    {
+      defaultValues: {
+        cif: merchantFilters.cif || '',
+        company_id: null,
+        code: merchantFilters.code || '',
+        name: merchantFilters.name || '',
+        status: merchantFilters.status
+          ? MERCHANT_STATUS.find((s) => s.value === merchantFilters.status) ||
+            null
+          : null,
+      },
+    }
+  )
 
-  // Fetch all companies (no limit/page)
-  const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
-    queryKey: ['companies-all'],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/company/list')
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error('Failed to fetch companies')
-    },
-  })
-
-  // Transform fetched companies into select options
-  const companyOptions =
-    companiesData?.map((company: any) => ({
-      label: company.name,
-      value: company.id,
-    })) || []
+  const { data: companyOptions, isLoading: isLoadingCompanies } =
+    useCompaniesOptions(false)
 
   // Update company_id when companies data is loaded
   useEffect(() => {
-    if (companiesData && merchantFilters.company_id) {
-      const company = companiesData.find((c: any) => c.id === merchantFilters.company_id)
+    if (companyOptions && merchantFilters.company_id) {
+      const company = companyOptions.find(
+        (c: any) => c.value === merchantFilters.company_id
+      )
       if (company) {
-        setValue('company_id', { label: company.name, value: company.id })
+        setValue('company_id', { label: company.label, value: company.value })
       }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [companiesData, merchantFilters.company_id])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(companyOptions), merchantFilters.company_id])
 
   const onSubmit = (data: FiltersFormValues) => {
-    // Transform field values to just their "value" if needed.
-    const processedData = {
-      ...data,
-      company_id: data.company_id ? data.company_id.value : null,
-      status: data.status ? data.status.value : null,
-    }
-
-    const payload = Object.entries(processedData).reduce(
-      (acc, [key, value]) => {
-        if (value) {
-          return { ...acc, [key]: value }
-        }
-        return acc
-      },
-      {} as Partial<FiltersFormValues>
-    )
+    const payload = Object.entries(data).reduce((acc, [key, value]) => {
+      if (value) {
+        return { ...acc, [key]: value }
+      }
+      return acc
+    }, {} as Partial<FiltersFormValues>)
 
     setMerchantFilters({
       ...merchantFilters,
-      ...payload,
+      status: payload.status as string | undefined,
+      cif: payload.cif,
+      company_id: payload.company_id,
+      code: payload.code,
+      name: payload.name,
       page: merchantFilters.page,
-      limit: merchantFilters.limit
+      limit: merchantFilters.limit,
     })
   }
 
@@ -97,7 +80,7 @@ const Filters: React.FC = () => {
       company_id: null,
       code: '',
       name: '',
-      status: null
+      status: null,
     })
     resetMerchantFilters()
   }

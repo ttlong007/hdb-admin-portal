@@ -12,6 +12,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
+import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 
 type Option = { label: string; value: string }
 
@@ -368,23 +369,8 @@ const EditMerchant = () => {
   })
 
   // Fetch companies for the select field.
-  const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
-    queryKey: ['companies-all'],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/company/list')
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error('Failed to fetch companies')
-    },
-  })
-
-  const companyOptions = companiesData
-    ? companiesData.map((company: any) => ({
-        label: company.name,
-        value: company.id,
-      }))
-    : []
+  const { data: companyOptions, isLoading: isLoadingCompanies } =
+    useCompaniesOptions()
 
   // Create merchant mutation.
   const createMerchantMutation = useMutation({

@@ -6,11 +6,13 @@ export interface CompanyOption {
   value: number
 }
 
-export function useCompanies() {
+export function useCompaniesOptions(isActive = true) {
   return useQuery<CompanyOption[]>({
-    queryKey: ['companies-all'],
+    queryKey: ['companies-options'],
     queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/company/list')
+      const response = await axiosInstance.get(
+        `/v1/admin/company/list${isActive ? '?status=ACTIVE' : ''}`
+      )
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.map((company: any) => ({
           label: company.name,

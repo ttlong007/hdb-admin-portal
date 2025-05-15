@@ -12,6 +12,7 @@ import { routes } from '@/config/routes'
 import { useAuth } from '@/store/authSlice/useAuth'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 
 type Option = { label: string; value: string }
 
@@ -160,7 +161,10 @@ const CreateMerchant = () => {
   // Set all transaction types as checked when options are loaded
   useEffect(() => {
     if (options.length > 0) {
-      setValue('transactionTypes', options.map((type) => type.id))
+      setValue(
+        'transactionTypes',
+        options.map((type) => type.id)
+      )
     }
   }, [options, setValue])
 
@@ -237,25 +241,8 @@ const CreateMerchant = () => {
     enabled: !!selectedDistrict,
   })
 
-  // Fetch companies
-  const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
-    queryKey: ['companies-all'],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/company/list')
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error('Failed to fetch companies')
-    },
-  })
-
-  // Map companies to options for the Select component
-  const companyOptions = companiesData
-    ? companiesData.map((company: any) => ({
-        label: company.name, // Adjust the field as needed
-        value: company.id, // Adjust the field as needed
-      }))
-    : []
+  const { data: companyOptions, isLoading: isLoadingCompanies } =
+    useCompaniesOptions()
 
   // Watch the selected company from the form.
   const selectedCompany = useWatch({ control, name: 'company_id' })

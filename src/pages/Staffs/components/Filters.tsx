@@ -11,6 +11,7 @@ import { useFilter } from '@/store/filterSlice/useFilter'
 import { STAFF_STATUS, STAFF_STATUS_MAP, STAFF_ROLES } from '@/config/constants'
 import axiosInstance from '@/config/axios'
 import { useExportStaffs } from '@/hooks/useExportStaffs'
+import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 
 interface FiltersFormValues {
   company_id: any
@@ -45,36 +46,22 @@ const Filters: React.FC = () => {
   const selectedCompanyId = watch('company_id')
 
   const onSubmit = (data: FiltersFormValues) => {
-    // Transform field values to just their "value" if needed.
-    const processedData = {
-      ...data,
-      company_id: data.company_id ? data.company_id.value : null,
-      store_id: data.store_id ? data.store_id.value : null,
-      status: data.status ? data.status.value : null,
-      role: data.role ? data.role.value.toUpperCase() : null,
-    }
-
-    // Remove empty values (null, undefined, empty string, empty array)
-    const filteredData = Object.fromEntries(
-      Object.entries(processedData).filter(([_, value]) => {
-        if (value === null || value === undefined) return false
-        if (typeof value === 'string' && value.trim() === '') return false
-        if (Array.isArray(value) && value.length === 0) return false
-        return true
-      })
-    )
-
-    // Check if there are any filter values
-    const hasFilterValues = Object.keys(filteredData).length > 0
-
-    if (!hasFilterValues) {
-      return
-    }
+    const payload = Object.entries(data).reduce((acc, [key, value]) => {
+      if (value) {
+        return { ...acc, [key]: value }
+      }
+      return acc
+    }, {} as Partial<FiltersFormValues>)
 
     setStaffFilters({
       ...staffFilters,
-      ...filteredData,
-      page: 1,
+      status: payload.status as string | undefined,
+      company_id: payload.company_id,
+      code: payload.code,
+      name: payload.name,
+      store_id: payload.store_id,
+      role: payload.role,
+      page: staffFilters.page,
       limit: staffFilters.limit,
     })
   }
@@ -87,21 +74,13 @@ const Filters: React.FC = () => {
       name: '',
       status: null,
       role: null,
-  })
+    })
     resetStaffFilters()
   }
 
   // Fetch all companies (no limit/page)
-  const { data: companiesData, isLoading: isLoadingCompanies } = useQuery({
-    queryKey: ['companies-all'],
-    queryFn: async () => {
-      const response = await axiosInstance.get('/v1/admin/company/list')
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data
-      }
-      throw new Error('Failed to fetch companies')
-    },
-  })
+  const { data: companyOptions, isLoading: isLoadingCompanies } =
+    useCompaniesOptions(false)
 
   // Fetch stores based on selected company
   const { data: storesData, isLoading: isLoadingStores } = useQuery({
@@ -120,13 +99,6 @@ const Filters: React.FC = () => {
     },
     enabled: !!selectedCompanyId?.value,
   })
-
-  // Transform fetched companies into select options
-  const companyOptions =
-    companiesData?.map((company: any) => ({
-      label: company.name,
-      value: company.id,
-    })) || []
 
   // Transform fetched stores into select options
   const storeOptions =
