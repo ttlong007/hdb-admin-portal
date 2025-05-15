@@ -270,7 +270,8 @@ export default function EditStaff() {
   const updateStaffMutation = useUpdateStaff(id, () => reset())
 
   const onSubmit = (data: FormData) => {
-    const formattedData: StaffPayload = {
+    // Create base payload with all fields
+    const basePayload: StaffPayload = {
       company_id: data.company_id!.value,
       email: data.email,
       name: data.name,
@@ -291,7 +292,67 @@ export default function EditStaff() {
       transaction_type_ids: data.transactionTypes || [],
     }
 
-    updateStaffMutation.mutate(formattedData)
+    // Create a new object with only changed fields
+    const changedFields: Partial<StaffPayload> = {}
+
+    // Check each field against the original staff detail
+    if (staffDetail) {
+      if (basePayload.company_id !== staffDetail.company_id) {
+        changedFields.company_id = basePayload.company_id
+      }
+      if (basePayload.email !== staffDetail.email) {
+        changedFields.email = basePayload.email
+      }
+      if (basePayload.name !== staffDetail.name) {
+        changedFields.name = basePayload.name
+      }
+      if (basePayload.national_id_number !== staffDetail.national_id_number) {
+        changedFields.national_id_number = basePayload.national_id_number
+      }
+      if (basePayload.phone_number !== staffDetail.phone_number) {
+        changedFields.phone_number = basePayload.phone_number
+      }
+      if (basePayload.role !== staffDetail.role) {
+        changedFields.role = basePayload.role
+      }
+      if (basePayload.store_id !== staffDetail.store_id) {
+        changedFields.store_id = basePayload.store_id
+      }
+
+      // Check limits
+      const originalDailyQuota = staffDetail.limits?.find(
+        (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
+      )?.amount
+      const originalMonthlyQuota = staffDetail.limits?.find(
+        (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
+      )?.amount
+
+      if (
+        originalDailyQuota !== basePayload.limits[0].amount ||
+        originalMonthlyQuota !== basePayload.limits[1].amount
+      ) {
+        changedFields.limits = basePayload.limits
+      }
+
+      // Check transaction types
+      const originalTransactionTypes = staffDetail.transaction_types?.map(
+        (type: { id: number }) => type.id
+      ) || []
+      if (
+        JSON.stringify(originalTransactionTypes.sort()) !==
+        JSON.stringify(basePayload.transaction_type_ids.sort())
+      ) {
+        changedFields.transaction_type_ids = basePayload.transaction_type_ids
+      }
+    }
+
+    // Only proceed if there are actual changes
+    if (Object.keys(changedFields).length === 0) {
+      toast.error('Không có thay đổi nào được thực hiện')
+      return
+    }
+
+    updateStaffMutation.mutate(changedFields as StaffPayload)
   }
 
   return (
