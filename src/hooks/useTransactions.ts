@@ -6,15 +6,14 @@ interface TransactionRequestBody {
   page?: number
   limit?: number
   status?: string
-  from_date?: string
-  to_date?: string
+  duration?: any
   company_id?: number
   store_id?: number
   staff_id?: number
   code?: string
-  transaction_type?: string
+  transaction_type_id?: string
   store_code?: string
-  created_by_staff_code?: string
+  staff_code?: string
   order_by_column: string
   descending: boolean
 }
@@ -37,15 +36,14 @@ export const useTransactions = ({
       let requestBody: TransactionRequestBody = {
         page: transactionFilters.page,
         limit: transactionFilters.limit,
-        from_date: transactionFilters.duration?.[0],
-        to_date: transactionFilters.duration?.[1],
+        duration: transactionFilters.duration,
         company_id: transactionFilters.company_id,
         store_id: transactionFilters.store_id,
         staff_id: transactionFilters.staff_id,
         code: transactionFilters.code,
-        transaction_type: transactionFilters.transaction_type,
+        transaction_type_id: transactionFilters.transaction_type,
         store_code: transactionFilters.store_code,
-        created_by_staff_code: transactionFilters.created_by_staff_code,
+        staff_code: transactionFilters.staff_code,
         order_by_column: sortField || 'created_at',
         descending: sortOrder === 'descend',
       }

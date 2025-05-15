@@ -20,7 +20,7 @@ interface FiltersFormValues {
   status: any
   store_code: string
   duration: any
-  created_by_staff_code: string
+  staff_code: string
 }
 
 const Filters: React.FC = () => {
@@ -40,7 +40,7 @@ const Filters: React.FC = () => {
         : null,
       store_code: transactionFilters.store_code || '',
       duration: transactionFilters.duration || null,
-      created_by_staff_code: transactionFilters.created_by_staff_code || '',
+      staff_code: transactionFilters.staff_code || '',
     },
   })
 
@@ -137,7 +137,7 @@ const Filters: React.FC = () => {
       status: null,
       store_code: '',
       duration: null,
-      created_by_staff_code: '',
+      staff_code: '',
     })
     resetTransactionFilters()
   }
@@ -217,27 +217,6 @@ const Filters: React.FC = () => {
           </div>
 
           <div>
-            <div className="text-sm text-[#000000] mb-2">Trạng thái</div>
-
-            <Controller
-              name="status"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  isClearable
-                  options={statusOptions}
-                  value={field.value}
-                  onChange={field.onChange}
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                  placeholder="Chọn trạng thái"
-                />
-              )}
-            />
-          </div>
-
-          <div>
             <Controller
               name="store_code"
               control={control}
@@ -254,7 +233,7 @@ const Filters: React.FC = () => {
 
           <div>
             <Controller
-              name="created_by_staff_code"
+              name="staff_code"
               control={control}
               render={({ field }) => (
                 <Input
@@ -262,6 +241,27 @@ const Filters: React.FC = () => {
                   label="Mã nhân viên"
                   placeholder="Mã nhân viên"
                   inputClassName="bg-white"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <div className="text-sm text-[#000000] mb-2">Trạng thái</div>
+
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  isClearable
+                  options={statusOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                  placeholder="Chọn trạng thái"
                 />
               )}
             />

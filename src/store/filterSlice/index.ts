@@ -40,7 +40,7 @@ interface FilterState {
     code?: string
     transaction_type?: string
     store_code?: string
-    created_by_staff_code?: string
+    staff_code?: string
   }
 }
 
@@ -84,7 +84,7 @@ const initialState: FilterState = {
     code: '',
     transaction_type: '',
     store_code: '',
-    created_by_staff_code: '',
+    staff_code: '',
   },
 }
 

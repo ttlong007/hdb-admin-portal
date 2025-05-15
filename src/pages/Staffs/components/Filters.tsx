@@ -223,25 +223,7 @@ const Filters: React.FC = () => {
               />
             )}
           />
-          <div>
-            <div className="text-sm text-[#000000] mb-2">Trạng thái</div>
-            <Controller
-              name="status"
-              control={control}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  isClearable
-                  options={STAFF_STATUS}
-                  value={field.value}
-                  onChange={field.onChange}
-                  placeholder="Chọn trạng thái"
-                  className="react-select-container"
-                  classNamePrefix="react-select"
-                />
-              )}
-            />
-          </div>
+
           <div>
             <div className="text-sm text-[#000000] mb-2">Nhóm chức danh</div>
             <Controller
@@ -255,6 +237,26 @@ const Filters: React.FC = () => {
                   value={field.value}
                   onChange={field.onChange}
                   placeholder="Chọn nhóm chức danh"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <div className="text-sm text-[#000000] mb-2">Trạng thái</div>
+            <Controller
+              name="status"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  isClearable
+                  options={STAFF_STATUS}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Chọn trạng thái"
                   className="react-select-container"
                   classNamePrefix="react-select"
                 />
