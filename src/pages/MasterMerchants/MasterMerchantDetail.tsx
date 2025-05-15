@@ -104,8 +104,7 @@ export default function MasterMerchantDetail() {
     },
     onSuccess: () => {
       toast.success('Từ chối thành công')
-      queryClient.invalidateQueries({ queryKey: ['masterMerchantDetail', id] })
-      navigate(-1)
+      queryClient.invalidateQueries({ queryKey: ['companyDetail', id] })
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Có lỗi xảy ra khi từ chối')
@@ -127,8 +126,7 @@ export default function MasterMerchantDetail() {
     },
     onSuccess: () => {
       toast.success('Duyệt thành công')
-      queryClient.invalidateQueries({ queryKey: ['masterMerchantDetail', id] })
-      navigate(-1)
+      queryClient.invalidateQueries({ queryKey: ['companyDetail', id] })
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Có lỗi xảy ra khi duyệt')
@@ -269,10 +267,12 @@ export default function MasterMerchantDetail() {
           </div>
         </InfoCard>
 
-        <ChangedInfo
-          isWaitingApprovalForEdit={isWaitingApprovalForEdit}
-          changeRequestData={changeRequestData?.proposedChanges}
-        />
+        {isWaitingApprovalForEdit ? (
+          <ChangedInfo
+            isWaitingApprovalForEdit={isWaitingApprovalForEdit}
+            changeRequestData={changeRequestData?.proposedChanges}
+          />
+        ) : null}
 
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
