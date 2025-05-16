@@ -61,7 +61,7 @@ const Filters: React.FC = () => {
       name: payload.name,
       store_id: payload.store_id,
       role: payload.role,
-      page: staffFilters.page,
+      page: 1,
       limit: staffFilters.limit,
     })
   }

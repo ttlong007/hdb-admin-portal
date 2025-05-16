@@ -6,6 +6,7 @@ import {
   EditOutlined,
   CloseCircleOutlined,
   CheckCircleOutlined,
+  CheckOutlined,
 } from '@ant-design/icons'
 import { Tag, message } from 'antd'
 import { useAuth } from '@/store/authSlice/useAuth'
@@ -20,8 +21,11 @@ import {
 import { toast } from 'react-toastify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import InfoCard from '@/components/core/components/InfoCard'
+import { useChangeRequestDetail } from '@/hooks/useChangeRequestDetail'
+import CompanyInfo from '../Staffs/components/CompanyInfo'
+import StaffDetail from '../Staffs/StaffDetail'
 
-export default function MasterMerchantDetail() {
+export default function MerchantDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { isCreator, isApprover } = useAuth()
@@ -29,7 +33,17 @@ export default function MasterMerchantDetail() {
   const { merchant, isLoading, error, monthlyLimit, dailyLimit } =
     useMerchantDetail(id)
 
-  const rejectMutation = useMutation({
+  const isWaitingApprovalForEdit =
+    merchant?.status === 'WAITING_APPROVAL_FOR_EDIT'
+  const isWaitingApprovalForCreate = merchant?.status === 'WAITING_APPROVE'
+
+  const { data: changeRequestData } = useChangeRequestDetail({
+    id: id || '',
+    entityType: 'MERCHANT',
+    isWaitingApprovalForEdit,
+  })
+
+  const rejectMutationCreate = useMutation({
     mutationFn: async () => {
       const response = await axiosInstance.post(
         '/v1/admin/store/reject-stores',
@@ -45,14 +59,13 @@ export default function MasterMerchantDetail() {
     onSuccess: () => {
       toast.success('Từ chối thành công')
       queryClient.invalidateQueries({ queryKey: ['merchantDetail', id] })
-      navigate(-1)
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Có lỗi xảy ra khi từ chối')
     },
   })
 
-  const approveMutation = useMutation({
+  const approveMutationCreate = useMutation({
     mutationFn: async () => {
       const response = await axiosInstance.post(
         '/v1/admin/store/approve-stores',
@@ -68,7 +81,50 @@ export default function MasterMerchantDetail() {
     onSuccess: () => {
       toast.success('Duyệt thành công')
       queryClient.invalidateQueries({ queryKey: ['merchantDetail', id] })
-      navigate(-1)
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi duyệt')
+    },
+  })
+
+  const rejectMutationEdit = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post(
+        '/v1/admin/change-request/reject',
+        {
+          id: Number(changeRequestData?.changedId),
+        }
+      )
+      if (response.status !== 204) {
+        throw new Error('Từ chối thất bại')
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Từ chối thành công')
+      queryClient.invalidateQueries({ queryKey: ['merchantDetail', id] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi từ chối')
+    },
+  })
+
+  const approveMutationEdit = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post(
+        '/v1/admin/change-request/approve',
+        {
+          id: Number(changeRequestData?.changedId),
+        }
+      )
+      if (response.status !== 204) {
+        throw new Error('Duyệt thất bại')
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Duyệt thành công')
+      queryClient.invalidateQueries({ queryKey: ['merchantDetail', id] })
     },
     onError: (error: Error) => {
       toast.error(error.message || 'Có lỗi xảy ra khi duyệt')
@@ -79,6 +135,7 @@ export default function MasterMerchantDetail() {
   if (error) return <div>Error loading detail.</div>
   if (!merchant) return <div>No merchant found.</div>
 
+  console.log(merchant)
   return (
     <>
       {/* Breadcrumbs */}
@@ -94,151 +151,170 @@ export default function MasterMerchantDetail() {
       </div>
 
       <section className="flex flex-col gap-4">
-        <div className="flex gap-4">
+        <div className="flex  gap-4">
           <div id="A" className="w-2/3 flex flex-col gap-4">
-            <InfoCard title="Thông tin công ty">
-              <div className="grid grid-cols-4 gap-6">
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">Mã Cif</span>
-                  <span className="text-base text-gray-800">
-                    {merchant.company?.cif || '---'}
-                  </span>
-                </div>
+            <CompanyInfo companyId={merchant.company?.id || ''} />
 
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">Tên công ty</span>
-                  <span className="text-base text-gray-800">
-                    {merchant.company?.name || '---'}
-                  </span>
-                </div>
+            <>
+              <InfoCard
+                title="Thông tin điểm đại lý"
+                showBadge={isWaitingApprovalForEdit}
+                badgeText="Thông tin cũ"
+                badgeColor="green"
+              >
+                <div className="grid grid-cols-4 gap-6">
+                  {/* Mã điểm địa lý */}
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">
+                      Mã điểm địa lý
+                    </span>
+                    <span className="text-base text-gray-800">
+                      {merchant.code || '---'}
+                    </span>
+                  </div>
 
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">Người đại điện</span>
-                  <span className="text-base text-gray-800">
-                    {merchant.company?.representative || '---'}
-                  </span>
-                </div>
+                  {/* Tên điểm đại lý */}
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">
+                      Tên điểm đại lý
+                    </span>
+                    <span className="text-base text-gray-800">
+                      {merchant.name || '---'}
+                    </span>
+                  </div>
 
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">
-                    Số giấy phép DKKD
-                  </span>
-                  <span className="text-base text-gray-800">
-                    {merchant.company?.tax_number || '---'}
-                  </span>
-                </div>
+                  {/* Địa chỉ */}
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">Địa chỉ</span>
+                    <span className="text-base text-gray-800">
+                      {merchant.address || '---'}
+                    </span>
+                  </div>
 
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">Trạng thái</span>
-                  <div className="inline-flex">
-                    <Tag
-                      color={
-                        MASTER_MERCHANT_STATUS_COLOR_MAP[
-                          merchant.company?.status || ''
-                        ]
-                      }
-                    >
-                      {MASTER_MERCHANT_STATUS.find(
-                        (status) => status.value === merchant.company?.status
-                      )?.label || '---'}
-                    </Tag>
+                  {/* Tài khoản chuyên thu */}
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">
+                      Tài khoản chuyên thu
+                    </span>
+                    <span className="text-base text-gray-800">
+                      {merchant.income_account || '---'}
+                    </span>
+                  </div>
+
+                  {/* Tài khoản chuyên chi */}
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">
+                      Tài khoản chuyên chi
+                    </span>
+                    <span className="text-base text-gray-800">
+                      {merchant.expense_account || '---'}
+                    </span>
+                  </div>
+
+                  {/* Trạng thái */}
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">Trạng thái</span>
+                    <div className="inline-flex">
+                      <Tag
+                        color={MERCHANT_STATUS_COLOR_MAP[merchant.status || '']}
+                      >
+                        {MERCHANT_STATUS.find(
+                          (status) => status.value === merchant.status
+                        )?.label || '---'}
+                      </Tag>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </InfoCard>
+              </InfoCard>
 
-            <InfoCard title="Thông tin điểm đại lý">
-              <div className="grid grid-cols-4 gap-6">
-                {/* Mã điểm địa lý */}
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">Mã điểm địa lý</span>
-                  <span className="text-base text-gray-800">
-                    {merchant.code || '---'}
-                  </span>
-                </div>
+              <InfoCard
+                title="Hạn mức giao dịch"
+                showBadge={isWaitingApprovalForEdit}
+                badgeText="Thông tin cũ"
+                badgeColor="green"
+              >
+                <div className="grid grid-cols-4 gap-6">
+                  {/* Hạn mức trong tháng */}
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">
+                      Hạn mức trong tháng
+                    </span>
+                    <span className="text-base text-gray-800">
+                      {monthlyLimit !== undefined
+                        ? monthlyLimit.toLocaleString('vi-VN') + ' VND'
+                        : '---'}
+                    </span>
+                  </div>
 
-                {/* Tên điểm đại lý */}
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">Tên điểm đại lý</span>
-                  <span className="text-base text-gray-800">
-                    {merchant.name || '---'}
-                  </span>
-                </div>
-
-                {/* Địa chỉ */}
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">Địa chỉ</span>
-                  <span className="text-base text-gray-800">
-                    {merchant.address || '---'}
-                  </span>
-                </div>
-
-                {/* Tài khoản chuyên thu */}
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">
-                    Tài khoản chuyên thu
-                  </span>
-                  <span className="text-base text-gray-800">
-                    {merchant.income_account || '---'}
-                  </span>
-                </div>
-
-                {/* Tài khoản chuyên chi */}
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">
-                    Tài khoản chuyên chi
-                  </span>
-                  <span className="text-base text-gray-800">
-                    {merchant.expense_account || '---'}
-                  </span>
-                </div>
-
-                {/* Trạng thái */}
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">Trạng thái</span>
-                  <div className="inline-flex">
-                    <Tag
-                      color={MERCHANT_STATUS_COLOR_MAP[merchant.status || '']}
-                    >
-                      {MERCHANT_STATUS.find(
-                        (status) => status.value === merchant.status
-                      )?.label || '---'}
-                    </Tag>
+                  {/* Hạn mức trong ngày */}
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">
+                      Hạn mức trong ngày
+                    </span>
+                    <span className="text-base text-gray-800">
+                      {dailyLimit !== undefined
+                        ? dailyLimit.toLocaleString('vi-VN') + ' VND'
+                        : '---'}
+                    </span>
                   </div>
                 </div>
-              </div>
-            </InfoCard>
-
-            <InfoCard title="Hạn mức giao dịch">
-              <div className="grid grid-cols-4 gap-6">
-                {/* Hạn mức trong tháng */}
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">
-                    Hạn mức trong tháng
-                  </span>
-                  <span className="text-base text-gray-800">
-                    {monthlyLimit !== undefined
-                      ? monthlyLimit.toLocaleString('vi-VN') + ' VND'
-                      : '---'}
-                  </span>
-                </div>
-
-                {/* Hạn mức trong ngày */}
-                <div className="flex flex-col flex-1 gap-2">
-                  <span className="text-sm text-gray-400">
-                    Hạn mức trong ngày
-                  </span>
-                  <span className="text-base text-gray-800">
-                    {dailyLimit !== undefined
-                      ? dailyLimit.toLocaleString('vi-VN') + ' VND'
-                      : '---'}
-                  </span>
-                </div>
-              </div>
-            </InfoCard>
+              </InfoCard>
+            </>
           </div>
           <div id="B" className="w-1/3">
-            <aside>{/* Additional side information */}</aside>
+            <InfoCard title="Xác nhận phê duyệt">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">
+                    Quản lý đồng ý yêu cầu
+                  </span>
+                  <span className="text-base text-gray-800">
+                    {merchant.need_approve_transaction_types ||
+                    merchant.approve_amount
+                      ? 'Đồng ý'
+                      : 'Không đồng ý'}
+                  </span>
+                </div>
+
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">
+                    Số tiền giao dịch
+                  </span>
+                  <span className="text-base text-gray-800">
+                    {merchant?.approve_amount
+                      ? merchant.approve_amount.toLocaleString('vi-VN') + ' VND'
+                      : '---'}
+                  </span>
+                </div>
+
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">
+                    Loại giao dịch yêu cầu
+                  </span>
+
+                  <div className="flex flex-col gap-1">
+                    {merchant.need_approve_transaction_types &&
+                    merchant.need_approve_transaction_types.length > 0 ? (
+                      merchant.need_approve_transaction_types.map(
+                        (type: any) => (
+                          <div
+                            key={type.transaction_type_code}
+                            className="flex items-center gap-2"
+                          >
+                            <CheckOutlined />
+                            <span className="text-base font-semibold">
+                              {type.transaction_type_name}
+                            </span>
+                          </div>
+                        )
+                      )
+                    ) : (
+                      <span className="text-base font-semibold">---</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </InfoCard>
           </div>
         </div>
 
@@ -264,25 +340,47 @@ export default function MasterMerchantDetail() {
               Chỉnh sửa
             </button>
           )}
-          {isApprover && merchant.status === 'WAITING_APPROVE' && (
+          {isApprover && isWaitingApprovalForCreate && (
             <>
               <button
                 type="button"
-                onClick={() => rejectMutation.mutate()}
-                disabled={rejectMutation.isPending}
+                onClick={() => rejectMutationCreate.mutate()}
+                disabled={rejectMutationCreate.isPending}
                 className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
               >
                 <CloseCircleOutlined />
-                {rejectMutation.isPending ? 'Đang xử lý...' : 'Từ chối'}
+                {rejectMutationCreate.isPending ? 'Đang xử lý...' : 'Từ chối'}
               </button>
               <button
                 type="button"
-                onClick={() => approveMutation.mutate()}
-                disabled={approveMutation.isPending}
+                onClick={() => approveMutationCreate.mutate()}
+                disabled={approveMutationCreate.isPending}
                 className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
               >
                 <CheckCircleOutlined />
-                {approveMutation.isPending ? 'Đang xử lý...' : 'Duyệt'}
+                {approveMutationCreate.isPending ? 'Đang xử lý...' : 'Duyệt'}
+              </button>
+            </>
+          )}
+          {isApprover && isWaitingApprovalForEdit && (
+            <>
+              <button
+                type="button"
+                onClick={() => rejectMutationEdit.mutate()}
+                disabled={rejectMutationEdit.isPending}
+                className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+              >
+                <CloseCircleOutlined />
+                {rejectMutationEdit.isPending ? 'Đang xử lý...' : 'Từ chối'}
+              </button>
+              <button
+                type="button"
+                onClick={() => approveMutationEdit.mutate()}
+                disabled={approveMutationEdit.isPending}
+                className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+              >
+                <CheckCircleOutlined />
+                {approveMutationEdit.isPending ? 'Đang xử lý...' : 'Duyệt'}
               </button>
             </>
           )}

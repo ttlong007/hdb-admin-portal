@@ -57,7 +57,7 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
       cif: payload.cif,
       name: payload.name,
       business_license: payload.business_license,
-      page: masterMerchantFilters.page,
+      page: 1,
       limit: masterMerchantFilters.limit,
     })
   }

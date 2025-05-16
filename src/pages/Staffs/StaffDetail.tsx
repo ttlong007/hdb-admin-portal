@@ -41,6 +41,7 @@ const StaffDetail: React.FC = () => {
   })
 
   const isWaitingApprovalForEdit = data?.status === 'WAITING_APPROVAL_FOR_EDIT'
+  const isWaitingApprovalForCreate = data?.status === 'WAITING_APPROVE'
 
   const { data: changeRequestData } = useChangeRequestDetail({
     id: id || '',
@@ -48,7 +49,51 @@ const StaffDetail: React.FC = () => {
     isWaitingApprovalForEdit,
   })
 
-  const rejectMutation = useMutation({
+  const rejectMutationCreate = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post(
+        '/v1/admin/staff/reject-staffs',
+        {
+          ids: [Number(id)],
+        }
+      )
+      if (response.status !== 204) {
+        throw new Error('Từ chối thất bại')
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Từ chối thành công')
+      queryClient.invalidateQueries({ queryKey: ['staffDetail', id] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi từ chối')
+    },
+  })
+
+  const approveMutationCreate = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post(
+        '/v1/admin/staff/approve-staffs',
+        {
+          ids: [Number(id)],
+        }
+      )
+      if (response.status !== 204) {
+        throw new Error('Duyệt thất bại')
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Duyệt thành công')
+      queryClient.invalidateQueries({ queryKey: ['staffDetail', id] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi duyệt')
+    },
+  })
+
+  const rejectMutationEdit = useMutation({
     mutationFn: async () => {
       const response = await axiosInstance.post(
         '/v1/admin/change-request/reject',
@@ -70,7 +115,7 @@ const StaffDetail: React.FC = () => {
     },
   })
 
-  const approveMutation = useMutation({
+  const approveMutationEdit = useMutation({
     mutationFn: async () => {
       const response = await axiosInstance.post(
         '/v1/admin/change-request/approve',
@@ -328,25 +373,47 @@ const StaffDetail: React.FC = () => {
             Chỉnh sửa
           </button>
         )}
-        {isApprover && staff.status === 'WAITING_APPROVAL_FOR_EDIT' && (
+        {isApprover && isWaitingApprovalForEdit && (
           <>
             <button
               type="button"
-              onClick={() => rejectMutation.mutate()}
-              disabled={rejectMutation.isPending}
+              onClick={() => rejectMutationEdit.mutate()}
+              disabled={rejectMutationEdit.isPending}
               className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
             >
               <CloseCircleOutlined />
-              {rejectMutation.isPending ? 'Đang xử lý...' : 'Từ chối'}
+              {rejectMutationEdit.isPending ? 'Đang xử lý...' : 'Từ chối'}
             </button>
             <button
               type="button"
-              onClick={() => approveMutation.mutate()}
-              disabled={approveMutation.isPending}
+              onClick={() => approveMutationEdit.mutate()}
+              disabled={approveMutationEdit.isPending}
               className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
             >
               <CheckCircleOutlined />
-              {approveMutation.isPending ? 'Đang xử lý...' : 'Duyệt'}
+              {approveMutationEdit.isPending ? 'Đang xử lý...' : 'Duyệt'}
+            </button>
+          </>
+        )}
+        {isApprover && isWaitingApprovalForCreate && (
+          <>
+            <button
+              type="button"
+              onClick={() => rejectMutationCreate.mutate()}
+              disabled={rejectMutationCreate.isPending}
+              className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+            >
+              <CloseCircleOutlined />
+              {rejectMutationCreate.isPending ? 'Đang xử lý...' : 'Từ chối'}
+            </button>
+            <button
+              type="button"
+              onClick={() => approveMutationCreate.mutate()}
+              disabled={approveMutationCreate.isPending}
+              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            >
+              <CheckCircleOutlined />
+              {approveMutationCreate.isPending ? 'Đang xử lý...' : 'Duyệt'}
             </button>
           </>
         )}

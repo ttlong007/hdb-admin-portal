@@ -206,16 +206,16 @@ export default function MasterMerchantEdit() {
       if (response.data.status_code === 'ACCEPT') {
         return response.data
       } else {
-        throw new Error(response.data.reason_message || 'Cập nhật thất bại')
+        throw new Error(response.data.reason_message || 'Tạo yêu cầu chỉnh sửa đại lý tổng thất bại')
       }
     },
     onSuccess: () => {
-      toast.success('Cập nhật thành công!')
+      toast.success('Tạo yêu cầu chỉnh sửa đại lý tổng thành công!')
       queryClient.invalidateQueries({ queryKey: ['masterMerchantDetail', id] })
-      navigate(-1)
+      navigate(routes.masterMerchant)
     },
     onError: (error: any) => {
-      toast.error(error.message || 'Có lỗi xảy ra khi cập nhật')
+      toast.error(error.message || 'Tạo yêu cầu chỉnh sửa đại lý tổng thất bại')
     },
   })
 
@@ -404,7 +404,7 @@ export default function MasterMerchantEdit() {
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(routes.masterMerchant)}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
             <CloseCircleOutlined />

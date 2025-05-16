@@ -131,8 +131,8 @@ const Filters: React.FC = () => {
     setTransactionFilters({
       ...transactionFilters,
       ...processedData,
-      page: transactionFilters.page,
-      limit: transactionFilters.limit,
+      page: 1,
+      limit: 10,
     })
   }
 

@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { toast } from 'react-toastify'
 import { useNavigate } from 'react-router-dom'
@@ -30,6 +30,7 @@ export function useUpdateStaff(
   onSuccessCallback?: () => void
 ) {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   return useMutation<void, Error, StaffPayload>({
     mutationFn: async (data) => {
@@ -51,13 +52,14 @@ export function useUpdateStaff(
       )
     },
     onSuccess: () => {
-      toast.success('Staff update request created successfully!')
-      onSuccessCallback?.()
+      toast.success('Tạo yêu cầu chỉnh sửa nhân viên thành công!')
+      queryClient.invalidateQueries({ queryKey: ['staffDetail', id] })
       navigate(routes.staff)
+      onSuccessCallback?.()
     },
     onError: (error: any) => {
       toast.error(
-        error.message || 'An error occurred while creating staff update request'
+        error.message || 'Tạo yêu cầu chỉnh sửa nhân viên thất bại'
       )
     },
   })

@@ -483,10 +483,7 @@ export default function CreateStaff() {
           <button
             type="button"
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
-            onClick={() => {
-              // Optionally perform cancel actions here
-            }}
-            disabled={createStaffMutation.isPending}
+            onClick={() => navigate(routes.staff)}
           >
             Hủy bỏ
           </button>
@@ -499,7 +496,7 @@ export default function CreateStaff() {
                 : ''
             }`}
           >
-            {createStaffMutation.isPending ? 'Đang tạo...' : 'Tạo nhân viên'}
+            {createStaffMutation.isPending ? 'Đang lưu...' : 'Lưu và gửi duyệt'}
           </button>
         </div>
       </form>

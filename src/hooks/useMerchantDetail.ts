@@ -23,10 +23,15 @@ interface Merchant {
     type: string
     amount: number
   }>
+  need_approve_transaction_types?: Array<{
+    approve_amount: number
+    is_active: boolean
+    transaction_type_code: string
+  }>
 }
 
 interface UseMerchantDetailResult {
-  merchant: Merchant | null
+  merchant: any | null
   isLoading: boolean
   error: Error | null
   monthlyLimit?: number
@@ -52,6 +57,7 @@ export function useMerchantDetail(id?: string): UseMerchantDetailResult {
 
   const merchant = storeData
     ? {
+        ...storeData,
         id: storeData.id,
         code: storeData.code,
         name: storeData.name,

@@ -585,7 +585,7 @@ export default function EditStaff() {
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(routes.staff)}
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
             <CloseCircleOutlined />
@@ -601,8 +601,8 @@ export default function EditStaff() {
             }`}
           >
             {updateStaffMutation.isPending
-              ? 'Đang cập nhật...'
-              : 'Cập nhật nhân viên'}
+              ? 'Đang lưu và gửi duyệt...'
+              : 'Lưu và gửi duyệt'}
           </button>
         </div>
       </form>

@@ -69,7 +69,7 @@ const Filters: React.FC = () => {
       company_id: payload.company_id,
       code: payload.code,
       name: payload.name,
-      page: merchantFilters.page,
+      page: 1,
       limit: merchantFilters.limit,
     })
   }

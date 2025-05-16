@@ -13,6 +13,7 @@ import { useAuth } from '@/store/authSlice/useAuth'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
+import { CloseCircleOutlined } from '@ant-design/icons'
 
 type Option = { label: string; value: string }
 
@@ -90,7 +91,17 @@ const schema = yup.object({
   approveThreshold: yup
     .string()
     .transform((value) => (value ? value.replace(/,/g, '') : ''))
-    .required('Ngưỡng giá trị cần duyệt là bắt buộc')
+    .test(
+      'required-if-needApprove',
+      'Ngưỡng giá trị cần duyệt là bắt buộc',
+      function (value) {
+        const needApprove = this.parent.needApprove
+        if (needApprove) {
+          return !!value
+        }
+        return true
+      }
+    )
     .test(
       'is-number',
       'Ngưỡng giá trị cần duyệt phải là số',
@@ -717,15 +728,23 @@ const CreateMerchant = () => {
           ) : null}
         </section>
 
-        <div className="flex items-center justify-end gap-4 w-full my-4">
+        <div className="flex items-center justify-end gap-4 w-full mt-8">
+          <button
+            type="button"
+            onClick={() => navigate(routes.merchant)}
+            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+          >
+            <CloseCircleOutlined />
+            Hủy bỏ
+          </button>
           <button
             type="submit"
             disabled={createMerchantMutation.isPending}
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
             {createMerchantMutation.isPending
-              ? 'Đang tạo đại lý...'
-              : 'Tạo đại lý'}
+              ? 'Đang lưu và gửi duyệt...'
+              : 'Lưu và gửi duyệt'}
           </button>
         </div>
       </form>

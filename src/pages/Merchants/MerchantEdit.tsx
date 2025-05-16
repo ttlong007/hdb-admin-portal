@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useParams, NavLink, useNavigate } from 'react-router-dom'
 import { useForm, Controller, useWatch } from 'react-hook-form'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Checkbox, Switch } from 'antd'
 import { Input, NumberInput } from 'rizzui'
 import Select from 'react-select'
@@ -13,6 +13,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
 import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
+import { CloseCircleOutlined } from '@ant-design/icons'
 
 type Option = { label: string; value: string }
 
@@ -31,6 +32,13 @@ interface MerchantFormValues {
   transactionTypes: number[]
   company_id: Option | null
 }
+
+interface ChangeRequestPayload {
+  entity_id: number
+  entity_type: string
+  proposed_changes: any
+}
+
 
 const defaultTransactionTypes = [
   { id: 1, name: 'Giao dịch 1' },
@@ -96,36 +104,30 @@ const schema = yup.object().shape({
   approveThreshold: yup
     .string()
     .transform((value) => (value ? value.replace(/,/g, '') : ''))
-    .required('Ngưỡng giá trị cần duyệt là bắt buộc')
+    .test(
+      'required-if-needApprove',
+      'Ngưỡng giá trị cần duyệt là bắt buộc',
+      function (value) {
+        const needApprove = this.parent.needApprove
+        if (needApprove) {
+          return !!value
+        }
+        return true
+      }
+    )
     .test(
       'is-number',
       'Ngưỡng giá trị cần duyệt phải là số',
       (value) => !value || !isNaN(Number(value))
     ),
-  transactionTypes: yup
-    .array()
-    .of(yup.mixed())
-    .test(
-      'required-if-approveThreshold',
-      'Chọn ít nhất một loại giao dịch cần duyệt',
-      function (value) {
-        const approveThreshold = this.parent.approveThreshold
-        if (
-          approveThreshold !== undefined &&
-          approveThreshold !== null &&
-          approveThreshold !== ''
-        ) {
-          return value && value.length > 0
-        }
-        return true
-      }
-    ),
+  transactionTypes: yup.array().of(yup.mixed()),
 })
 
 const EditMerchant = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { isApprover } = useAuth()
+  const queryClient = useQueryClient()
 
   useEffect(() => {
     if (isApprover) {
@@ -372,31 +374,15 @@ const EditMerchant = () => {
   const { data: companyOptions, isLoading: isLoadingCompanies } =
     useCompaniesOptions()
 
-  // Create merchant mutation.
-  const createMerchantMutation = useMutation({
-    mutationFn: async (payload: any) => {
-      const response = await axiosInstance.post(
-        '/v1/admin/store/create',
-        payload
-      )
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data
-      }
-      throw new Error('Creation failed')
-    },
-    onSuccess: () => {
-      toast.success('Tạo đại lý thành công!')
-    },
-    onError: (error: any) => {
-      toast.error('Tạo đại lý thất bại!')
-      console.error(error)
-    },
-  })
-
   const editMerchantMutation = useMutation({
-    mutationFn: async (payload: any) => {
-      const response = await axiosInstance.patch(
-        `/v1/admin/store/${id}`,
+    mutationFn: async (data: any) => {
+      const payload: ChangeRequestPayload = {
+        entity_id: Number(id),
+        entity_type: 'STORE',
+        proposed_changes: data
+      }
+      const response = await axiosInstance.post(
+        `/v1/admin/change-request/create`,
         payload
       )
       if (response.data.status_code === 'ACCEPT') {
@@ -405,10 +391,12 @@ const EditMerchant = () => {
       throw new Error('Edit failed')
     },
     onSuccess: () => {
-      toast.success('Chỉnh sửa đại lý thành công!')
+      toast.success('Tạo yêu cầu chỉnh sửa đại lý thành công!')
+      queryClient.invalidateQueries({ queryKey: ['merchantDetail', id] })
+      navigate(routes.merchant)
     },
     onError: (error: any) => {
-      toast.error('Chỉnh sửa đại lý thất bại!')
+      toast.error('Tạo yêu cầu chỉnh sửa đại lý thất bại!')
       console.error(error)
     },
   })
@@ -485,7 +473,6 @@ const EditMerchant = () => {
       }
     }
 
-    // Submit only the changed payload.
     editMerchantMutation.mutate(payload)
   }
 
@@ -826,7 +813,7 @@ const EditMerchant = () => {
 
           {needApprove ? (
             <>
-              <div className="grid grid-cols-3 gap-6 w-full mb-4">
+              <div className="w-1/2 mb-4">
                 <Controller
                   name="approveThreshold"
                   control={control}
@@ -844,9 +831,9 @@ const EditMerchant = () => {
                   )}
                 />
                 {errors.approveThreshold?.message ? (
-                  <span className="text-red-500 text-sm">
+                  <div className="text-red-500 text-sm mt-1">
                     {errors.approveThreshold?.message?.toString()}
-                  </span>
+                  </div>
                 ) : null}
               </div>
 
@@ -889,15 +876,23 @@ const EditMerchant = () => {
           ) : null}
         </section>
 
-        <div className="flex items-center justify-end gap-4 w-full my-4">
+        <div className="flex items-center justify-end gap-4 w-full mt-8">
+          <button
+            type="button"
+            onClick={() => navigate(routes.merchant)}
+            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+          >
+            <CloseCircleOutlined />
+            Hủy bỏ
+          </button>
           <button
             type="submit"
-            disabled={createMerchantMutation.isPending}
+            disabled={editMerchantMutation.isPending}
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
-            {createMerchantMutation.isPending
-              ? 'Đang chỉnh sửa đại lý...'
-              : 'Chỉnh sửa đại lý'}
+            {editMerchantMutation.isPending
+              ? 'Đang lưu và gửi duyệt...'
+              : 'Lưu và gửi duyệt'}
           </button>
         </div>
       </form>
