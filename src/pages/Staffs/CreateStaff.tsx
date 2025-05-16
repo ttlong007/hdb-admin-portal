@@ -46,68 +46,11 @@ type StaffPayload = {
   transaction_type_ids: number[]
 }
 
-const schema = yup.object().shape({
-  name: yup.string().required('Họ tên là bắt buộc'),
-  email: yup.string().email('Email không hợp lệ').required('Email là bắt buộc'),
-  phone_number: yup
-    .string()
-    .matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số')
-    .min(10, 'Số điện thoại phải có ít nhất 10 số')
-    .max(11, 'Số điện thoại không được vượt quá 11 số')
-    .required('Số điện thoại là bắt buộc'),
-  national_id_number: yup
-    .string()
-    .matches(/^[0-9]+$/, 'Số CCCD chỉ được chứa số')
-    .length(12, 'Số CCCD phải có đúng 12 số')
-    .required('Số CCCD là bắt buộc'),
-  company_id: yup.mixed<Option>().nullable().required('Công ty là bắt buộc'),
-  role: yup.mixed<Option>().nullable().required('Nhóm chức danh là bắt buộc'),
-  store_id: yup.mixed<Option>().nullable().required('Cửa hàng là bắt buộc'),
-  transaction_monthly_quota: yup
-    .string()
-    .transform((value) => (value ? value.replace(/,/g, '') : ''))
-    .required('Hạn mức tháng là bắt buộc')
-    .test(
-      'is-number',
-      'Hạn mức tháng phải là số',
-      (value) => !value || !isNaN(Number(value))
-    )
-    .test(
-      'max-monthly',
-      'Hạn mức tháng tối đa là 5,000,000,000',
-      (value) => !value || Number(value) <= 5000000000
-    ),
-  transaction_daily_quota: yup
-    .string()
-    .transform((value) => (value ? value.replace(/,/g, '') : ''))
-    .required('Hạn mức ngày là bắt buộc')
-    .test(
-      'is-number',
-      'Hạn mức ngày phải là số',
-      (value) => !value || !isNaN(Number(value))
-    )
-    .test(
-      'max-daily',
-      'Hạn mức ngày tối đa là 200,000,000',
-      (value) => !value || Number(value) <= 200000000
-    )
-    .test(
-      'less-than-monthly',
-      'Hạn mức ngày phải nhỏ hơn hoặc bằng hạn mức tháng',
-      function (value) {
-        const monthlyQuota = this.parent.transaction_monthly_quota
-        if (!value || !monthlyQuota) return true
-        return Number(value) <= Number(monthlyQuota)
-      }
-    ),
-  transactionTypes: yup.array().of(yup.mixed()),
-}) as yup.ObjectSchema<FormData>
-
 const defaultTransactionTypes = []
 
 export default function CreateStaff() {
   const navigate = useNavigate()
-  const { isApprover } = useAuth()
+  const { isApprover, systemConfig } = useAuth()
 
   useEffect(() => {
     if (isApprover) {
@@ -138,7 +81,69 @@ export default function CreateStaff() {
           name: t.name,
         }))
       : defaultTransactionTypes
-
+  const schema = yup.object().shape({
+    name: yup.string().required('Họ tên là bắt buộc'),
+    email: yup
+      .string()
+      .email('Email không hợp lệ')
+      .required('Email là bắt buộc'),
+    phone_number: yup
+      .string()
+      .matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số')
+      .min(10, 'Số điện thoại phải có ít nhất 10 số')
+      .max(11, 'Số điện thoại không được vượt quá 11 số')
+      .required('Số điện thoại là bắt buộc'),
+    national_id_number: yup
+      .string()
+      .matches(/^[0-9]+$/, 'Số CCCD chỉ được chứa số')
+      .length(12, 'Số CCCD phải có đúng 12 số')
+      .required('Số CCCD là bắt buộc'),
+    company_id: yup.mixed<Option>().nullable().required('Công ty là bắt buộc'),
+    role: yup.mixed<Option>().nullable().required('Nhóm chức danh là bắt buộc'),
+    store_id: yup.mixed<Option>().nullable().required('Cửa hàng là bắt buộc'),
+    transaction_monthly_quota: yup
+      .string()
+      .transform((value) => (value ? value.replace(/,/g, '') : ''))
+      .required('Hạn mức tháng là bắt buộc')
+      .test(
+        'is-number',
+        'Hạn mức tháng phải là số',
+        (value) => !value || !isNaN(Number(value))
+      )
+      .test(
+        'max-monthly',
+        `Hạn mức tháng tối đa là ${Number(
+          systemConfig.LIMIT_MONTHLY_MAXIMUM
+        ).toLocaleString()}`,
+        (value) => !value || Number(value) <= Number(systemConfig.LIMIT_MONTHLY_MAXIMUM)
+      ),
+    transaction_daily_quota: yup
+      .string()
+      .transform((value) => (value ? value.replace(/,/g, '') : ''))
+      .required('Hạn mức ngày là bắt buộc')
+      .test(
+        'is-number',
+        'Hạn mức ngày phải là số',
+        (value) => !value || !isNaN(Number(value))
+      )
+      .test(
+        'max-daily',
+        `Hạn mức ngày tối đa là ${Number(
+          systemConfig.LIMIT_DAILY_MAXIMUM
+        ).toLocaleString()}`,
+        (value) => !value || Number(value) <= Number(systemConfig.LIMIT_DAILY_MAXIMUM)
+      )
+      .test(
+        'less-than-monthly',
+        'Hạn mức ngày phải nhỏ hơn hoặc bằng hạn mức tháng',
+        function (value) {
+          const monthlyQuota = this.parent.transaction_monthly_quota
+          if (!value || !monthlyQuota) return true
+          return Number(value) <= Number(monthlyQuota)
+        }
+      ),
+    transactionTypes: yup.array().of(yup.mixed()),
+  }) as yup.ObjectSchema<FormData>
   const {
     control,
     handleSubmit,

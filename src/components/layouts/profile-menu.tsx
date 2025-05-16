@@ -50,8 +50,13 @@ export default function ProfileMenu({
     queryFn: async () => {
       const response = await axiosInstance.get('/v1/admin/system-config/list')
       if (response.data.status_code === 'ACCEPT') {
-        setAuthState({ systemConfig: response.data.data })
-        return response.data.data
+        const systemConfigData = response.data.data
+        const formattedConfig = systemConfigData.reduce((acc: any, config: any) => {
+          acc[config.key] = config.value
+          return acc
+        }, {})
+        setAuthState({ systemConfig: formattedConfig })
+        return formattedConfig
       }
       throw new Error(
         response.data.reason_message || 'Failed to fetch system config'

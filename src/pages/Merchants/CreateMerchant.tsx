@@ -35,84 +35,9 @@ interface MerchantFormValues {
 
 const defaultTransactionTypes = []
 
-const schema = yup.object({
-  name: yup.string().required('Tên điểm đại lý là bắt buộc'),
-  code: yup.string().required('Mã điểm đại lý là bắt buộc'),
-  address: yup.string().required('Địa chỉ là bắt buộc'),
-  city: yup.object().nullable().required('Tỉnh/Thành phố là bắt buộc'),
-  district: yup.object().nullable().required('Quận/Huyện là bắt buộc'),
-  ward: yup.object().nullable().required('Phường/Xã là bắt buộc'),
-  expense_account: yup
-    .object()
-    .nullable()
-    .required('Tài khoản chuyên chi là bắt buộc'),
-  income_account: yup
-    .object()
-    .nullable()
-    .required('Tài khoản chuyên thu là bắt buộc'),
-  company_id: yup.object().nullable().required('Công ty là bắt buộc'),
-  transaction_monthly_quota: yup
-    .string()
-    .transform((value) => (value ? value.replace(/,/g, '') : ''))
-    .required('Hạn mức tháng là bắt buộc')
-    .test(
-      'is-number',
-      'Hạn mức tháng phải là số',
-      (value) => !value || !isNaN(Number(value))
-    )
-    .test(
-      'max-monthly',
-      'Hạn mức tháng tối đa là 5,000,000,000',
-      (value) => !value || Number(value) <= 5000000000
-    ),
-  transaction_daily_quota: yup
-    .string()
-    .transform((value) => (value ? value.replace(/,/g, '') : ''))
-    .required('Hạn mức ngày là bắt buộc')
-    .test(
-      'is-number',
-      'Hạn mức ngày phải là số',
-      (value) => !value || !isNaN(Number(value))
-    )
-    .test(
-      'max-daily',
-      'Hạn mức ngày tối đa là 200,000,000',
-      (value) => !value || Number(value) <= 200000000
-    )
-    .test(
-      'less-than-monthly',
-      'Hạn mức ngày phải nhỏ hơn hoặc bằng hạn mức tháng',
-      function (value) {
-        const monthlyQuota = this.parent.transaction_monthly_quota
-        if (!value || !monthlyQuota) return true
-        return Number(value) <= Number(monthlyQuota)
-      }
-    ),
-  approveThreshold: yup
-    .string()
-    .transform((value) => (value ? value.replace(/,/g, '') : ''))
-    .test(
-      'required-if-needApprove',
-      'Ngưỡng giá trị cần duyệt là bắt buộc',
-      function (value) {
-        const needApprove = this.parent.needApprove
-        if (needApprove) {
-          return !!value
-        }
-        return true
-      }
-    )
-    .test(
-      'is-number',
-      'Ngưỡng giá trị cần duyệt phải là số',
-      (value) => !value || !isNaN(Number(value))
-    ),
-  transactionTypes: yup.array().of(yup.mixed()),
-})
-
 const CreateMerchant = () => {
   const navigate = useNavigate()
-  const { isApprover } = useAuth()
+  const { isApprover, systemConfig } = useAuth()
 
   useEffect(() => {
     if (isApprover) {
@@ -144,6 +69,94 @@ const CreateMerchant = () => {
         }))
       : defaultTransactionTypes
 
+  const schema = yup.object({
+    name: yup.string().required('Tên điểm đại lý là bắt buộc'),
+    code: yup.string().required('Mã điểm đại lý là bắt buộc'),
+    address: yup.string().required('Địa chỉ là bắt buộc'),
+    city: yup.object().nullable().required('Tỉnh/Thành phố là bắt buộc'),
+    district: yup.object().nullable().required('Quận/Huyện là bắt buộc'),
+    ward: yup.object().nullable().required('Phường/Xã là bắt buộc'),
+    expense_account: yup
+      .object()
+      .nullable()
+      .required('Tài khoản chuyên chi là bắt buộc'),
+    income_account: yup
+      .object()
+      .nullable()
+      .required('Tài khoản chuyên thu là bắt buộc'),
+    company_id: yup.object().nullable().required('Công ty là bắt buộc'),
+    transaction_monthly_quota: yup
+      .string()
+      .transform((value) => (value ? value.replace(/,/g, '') : ''))
+      .required('Hạn mức tháng là bắt buộc')
+      .test(
+        'is-number',
+        'Hạn mức tháng phải là số',
+        (value) => !value || !isNaN(Number(value))
+      )
+      .test(
+        'max-monthly',
+        `Hạn mức tháng tối đa là ${Number(
+          systemConfig.LIMIT_MONTHLY_MAXIMUM
+        ).toLocaleString()}`,
+        (value) =>
+          !value || Number(value) <= Number(systemConfig.LIMIT_MONTHLY_MAXIMUM)
+      ),
+    transaction_daily_quota: yup
+      .string()
+      .transform((value) => (value ? value.replace(/,/g, '') : ''))
+      .required('Hạn mức ngày là bắt buộc')
+      .test(
+        'is-number',
+        'Hạn mức ngày phải là số',
+        (value) => !value || !isNaN(Number(value))
+      )
+      .test(
+        'max-daily',
+        `Hạn mức ngày tối đa là ${Number(
+          systemConfig.LIMIT_DAILY_MAXIMUM
+        ).toLocaleString()}`,
+        (value) =>
+          !value || Number(value) <= Number(systemConfig.LIMIT_DAILY_MAXIMUM)
+      )
+      .test(
+        'less-than-monthly',
+        'Hạn mức ngày phải nhỏ hơn hoặc bằng hạn mức tháng',
+        function (value) {
+          const monthlyQuota = this.parent.transaction_monthly_quota
+          if (!value || !monthlyQuota) return true
+          return Number(value) <= Number(monthlyQuota)
+        }
+      ),
+    approveThreshold: yup
+      .string()
+      .transform((value) => (value ? value.replace(/,/g, '') : ''))
+      .test(
+        'required-if-needApprove',
+        'Ngưỡng giá trị cần duyệt là bắt buộc',
+        function (value) {
+          const needApprove = this.parent.needApprove
+          if (needApprove) {
+            return !!value
+          }
+          return true
+        }
+      )
+      .test(
+        'is-number',
+        'Ngưỡng giá trị cần duyệt phải là số',
+        (value) => !value || !isNaN(Number(value))
+      )
+      .test(
+        'max-approval',
+        `Ngưỡng giá trị cần duyệt tối đa là ${Number(
+          systemConfig.LIMIT_APPROVAL_DEFAULT
+        ).toLocaleString()}`,
+        (value) =>
+          !value || Number(value) <= Number(systemConfig.LIMIT_APPROVAL_DEFAULT)
+      ),
+    transactionTypes: yup.array().of(yup.mixed()),
+  })
   const {
     handleSubmit,
     control,
