@@ -242,7 +242,7 @@ export default function MerchantDetail() {
                     </span>
                     <span className="text-base text-gray-800">
                       {monthlyLimit !== undefined
-                        ? monthlyLimit.toLocaleString('vi-VN') + ' VND'
+                        ? monthlyLimit.toLocaleString('en-US') + ' VND'
                         : '---'}
                     </span>
                   </div>
@@ -254,7 +254,7 @@ export default function MerchantDetail() {
                     </span>
                     <span className="text-base text-gray-800">
                       {dailyLimit !== undefined
-                        ? dailyLimit.toLocaleString('vi-VN') + ' VND'
+                        ? dailyLimit.toLocaleString('en-US') + ' VND'
                         : '---'}
                     </span>
                   </div>
@@ -283,7 +283,7 @@ export default function MerchantDetail() {
                   </span>
                   <span className="text-base text-gray-800">
                     {merchant?.approve_amount
-                      ? merchant.approve_amount.toLocaleString('vi-VN') + ' VND'
+                      ? merchant.approve_amount.toLocaleString('en-US') + ' VND'
                       : '---'}
                   </span>
                 </div>

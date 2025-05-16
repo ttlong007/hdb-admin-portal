@@ -256,8 +256,9 @@ const Merchants: React.FC = () => {
               pageSize: merchantFilters.limit || 10,
               current: merchantFilters.page || 1,
               showSizeChanger: true,
-              showTotal: (total) => `Có ${total} items`,
+              showTotal: (total) => `Có ${total} kết quả`,
               pageSizeOptions: ['10', '20', '50', '100', '500'],
+              locale: { items_per_page: 'kết quả / trang' },
             }}
             onChange={onTableChange}
           />

@@ -1,7 +1,7 @@
 import React from 'react'
 import { Input } from 'rizzui'
 import Select from 'react-select'
-import { BsDownload, BsArrowClockwise } from 'react-icons/bs'
+import { BsDownload, BsArrowClockwise, BsTrash } from 'react-icons/bs'
 import { DatePicker } from 'antd'
 import { useForm, Controller } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
@@ -12,6 +12,7 @@ import { toast } from 'react-toastify'
 import { TRANSACTION_STATUS } from '@/config/constants'
 import { useFilter } from '@/store/filterSlice/useFilter'
 import dayjs from 'dayjs'
+import { FilterOutlined } from '@ant-design/icons'
 const { RangePicker } = DatePicker
 
 interface FiltersFormValues {
@@ -99,7 +100,7 @@ const Filters: React.FC = () => {
     return data.map((item, index) => ({
       stt: index + 1,
       code: item.code || '---',
-      amount: item.amount ? item.amount.toLocaleString('vi-VN') : '---',
+      amount: item.amount ? item.amount.toLocaleString('en-US') : '---',
       status: item.status
         ? TRANSACTION_STATUS.find((s) => s.value === item.status)?.label ||
           '---'
@@ -198,7 +199,9 @@ const Filters: React.FC = () => {
           </div>
 
           <div>
-            <div className="text-sm text-[#000000] mb-2">Loại giao dịch</div>
+            <div className="text-sm text-[#000000] mb-[6px]">
+              Loại giao dịch
+            </div>
 
             <Controller
               name="transaction_type"
@@ -212,7 +215,7 @@ const Filters: React.FC = () => {
                   onChange={field.onChange}
                   placeholder={
                     isLoadingTransactionTypes
-                      ? 'Loading...'
+                      ? 'Đang tải...'
                       : 'Chọn loại giao dịch'
                   }
                   className="react-select-container"
@@ -253,7 +256,7 @@ const Filters: React.FC = () => {
           </div>
 
           <div>
-            <div className="text-sm text-[#000000] mb-2">Trạng thái</div>
+            <div className="text-sm text-[#000000] mb-[6px]">Trạng thái</div>
 
             <Controller
               name="status"
@@ -288,7 +291,7 @@ const Filters: React.FC = () => {
             />
             {isExporting || exportMutation.isPending
               ? 'Đang tải...'
-              : 'Xuất file'}
+              : 'Tải xuống'}
           </button>
           <CSVLink
             ref={csvLinkRef}
@@ -302,15 +305,16 @@ const Filters: React.FC = () => {
           <button
             type="button"
             onClick={handleReset}
-            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+            className="bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <BsArrowClockwise />
+            <BsTrash />
             Xóa bộ lọc
           </button>
           <button
             type="submit"
-            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            className="rounded-md outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
+            <FilterOutlined />
             Áp dụng
           </button>
         </div>

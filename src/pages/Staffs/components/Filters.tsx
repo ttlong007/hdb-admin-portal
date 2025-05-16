@@ -1,6 +1,6 @@
 import React from 'react'
 import { Input } from 'rizzui'
-import { BsDownload, BsArrowClockwise } from 'react-icons/bs'
+import { BsDownload, BsArrowClockwise, BsTrash } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
 import Select from 'react-select'
 import { useQuery } from '@tanstack/react-query'
@@ -12,6 +12,7 @@ import { STAFF_STATUS, STAFF_STATUS_MAP, STAFF_ROLES } from '@/config/constants'
 import axiosInstance from '@/config/axios'
 import { useExportStaffs } from '@/hooks/useExportStaffs'
 import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
+import { FilterOutlined } from '@ant-design/icons'
 
 interface FiltersFormValues {
   company_id: any
@@ -153,7 +154,7 @@ const Filters: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="grid grid-cols-3 gap-4 w-full">
           <div>
-            <div className="text-sm text-[#000000] mb-2">Công ty</div>
+            <div className="text-sm text-[#000000] mb-[6px]">Công ty</div>
             <Controller
               name="company_id"
               control={control}
@@ -178,7 +179,7 @@ const Filters: React.FC = () => {
             />
           </div>
           <div>
-            <div className="text-sm text-[#000000] mb-2">Điểm đại lý</div>
+            <div className="text-sm text-[#000000] mb-[6px]">Điểm đại lý</div>
             <Controller
               name="store_id"
               control={control}
@@ -225,7 +226,9 @@ const Filters: React.FC = () => {
           />
 
           <div>
-            <div className="text-sm text-[#000000] mb-2">Nhóm chức danh</div>
+            <div className="text-sm text-[#000000] mb-[6px]">
+              Nhóm chức danh
+            </div>
             <Controller
               name="role"
               control={control}
@@ -245,7 +248,7 @@ const Filters: React.FC = () => {
           </div>
 
           <div>
-            <div className="text-sm text-[#000000] mb-2">Trạng thái</div>
+            <div className="text-sm text-[#000000] mb-[6px]">Trạng thái</div>
             <Controller
               name="status"
               control={control}
@@ -278,7 +281,7 @@ const Filters: React.FC = () => {
             />
             {isExporting || exportMutation.isPending
               ? 'Đang tải...'
-              : 'Xuất file'}
+              : 'Tải xuống'}
           </button>
           <CSVLink
             ref={csvLinkRef}
@@ -292,15 +295,16 @@ const Filters: React.FC = () => {
           <button
             type="button"
             onClick={handleReset}
-            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+            className="bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <BsArrowClockwise />
+            <BsTrash />
             Xóa bộ lọc
           </button>
           <button
             type="submit"
-            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            className="rounded-md outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
+            <FilterOutlined />
             Áp dụng
           </button>
         </div>

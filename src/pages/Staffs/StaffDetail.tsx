@@ -289,7 +289,7 @@ const StaffDetail: React.FC = () => {
                                 (limit) =>
                                   limit.type === 'TRANSACTION_QUOTA_MONTHLY'
                               )?.amount
-                            ).toLocaleString('vi-VN')} VND`
+                            ).toLocaleString('en-US')} VND`
                           : '---'}
                       </span>
                     </div>
@@ -307,7 +307,7 @@ const StaffDetail: React.FC = () => {
                                 (limit) =>
                                   limit.type === 'TRANSACTION_QUOTA_DAILY'
                               )?.amount
-                            ).toLocaleString('vi-VN')} VND`
+                            ).toLocaleString('en-US')} VND`
                           : '---'}
                       </span>
                     </div>

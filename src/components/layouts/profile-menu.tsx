@@ -45,6 +45,19 @@ export default function ProfileMenu({
       throw new Error(response.data.reason_message || 'Failed to fetch profile')
     },
   })
+  useQuery({
+    queryKey: ['systemConfig'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/system-config/list')
+      if (response.data.status_code === 'ACCEPT') {
+        setAuthState({ systemConfig: response.data.data })
+        return response.data.data
+      }
+      throw new Error(
+        response.data.reason_message || 'Failed to fetch system config'
+      )
+    },
+  })
 
   return (
     <ProfileMenuPopover>
@@ -129,7 +142,7 @@ function DropdownMenu({ profile }: DropdownMenuProps) {
 
   console.log('profile', profile)
   return (
-    <div className="w-64 text-left rtl:text-right">
+    <div className="text-left rtl:text-right">
       <div className="flex items-center border-b border-gray-300 px-6 pb-5 pt-6">
         <Avatar
           src={profile?.avatar || '/avatar.png'}

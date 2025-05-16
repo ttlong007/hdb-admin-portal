@@ -135,7 +135,7 @@ export function MerchantChangeInfo({
                       Hạn mức trong tháng
                     </span>
                     <span className="text-base font-semibold">
-                      {monthlyLimit.toLocaleString('vi-VN') + ' VND'}
+                      {monthlyLimit.toLocaleString('en-US') + ' VND'}
                     </span>
                   </div>
                 ) : null}
@@ -146,7 +146,7 @@ export function MerchantChangeInfo({
                       Hạn mức trong ngày
                     </span>
                     <span className="text-base font-semibold">
-                      {dailyLimit.toLocaleString('vi-VN') + ' VND'}
+                      {dailyLimit.toLocaleString('en-US') + ' VND'}
                     </span>
                   </div>
                 ) : null}

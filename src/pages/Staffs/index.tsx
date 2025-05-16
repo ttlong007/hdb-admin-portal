@@ -229,8 +229,9 @@ const Staffs: React.FC = () => {
               current: staffFilters.page,
               pageSize: staffFilters.limit,
               showSizeChanger: true,
-              showTotal: (total: number) => `Có ${total} items`,
+              showTotal: (total: number) => `Có ${total} kết quả`,
               pageSizeOptions: ['10', '20', '50', '100', '500'],
+              locale: { items_per_page: 'kết quả / trang' },
             }}
             onChange={onTableChange}
           />

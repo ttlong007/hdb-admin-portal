@@ -1,6 +1,6 @@
 import React from 'react'
 import { Input, Select } from 'rizzui'
-import { BsArrowClockwise, BsDownload } from 'react-icons/bs'
+import { BsArrowClockwise, BsDownload, BsTrash } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
 import { CSVLink } from 'react-csv'
 import { toast } from 'react-toastify'
@@ -9,6 +9,7 @@ import ReactSelect from 'react-select'
 import { useExportMasterMerchants } from '@/hooks/useExportMasterMerchants'
 import { MASTER_MERCHANT_STATUS } from '@/config/constants'
 import { useFilter } from '@/store/filterSlice/useFilter'
+import { FilterOutlined } from '@ant-design/icons'
 
 interface FiltersFormValues {
   cif: string
@@ -67,7 +68,7 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
       cif: '',
       name: '',
       business_license: '',
-      status: null
+      status: null,
     })
     resetMasterMerchantFilters()
   }
@@ -163,7 +164,7 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
             control={control}
             render={({ field }) => (
               <div className="w-full">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 mb-[6px]">
                   Trạng thái
                 </label>
                 <ReactSelect
@@ -192,7 +193,7 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
             />
             {isExporting || exportMutation.isPending
               ? 'Đang tải...'
-              : 'Xuất file'}
+              : 'Tải xuống'}
           </button>
           <CSVLink
             ref={csvLinkRef}
@@ -207,7 +208,7 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
             type="button"
             onClick={sync}
             disabled={syncLoading}
-            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+            className="bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
             <BsArrowClockwise />
             {syncLoading ? 'Đang đồng bộ...' : 'Đồng bộ công ty'}
@@ -215,15 +216,16 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
           <button
             type="button"
             onClick={handleReset}
-            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+            className="bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <BsArrowClockwise />
+            <BsTrash />
             Xóa bộ lọc
           </button>
           <button
             type="submit"
-            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            className="rounded-md outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
+            <FilterOutlined />
             Áp dụng
           </button>
         </div>

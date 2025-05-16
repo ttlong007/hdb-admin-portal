@@ -158,11 +158,11 @@ const MasterMerchants: React.FC = () => {
       }
     },
     onSuccess: () => {
-      toast.success('Companies synced successfully!')
+      toast.success('Đồng bộ công ty thành công')
       refetch()
     },
     onError: () => {
-      toast.error('Failed to sync companies.')
+      toast.error('Đồng bộ công ty thất bại')
     },
   })
 
@@ -210,8 +210,9 @@ const MasterMerchants: React.FC = () => {
               pageSize: masterMerchantFilters.limit,
               current: masterMerchantFilters.page,
               showSizeChanger: true,
-              showTotal: (total) => `Có ${total} items`,
+              showTotal: (total) => `Có ${total} kết quả`,
               pageSizeOptions: ['10', '20', '50', '100', '500'],
+              locale: { items_per_page: 'kết quả / trang' },
             }}
             onChange={onTableChange}
           />

@@ -44,7 +44,7 @@ const Transactions: React.FC = () => {
       key: 'amount',
       sorter: true,
       render: (amount: number) =>
-        amount ? amount.toLocaleString('vi-VN') : '---',
+        amount ? amount.toLocaleString('en-US') : '---',
     },
     {
       title: 'Trạng thái',
@@ -72,7 +72,7 @@ const Transactions: React.FC = () => {
       key: 'created_at',
       sorter: true,
       render: (date: string) =>
-        date ? new Date(date).toLocaleString('vi-VN') : '---',
+        date ? new Date(date).toLocaleString('en-US') : '---',
     },
     {
       title: 'Mã - Tên điểm đại lý',
@@ -93,7 +93,7 @@ const Transactions: React.FC = () => {
       dataIndex: 'transaction_fee',
       key: 'transaction_fee',
       sorter: true,
-      render: (fee: number) => (fee ? fee.toLocaleString('vi-VN') : '---'),
+      render: (fee: number) => (fee ? fee.toLocaleString('en-US') : '---'),
     },
     {
       title: 'Tác vụ',
@@ -171,8 +171,9 @@ const Transactions: React.FC = () => {
               current: page,
               pageSize: limit,
               showSizeChanger: true,
-              showTotal: (total: number) => `Có ${total} items`,
+              showTotal: (total: number) => `Có ${total} kết quả`,
               pageSizeOptions: ['10', '20', '50', '100', '500'],
+              locale: { items_per_page: 'kết quả / trang' },
             }}
             onChange={onTableChange}
             rowKey="id"

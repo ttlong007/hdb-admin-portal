@@ -1622,3 +1622,8 @@ div[style='z-index: 1000001;'],
 .react-select__menu {
   z-index: 9999 !important;
 }
+
+.rizzui-input-container {
+  box-shadow: none !important;
+  height: 39px !important;
+}

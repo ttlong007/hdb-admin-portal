@@ -169,7 +169,7 @@ export default function MasterMerchantDetail() {
               <span className="text-sm text-gray-400">Hạn mức trong tháng</span>
               <span className="text-base font-semibold">
                 {monthlyLimit
-                  ? monthlyLimit.toLocaleString('vi-VN') + ' VND'
+                  ? monthlyLimit.toLocaleString('en-US') + ' VND'
                   : '---'}
               </span>
             </div>
@@ -177,7 +177,7 @@ export default function MasterMerchantDetail() {
               <span className="text-sm text-gray-400">Hạn mức trong ngày</span>
               <span className="text-base font-semibold">
                 {dailyLimit
-                  ? dailyLimit.toLocaleString('vi-VN') + ' VND'
+                  ? dailyLimit.toLocaleString('en-US') + ' VND'
                   : '---'}
               </span>
             </div>

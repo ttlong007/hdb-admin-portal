@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import { Input } from 'rizzui'
-import { BsDownload, BsArrowClockwise } from 'react-icons/bs'
+import { BsDownload, BsTrash } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
 import Select from 'react-select'
 import { CSVLink } from 'react-csv'
@@ -10,6 +10,7 @@ import { useFilter } from '@/store/filterSlice/useFilter'
 import { MERCHANT_STATUS, MERCHANT_STATUS_MAP } from '@/config/constants'
 import { useExportMerchants } from '@/hooks/useExportMerchants'
 import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
+import { FilterOutlined } from '@ant-design/icons'
 
 interface FiltersFormValues {
   cif: string
@@ -143,7 +144,7 @@ const Filters: React.FC = () => {
             )}
           />
           <div>
-            <div className="text-sm text-[#000000] mb-2">Công ty</div>
+            <div className="text-sm text-[#000000] mb-[6px]">Công ty</div>
             <Controller
               name="company_id"
               control={control}
@@ -188,7 +189,7 @@ const Filters: React.FC = () => {
             )}
           />
           <div>
-            <div className="text-sm text-[#000000] mb-2">Trạng thái</div>
+            <div className="text-sm text-[#000000] mb-[6px]">Trạng thái</div>
             <Controller
               name="status"
               control={control}
@@ -212,7 +213,7 @@ const Filters: React.FC = () => {
             type="button"
             onClick={handleExport}
             disabled={isExporting || exportMutation.isPending}
-            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <BsDownload
               className={
@@ -221,7 +222,7 @@ const Filters: React.FC = () => {
             />
             {isExporting || exportMutation.isPending
               ? 'Đang tải...'
-              : 'Xuất file'}
+              : 'Tải xuống'}
           </button>
           <CSVLink
             ref={csvLinkRef}
@@ -235,15 +236,16 @@ const Filters: React.FC = () => {
           <button
             type="button"
             onClick={handleReset}
-            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+            className="bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
-            <BsArrowClockwise />
+            <BsTrash />
             Xóa bộ lọc
           </button>
           <button
             type="submit"
-            className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            className="rounded-md outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
           >
+            <FilterOutlined />
             Áp dụng
           </button>
         </div>

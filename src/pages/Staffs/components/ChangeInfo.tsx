@@ -195,7 +195,7 @@ export function ChangeInfo({
                     </span>
                     <span className="text-base font-semibold">
                       {monthlyLimit
-                        ? `${Number(monthlyLimit).toLocaleString('vi-VN')} VND`
+                        ? `${Number(monthlyLimit).toLocaleString('en-US')} VND`
                         : '---'}
                     </span>
                   </div>
@@ -208,7 +208,7 @@ export function ChangeInfo({
                     </span>
                     <span className="text-base font-semibold">
                       {dailyLimit
-                        ? `${Number(dailyLimit).toLocaleString('vi-VN')} VND`
+                        ? `${Number(dailyLimit).toLocaleString('en-US')} VND`
                         : '---'}
                     </span>
                   </div>

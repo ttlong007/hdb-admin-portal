@@ -290,7 +290,7 @@ const TransactionDetail: React.FC = () => {
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
               {transaction.total_amount
-                ? transaction.total_amount.toLocaleString('vi-VN') + ' VND'
+                ? transaction.total_amount.toLocaleString('en-US') + ' VND'
                 : '---'}
             </span>
           </div>
@@ -302,7 +302,7 @@ const TransactionDetail: React.FC = () => {
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
               {transaction.amount
-                ? transaction.amount.toLocaleString('vi-VN') + ' VND'
+                ? transaction.amount.toLocaleString('en-US') + ' VND'
                 : '---'}
             </span>
           </div>
@@ -344,7 +344,7 @@ const TransactionDetail: React.FC = () => {
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
               {transaction.created_at
-                ? new Date(transaction.created_at).toLocaleString('vi-VN')
+                ? new Date(transaction.created_at).toLocaleString('en-US')
                 : '---'}
             </span>
           </div>
@@ -356,7 +356,7 @@ const TransactionDetail: React.FC = () => {
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
               {transaction.transaction_fee !== undefined
-                ? transaction.transaction_fee.toLocaleString('vi-VN') + ' VND'
+                ? transaction.transaction_fee.toLocaleString('en-US') + ' VND'
                 : '---'}
             </span>
           </div>

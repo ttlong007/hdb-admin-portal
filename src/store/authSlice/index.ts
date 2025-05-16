@@ -4,12 +4,14 @@ interface State {
   accessToken: string | null
   refreshToken: string | null
   user: any
+  systemConfig: any
 }
 
 const initialState: State = {
   accessToken: null,
   refreshToken: null,
   user: null,
+  systemConfig: null,
 }
 
 const authSlice = createSlice({
