@@ -16,7 +16,7 @@ import { toast } from 'react-toastify'
 import { useMerchants } from '@/hooks/useMerchants'
 import { useAuth } from '@/store/authSlice/useAuth'
 import { useFilter } from '@/store/filterSlice/useFilter'
-
+import { useConfirm } from '@/providers/ConfirmProvider'
 const Merchants: React.FC = () => {
   const { merchantFilters, setMerchantFilters } = useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
@@ -25,6 +25,7 @@ const Merchants: React.FC = () => {
   )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { isApprover, isCreator } = useAuth()
+  const confirm = useConfirm()
 
   const { data, isPending, refetch } = useMerchants({
     page: merchantFilters.page || 1,
@@ -177,23 +178,30 @@ const Merchants: React.FC = () => {
       if (response.status === 204) {
         return response
       }
-      throw new Error(response.data.reason_message || 'Approval failed')
+      throw new Error(response.data.reason_message || 'Duyệt thất bại')
     },
     onSuccess: () => {
-      toast.success('Approval successful')
+      toast.success('Duyệt thành công')
       refetch() // refresh list merchants when status code is 204 or ACCEPT
       setSelectedRowKeys([]) // clear selection
     },
     onError: (error: any) => {
-      toast.error(
-        error.message || 'An error occurred while approving merchants'
-      )
+      toast.error('Lỗi duyệt điểm đại lý')
       console.error('Approval error:', error)
     },
   })
 
   const handleApprove = () => {
-    approveMutation.mutate(selectedRowKeys)
+    confirm({
+      title: 'Xác nhận duyệt',
+      message: 'Bạn có chắc chắn muốn duyệt những điểm đại lý này?',
+      confirmText: 'Đồng ý',
+      cancelText: 'Hủy bỏ',
+    }).then((result) => {
+      if (result) {
+        approveMutation.mutate(selectedRowKeys)
+      }
+    })
   }
 
   return (

@@ -19,12 +19,14 @@ import InfoCard from '@/components/core/components/InfoCard'
 import { useChangeRequestDetail } from '@/hooks/useChangeRequestDetail'
 import CompanyInfo from './components/CompanyInfo'
 import { ChangeInfo } from './components/ChangeInfo'
+import { useConfirm } from '@/providers/ConfirmProvider'
 
 const StaffDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { isCreator, isApprover } = useAuth()
   const queryClient = useQueryClient()
+  const confirm = useConfirm()
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['staffDetail', id],
@@ -377,7 +379,18 @@ const StaffDetail: React.FC = () => {
           <>
             <button
               type="button"
-              onClick={() => rejectMutationEdit.mutate()}
+              onClick={() =>
+                confirm({
+                  title: 'Xác nhận từ chối',
+                  message: 'Bạn có chắc chắn muốn từ chối nhân viên này?',
+                  confirmText: 'Đồng ý',
+                  cancelText: 'Hủy bỏ',
+                }).then((result) => {
+                  if (result) {
+                    rejectMutationEdit.mutate()
+                  }
+                })
+              }
               disabled={rejectMutationEdit.isPending}
               className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
             >
@@ -386,7 +399,18 @@ const StaffDetail: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => approveMutationEdit.mutate()}
+              onClick={() =>
+                confirm({
+                  title: 'Xác nhận duyệt',
+                  message: 'Bạn có chắc chắn muốn duyệt nhân viên này?',
+                  confirmText: 'Đồng ý',
+                  cancelText: 'Hủy bỏ',
+                }).then((result) => {
+                  if (result) {
+                    approveMutationEdit.mutate()
+                  }
+                })
+              }
               disabled={approveMutationEdit.isPending}
               className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
             >
@@ -399,7 +423,18 @@ const StaffDetail: React.FC = () => {
           <>
             <button
               type="button"
-              onClick={() => rejectMutationCreate.mutate()}
+              onClick={() =>
+                confirm({
+                  title: 'Xác nhận từ chối',
+                  message: 'Bạn có chắc chắn muốn từ chối nhân viên này?',
+                  confirmText: 'Đồng ý',
+                  cancelText: 'Hủy bỏ',
+                }).then((result) => {
+                  if (result) {
+                    rejectMutationCreate.mutate()
+                  }
+                })
+              }
               disabled={rejectMutationCreate.isPending}
               className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
             >
@@ -408,7 +443,18 @@ const StaffDetail: React.FC = () => {
             </button>
             <button
               type="button"
-              onClick={() => approveMutationCreate.mutate()}
+              onClick={() =>
+                confirm({
+                  title: 'Xác nhận duyệt',
+                  message: 'Bạn có chắc chắn muốn duyệt nhân viên này?',
+                  confirmText: 'Đồng ý',
+                  cancelText: 'Hủy bỏ',
+                }).then((result) => {
+                  if (result) {
+                    approveMutationCreate.mutate()
+                  }
+                })
+              }
               disabled={approveMutationCreate.isPending}
               className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
             >

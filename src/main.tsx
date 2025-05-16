@@ -9,12 +9,11 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 import 'react-toastify/dist/ReactToastify.css'
 
-
 import { store, persistor } from './store'
 import App from './App.tsx'
 import { Providers } from '@core/providers'
 import './index.css'
-
+import { ConfirmProvider } from './providers/ConfirmProvider.tsx'
 
 const queryClient = new QueryClient()
 
@@ -25,7 +24,9 @@ createRoot(document.getElementById('root')!).render(
         <PersistGate loading={null} persistor={persistor}>
           <QueryClientProvider client={queryClient}>
             <BrowserRouter>
-              <App />
+              <ConfirmProvider>
+                <App />
+              </ConfirmProvider>
               <ToastContainer />
             </BrowserRouter>
             <ReactQueryDevtools initialIsOpen={false} />

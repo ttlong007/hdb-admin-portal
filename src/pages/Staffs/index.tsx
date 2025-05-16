@@ -15,7 +15,10 @@ import {
   STAFF_STATUS_MAP,
 } from '@/config/constants'
 import { useAuth } from '@/store/authSlice/useAuth'
-
+import { useMutation } from '@tanstack/react-query'
+import axiosInstance from '@/config/axios'
+import { toast } from 'react-toastify'
+import { useConfirm } from '@/providers/ConfirmProvider'
 interface Staff {
   id: number
   code: string
@@ -29,6 +32,7 @@ interface Staff {
 const Staffs: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { isApprover, isCreator } = useAuth()
+  const confirm = useConfirm()
   const { staffFilters, setStaffFilters } = useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
   const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
@@ -133,31 +137,6 @@ const Staffs: React.FC = () => {
     },
   ]
 
-  const rowSelection: TableProps['rowSelection'] = isApprover
-    ? {
-        onChange: (selectedRowKeys: React.Key[], selectedRows: any[]) => {
-          setSelectedRowKeys(selectedRowKeys)
-          console.log(
-            `selectedRowKeys: ${selectedRowKeys}`,
-            'selectedRows:',
-            selectedRows
-          )
-        },
-        getCheckboxProps: (record: any) => ({
-          disabled: record.name === 'Disabled User',
-          name: record.name,
-        }),
-      }
-    : undefined
-
-  const onPaginationChange = (pagination: any) => {
-    setStaffFilters({
-      ...staffFilters,
-      page: pagination.current,
-      limit: pagination.pageSize,
-    })
-  }
-
   const onTableChange = (pagination: any, _filters: any, sorter: any) => {
     onPaginationChange(pagination)
 
@@ -168,6 +147,71 @@ const Staffs: React.FC = () => {
       setSortField(null)
       setSortOrder(null)
     }
+  }
+
+  const rowSelection: TableProps['rowSelection'] = isApprover
+    ? {
+        onChange: (selectedKeys: React.Key[], selectedRows: any[]) => {
+          console.log(
+            'Selected Row Keys:',
+            selectedKeys,
+            'Selected Rows:',
+            selectedRows
+          )
+          setSelectedRowKeys(selectedKeys)
+        },
+        getCheckboxProps: (record: any) => ({
+          // Hide the checkbox for rows whose status is not "waiting_approve"
+          style:
+            record.status?.toLowerCase() !== 'waiting_approve'
+              ? { display: 'none' }
+              : {},
+        }),
+      }
+    : undefined
+
+  const approveMutation = useMutation({
+    mutationFn: async (ids: React.Key[]) => {
+      const payload = { ids }
+      const response = await axiosInstance.post(
+        '/v1/admin/staff/approve-staffs',
+        payload
+      )
+      // Check if the HTTP status code is 204 or the response data has status_code "ACCEPT"
+      if (response.status === 204) {
+        return response
+      }
+      throw new Error(response.data.reason_message || 'Duyệt thất bại')
+    },
+    onSuccess: () => {
+      toast.success('Duyệt thành công')
+      refetch() // refresh list merchants when status code is 204 or ACCEPT
+      setSelectedRowKeys([]) // clear selection
+    },
+    onError: (error: any) => {
+      toast.error('Lỗi duyệt nhân viên')
+      console.error('Approval error:', error)
+    },
+  })
+  const onPaginationChange = (pagination: any) => {
+    setStaffFilters({
+      ...staffFilters,
+      page: pagination.current,
+      limit: pagination.pageSize,
+    })
+  }
+
+  const handleApprove = () => {
+    confirm({
+      title: 'Xác nhận duyệt',
+      message: 'Bạn có chắc chắn muốn duyệt những nhân viên này?',
+      confirmText: 'Đồng ý',
+      cancelText: 'Hủy bỏ',
+    }).then((result) => {
+      if (result) {
+        approveMutation.mutate(selectedRowKeys)
+      }
+    })
   }
 
   return (
