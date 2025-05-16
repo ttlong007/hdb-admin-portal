@@ -44,7 +44,7 @@ export function useMerchantDetail(id?: string): UseMerchantDetailResult {
     isLoading,
     error,
   } = useQuery<Merchant, Error>({
-    queryKey: ['storeDetail', id],
+    queryKey: ['merchantDetail', id],
     queryFn: async () => {
       const response = await axiosInstance.get(`/v1/admin/store/${id}`)
       if (response.data.status_code === 'ACCEPT') {

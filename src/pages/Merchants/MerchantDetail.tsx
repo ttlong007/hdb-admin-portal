@@ -24,6 +24,7 @@ import InfoCard from '@/components/core/components/InfoCard'
 import { useChangeRequestDetail } from '@/hooks/useChangeRequestDetail'
 import CompanyInfo from '../Staffs/components/CompanyInfo'
 import StaffDetail from '../Staffs/StaffDetail'
+import { MerchantChangeInfo } from './components/MerchantChangeInfo'
 
 export default function MerchantDetail() {
   const { id } = useParams<{ id: string }>()
@@ -39,7 +40,7 @@ export default function MerchantDetail() {
 
   const { data: changeRequestData } = useChangeRequestDetail({
     id: id || '',
-    entityType: 'MERCHANT',
+    entityType: 'STORE',
     isWaitingApprovalForEdit,
   })
 
@@ -318,6 +319,13 @@ export default function MerchantDetail() {
           </div>
         </div>
 
+        {isApprover && isWaitingApprovalForEdit ? (
+          <MerchantChangeInfo
+            isWaitingApprovalForEdit={isWaitingApprovalForEdit}
+            changeRequestData={changeRequestData?.proposedChanges}
+          />
+        ) : null}
+
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
@@ -358,7 +366,9 @@ export default function MerchantDetail() {
                 className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
               >
                 <CheckCircleOutlined />
-                {approveMutationCreate.isPending ? 'Đang xử lý...' : 'Duyệt'}
+                {approveMutationCreate.isPending
+                  ? 'Đang xử lý...'
+                  : 'Đồng ý duyệt'}
               </button>
             </>
           )}
@@ -380,7 +390,9 @@ export default function MerchantDetail() {
                 className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
               >
                 <CheckCircleOutlined />
-                {approveMutationEdit.isPending ? 'Đang xử lý...' : 'Duyệt'}
+                {approveMutationEdit.isPending
+                  ? 'Đang xử lý...'
+                  : 'Đồng ý duyệt'}
               </button>
             </>
           )}

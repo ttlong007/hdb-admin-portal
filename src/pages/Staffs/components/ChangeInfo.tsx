@@ -41,7 +41,7 @@ export function ChangeInfo({
 
   return (
     <div className="mt-8 flex flex-col gap-6">
-      <h2 className="text-[#212B36] font-bold leading-[20px] text-blue-400">
+      <h2 className="font-bold leading-[20px] text-blue-400">
         Thông tin đề nghị chỉnh sửa
       </h2>
 
