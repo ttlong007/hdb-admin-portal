@@ -1,4 +1,5 @@
 envsubst < .env.uat > .env
+rm -rf release/uat
 yarn build
 mkdir -p release/uat
 cp -r dist/* release/uat
