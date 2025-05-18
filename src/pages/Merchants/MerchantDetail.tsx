@@ -144,7 +144,7 @@ export default function MerchantDetail() {
       {/* Breadcrumbs */}
       <div className="flex justify-start items-center gap-2 mb-4">
         <Link
-          to={routes.masterMerchant}
+          to={routes.merchant}
           className="text-base font-semibold hover:underline"
         >
           Quản lý đại lý
@@ -321,7 +321,7 @@ export default function MerchantDetail() {
           </div>
         </div>
 
-        {isApprover && isWaitingApprovalForEdit ? (
+        {isWaitingApprovalForEdit ? (
           <MerchantChangeInfo
             isWaitingApprovalForEdit={isWaitingApprovalForEdit}
             changeRequestData={changeRequestData?.proposedChanges}

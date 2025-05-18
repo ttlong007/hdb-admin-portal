@@ -19,6 +19,7 @@ import { useMutation } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { toast } from 'react-toastify'
 import { useConfirm } from '@/providers/ConfirmProvider'
+import { useGetFiles } from '@/hooks/useGetFiles'
 interface Staff {
   id: number
   code: string
@@ -38,6 +39,22 @@ const Staffs: React.FC = () => {
   const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
     null
   )
+  const { data: file, isPending: isFilesPending } = useGetFiles({
+    fields: ['admin_staffs_create.xlsx'],
+  })
+
+  const handleDownloadTemplate = () => {
+    if (file?.full_url) {
+      const link = document.createElement('a')
+      link.href = file.full_url
+      link.download = file.original_file_name || 'template.xlsx'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } else {
+      toast.error('Không thể tải file mẫu')
+    }
+  }
 
   const { data, isPending, refetch } = useStaffs({
     page: staffFilters.page || 1,
@@ -240,9 +257,13 @@ const Staffs: React.FC = () => {
             Danh sách nhân viên đại lý
           </div>
           <div className="flex justify-start items-center gap-3">
-            <div className="text-[#366AE2] text-xs font-medium underline">
+            <button
+              onClick={handleDownloadTemplate}
+              disabled={isFilesPending}
+              className="text-[#366AE2] text-xs font-medium underline cursor-pointer hover:text-[#2d57b8] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Tải về file mẫu
-            </div>
+            </button>
             <button className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]">
               {/* SVG icon */}
               Tải lên theo danh sách

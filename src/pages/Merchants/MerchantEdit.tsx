@@ -14,6 +14,7 @@ import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
 import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 import { CloseCircleOutlined } from '@ant-design/icons'
+import InfoCard from '@/components/core/components/InfoCard'
 
 type Option = { label: string; value: string }
 
@@ -31,6 +32,7 @@ interface MerchantFormValues {
   approveThreshold: number | string
   transactionTypes: number[]
   company_id: Option | null
+  active: boolean
 }
 
 interface ChangeRequestPayload {
@@ -169,6 +171,7 @@ const EditMerchant = () => {
       approveThreshold: '',
       transactionTypes: [],
       company_id: null,
+      active: false,
     },
     resolver: yupResolver(schema),
     mode: 'all',
@@ -252,6 +255,8 @@ const EditMerchant = () => {
                 value: storeData.company.id.toString(),
               }
             : null,
+        // Set active based on status
+        active: storeData.status === 'ACTIVE',
       })
 
       // Set the needApprove flag based on whether any approval transaction types exist.
@@ -415,7 +420,6 @@ const EditMerchant = () => {
   })
 
   const onSubmit = (data: MerchantFormValues) => {
-    // Start with required field(s)
     const payload: any = {}
 
     // Loop over changed fields (dirtyFields) to add them in payload.
@@ -427,14 +431,12 @@ const EditMerchant = () => {
         key !== 'approveThreshold' &&
         key !== 'transactionTypes' &&
         key !== 'expense_account' &&
-        key !== 'income_account' &&
-        key !== 'ward'
+        key !== 'income_account'
       ) {
         payload[key] = (data as any)[key]
       }
     })
 
-    // Handle accounts separately (assuming they are Option objects)
     if (dirtyFields.expense_account && data.expense_account) {
       payload.expense_account = data.expense_account.value
     }
@@ -442,9 +444,17 @@ const EditMerchant = () => {
       payload.income_account = data.income_account.value
     }
 
-    // Handle location: use ward to map location_id.
     if (dirtyFields.ward && data.ward) {
       payload.location_id = Number(data.ward.value)
+    }
+
+    if (dirtyFields.company_id && data.company_id) {
+      payload.company_id = Number(data.company_id.value)
+    }
+
+    // Handle active status
+    if (dirtyFields.active) {
+      payload.status = data.active ? 'ACTIVE' : 'INACTIVE'
     }
 
     // Handle limits if either daily or monthly quotas changed.
@@ -486,6 +496,11 @@ const EditMerchant = () => {
       }
     }
 
+    if (payload.ward) delete payload.ward
+    if (payload.district) delete payload.district
+    if (payload.city) delete payload.city
+    if (payload.active) delete payload.active
+
     editMerchantMutation.mutate(payload)
   }
 
@@ -510,14 +525,8 @@ const EditMerchant = () => {
         </span>
       </div>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex p-6 flex-col items-start gap-6 rounded-lg bg-white"
-      >
-        <section className="w-full border-b pb-8">
-          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
-            Thông tin điểm đại lý
-          </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+        <InfoCard title="Thông tin điểm đại lý">
           <div className="grid grid-cols-3 gap-6 w-full">
             {/* Company */}
             <div>
@@ -751,12 +760,9 @@ const EditMerchant = () => {
               />
             </div>
           </div>
-        </section>
+        </InfoCard>
 
-        <section className="w-full border-b pb-8">
-          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
-            Hạn mức giao dịch
-          </div>
+        <InfoCard title="Hạn mức giao dịch">
           <div className="flex gap-4 w-2/3">
             <div className="flex-1">
               <Controller
@@ -806,26 +812,20 @@ const EditMerchant = () => {
               ) : null}
             </div>
           </div>
-        </section>
+        </InfoCard>
 
-        <section className="w-full border-b pb-8">
-          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
-            Duyệt giao dịch
-          </div>
-
-          <div className="flex items-center gap-2 mb-4">
-            <Switch
-              checked={needApprove}
-              onChange={handleApporveChange}
-              className="!w-[40px] !h-[20px] !rounded-full"
-            />
-            <span className="text-[#212B36]">
-              Yêu cầu trưởng cửa hàng duyệt giao dịch
-            </span>
-          </div>
+        <InfoCard title="Duyệt giao dịch">
+          <Switch
+            checked={needApprove}
+            onChange={handleApporveChange}
+            className="!w-[40px] !h-[20px] !rounded-full"
+          />
+          <label className="ml-2">
+            Yêu cầu trưởng cửa hàng duyệt giao dịch
+          </label>
 
           {needApprove ? (
-            <>
+            <div className="flex flex-col gap-4 mt-4">
               <div className="w-1/2 mb-4">
                 <Controller
                   name="approveThreshold"
@@ -885,9 +885,22 @@ const EditMerchant = () => {
                   )}
                 />
               </div>
-            </>
+            </div>
           ) : null}
-        </section>
+        </InfoCard>
+
+        <InfoCard title="">
+          <Controller
+            name="active"
+            control={control}
+            render={({ field }) => (
+              <div>
+                <Switch {...field} checked={field.value} />
+                <label className="ml-2">Hoạt động</label>
+              </div>
+            )}
+          />
+        </InfoCard>
 
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button

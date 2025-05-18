@@ -347,7 +347,7 @@ const StaffDetail: React.FC = () => {
           </div>
         </>
 
-        {isApprover && staff.status === 'WAITING_APPROVAL_FOR_EDIT' ? (
+        {staff.status === 'WAITING_APPROVAL_FOR_EDIT' ? (
           <ChangeInfo
             isWaitingApprovalForEdit={isWaitingApprovalForEdit}
             changeRequestData={changeRequestData?.proposedChanges}

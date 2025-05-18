@@ -18,19 +18,22 @@ const InfoCard: React.FC<InfoCardProps> = ({
 }) => {
   return (
     <section className="p-6 bg-white rounded-lg shadow-[0_1px_4px_rgba(51,49,65,0.25)]">
-      <div className="flex items-center justify-between mb-6">
-        {title ? (
-          <h2 className="text-3xl font-bold text-gray-800 max-sm:text-2xl">
-            {title}
-          </h2>
-        ) : null}
+      {title ? (
+        <div className="flex items-center justify-between mb-6">
+          {title ? (
+            <h2 className="text-3xl font-bold text-gray-800 max-sm:text-2xl">
+              {title}
+            </h2>
+          ) : null}
 
-        {showBadge && (
-          <Tag color={badgeColor} className="w-fit">
-            {badgeText}
-          </Tag>
-        )}
-      </div>
+          {showBadge && (
+            <Tag color={badgeColor} className="w-fit">
+              {badgeText}
+            </Tag>
+          )}
+        </div>
+      ) : null}
+
       {children}
     </section>
   )

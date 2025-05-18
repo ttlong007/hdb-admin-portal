@@ -17,6 +17,7 @@ import { useMerchants } from '@/hooks/useMerchants'
 import { useAuth } from '@/store/authSlice/useAuth'
 import { useFilter } from '@/store/filterSlice/useFilter'
 import { useConfirm } from '@/providers/ConfirmProvider'
+import { useGetFiles } from '@/hooks/useGetFiles'
 const Merchants: React.FC = () => {
   const { merchantFilters, setMerchantFilters } = useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
@@ -26,6 +27,23 @@ const Merchants: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { isApprover, isCreator } = useAuth()
   const confirm = useConfirm()
+  const { data: file, isPending: isFilesPending } = useGetFiles({
+    fields: ['admin_stores_create.xlsx'],
+  })
+
+  const handleDownloadTemplate = () => {
+    if (file?.full_url) {
+      // Create a temporary anchor element
+      const link = document.createElement('a')
+      link.href = file.full_url
+      link.download = file.original_file_name || 'template.xlsx'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } else {
+      toast.error('Không thể tải file mẫu')
+    }
+  }
 
   const { data, isPending, refetch } = useMerchants({
     page: merchantFilters.page || 1,
@@ -230,9 +248,13 @@ const Merchants: React.FC = () => {
             Quản lý điểm đại lý
           </div>
           <div className="flex justify-start items-center gap-3">
-            <div className="text-[#366AE2] text-xs font-medium underline">
+            <button
+              onClick={handleDownloadTemplate}
+              disabled={isFilesPending}
+              className="text-[#366AE2] text-xs font-medium underline cursor-pointer hover:text-[#2d57b8] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               Tải về file mẫu
-            </div>
+            </button>
             <button className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]">
               {/* SVG for download */}
               Tải lên theo danh sách

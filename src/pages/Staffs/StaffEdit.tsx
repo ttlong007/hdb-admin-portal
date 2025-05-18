@@ -14,9 +14,10 @@ import { useAuth } from '@/store/authSlice/useAuth'
 import { CloseCircleOutlined } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
-import { Checkbox } from 'antd'
+import { Checkbox, Switch } from 'antd'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
+import InfoCard from '@/components/core/components/InfoCard'
 
 type Option<T> = { label: string; value: T }
 
@@ -31,6 +32,7 @@ type FormData = {
   transaction_monthly_quota: string
   transaction_daily_quota: string
   transactionTypes: number[]
+  active: boolean
 }
 
 type StaffPayload = {
@@ -46,6 +48,7 @@ type StaffPayload = {
     type: 'TRANSACTION_QUOTA_DAILY' | 'TRANSACTION_QUOTA_MONTHLY'
   }[]
   transaction_type_ids: number[]
+  status?: string
 }
 
 // Add role options constant
@@ -98,6 +101,7 @@ function mapStaffToDefaultValues(staffDetail: any): FormData {
     transactionTypes:
       staffDetail.transaction_types?.map((type: { id: number }) => type.id) ||
       [],
+    active: staffDetail.status === 'ACTIVE',
   }
 }
 
@@ -210,6 +214,7 @@ export default function EditStaff() {
         }
       ),
     transactionTypes: yup.array().of(yup.mixed()),
+    active: yup.boolean().required('Trạng thái hoạt động là bắt buộc'),
   }) as yup.ObjectSchema<FormData>
 
   const {
@@ -231,6 +236,7 @@ export default function EditStaff() {
       transaction_monthly_quota: '',
       transaction_daily_quota: '',
       transactionTypes: [],
+      active: false,
     },
     resolver: yupResolver(schema),
     mode: 'all',
@@ -344,6 +350,11 @@ export default function EditStaff() {
         changedFields.store_id = basePayload.store_id
       }
 
+      // Check active status
+      if (data.active !== (staffDetail.status === 'ACTIVE')) {
+        changedFields.status = data.active ? 'ACTIVE' : 'INACTIVE'
+      }
+
       // Check limits
       const originalDailyQuota = staffDetail.limits?.find(
         (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
@@ -377,6 +388,7 @@ export default function EditStaff() {
       return
     }
 
+    debugger;
     updateStaffMutation.mutate(changedFields as StaffPayload)
   }
 
@@ -398,14 +410,8 @@ export default function EditStaff() {
           Chỉnh sửa nhân viên
         </span>
       </div>
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="flex p-6 flex-col items-start gap-6 rounded-lg bg-white"
-      >
-        <section className="w-full border-b pb-8">
-          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
-            Thông tin nhân viên
-          </div>
+      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6">
+        <InfoCard title="Thông tin nhân viên">
           <div className="grid grid-cols-5 gap-6 w-full">
             <Controller
               name="name"
@@ -515,11 +521,9 @@ export default function EditStaff() {
               )}
             />
           </div>
-        </section>
-        <section className="w-full border-b pb-8">
-          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
-            Hạn mức giao dịch
-          </div>
+        </InfoCard>
+
+        <InfoCard title="Hạn mức giao dịch">
           <div className="flex gap-4 w-2/3">
             <div className="flex-1">
               <Controller
@@ -569,11 +573,9 @@ export default function EditStaff() {
               ) : null}
             </div>
           </div>
-        </section>
-        <section className="w-full border-b pb-8">
-          <div className="text-[#212B36] text-[28px] not-italic font-bold leading-normal mb-8">
-            Loại giao dịch
-          </div>
+        </InfoCard>
+
+        <InfoCard title="Loại giao dịch">
           <div>
             <Controller
               name="transactionTypes"
@@ -606,7 +608,21 @@ export default function EditStaff() {
               )}
             />
           </div>
-        </section>
+        </InfoCard>
+
+        <InfoCard title="">
+          <Controller
+            name="active"
+            control={control}
+            render={({ field }) => (
+              <div>
+                <Switch {...field} checked={field.value} />
+                <label className="ml-2">Hoạt động</label>
+              </div>
+            )}
+          />
+        </InfoCard>
+
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
