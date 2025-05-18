@@ -1,16 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import type { TableProps } from 'antd'
-import {
-  Form,
-  Input,
-  InputNumber,
-  Popconfirm,
-  Table,
-  Typography,
-  Select,
-} from 'antd'
+import { Form, Popconfirm, Table, Typography } from 'antd'
 import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
+import { useAuth } from '@/store/authSlice/useAuth'
+import { Input, NumberInput } from 'rizzui'
 
 interface DataType {
   key: string
@@ -45,22 +39,35 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
   children,
   ...restProps
 }) => {
-  let inputNode
-  if (inputType === 'number') {
-    inputNode = <InputNumber />
-  } else if (inputType === 'select') {
-    inputNode = (
-      <Select>
-        {feeTypes &&
-          feeTypes.map((ft) => (
-            <Select.Option key={ft.id} value={ft.name}>
-              {ft.name}
-            </Select.Option>
-          ))}
-      </Select>
+  const { systemConfig } = useAuth()
+
+  const LIMIT_DAILY_MAXIMUM = systemConfig.LIMIT_DAILY_MAXIMUM
+
+  const getInputNode = () => {
+    if (dataIndex === 'transactionFeePercent') {
+      return (
+        <NumberInput
+          formatType="numeric"
+          displayType="input"
+          customInput={Input as React.ComponentType<unknown>}
+          thousandSeparator=","
+          min={0}
+          max={100}
+          suffix="%"
+        />
+      )
+    }
+
+    return (
+      <NumberInput
+        formatType="numeric"
+        displayType="input"
+        customInput={Input as React.ComponentType<unknown>}
+        thousandSeparator=","
+        min={0}
+        max={LIMIT_DAILY_MAXIMUM}
+      />
     )
-  } else {
-    inputNode = <Input />
   }
 
   return (
@@ -69,14 +76,42 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
         <Form.Item
           name={dataIndex}
           style={{ margin: 0 }}
+          validateTrigger={['onChange', 'onBlur']}
           rules={[
             {
-              required: true,
-              message: `Please input ${title}!`,
+              validator: async (_, value) => {
+                if (value === undefined || value === '') {
+                  throw new Error('Vui lòng nhập giá trị')
+                }
+
+                // Convert string value to number, removing any formatting
+                const numericValue =
+                  typeof value === 'string'
+                    ? parseFloat(value.replace(/,/g, '').replace('%', ''))
+                    : value
+
+                if (isNaN(numericValue)) {
+                  throw new Error('Giá trị không hợp lệ')
+                }
+
+                if (dataIndex === 'transactionFeePercent') {
+                  if (numericValue < 0 || numericValue > 100) {
+                    throw new Error('Phần trăm phải từ 0 đến 100')
+                  }
+                } else {
+                  if (numericValue < 0 || numericValue > LIMIT_DAILY_MAXIMUM) {
+                    throw new Error(
+                      `Giá trị phải từ 0 đến ${Number(
+                        LIMIT_DAILY_MAXIMUM
+                      ).toLocaleString()}`
+                    )
+                  }
+                }
+              },
             },
           ]}
         >
-          {inputNode}
+          {getInputNode()}
         </Form.Item>
       ) : (
         children
@@ -184,12 +219,13 @@ const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({
         // Notify parent component of fee changes
         const updatedFees = newData.map((item) => ({
           fee_transaction_type_id: Number(item.key),
-          fixed_fee: Number(item.fixedFee) || 0,
-          max_fee: Number(item.maxFee) || 0,
-          min_fee: Number(item.minFee) || 0,
-          overtime_fee: Number(item.afterHoursFee) || 0,
-          percentage_fee_per_txn: Number(item.transactionFeePercent) || 0,
+          fixed_fee: Number(item.fixedFee?.toString().replace(/,/g, '')) || 0,
+          max_fee: Number(item.maxFee?.toString().replace(/,/g, '')) || 0,
+          min_fee: Number(item.minFee?.toString().replace(/,/g, '')) || 0,
+          overtime_fee: Number(item.afterHoursFee?.toString().replace(/,/g, '')) || 0,
+          percentage_fee_per_txn: Number(item.transactionFeePercent?.toString().replace(/,/g, '').replace('%', '')) || 0,
         }))
+        debugger;
         onFeesChange(updatedFees)
       } else {
         newData.push(row)
@@ -252,7 +288,7 @@ const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({
             >
               Lưu
             </Typography.Link>
-            <Popconfirm title="Sure to cancel?" onConfirm={cancel}>
+            <Popconfirm title="Bạn có chắc chắn muốn hủy?" onConfirm={cancel}>
               <a>Hủy bỏ</a>
             </Popconfirm>
           </span>

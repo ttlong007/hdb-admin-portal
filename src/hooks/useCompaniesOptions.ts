@@ -15,7 +15,7 @@ export function useCompaniesOptions(isActive = true) {
       )
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.map((company: any) => ({
-          label: `${company.cif} - (${company.name})`,
+          label: company.cif_name,
           value: company.id,
         }))
       }
