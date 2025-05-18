@@ -225,7 +225,7 @@ const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({
           overtime_fee: Number(item.afterHoursFee?.toString().replace(/,/g, '')) || 0,
           percentage_fee_per_txn: Number(item.transactionFeePercent?.toString().replace(/,/g, '').replace('%', '')) || 0,
         }))
-        debugger;
+
         onFeesChange(updatedFees)
       } else {
         newData.push(row)
