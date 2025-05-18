@@ -29,6 +29,7 @@ export function useUploadFile() {
 
   const uploadFile = useMutation({
     mutationFn: async (params: PresignedUrlParams) => {
+      console.log(params)
       // Implementation will be added later
       return Promise.resolve()
     }
