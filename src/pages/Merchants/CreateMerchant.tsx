@@ -150,10 +150,10 @@ const CreateMerchant = () => {
       .test(
         'max-approval',
         `Ngưỡng giá trị cần duyệt tối đa là ${Number(
-          systemConfig.LIMIT_APPROVAL_DEFAULT
+          systemConfig.LIMIT_DAILY_MAXIMUM
         ).toLocaleString()}`,
         (value) =>
-          !value || Number(value) <= Number(systemConfig.LIMIT_APPROVAL_DEFAULT)
+          !value || Number(value) <= Number(systemConfig.LIMIT_DAILY_MAXIMUM)
       ),
     transactionTypes: yup.array().of(yup.mixed()),
   })
@@ -174,7 +174,7 @@ const CreateMerchant = () => {
       income_account: null,
       transaction_monthly_quota: '',
       transaction_daily_quota: '',
-      approveThreshold: '',
+      approveThreshold: systemConfig.LIMIT_APPROVAL_DEFAULT?.toString() || '',
       transactionTypes: [], // Initialize as empty array
       company_id: null,
     },
