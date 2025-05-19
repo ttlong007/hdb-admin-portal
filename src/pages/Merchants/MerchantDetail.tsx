@@ -186,14 +186,6 @@ export default function MerchantDetail() {
                     </span>
                   </div>
 
-                  {/* Địa chỉ */}
-                  <div className="flex flex-col flex-1 gap-2">
-                    <span className="text-sm text-gray-400">Địa chỉ</span>
-                    <span className="text-base text-gray-800">
-                      {merchant.address || '---'}
-                    </span>
-                  </div>
-
                   {/* Tài khoản chuyên thu */}
                   <div className="flex flex-col flex-1 gap-2">
                     <span className="text-sm text-gray-400">
@@ -226,6 +218,14 @@ export default function MerchantDetail() {
                         )?.label || '---'}
                       </Tag>
                     </div>
+                  </div>
+
+                  {/* Địa chỉ */}
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">Địa chỉ</span>
+                    <span className="text-base text-gray-800">
+                      {merchant.full_address || '---'}
+                    </span>
                   </div>
                 </div>
               </InfoCard>

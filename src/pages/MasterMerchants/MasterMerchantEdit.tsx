@@ -18,6 +18,7 @@ import {
 import { useAuth } from '@/store/authSlice/useAuth'
 import { useMasterMerchantDetail } from '@/hooks/useMasterMerchantDetail'
 import InfoCard from '@/components/core/components/InfoCard'
+import UploadDocument from './components/UploadDocument'
 
 const { Option } = Select
 
@@ -395,6 +396,12 @@ export default function MasterMerchantEdit() {
               )}
             />
           </div>
+
+          <UploadDocument
+            attachmentId={Number(id)}
+            attachmentType="COMPANY"
+            field="DOCUMENT"
+          />
         </InfoCard>
 
         <InfoCard title="">
