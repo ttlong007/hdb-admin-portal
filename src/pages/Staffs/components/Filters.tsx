@@ -104,7 +104,7 @@ const Filters: React.FC = () => {
   // Transform fetched stores into select options
   const storeOptions =
     storesData?.map((store: any) => ({
-      label: store.name,
+      label: store.code_name,
       value: store.id,
     })) || []
 
