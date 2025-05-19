@@ -86,6 +86,11 @@ const EditMerchant = () => {
         (value) => !value || !isNaN(Number(value))
       )
       .test(
+        'greater-than-zero',
+        'Hạn mức tháng phải lớn hơn 0',
+        (value) => !value || Number(value) > 0
+      )
+      .test(
         'max-monthly',
         `Hạn mức tháng tối đa là ${Number(
           systemConfig.LIMIT_MONTHLY_MAXIMUM
@@ -103,6 +108,11 @@ const EditMerchant = () => {
         (value) => !value || !isNaN(Number(value))
       )
       .test(
+        'greater-than-zero',
+        'Hạn mức ngày phải lớn hơn 0',
+        (value) => !value || Number(value) > 0
+      )
+      .test(
         'max-daily',
         `Hạn mức ngày tối đa là ${Number(
           systemConfig.LIMIT_DAILY_MAXIMUM
@@ -115,9 +125,7 @@ const EditMerchant = () => {
         'Hạn mức ngày phải nhỏ hơn hoặc bằng hạn mức tháng',
         function (value) {
           const monthlyQuota = this.parent.transaction_monthly_quota
-          if (!value || !monthlyQuota) {
-            return true // Skip validation if either is empty
-          }
+          if (!value || !monthlyQuota) return true
           return Number(value) <= Number(monthlyQuota)
         }
       ),
@@ -141,12 +149,17 @@ const EditMerchant = () => {
         (value) => !value || !isNaN(Number(value))
       )
       .test(
+        'greater-than-zero',
+        'Ngưỡng giá trị cần duyệt phải lớn hơn 0',
+        (value) => !value || Number(value) > 0
+      )
+      .test(
         'max-approval',
         `Ngưỡng giá trị cần duyệt tối đa là ${Number(
-          systemConfig.LIMIT_APPROVAL_DEFAULT
+          systemConfig.LIMIT_DAILY_MAXIMUM
         ).toLocaleString()}`,
         (value) =>
-          !value || Number(value) <= Number(systemConfig.LIMIT_APPROVAL_DEFAULT)
+          !value || Number(value) <= Number(systemConfig.LIMIT_DAILY_MAXIMUM)
       ),
     transactionTypes: yup.array().of(yup.mixed()),
   })

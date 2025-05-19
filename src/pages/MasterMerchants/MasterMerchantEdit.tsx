@@ -74,6 +74,11 @@ export default function MasterMerchantEdit() {
         (value) => !value || !isNaN(Number(value))
       )
       .test(
+        'greater-than-zero',
+        'Hạn mức tháng phải lớn hơn 0',
+        (value) => !value || Number(value) > 0
+      )
+      .test(
         'max-monthly',
         `Hạn mức tháng tối đa là ${Number(
           systemConfig.LIMIT_MONTHLY_MAXIMUM
@@ -89,6 +94,11 @@ export default function MasterMerchantEdit() {
         'is-number',
         'Hạn mức ngày phải là số',
         (value) => !value || !isNaN(Number(value))
+      )
+      .test(
+        'greater-than-zero',
+        'Hạn mức ngày phải lớn hơn 0',
+        (value) => !value || Number(value) > 0
       )
       .test(
         'max-daily',

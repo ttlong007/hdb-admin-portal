@@ -95,6 +95,11 @@ const CreateMerchant = () => {
         (value) => !value || !isNaN(Number(value))
       )
       .test(
+        'greater-than-zero',
+        'Hạn mức tháng phải lớn hơn 0',
+        (value) => !value || Number(value) > 0
+      )
+      .test(
         'max-monthly',
         `Hạn mức tháng tối đa là ${Number(
           systemConfig.LIMIT_MONTHLY_MAXIMUM
@@ -110,6 +115,11 @@ const CreateMerchant = () => {
         'is-number',
         'Hạn mức ngày phải là số',
         (value) => !value || !isNaN(Number(value))
+      )
+      .test(
+        'greater-than-zero',
+        'Hạn mức ngày phải lớn hơn 0',
+        (value) => !value || Number(value) > 0
       )
       .test(
         'max-daily',
@@ -146,6 +156,11 @@ const CreateMerchant = () => {
         'is-number',
         'Ngưỡng giá trị cần duyệt phải là số',
         (value) => !value || !isNaN(Number(value))
+      )
+      .test(
+        'greater-than-zero',
+        'Ngưỡng giá trị cần duyệt phải lớn hơn 0',
+        (value) => !value || Number(value) > 0
       )
       .test(
         'max-approval',
