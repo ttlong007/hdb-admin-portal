@@ -188,6 +188,7 @@ const Merchants: React.FC = () => {
   const approveMutation = useMutation({
     mutationFn: async (ids: React.Key[]) => {
       const payload = { ids }
+
       const response = await axiosInstance.post(
         '/v1/admin/store/approve-stores',
         payload

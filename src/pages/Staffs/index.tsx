@@ -284,6 +284,7 @@ const Staffs: React.FC = () => {
 
         <div className="w-full">
           <Table
+            rowKey="id"
             rowSelection={rowSelection}
             columns={columns}
             dataSource={dataSource}
