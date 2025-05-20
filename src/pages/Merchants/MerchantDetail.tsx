@@ -15,8 +15,6 @@ import axiosInstance from '@/config/axios'
 import {
   MERCHANT_STATUS,
   MERCHANT_STATUS_COLOR_MAP,
-  MASTER_MERCHANT_STATUS,
-  MASTER_MERCHANT_STATUS_COLOR_MAP,
 } from '@/config/constants'
 import { toast } from 'react-toastify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
