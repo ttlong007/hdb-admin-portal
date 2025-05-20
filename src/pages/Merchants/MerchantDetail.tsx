@@ -133,7 +133,6 @@ export default function MerchantDetail() {
   if (error) return <div>Error loading detail.</div>
   if (!merchant) return <div>No merchant found.</div>
 
-  console.log(merchant.need_approve_transaction_types[0])
   return (
     <>
       {/* Breadcrumbs */}
@@ -278,7 +277,7 @@ export default function MerchantDetail() {
                     Số tiền giao dịch
                   </span>
                   <span className="text-base text-gray-800">
-                    {merchant.need_approve_transaction_types[0].approve_amount
+                    {merchant && merchant.need_approve_transaction_types && merchant.need_approve_transaction_types[0].approve_amount
                       ? Number(
                           merchant.need_approve_transaction_types[0]
                             .approve_amount
