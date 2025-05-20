@@ -155,8 +155,7 @@ export function MerchantChangeInfo({
           ) : null}
         </div>
 
-        {changeRequestData.need_approve_transaction_types ||
-        changeRequestData.approve_amount ? (
+        {changeRequestData.need_approve_transaction_types ? (
           <div id="B" className="w-1/3">
             <InfoCard title="Xác nhận phê duyệt">
               <div className="flex flex-col gap-4">
@@ -165,8 +164,7 @@ export function MerchantChangeInfo({
                     Quản lý đồng ý yêu cầu
                   </span>
                   <span className="text-base font-semibold">
-                    {changeRequestData.need_approve_transaction_types ||
-                    changeRequestData.approve_amount
+                    {changeRequestData.need_approve_transaction_types
                       ? 'Đồng ý'
                       : 'Không đồng ý'}
                   </span>
@@ -177,10 +175,12 @@ export function MerchantChangeInfo({
                     Số tiền giao dịch
                   </span>
                   <span className="text-base font-semibold">
-                    {changeRequestData?.approve_amount
-                      ? changeRequestData.approve_amount.toLocaleString(
-                          'vi-VN'
-                        ) + ' VND'
+                    {changeRequestData.need_approve_transaction_types[0]
+                      .approve_amount
+                      ? Number(
+                          changeRequestData.need_approve_transaction_types[0]
+                            .approve_amount
+                        ).toLocaleString('vi-VN') + ' VND'
                       : '---'}
                   </span>
                 </div>

@@ -12,10 +12,7 @@ import { Tag, message } from 'antd'
 import { useAuth } from '@/store/authSlice/useAuth'
 import { useMerchantDetail } from '@/hooks/useMerchantDetail'
 import axiosInstance from '@/config/axios'
-import {
-  MERCHANT_STATUS,
-  MERCHANT_STATUS_COLOR_MAP,
-} from '@/config/constants'
+import { MERCHANT_STATUS, MERCHANT_STATUS_COLOR_MAP } from '@/config/constants'
 import { toast } from 'react-toastify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import InfoCard from '@/components/core/components/InfoCard'
@@ -136,7 +133,7 @@ export default function MerchantDetail() {
   if (error) return <div>Error loading detail.</div>
   if (!merchant) return <div>No merchant found.</div>
 
-  console.log(merchant)
+  console.log(merchant.need_approve_transaction_types[0])
   return (
     <>
       {/* Breadcrumbs */}
@@ -270,8 +267,7 @@ export default function MerchantDetail() {
                     Quản lý đồng ý yêu cầu
                   </span>
                   <span className="text-base text-gray-800">
-                    {merchant.need_approve_transaction_types ||
-                    merchant.approve_amount
+                    {merchant.need_approve_transaction_types
                       ? 'Đồng ý'
                       : 'Không đồng ý'}
                   </span>
@@ -282,8 +278,11 @@ export default function MerchantDetail() {
                     Số tiền giao dịch
                   </span>
                   <span className="text-base text-gray-800">
-                    {merchant?.approve_amount
-                      ? merchant.approve_amount.toLocaleString('en-US') + ' VND'
+                    {merchant.need_approve_transaction_types[0].approve_amount
+                      ? Number(
+                          merchant.need_approve_transaction_types[0]
+                            .approve_amount
+                        ).toLocaleString('en-US') + ' VND'
                       : '---'}
                   </span>
                 </div>

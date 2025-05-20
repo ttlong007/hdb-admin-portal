@@ -99,6 +99,10 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
                     throw new Error('Phần trăm phải từ 0 đến 100')
                   }
                 } else {
+                  // Check if the value is an integer for fee fields
+                  if (!Number.isInteger(numericValue)) {
+                    throw new Error('Giá trị phải là số nguyên')
+                  }
                   if (numericValue < 0 || numericValue > LIMIT_DAILY_MAXIMUM) {
                     throw new Error(
                       `Giá trị phải từ 0 đến ${Number(

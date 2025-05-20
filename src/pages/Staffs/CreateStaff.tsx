@@ -111,6 +111,11 @@ export default function CreateStaff() {
         (value) => !value || !isNaN(Number(value))
       )
       .test(
+        'is-integer',
+        'Hạn mức tháng phải là số nguyên',
+        (value) => !value || Number.isInteger(Number(value))
+      )
+      .test(
         'greater-than-zero',
         'Hạn mức tháng phải lớn hơn 0',
         (value) => !value || Number(value) > 0
@@ -131,6 +136,11 @@ export default function CreateStaff() {
         'is-number',
         'Hạn mức ngày phải là số',
         (value) => !value || !isNaN(Number(value))
+      )
+      .test(
+        'is-integer',
+        'Hạn mức ngày phải là số nguyên',
+        (value) => !value || Number.isInteger(Number(value))
       )
       .test(
         'greater-than-zero',
