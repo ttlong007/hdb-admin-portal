@@ -292,7 +292,9 @@ const CreateMerchant = () => {
       // Fetch company details to get limits
       const fetchCompanyLimits = async () => {
         try {
-          const response = await axiosInstance.get(`/v1/admin/company/${selectedCompany.value}`)
+          const response = await axiosInstance.get(
+            `/v1/admin/company/${selectedCompany.value}`
+          )
           if (response.data.status_code === 'ACCEPT') {
             const companyData = response.data.data
             // Find daily and monthly limits
@@ -716,15 +718,11 @@ const CreateMerchant = () => {
             Duyệt giao dịch
           </div>
 
-          <div className="flex items-center gap-2 mb-4">
-            <Switch
-              checked={needApprove}
-              onChange={handleApporveChange}
-              className="!w-[40px] !h-[20px] !rounded-full"
-            />
-            <span className="text-[#212B36]">
+          <div className="my-4">
+            <Switch checked={needApprove} onChange={handleApporveChange} />
+            <label className="ml-2">
               Yêu cầu trưởng cửa hàng duyệt giao dịch
-            </span>
+            </label>
           </div>
 
           {needApprove ? (

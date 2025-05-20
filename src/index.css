@@ -1627,3 +1627,8 @@ div[style='z-index: 1000001;'],
   box-shadow: none !important;
   height: 39px !important;
 }
+
+[type='checkbox']:checked,
+[type='radio']:checked {
+  @apply bg-[#da2128] !border-[#da2128];
+}

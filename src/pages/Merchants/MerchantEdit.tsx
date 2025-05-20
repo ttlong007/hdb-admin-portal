@@ -811,14 +811,12 @@ const EditMerchant = () => {
         </InfoCard>
 
         <InfoCard title="Duyệt giao dịch">
-          <Switch
-            checked={needApprove}
-            onChange={handleApporveChange}
-            className="!w-[40px] !h-[20px] !rounded-full"
-          />
-          <label className="ml-2">
-            Yêu cầu trưởng cửa hàng duyệt giao dịch
-          </label>
+          <div>
+            <Switch checked={needApprove} onChange={handleApporveChange} />
+            <label className="ml-2">
+              Yêu cầu trưởng cửa hàng duyệt giao dịch
+            </label>
+          </div>
 
           {needApprove ? (
             <div className="flex flex-col gap-4 mt-4">
