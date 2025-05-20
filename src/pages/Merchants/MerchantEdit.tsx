@@ -15,6 +15,7 @@ import { routes } from '@/config/routes'
 import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 import { CloseCircleOutlined } from '@ant-design/icons'
 import InfoCard from '@/components/core/components/InfoCard'
+import { STATUS_WAITING_APPROVE } from '@/config/constants'
 
 type Option = { label: string; value: string }
 
@@ -53,33 +54,19 @@ const EditMerchant = () => {
   const { isApprover, systemConfig } = useAuth()
   const queryClient = useQueryClient()
 
-  useEffect(() => {
-    if (isApprover) {
-      toast.error('Bạn không có quyền truy cập trang này')
-      navigate(routes.merchant)
-    }
-  }, [isApprover, navigate])
-
   const schema = yup.object().shape({
-    name: yup.string().required('Tên điểm đại lý là bắt buộc'),
-    code: yup.string().required('Mã điểm đại lý là bắt buộc'),
-    address: yup.string().required('Địa chỉ là bắt buộc'),
-    city: yup.object().nullable().required('Tỉnh/Thành phố là bắt buộc'),
-    district: yup.object().nullable().required('Quận/Huyện là bắt buộc'),
-    ward: yup.object().nullable().required('Phường/Xã là bắt buộc'),
-    expense_account: yup
-      .object()
-      .nullable()
-      .required('Tài khoản chuyên chi là bắt buộc'),
-    income_account: yup
-      .object()
-      .nullable()
-      .required('Tài khoản chuyên thu là bắt buộc'),
-    company_id: yup.object().nullable().required('Công ty là bắt buộc'),
+    name: yup.string(),
+    code: yup.string(),
+    address: yup.string(),
+    city: yup.object().nullable(),
+    district: yup.object().nullable(),
+    ward: yup.object().nullable(),
+    expense_account: yup.object().nullable(),
+    income_account: yup.object().nullable(),
+    company_id: yup.object().nullable(),
     transaction_monthly_quota: yup
       .string()
       .transform((value) => (value ? value.replace(/,/g, '') : ''))
-      .required('Hạn mức tháng là bắt buộc')
       .test(
         'is-number',
         'Hạn mức tháng phải là số',
@@ -101,7 +88,6 @@ const EditMerchant = () => {
     transaction_daily_quota: yup
       .string()
       .transform((value) => (value ? value.replace(/,/g, '') : ''))
-      .required('Hạn mức ngày là bắt buộc')
       .test(
         'is-number',
         'Hạn mức ngày phải là số',
@@ -132,17 +118,6 @@ const EditMerchant = () => {
     approveThreshold: yup
       .string()
       .transform((value) => (value ? value.replace(/,/g, '') : ''))
-      .test(
-        'required-if-needApprove',
-        'Ngưỡng giá trị cần duyệt là bắt buộc',
-        function (value) {
-          const needApprove = this.parent.needApprove
-          if (needApprove) {
-            return !!value
-          }
-          return true
-        }
-      )
       .test(
         'is-number',
         'Ngưỡng giá trị cần duyệt phải là số',
@@ -407,6 +382,10 @@ const EditMerchant = () => {
 
   const editMerchantMutation = useMutation({
     mutationFn: async (data: any) => {
+      if (Object.keys(data).length === 0) {
+        throw new Error('Không có thay đổi nào được thực hiện')
+      }
+
       const payload: ChangeRequestPayload = {
         entity_id: Number(id),
         entity_type: 'STORE',
@@ -419,7 +398,10 @@ const EditMerchant = () => {
       if (response.data.status_code === 'ACCEPT') {
         return response.data
       }
-      throw new Error('Edit failed')
+      throw new Error(
+        response.data.reason_message ||
+          'Tạo yêu cầu chỉnh sửa đại lý tổng thất bại'
+      )
     },
     onSuccess: () => {
       toast.success('Tạo yêu cầu chỉnh sửa đại lý thành công!')
@@ -427,8 +409,7 @@ const EditMerchant = () => {
       navigate(routes.merchant)
     },
     onError: (error: any) => {
-      toast.error('Tạo yêu cầu chỉnh sửa đại lý thất bại!')
-      console.error(error)
+      toast.error(error.message || 'Tạo yêu cầu chỉnh sửa đại lý thất bại')
     },
   })
 
@@ -513,9 +494,18 @@ const EditMerchant = () => {
     if (payload.district) delete payload.district
     if (payload.city) delete payload.city
     if (payload.active) delete payload.active
-
+    if (payload.need_approve_transaction_data === undefined) {
+      delete payload.need_approve_transaction_data
+    }
     editMerchantMutation.mutate(payload)
   }
+
+  useEffect(() => {
+    if (isApprover || STATUS_WAITING_APPROVE.includes(storeData?.status)) {
+      toast.error('Bạn không có quyền truy cập trang này')
+      navigate(routes.merchant)
+    }
+  }, [isApprover, storeData?.status])
 
   if (isLoadingStore) return <div>Loading store details...</div>
 
@@ -546,11 +536,10 @@ const EditMerchant = () => {
               <Controller
                 name="company_id"
                 control={control}
-                rules={{ required: true }}
                 render={({ field }) => (
                   <div className="w-full">
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Công ty *
+                      Công ty
                     </label>
                     <Select
                       {...field}
@@ -558,6 +547,7 @@ const EditMerchant = () => {
                       placeholder={
                         isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
                       }
+                      isDisabled={true}
                     />
                   </div>
                 )}
@@ -568,12 +558,11 @@ const EditMerchant = () => {
               <Controller
                 name="name"
                 control={control}
-                rules={{ required: 'Tên điểm đại lý là bắt buộc' }}
                 render={({ field }) => (
                   <>
                     <Input
                       {...field}
-                      label="Tên điểm đại lý *"
+                      label="Tên điểm đại lý"
                       placeholder="Nhập tên điểm đại lý"
                       className="w-full"
                     />
@@ -591,18 +580,18 @@ const EditMerchant = () => {
               <Controller
                 name="code"
                 control={control}
-                rules={{ required: 'Mã điểm đại lý là bắt buộc' }}
                 render={({ field }) => (
                   <>
                     <Input
                       {...field}
-                      label="Mã điểm đại lý *"
+                      label="Mã điểm đại lý"
                       placeholder="Nhập mã điểm đại lý"
                       className="w-full"
+                      disabled={true}
                     />
                     {errors.code?.message ? (
                       <p className="text-red-500 text-sm">
-                        {errors.code?.message?.toString()}˝
+                        {errors.code?.message?.toString()}
                       </p>
                     ) : null}
                   </>
@@ -614,12 +603,11 @@ const EditMerchant = () => {
               <Controller
                 name="address"
                 control={control}
-                rules={{ required: 'Địa chỉ là bắt buộc' }}
                 render={({ field }) => (
                   <>
                     <Input
                       {...field}
-                      label="Địa chỉ *"
+                      label="Địa chỉ"
                       placeholder="Nhập địa chỉ"
                       className="w-full"
                     />
@@ -635,12 +623,11 @@ const EditMerchant = () => {
             {/* City Field */}
             <div>
               <div className="text-sm font-medium text-gray-700 mb-1">
-                Tỉnh/Thành phố *
+                Tỉnh/Thành phố
               </div>
               <Controller
                 name="city"
                 control={control}
-                rules={{ required: 'Tỉnh/Thành phố là bắt buộc' }}
                 render={({ field }) => (
                   <>
                     <Select
@@ -663,12 +650,11 @@ const EditMerchant = () => {
             {/* District Field */}
             <div>
               <div className="text-sm font-medium text-gray-700 mb-1">
-                Quận/Huyện *
+                Quận/Huyện
               </div>
               <Controller
                 name="district"
                 control={control}
-                rules={{ required: 'Quận/Huyện là bắt buộc' }}
                 render={({ field }) => (
                   <>
                     <Select
@@ -691,12 +677,11 @@ const EditMerchant = () => {
             {/* Ward Field */}
             <div>
               <div className="text-sm font-medium text-gray-700 mb-1">
-                Phường/Xã *
+                Phường/Xã
               </div>
               <Controller
                 name="ward"
                 control={control}
-                rules={{ required: 'Phường/Xã là bắt buộc' }}
                 render={({ field }) => (
                   <>
                     <Select
@@ -719,12 +704,11 @@ const EditMerchant = () => {
             {/* Expense Account */}
             <div>
               <div className="text-sm font-medium text-gray-700 mb-1">
-                Tài khoản chuyên chi *
+                Tài khoản chuyên chi
               </div>
               <Controller
                 name="expense_account"
                 control={control}
-                rules={{ required: 'Tài khoản chuyên chi là bắt buộc' }}
                 render={({ field }) => (
                   <>
                     <Select
@@ -747,12 +731,11 @@ const EditMerchant = () => {
             {/* Income Account */}
             <div>
               <div className="text-sm font-medium text-gray-700 mb-1">
-                Tài khoản chuyên thu *
+                Tài khoản chuyên thu
               </div>
               <Controller
                 name="income_account"
                 control={control}
-                rules={{ required: 'Tài khoản chuyên thu là bắt buộc' }}
                 render={({ field }) => (
                   <>
                     <Select

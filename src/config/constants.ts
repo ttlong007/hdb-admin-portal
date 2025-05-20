@@ -134,3 +134,8 @@ export const SYSTEM_ROLES = {
   HDB_CREATION: 'chỉnh sửa',
   HDB_APPROVAL: 'duyệt',
 }
+
+export const STATUS_WAITING_APPROVE = [
+  'WAITING_APPROVE',
+  'WAITING_APPROVAL_FOR_EDIT',
+]

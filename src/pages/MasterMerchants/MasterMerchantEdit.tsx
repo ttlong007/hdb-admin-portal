@@ -67,7 +67,6 @@ export default function MasterMerchantEdit() {
     transaction_monthly_quota: yup
       .string()
       .transform((value) => (value ? value.replace(/,/g, '') : ''))
-      .required('Hạn mức tháng là bắt buộc')
       .test(
         'is-number',
         'Hạn mức tháng phải là số',
@@ -89,7 +88,6 @@ export default function MasterMerchantEdit() {
     transaction_daily_quota: yup
       .string()
       .transform((value) => (value ? value.replace(/,/g, '') : ''))
-      .required('Hạn mức ngày là bắt buộc')
       .test(
         'is-number',
         'Hạn mức ngày phải là số',

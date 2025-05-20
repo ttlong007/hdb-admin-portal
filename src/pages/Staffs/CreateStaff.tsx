@@ -120,7 +120,8 @@ export default function CreateStaff() {
         `Hạn mức tháng tối đa là ${Number(
           systemConfig.LIMIT_MONTHLY_MAXIMUM
         ).toLocaleString()}`,
-        (value) => !value || Number(value) <= Number(systemConfig.LIMIT_MONTHLY_MAXIMUM)
+        (value) =>
+          !value || Number(value) <= Number(systemConfig.LIMIT_MONTHLY_MAXIMUM)
       ),
     transaction_daily_quota: yup
       .string()
@@ -141,7 +142,8 @@ export default function CreateStaff() {
         `Hạn mức ngày tối đa là ${Number(
           systemConfig.LIMIT_DAILY_MAXIMUM
         ).toLocaleString()}`,
-        (value) => !value || Number(value) <= Number(systemConfig.LIMIT_DAILY_MAXIMUM)
+        (value) =>
+          !value || Number(value) <= Number(systemConfig.LIMIT_DAILY_MAXIMUM)
       )
       .test(
         'less-than-monthly',
@@ -193,6 +195,45 @@ export default function CreateStaff() {
 
   // Watch selected company_id to fetch stores
   const selectedCompany = watch('company_id')
+  const selectedStore = watch('store_id')
+
+  // Add query to fetch staff limits
+  const { data: staffLimits } = useQuery({
+    queryKey: ['store-limits', selectedStore?.value],
+    queryFn: async () => {
+      if (!selectedStore?.value) return null
+      const response = await axiosInstance.get('/v1/admin/limit/list', {
+        params: {
+          entity_id: selectedStore.value,
+          entity_type: 'STORE',
+        },
+      })
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch staff limits')
+    },
+    enabled: !!selectedStore?.value,
+  })
+
+  // Update form values when staff limits are fetched
+  useEffect(() => {
+    if (staffLimits) {
+      const dailyLimit = staffLimits.find(
+        (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
+      )?.amount
+      const monthlyLimit = staffLimits.find(
+        (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
+      )?.amount
+
+      if (dailyLimit) {
+        setValue('transaction_daily_quota', dailyLimit.toString())
+      }
+      if (monthlyLimit) {
+        setValue('transaction_monthly_quota', monthlyLimit.toString())
+      }
+    }
+  }, [staffLimits, setValue])
 
   useEffect(() => {
     // When the company selection changes, reset store_id to null

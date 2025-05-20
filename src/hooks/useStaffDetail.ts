@@ -23,7 +23,7 @@ export interface StaffDetail {
     id: number
     name: string
   }[]
-  status?: string
+  status: string
 }
 
 export function useStaffDetail(id?: string) {

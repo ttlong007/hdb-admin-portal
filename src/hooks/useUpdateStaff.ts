@@ -34,6 +34,10 @@ export function useUpdateStaff(
 
   return useMutation<void, Error, StaffPayload>({
     mutationFn: async (data) => {
+      if (Object.keys(data).length === 0) {
+        throw new Error('Không có thay đổi nào được thực hiện')
+      }
+
       const payload: ChangeRequestPayload = {
         entity_id: Number(id),
         entity_type: 'STAFF',

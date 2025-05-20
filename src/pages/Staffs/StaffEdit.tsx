@@ -18,6 +18,7 @@ import { Checkbox, Switch } from 'antd'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import InfoCard from '@/components/core/components/InfoCard'
+import { STATUS_WAITING_APPROVE } from '@/config/constants'
 
 type Option<T> = { label: string; value: T }
 
@@ -110,13 +111,6 @@ export default function EditStaff() {
   const navigate = useNavigate()
   const { isApprover, systemConfig } = useAuth()
 
-  useEffect(() => {
-    if (isApprover) {
-      toast.error('Bạn không có quyền truy cập trang này')
-      navigate(routes.staff)
-    }
-  }, [isApprover, navigate])
-
   const { data: transactionOptions, isLoading: isLoadingTransactionTypes } =
     useQuery({
       queryKey: ['transaction-types'],
@@ -142,38 +136,23 @@ export default function EditStaff() {
       : defaultTransactionTypes
 
   const schema = yup.object().shape({
-    name: yup.string().required('Họ tên là bắt buộc'),
-    email: yup
-      .string()
-      .email('Email không hợp lệ')
-      .required('Email là bắt buộc'),
+    name: yup.string(),
+    email: yup.string().email('Email không hợp lệ'),
     phone_number: yup
       .string()
       .matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số')
       .min(10, 'Số điện thoại phải có ít nhất 10 số')
-      .max(11, 'Số điện thoại không được vượt quá 11 số')
-      .required('Số điện thoại là bắt buộc'),
+      .max(11, 'Số điện thoại không được vượt quá 11 số'),
     national_id_number: yup
       .string()
       .matches(/^[0-9]+$/, 'Số CCCD chỉ được chứa số')
-      .length(12, 'Số CCCD phải có đúng 12 số')
-      .required('Số CCCD là bắt buộc'),
-    company_id: yup
-      .mixed<Option<number>>()
-      .nullable()
-      .required('Công ty là bắt buộc'),
-    role: yup
-      .mixed<Option<string>>()
-      .nullable()
-      .required('Nhóm chức danh là bắt buộc'),
-    store_id: yup
-      .mixed<Option<number>>()
-      .nullable()
-      .required('Cửa hàng là bắt buộc'),
+      .length(12, 'Số CCCD phải có đúng 12 số'),
+    company_id: yup.mixed<Option<number>>().nullable(),
+    role: yup.mixed<Option<string>>().nullable(),
+    store_id: yup.mixed<Option<number>>().nullable(),
     transaction_monthly_quota: yup
       .string()
       .transform((value) => (value ? value.replace(/,/g, '') : ''))
-      .required('Hạn mức tháng là bắt buộc')
       .test(
         'is-number',
         'Hạn mức tháng phải là số',
@@ -195,7 +174,6 @@ export default function EditStaff() {
     transaction_daily_quota: yup
       .string()
       .transform((value) => (value ? value.replace(/,/g, '') : ''))
-      .required('Hạn mức ngày là bắt buộc')
       .test(
         'is-number',
         'Hạn mức ngày phải là số',
@@ -224,7 +202,7 @@ export default function EditStaff() {
         }
       ),
     transactionTypes: yup.array().of(yup.mixed()),
-    active: yup.boolean().required('Trạng thái hoạt động là bắt buộc'),
+    active: yup.boolean(),
   }) as yup.ObjectSchema<FormData>
 
   const {
@@ -401,6 +379,16 @@ export default function EditStaff() {
     updateStaffMutation.mutate(changedFields as StaffPayload)
   }
 
+  useEffect(() => {
+    if (
+      isApprover ||
+      STATUS_WAITING_APPROVE.includes(staffDetail?.status || '')
+    ) {
+      toast.error('Bạn không có quyền truy cập trang này')
+      navigate(routes.staff)
+    }
+  }, [isApprover, staffDetail?.status])
+
   return (
     <>
       <div className="flex justify-start items-center gap-2 mb-4">
@@ -425,24 +413,23 @@ export default function EditStaff() {
             <Controller
               name="name"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Họ tên *"
+                  label="Họ tên"
                   placeholder="Nhập họ tên"
                   className="w-full"
+                  disabled={true}
                 />
               )}
             />
             <Controller
               name="company_id"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <div className="w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Công ty *
+                    Công ty
                   </label>
                   <ReactSelect
                     {...field}
@@ -450,6 +437,7 @@ export default function EditStaff() {
                     placeholder={
                       isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
                     }
+                    isDisabled={true}
                   />
                 </div>
               )}
@@ -457,11 +445,10 @@ export default function EditStaff() {
             <Controller
               name="store_id"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <div className="w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Cửa hàng *
+                    Cửa hàng
                   </label>
                   <ReactSelect
                     {...field}
@@ -469,6 +456,7 @@ export default function EditStaff() {
                     placeholder={
                       isLoadingStores ? 'Loading stores...' : 'Chọn cửa hàng'
                     }
+                    isDisabled={true}
                   />
                 </div>
               )}
@@ -476,37 +464,36 @@ export default function EditStaff() {
             <Controller
               name="phone_number"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Số điện thoại *"
+                  label="Số điện thoại"
                   placeholder="Nhập số điện thoại"
                   className="w-full"
+                  disabled={true}
                 />
               )}
             />
             <Controller
               name="national_id_number"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Số CCCD *"
+                  label="Số CCCD"
                   placeholder="Nhập số CCCD"
                   className="w-full"
+                  disabled={true}
                 />
               )}
             />
             <Controller
               name="email"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <Input
                   {...field}
-                  label="Email *"
+                  label="Email"
                   placeholder="Nhập email"
                   className="w-full"
                 />
@@ -515,11 +502,10 @@ export default function EditStaff() {
             <Controller
               name="role"
               control={control}
-              rules={{ required: true }}
               render={({ field }) => (
                 <div className="w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nhóm chức danh *
+                    Nhóm chức danh
                   </label>
                   <ReactSelect
                     {...field}

@@ -286,6 +286,40 @@ const CreateMerchant = () => {
   // Watch the selected company from the form.
   const selectedCompany = useWatch({ control, name: 'company_id' })
 
+  // Add effect to update transaction quotas when company is selected
+  useEffect(() => {
+    if (selectedCompany?.value) {
+      // Fetch company details to get limits
+      const fetchCompanyLimits = async () => {
+        try {
+          const response = await axiosInstance.get(`/v1/admin/company/${selectedCompany.value}`)
+          if (response.data.status_code === 'ACCEPT') {
+            const companyData = response.data.data
+            // Find daily and monthly limits
+            const dailyLimit = companyData.limits?.find(
+              (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
+            )?.amount
+            const monthlyLimit = companyData.limits?.find(
+              (limit: any) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
+            )?.amount
+
+            // Set the values in the form
+            if (dailyLimit) {
+              setValue('transaction_daily_quota', dailyLimit.toString())
+            }
+            if (monthlyLimit) {
+              setValue('transaction_monthly_quota', monthlyLimit.toString())
+            }
+          }
+        } catch (error) {
+          console.error('Failed to fetch company limits:', error)
+        }
+      }
+
+      fetchCompanyLimits()
+    }
+  }, [selectedCompany?.value, setValue])
+
   // Fetch account list dynamically using the selected company id.
   const { data: accountList, isLoading: isLoadingAccounts } = useQuery<
     Option[]

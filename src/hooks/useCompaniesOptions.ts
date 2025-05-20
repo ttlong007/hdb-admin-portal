@@ -17,6 +17,7 @@ export function useCompaniesOptions(isActive = true) {
         return response.data.data.map((company: any) => ({
           label: company.cif_name,
           value: company.id,
+          limit: company.limit,
         }))
       }
       throw new Error('Failed to fetch companies')
