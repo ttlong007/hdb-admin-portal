@@ -22,6 +22,7 @@ import { ChangedInfo } from './components/ChangedInfo'
 import InfoCard from '@/components/core/components/InfoCard'
 import { useChangeRequestDetail } from '@/hooks/useChangeRequestDetail'
 import { useConfirm } from '@/providers/ConfirmProvider'
+
 export default function MasterMerchantDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()

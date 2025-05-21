@@ -14,6 +14,7 @@ import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import { useStores } from '@/hooks/useStores'
 import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
+import { useConfirm } from '@/providers/ConfirmProvider'
 
 type Option = { label: string; value: number }
 
@@ -51,6 +52,7 @@ const defaultTransactionTypes = []
 export default function CreateStaff() {
   const navigate = useNavigate()
   const { isApprover, systemConfig } = useAuth()
+  const confirm = useConfirm()
 
   useEffect(() => {
     if (isApprover) {
@@ -274,28 +276,35 @@ export default function CreateStaff() {
   })
 
   const onSubmit = (data: FormData) => {
-    const formattedData: StaffPayload = {
-      company_id: data.company_id!.value,
-      email: data.email,
-      name: data.name,
-      national_id_number: data.national_id_number,
-      phone_number: data.phone_number,
-      role: String(data.role!.value),
-      store_id: data.store_id!.value,
-      limits: [
-        {
-          amount: Number(data.transaction_daily_quota),
-          type: 'TRANSACTION_QUOTA_DAILY',
-        },
-        {
-          amount: Number(data.transaction_monthly_quota),
-          type: 'TRANSACTION_QUOTA_MONTHLY',
-        },
-      ],
-      transaction_type_ids: data.transactionTypes || [],
-    }
+    confirm({
+      title: 'Xác nhận gửi duyệt',
+      message: 'Bạn có chắc chắn muốn gửi duyệt nhân viên này?',
+      confirmText: 'Đồng ý',
+      cancelText: 'Hủy bỏ',
+    }).then((result) => {
+      const formattedData: StaffPayload = {
+        company_id: data.company_id!.value,
+        email: data.email,
+        name: data.name,
+        national_id_number: data.national_id_number,
+        phone_number: data.phone_number,
+        role: String(data.role!.value),
+        store_id: data.store_id!.value,
+        limits: [
+          {
+            amount: Number(data.transaction_daily_quota),
+            type: 'TRANSACTION_QUOTA_DAILY',
+          },
+          {
+            amount: Number(data.transaction_monthly_quota),
+            type: 'TRANSACTION_QUOTA_MONTHLY',
+          },
+        ],
+        transaction_type_ids: data.transactionTypes || [],
+      }
 
-    createStaffMutation.mutate(formattedData)
+      createStaffMutation.mutate(formattedData)
+    })
   }
 
   return (
@@ -549,7 +558,16 @@ export default function CreateStaff() {
           <button
             type="button"
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
-            onClick={() => navigate(routes.staff)}
+            onClick={() =>
+              confirm({
+                title: 'Xác nhận hủy bỏ',
+                message: 'Bạn có chắc chắn muốn hủy bỏ nhân viên này?',
+                confirmText: 'Đồng ý',
+                cancelText: 'Hủy bỏ',
+              }).then((result) => {
+                if (result) navigate(routes.staff)
+              })
+            }
           >
             Hủy bỏ
           </button>

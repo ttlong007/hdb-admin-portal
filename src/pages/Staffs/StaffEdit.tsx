@@ -19,6 +19,7 @@ import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import InfoCard from '@/components/core/components/InfoCard'
 import { STATUS_WAITING_APPROVE } from '@/config/constants'
+import { useConfirm } from '@/providers/ConfirmProvider'
 
 type Option<T> = { label: string; value: T }
 
@@ -110,6 +111,7 @@ export default function EditStaff() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { isApprover, systemConfig } = useAuth()
+  const confirm = useConfirm()
 
   const { data: transactionOptions, isLoading: isLoadingTransactionTypes } =
     useQuery({
@@ -386,7 +388,16 @@ export default function EditStaff() {
       return
     }
 
-    updateStaffMutation.mutate(changedFields as StaffPayload)
+    confirm({
+      title: 'Xác nhận gửi duyệt',
+      message: 'Bạn có chắc chắn muốn gửi duyệt nhân viên này?',
+      confirmText: 'Đồng ý',
+      cancelText: 'Hủy bỏ',
+    }).then((result) => {
+      if (result) {
+        updateStaffMutation.mutate(changedFields as StaffPayload)
+      }
+    })
   }
 
   useEffect(() => {
@@ -631,7 +642,18 @@ export default function EditStaff() {
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
-            onClick={() => navigate(routes.staff)}
+            onClick={() =>
+              confirm({
+                title: 'Xác nhận hủy bỏ',
+                message: 'Bạn có chắc chắn muốn hủy bỏ đại lý này?',
+                confirmText: 'Đồng ý',
+                cancelText: 'Hủy bỏ',
+              }).then((result) => {
+                if (result) {
+                  navigate(routes.staff)
+                }
+              })
+            }
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
             <CloseCircleOutlined />

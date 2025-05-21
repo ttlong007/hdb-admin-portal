@@ -172,7 +172,7 @@ const Transactions: React.FC = () => {
               pageSize: limit,
               showSizeChanger: true,
               showTotal: (total: number) => `Có ${total} kết quả`,
-              pageSizeOptions: ['10', '20', '50', '100', '500'],
+              pageSizeOptions: ['10', '20', '50', '100'],
               locale: { items_per_page: 'kết quả / trang' },
             }}
             onChange={onTableChange}

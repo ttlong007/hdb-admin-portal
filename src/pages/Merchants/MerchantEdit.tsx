@@ -16,6 +16,7 @@ import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 import { CloseCircleOutlined } from '@ant-design/icons'
 import InfoCard from '@/components/core/components/InfoCard'
 import { STATUS_WAITING_APPROVE } from '@/config/constants'
+import { useConfirm } from '@/providers/ConfirmProvider'
 
 type Option = { label: string; value: string }
 
@@ -53,6 +54,7 @@ const EditMerchant = () => {
   const navigate = useNavigate()
   const { isApprover, systemConfig } = useAuth()
   const queryClient = useQueryClient()
+  const confirm = useConfirm()
 
   const schema = yup.object().shape({
     name: yup
@@ -523,7 +525,17 @@ const EditMerchant = () => {
     if (payload.need_approve_transaction_data === undefined) {
       delete payload.need_approve_transaction_data
     }
-    editMerchantMutation.mutate(payload)
+
+    confirm({
+      title: 'Xác nhận gửi duyệt',
+      message: 'Bạn có chắc chắn muốn gửi duyệt đại lý này?',
+      confirmText: 'Đồng ý',
+      cancelText: 'Hủy bỏ',
+    }).then((result) => {
+      if (result) {
+        editMerchantMutation.mutate(payload)
+      }
+    })
   }
 
   useEffect(() => {
@@ -925,7 +937,18 @@ const EditMerchant = () => {
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
-            onClick={() => navigate(routes.merchant)}
+            onClick={() =>
+              confirm({
+                title: 'Xác nhận hủy bỏ',
+                message: 'Bạn có chắc chắn muốn hủy bỏ đại lý này?',
+                confirmText: 'Đồng ý',
+                cancelText: 'Hủy bỏ',
+              }).then((result) => {
+                if (result) {
+                  navigate(routes.merchant)
+                }
+              })
+            }
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
             <CloseCircleOutlined />

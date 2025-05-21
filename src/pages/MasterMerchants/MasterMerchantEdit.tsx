@@ -19,6 +19,7 @@ import { useAuth } from '@/store/authSlice/useAuth'
 import { useMasterMerchantDetail } from '@/hooks/useMasterMerchantDetail'
 import InfoCard from '@/components/core/components/InfoCard'
 import UploadDocument from './components/UploadDocument'
+import { useConfirm } from '@/providers/ConfirmProvider'
 
 const { Option } = Select
 
@@ -52,6 +53,7 @@ export default function MasterMerchantEdit() {
   const navigate = useNavigate()
   const { isApprover, systemConfig } = useAuth()
   const queryClient = useQueryClient()
+  const confirm = useConfirm()
 
   const { company, dailyLimit, monthlyLimit, isLoading, error } =
     useMasterMerchantDetail(id)
@@ -248,7 +250,14 @@ export default function MasterMerchantEdit() {
   })
 
   const onFinish: SubmitHandler<any> = async (values) => {
-    updateCompanyMutation.mutate(values)
+    confirm({
+      title: 'Xác nhận gửi duyệt',
+      message: 'Bạn có chắc chắn muốn gửi duyệt đại lý này?',
+      confirmText: 'Đồng ý',
+      cancelText: 'Hủy bỏ',
+    }).then((result) => {
+      if (result) updateCompanyMutation.mutate(values)
+    })
   }
 
   if (isLoading) return <Spin />
@@ -438,7 +447,18 @@ export default function MasterMerchantEdit() {
         <div className="flex items-center justify-end gap-4 w-full mt-8">
           <button
             type="button"
-            onClick={() => navigate(routes.masterMerchant)}
+            onClick={() =>
+              confirm({
+                title: 'Xác nhận hủy bỏ',
+                message: 'Bạn có chắc chắn muốn hủy bỏ đại lý này?',
+                confirmText: 'Đồng ý',
+                cancelText: 'Hủy bỏ',
+              }).then((result) => {
+                if (result) {
+                  navigate(routes.masterMerchant)
+                }
+              })
+            }
             className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
           >
             <CloseCircleOutlined />
