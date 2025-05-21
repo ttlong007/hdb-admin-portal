@@ -50,7 +50,7 @@ export default function MerchantDetail() {
         }
       )
       if (response.status !== 204) {
-        throw new Error('Từ chối thất bại')
+        throw new Error(response.data.reason_message)
       }
       return response.data
     },
@@ -72,7 +72,7 @@ export default function MerchantDetail() {
         }
       )
       if (response.status !== 204) {
-        throw new Error('Duyệt thất bại')
+        throw new Error(response.data.reason_message)
       }
       return response.data
     },
@@ -94,7 +94,7 @@ export default function MerchantDetail() {
         }
       )
       if (response.status !== 204) {
-        throw new Error('Từ chối thất bại')
+        throw new Error(response.data.reason_message)
       }
       return response.data
     },
@@ -116,7 +116,7 @@ export default function MerchantDetail() {
         }
       )
       if (response.status !== 204) {
-        throw new Error('Duyệt thất bại')
+        throw new Error(response.data.reason_message)
       }
       return response.data
     },

@@ -10,6 +10,7 @@ import { getEnv } from '@/config/env'
 import { useMutation } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
+import { toast } from 'react-toastify'
 
 const Layout = () => {
   const { isAuthenticated, setAuthState } = useAuth() // Assuming you have a setter to update auth state
@@ -30,6 +31,7 @@ const Layout = () => {
         })
         navigate(routes.masterMerchant, { replace: true })
       } else {
+        toast.error(response.data.reason_message)
         throw new Error('Login failed')
       }
     },

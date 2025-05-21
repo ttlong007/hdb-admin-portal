@@ -60,7 +60,7 @@ const StaffDetail: React.FC = () => {
         }
       )
       if (response.status !== 204) {
-        throw new Error('Từ chối thất bại')
+        throw new Error(response.data.reason_message)
       }
       return response.data
     },
@@ -82,7 +82,7 @@ const StaffDetail: React.FC = () => {
         }
       )
       if (response.status !== 204) {
-        throw new Error('Duyệt thất bại')
+        throw new Error(response.data.reason_message)
       }
       return response.data
     },
@@ -104,7 +104,7 @@ const StaffDetail: React.FC = () => {
         }
       )
       if (response.status !== 204) {
-        throw new Error('Từ chối thất bại')
+        throw new Error(response.data.reason_message)
       }
       return response.data
     },
@@ -126,7 +126,7 @@ const StaffDetail: React.FC = () => {
         }
       )
       if (response.status !== 204) {
-        throw new Error('Duyệt thất bại')
+        throw new Error(response.data.reason_message)
       }
       return response.data
     },

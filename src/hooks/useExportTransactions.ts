@@ -12,7 +12,7 @@ export const useExportTransactions = () => {
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data
       } else {
-        throw new Error('Export failed')
+        throw new Error(response.data.reason_message)
       }
     },
   })

@@ -384,7 +384,7 @@ const CreateMerchant = () => {
       if (response.data.status_code === 'ACCEPT') {
         return response.data
       }
-      throw new Error('Creation failed')
+      throw new Error(response.data.reason_message)
     },
     onSuccess: () => {
       toast.success('Tạo đại lý thành công!')

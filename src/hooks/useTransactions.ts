@@ -73,7 +73,7 @@ export const useTransactions = ({
           total: response.data.page_data.total,
         }
       }
-      throw new Error('Failed to fetch transactions')
+      throw new Error(response.data.reason_message)
     },
   })
 

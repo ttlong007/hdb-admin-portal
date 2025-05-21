@@ -154,15 +154,15 @@ const MasterMerchants: React.FC = () => {
       if (response.data.status_code === 'ACCEPT') {
         return response.data
       } else {
-        throw new Error('Sync failed')
+        throw new Error(response.data.reason_message)
       }
     },
     onSuccess: () => {
       toast.success('Đồng bộ công ty thành công')
       refetch()
     },
-    onError: () => {
-      toast.error('Đồng bộ công ty thất bại')
+    onError: (error: any) => {
+      toast.error(error.message)
     },
   })
 
