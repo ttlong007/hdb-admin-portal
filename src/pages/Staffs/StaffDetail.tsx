@@ -238,6 +238,15 @@ const StaffDetail: React.FC = () => {
                   </Tag>
                 </div>
               </div>
+
+              {staff.role === ROLE.STORE_MANAGER && (
+                <div className="flex flex-col gap-2">
+                  <span className="text-sm text-gray-400">Quyền thực hiện giao dịch</span>
+                  <span className="text-base font-semibold">
+                    {staff.can_make_transaction ? 'Có' : 'Không'}
+                  </span>
+                </div>
+              )}
             </div>
           </InfoCard>
 

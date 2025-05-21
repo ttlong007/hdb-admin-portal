@@ -16,19 +16,21 @@ import { useStores } from '@/hooks/useStores'
 import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 import { useConfirm } from '@/providers/ConfirmProvider'
 
-type Option = { label: string; value: number }
+type NumberOption = { label: string; value: number }
+type StringOption = { label: string; value: string }
 
 type FormData = {
-  company_id: Option | null
+  company_id: NumberOption | null
   email: string
   name: string
   national_id_number: string
   phone_number: string
-  role: Option | null
-  store_id: Option | null
+  role: StringOption | null
+  store_id: NumberOption | null
   transaction_monthly_quota: string
   transaction_daily_quota: string
   transactionTypes: number[]
+  can_make_transaction: boolean
 }
 
 // Define a new type for the payload expected by the API.
@@ -45,6 +47,7 @@ type StaffPayload = {
     type: 'TRANSACTION_QUOTA_DAILY' | 'TRANSACTION_QUOTA_MONTHLY'
   }[]
   transaction_type_ids: number[]
+  can_make_transaction: boolean
 }
 
 const defaultTransactionTypes = []
@@ -100,9 +103,18 @@ export default function CreateStaff() {
       .matches(/^[0-9]+$/, 'Số CCCD chỉ được chứa số')
       .length(12, 'Số CCCD phải có đúng 12 số')
       .required('Số CCCD là bắt buộc'),
-    company_id: yup.mixed<Option>().nullable().required('Công ty là bắt buộc'),
-    role: yup.mixed<Option>().nullable().required('Nhóm chức danh là bắt buộc'),
-    store_id: yup.mixed<Option>().nullable().required('Cửa hàng là bắt buộc'),
+    company_id: yup
+      .mixed<NumberOption>()
+      .nullable()
+      .required('Công ty là bắt buộc'),
+    role: yup
+      .mixed<StringOption>()
+      .nullable()
+      .required('Nhóm chức danh là bắt buộc'),
+    store_id: yup
+      .mixed<NumberOption>()
+      .nullable()
+      .required('Cửa hàng là bắt buộc'),
     transaction_monthly_quota: yup
       .string()
       .transform((value) => (value ? value.replace(/,/g, '') : ''))
@@ -167,6 +179,7 @@ export default function CreateStaff() {
         }
       ),
     transactionTypes: yup.array().of(yup.mixed()),
+    can_make_transaction: yup.boolean(),
   }) as yup.ObjectSchema<FormData>
   const {
     control,
@@ -187,6 +200,7 @@ export default function CreateStaff() {
       transaction_monthly_quota: '',
       transaction_daily_quota: '',
       transactionTypes: [], // Initialize as empty array
+      can_make_transaction: false,
     },
     resolver: yupResolver(schema),
     mode: 'all',
@@ -208,6 +222,7 @@ export default function CreateStaff() {
   // Watch selected company_id to fetch stores
   const selectedCompany = watch('company_id')
   const selectedStore = watch('store_id')
+  const selectedRole = watch('role')
 
   // Add query to fetch staff limits
   const { data: staffLimits } = useQuery({
@@ -295,6 +310,7 @@ export default function CreateStaff() {
         },
       ],
       transaction_type_ids: data.transactionTypes || [],
+      can_make_transaction: data.can_make_transaction,
     }
     confirm({
       title: 'Xác nhận gửi duyệt',
@@ -447,7 +463,7 @@ export default function CreateStaff() {
                       [
                         { label: 'Quản lý', value: 'STORE_MANAGER' },
                         { label: 'Nhân viên', value: 'STORE_EMPLOYEE' },
-                      ] as unknown as Option[]
+                      ] as unknown as StringOption[]
                     }
                     placeholder="Chọn nhóm chức danh"
                   />
@@ -459,6 +475,25 @@ export default function CreateStaff() {
                 </div>
               )}
             />
+
+            <div className="flex flex-col justify-end">
+              {selectedRole?.value === 'STORE_MANAGER' && (
+                <Controller
+                  name="can_make_transaction"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="mb-1">
+                      <Checkbox
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      >
+                        Quản lý trưởng thực hiện giao dịch
+                      </Checkbox>
+                    </div>
+                  )}
+                />
+              )}
+            </div>
           </div>
         </section>
         <section className="w-full border-b pb-8">

@@ -35,6 +35,7 @@ type FormData = {
   transaction_daily_quota: string
   transactionTypes: number[]
   active: boolean
+  can_make_transaction: boolean
 }
 
 type StaffPayload = {
@@ -51,6 +52,7 @@ type StaffPayload = {
   }[]
   transaction_type_ids: number[]
   status?: string
+  can_make_transaction: boolean
 }
 
 // Add role options constant
@@ -104,6 +106,7 @@ function mapStaffToDefaultValues(staffDetail: any): FormData {
       staffDetail.transaction_types?.map((type: { id: number }) => type.id) ||
       [],
     active: staffDetail.status === 'ACTIVE',
+    can_make_transaction: staffDetail.can_make_transaction || false,
   }
 }
 
@@ -215,6 +218,7 @@ export default function EditStaff() {
       ),
     transactionTypes: yup.array().of(yup.mixed()),
     active: yup.boolean(),
+    can_make_transaction: yup.boolean(),
   }) as yup.ObjectSchema<FormData>
 
   const {
@@ -237,6 +241,7 @@ export default function EditStaff() {
       transaction_daily_quota: '',
       transactionTypes: [],
       active: false,
+      can_make_transaction: false,
     },
     resolver: yupResolver(schema),
     mode: 'all',
@@ -282,6 +287,7 @@ export default function EditStaff() {
 
   // Watch selected company_id to fetch stores
   const selectedCompany = watch('company_id')
+  const selectedRole = watch('role')
 
   useEffect(() => {
     // When the company selection changes, reset store_id to null
@@ -321,6 +327,7 @@ export default function EditStaff() {
         },
       ],
       transaction_type_ids: data.transactionTypes || [],
+      can_make_transaction: data.can_make_transaction,
     }
 
     // Create a new object with only changed fields
@@ -379,6 +386,11 @@ export default function EditStaff() {
         JSON.stringify(basePayload.transaction_type_ids.sort())
       ) {
         changedFields.transaction_type_ids = basePayload.transaction_type_ids
+      }
+
+      // Check can_make_transaction
+      if (data.can_make_transaction !== staffDetail.can_make_transaction) {
+        changedFields.can_make_transaction = data.can_make_transaction
       }
     }
 
@@ -536,6 +548,25 @@ export default function EditStaff() {
                 </div>
               )}
             />
+
+            <div className="flex flex-col justify-end">
+              {selectedRole?.value === 'STORE_MANAGER' && (
+                <Controller
+                  name="can_make_transaction"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="mb-1">
+                      <Checkbox
+                        checked={field.value}
+                        onChange={(e) => field.onChange(e.target.checked)}
+                      >
+                        Quản lý trưởng thực hiện giao dịch
+                      </Checkbox>
+                    </div>
+                  )}
+                />
+              )}
+            </div>
           </div>
         </InfoCard>
 
