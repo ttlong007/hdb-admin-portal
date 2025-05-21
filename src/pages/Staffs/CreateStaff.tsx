@@ -276,34 +276,35 @@ export default function CreateStaff() {
   })
 
   const onSubmit = (data: FormData) => {
+    const formattedData: StaffPayload = {
+      company_id: data.company_id!.value,
+      email: data.email,
+      name: data.name,
+      national_id_number: data.national_id_number,
+      phone_number: data.phone_number,
+      role: String(data.role!.value),
+      store_id: data.store_id!.value,
+      limits: [
+        {
+          amount: Number(data.transaction_daily_quota),
+          type: 'TRANSACTION_QUOTA_DAILY',
+        },
+        {
+          amount: Number(data.transaction_monthly_quota),
+          type: 'TRANSACTION_QUOTA_MONTHLY',
+        },
+      ],
+      transaction_type_ids: data.transactionTypes || [],
+    }
     confirm({
       title: 'Xác nhận gửi duyệt',
       message: 'Bạn có chắc chắn muốn gửi duyệt nhân viên này?',
       confirmText: 'Đồng ý',
       cancelText: 'Hủy bỏ',
     }).then((result) => {
-      const formattedData: StaffPayload = {
-        company_id: data.company_id!.value,
-        email: data.email,
-        name: data.name,
-        national_id_number: data.national_id_number,
-        phone_number: data.phone_number,
-        role: String(data.role!.value),
-        store_id: data.store_id!.value,
-        limits: [
-          {
-            amount: Number(data.transaction_daily_quota),
-            type: 'TRANSACTION_QUOTA_DAILY',
-          },
-          {
-            amount: Number(data.transaction_monthly_quota),
-            type: 'TRANSACTION_QUOTA_MONTHLY',
-          },
-        ],
-        transaction_type_ids: data.transactionTypes || [],
+      if (result) {
+        createStaffMutation.mutate(formattedData)
       }
-
-      createStaffMutation.mutate(formattedData)
     })
   }
 
