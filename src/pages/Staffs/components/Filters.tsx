@@ -108,7 +108,15 @@ const Filters: React.FC = () => {
       value: store.id,
     })) || []
 
-  const exportMutation = useExportStaffs()
+  const exportMutation = useExportStaffs({
+    filter: {
+      company_id: staffFilters.company_id,
+      store_id: staffFilters.store_id,
+      code: staffFilters.code,
+      name: staffFilters.name,
+      status: staffFilters.status,
+    },
+  })
   const [isExporting, setIsExporting] = React.useState(false)
   const csvLinkRef = React.useRef<any>(null)
 
@@ -134,9 +142,11 @@ const Filters: React.FC = () => {
   const csvHeaders = [
     { label: 'STT', key: 'stt' },
     { label: 'Mã nhân viên', key: 'code' },
-    { label: 'Tên nhân viên', key: 'name' },
-    { label: 'Địa chỉ', key: 'address' },
-    { label: 'Trạng thái duyệt', key: 'status' },
+    { label: 'Họ tên', key: 'name' },
+    { label: 'Trạng thái', key: 'status' },
+    { label: 'Tên cửa hàng', key: 'store_name' },
+    { label: 'Nhóm chức danh', key: 'role' },
+    { label: 'Đại lý tổng', key: 'company_name' },
   ]
 
   const prepareCsvData = (data: any[]) => {
@@ -144,8 +154,10 @@ const Filters: React.FC = () => {
       stt: index + 1,
       code: item.code || '---',
       name: item.name || '---',
-      address: item.address || '---',
-      status: STAFF_STATUS_MAP[item.status?.toLowerCase()] || '---',
+      status: STAFF_STATUS_MAP[item.status?.toUpperCase()] || '---',
+      store_name: item.store_name || '---',
+      role: STAFF_ROLES.find((r) => r.value === item.role?.toUpperCase())?.label || '---',
+      company_name: item.company_name || '---',
     }))
   }
 

@@ -21,7 +21,7 @@ import { useGetFiles } from '@/hooks/useGetFiles'
 import UploadFileModal from '@/components/core/components/UploadFileModal'
 import PreviewUploadModal from '@/components/core/components/PreviewUploadModal'
 const Merchants: React.FC = () => {
-  const { objectKeyMerchant } = useAuth()
+  const { objectKeyMerchant, setAuthState } = useAuth()
   const { merchantFilters, setMerchantFilters } = useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
   const [isUploadFileModalOpen, setIsUploadFileModalOpen] = useState(false)
@@ -37,7 +37,6 @@ const Merchants: React.FC = () => {
     fields: ['admin_stores_create.xlsx'],
   })
 
-  console.log('objectKeyMerchant', objectKeyMerchant)
   const { data: uploadResult, isPending: isUploadResultPending } = useQuery({
     queryKey: ['uploadResult', objectKeyMerchant],
     queryFn: async () => {
@@ -49,7 +48,10 @@ const Merchants: React.FC = () => {
         return response.data
       }
       if (response.data.status_code === 'REJECT') {
-        toast.error(response.data.reason_message || 'Xử lý file thất bại')
+        setAuthState({
+          objectKeyMerchant: null,
+        })
+        return null
       }
       if (response.data.status_code === 'PROCESSING') {
         throw { response: { data: response.data } }

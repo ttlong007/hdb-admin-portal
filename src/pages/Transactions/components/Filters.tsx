@@ -76,7 +76,16 @@ const Filters: React.FC = () => {
   // Map status options from constants
   const statusOptions = TRANSACTION_STATUS
 
-  const exportMutation = useExportTransactions()
+  const exportMutation = useExportTransactions({
+    filter: {
+      code: transactionFilters.code,
+      transaction_type: transactionFilters.transaction_type,
+      status: transactionFilters.status,
+      store_code: transactionFilters.store_code,
+      duration: transactionFilters.duration,
+      staff_code: transactionFilters.staff_code,
+    },
+  })
   const [isExporting, setIsExporting] = React.useState(false)
   const csvLinkRef = React.useRef<any>(null)
 
@@ -88,26 +97,27 @@ const Filters: React.FC = () => {
 
   const csvHeaders = [
     { label: 'STT', key: 'stt' },
-    { label: 'Mã giao dịch', key: 'code' },
+    { label: 'Mã tham chiếu', key: 'ref_code' },
     { label: 'Số tiền', key: 'amount' },
     { label: 'Trạng thái', key: 'status' },
-    { label: 'Loại giao dịch', key: 'transaction_type' },
-    { label: 'Công ty', key: 'company_id' },
-    { label: 'Cửa hàng', key: 'store' },
+    { label: 'Loại GD', key: 'transaction_type_name' },
+    { label: 'Thời gian GD', key: 'created_at' },
+    { label: 'Mã - Tên điểm đại lý', key: 'store_code_name' },
+    { label: 'Mã nhân viên', key: 'created_by_staff_code' },
+    { label: 'Phí giao dịch', key: 'transaction_fee' },
   ]
 
   const prepareCsvData = (data: any[]) => {
     return data.map((item, index) => ({
       stt: index + 1,
-      code: item.code || '---',
+      ref_code: item.ref_code || '---',
       amount: item.amount ? item.amount.toLocaleString('en-US') : '---',
-      status: item.status
-        ? TRANSACTION_STATUS.find((s) => s.value === item.status)?.label ||
-          '---'
-        : '---',
-      transaction_type: item.transaction_type?.name || '---',
-      company_id: item.company_id ? `Company ${item.company_id}` : '---',
-      store: item.store?.name || '---',
+      status: TRANSACTION_STATUS.find((s) => s.value === item.status?.toUpperCase())?.label || '---',
+      transaction_type_name: item.transaction_type_name || '---',
+      created_at: item.created_at ? new Date(item.created_at).toLocaleString('en-US') : '---',
+      store_code_name: item.store_code_name || '---',
+      created_by_staff_code: item.created_by_staff_code || '---',
+      transaction_fee: item.transaction_fee ? item.transaction_fee.toLocaleString('en-US') : '---',
     }))
   }
 

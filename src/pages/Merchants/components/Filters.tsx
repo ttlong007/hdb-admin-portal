@@ -86,7 +86,15 @@ const Filters: React.FC = () => {
     resetMerchantFilters()
   }
 
-  const exportMutation = useExportMerchants()
+  const exportMutation = useExportMerchants({
+    filter: {
+      status: merchantFilters.status,
+      cif: merchantFilters.cif,
+      company_id: merchantFilters.company_id,
+      code: merchantFilters.code,
+      name: merchantFilters.name,
+    },
+  })
   const [isExporting, setIsExporting] = React.useState(false)
   const csvLinkRef = React.useRef<any>(null)
 
@@ -111,18 +119,24 @@ const Filters: React.FC = () => {
 
   const csvHeaders = [
     { label: 'STT', key: 'stt' },
+    { label: 'Mã CIF', key: 'company_cif' },
+    { label: 'Tên công ty', key: 'company_name' },
     { label: 'Mã điểm đại lý', key: 'code' },
     { label: 'Tên điểm đại lý', key: 'name' },
-    { label: 'Địa chỉ', key: 'address' },
-    { label: 'Trạng thái duyệt', key: 'status' },
+    { label: 'Tên quản lý', key: 'manager_name' },
+    { label: 'Mã nhân viên', key: 'manager_code' },
+    { label: 'Trạng thái', key: 'status' },
   ]
 
   const prepareCsvData = (data: any[]) => {
     return data.map((item, index) => ({
       stt: index + 1,
+      company_cif: item.company_cif || '---',
+      company_name: item.company_name || '---',
       code: item.code || '---',
       name: item.name || '---',
-      address: item.address || '---',
+      manager_name: item.manager_name || '---',
+      manager_code: item.manager_code || '---',
       status: MERCHANT_STATUS_MAP[item.status?.toLowerCase()] || '---',
     }))
   }

@@ -1,7 +1,16 @@
 import { useMutation } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 
-export const useExportMasterMerchants = ({ filter }: { filter: any }) => {
+interface ExportMasterMerchantsProps {
+  filter: {
+    status?: any
+    cif?: string
+    name?: string
+    business_license?: string
+  }
+}
+
+export const useExportMasterMerchants = ({ filter }: ExportMasterMerchantsProps) => {
   return useMutation({
     mutationFn: async () => {
       const cleanFilter: any = {}
