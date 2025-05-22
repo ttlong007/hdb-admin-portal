@@ -137,7 +137,7 @@ const Filters: React.FC = () => {
       name: item.name || '---',
       manager_name: item.manager_name || '---',
       manager_code: item.manager_code || '---',
-      status: MERCHANT_STATUS_MAP[item.status?.toLowerCase()] || '---',
+      status: MERCHANT_STATUS_MAP[item.status] || '---',
     }))
   }
 

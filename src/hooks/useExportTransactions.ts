@@ -23,8 +23,8 @@ export const useExportTransactions = ({ filter }: ExportTransactionsProps) => {
       if (filter?.transaction_type?.value) {
         cleanFilter.transaction_type = filter.transaction_type.value
       }
-      if (filter?.status?.value) {
-        cleanFilter.status = filter.status.value
+      if (filter?.status) {
+        cleanFilter.status = filter.status
       }
       if (filter?.store_code) {
         cleanFilter.store_code = filter.store_code
@@ -35,6 +35,7 @@ export const useExportTransactions = ({ filter }: ExportTransactionsProps) => {
       if (filter?.staff_code) {
         cleanFilter.staff_code = filter.staff_code
       }
+
       const response = await axiosInstance.post('/v1/admin/transaction/list', {
         ...cleanFilter,
         limit: 500,
@@ -45,11 +46,14 @@ export const useExportTransactions = ({ filter }: ExportTransactionsProps) => {
       let allData = [...response.data.data]
 
       for (let page = 2; page <= totalPages; page++) {
-        const response = await axiosInstance.post('/v1/admin/transaction/list', {
-          ...cleanFilter,
-          page,
-          limit: 500,
-        })
+        const response = await axiosInstance.post(
+          '/v1/admin/transaction/list',
+          {
+            ...cleanFilter,
+            page,
+            limit: 500,
+          }
+        )
 
         if (response.data.status_code === 'ACCEPT') {
           allData = [...allData, ...response.data.data]

@@ -210,13 +210,12 @@ const Staffs: React.FC = () => {
   const rowSelection: TableProps['rowSelection'] = isApprover
     ? {
         onChange: (selectedKeys: React.Key[], selectedRows: any[]) => {
-          console.log(
-            'Selected Row Keys:',
-            selectedKeys,
-            'Selected Rows:',
-            selectedRows
+          // Only select rows with waiting_approve status
+          const waitingApproveRows = selectedRows.filter(
+            (row) => row.status?.toLowerCase() === 'waiting_approve'
           )
-          setSelectedRowKeys(selectedKeys)
+          const waitingApproveKeys = waitingApproveRows.map((row) => row.id)
+          setSelectedRowKeys(waitingApproveKeys)
         },
         getCheckboxProps: (record: any) => ({
           // Hide the checkbox for rows whose status is not "waiting_approve"
@@ -225,6 +224,15 @@ const Staffs: React.FC = () => {
               ? { display: 'none' }
               : {},
         }),
+        selectedRowKeys: selectedRowKeys,
+        // Only select waiting_approve items when using Select All
+        onSelectAll: (selected: boolean, selectedRows: any[]) => {
+          const waitingApproveRows = selectedRows.filter(
+            (row) => row.status?.toLowerCase() === 'waiting_approve'
+          )
+          const waitingApproveKeys = waitingApproveRows.map((row) => row.id)
+          setSelectedRowKeys(selected ? waitingApproveKeys : [])
+        }
       }
     : undefined
 

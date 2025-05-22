@@ -146,6 +146,7 @@ export default function EditStaff() {
     phone_number: yup
       .string()
       .matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số')
+      .matches(/^0/, 'Số điện thoại phải bắt đầu bằng số 0')
       .min(10, 'Số điện thoại phải có ít nhất 10 số')
       .max(11, 'Số điện thoại không được vượt quá 11 số'),
     national_id_number: yup

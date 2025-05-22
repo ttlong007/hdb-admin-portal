@@ -391,8 +391,7 @@ const CreateMerchant = () => {
       // Navigate or show success message as needed.
     },
     onError: (error: any) => {
-      toast.error('Tạo đại lý thất bại!')
-      console.error(error)
+      toast.error(error.message)
     },
   })
 

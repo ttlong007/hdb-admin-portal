@@ -95,6 +95,7 @@ export default function CreateStaff() {
     phone_number: yup
       .string()
       .matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số')
+      .matches(/^0/, 'Số điện thoại phải bắt đầu bằng số 0')
       .min(10, 'Số điện thoại phải có ít nhất 10 số')
       .max(11, 'Số điện thoại không được vượt quá 11 số')
       .required('Số điện thoại là bắt buộc'),
@@ -286,7 +287,7 @@ export default function CreateStaff() {
       navigate(routes.staff) // Adjust the route as needed
     },
     onError: (error: any) => {
-      toast.error(error.message || 'An error occurred while creating staff')
+      toast.error(error.message)
     },
   })
 
