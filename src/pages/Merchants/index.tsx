@@ -265,7 +265,7 @@ const Merchants: React.FC = () => {
   }
 
   const handleOpenUploadFileModal = () => {
-    if (!objectKeyMerchant && !isUploadResultPending) {
+    if (!objectKeyMerchant && !isLoadingUploadResult) {
       setIsUploadFileModalOpen(true)
     }
 
@@ -308,8 +308,8 @@ const Merchants: React.FC = () => {
             </button>
 
             <button
-              disabled={!!isLoadingUploadResult}
               onClick={handleOpenUploadFileModal}
+              disabled={!!isLoadingUploadResult}
               className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]"
             >
               {isLoadingUploadResult && <LoadingOutlined />}
