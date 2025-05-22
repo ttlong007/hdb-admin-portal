@@ -5,6 +5,8 @@ interface State {
   refreshToken: string | null
   user: any
   systemConfig: any
+  objectKeyStore: string | null
+  objectKeyMerchant: string | null
 }
 
 const initialState: State = {
@@ -12,6 +14,8 @@ const initialState: State = {
   refreshToken: null,
   user: null,
   systemConfig: null,
+  objectKeyStore: null,
+  objectKeyMerchant: null,
 }
 
 const authSlice = createSlice({

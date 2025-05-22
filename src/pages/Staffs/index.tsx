@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import { Button, Space, Table, Tag } from 'antd'
-import { EditOutlined, EyeOutlined } from '@ant-design/icons'
+import { Button, Space, Spin, Table, Tag } from 'antd'
+import { EditOutlined, EyeOutlined, LoadingOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import { Link, NavLink } from 'react-router-dom'
 import { useFilter } from '@/store/filterSlice/useFilter'
@@ -9,17 +9,18 @@ import { useStaffs } from '@/hooks/useStaffs'
 import { routes } from '@/config/routes'
 import Filters from './components/Filters'
 import {
-  STAFF_STATUS,
   STAFF_STATUS_COLOR_MAP,
   STAFF_ROLES,
   STAFF_STATUS_MAP,
 } from '@/config/constants'
 import { useAuth } from '@/store/authSlice/useAuth'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 import { toast } from 'react-toastify'
 import { useConfirm } from '@/providers/ConfirmProvider'
 import { useGetFiles } from '@/hooks/useGetFiles'
+import PreviewUploadModal from '@/components/core/components/PreviewUploadModal'
+import UploadFileModal from '@/components/core/components/UploadFileModal'
 interface Staff {
   id: number
   code: string
@@ -33,15 +34,50 @@ interface Staff {
 const Staffs: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { isApprover, isCreator } = useAuth()
+  const { objectKeyStore } = useAuth()
   const confirm = useConfirm()
   const { staffFilters, setStaffFilters } = useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
   const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
     null
   )
+  const [isUploadFileModalOpen, setIsUploadFileModalOpen] = useState(false)
+  const [isPreviewUploadModalOpen, setIsPreviewUploadModalOpen] =
+    useState(false)
   const { data: file, isPending: isFilesPending } = useGetFiles({
     fields: ['admin_staffs_create.xlsx'],
   })
+  const { data: uploadResult, isPending: isUploadResultPending } = useQuery({
+    queryKey: ['uploadResult', objectKeyStore],
+    queryFn: async () => {
+      const response = await axiosInstance.post(
+        '/v1/admin/file/upload/get-transaction-result',
+        { object_key: objectKeyStore }
+      )
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data
+      }
+      if (response.data.status_code === 'REJECT') {
+        toast.error(response.data.reason_message || 'Xử lý file thất bại')
+      }
+      if (response.data.status_code === 'PROCESSING') {
+        throw { response: { data: response.data } }
+      }
+      return response.data
+    },
+    enabled: !!objectKeyStore,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.data?.status_code === 'PROCESSING') {
+        return failureCount < 30
+      }
+      return false
+    },
+    retryDelay: 10000,
+  })
+
+  const isWaitingConfirmApply =
+    uploadResult?.data?.validate_status === 'VALIDATE_SUCCESSFUL' &&
+    !isUploadResultPending
 
   const handleDownloadTemplate = () => {
     if (file?.full_url) {
@@ -231,6 +267,18 @@ const Staffs: React.FC = () => {
     })
   }
 
+  const handleOpenUploadFileModal = () => {
+    if (!objectKeyStore && !isUploadResultPending) {
+      setIsUploadFileModalOpen(true)
+    }
+  }
+
+  const handleOpenPreviewUploadModal = () => {
+    if (isWaitingConfirmApply) {
+      setIsPreviewUploadModalOpen(true)
+    }
+  }
+
   return (
     <>
       {/* Breadcrumbs */}
@@ -264,10 +312,33 @@ const Staffs: React.FC = () => {
             >
               Tải về file mẫu
             </button>
-            <button className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]">
-              {/* SVG icon */}
-              Tải lên theo danh sách
+            <button
+              onClick={handleOpenUploadFileModal}
+              disabled={isUploadResultPending}
+              className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]"
+            >
+              {isUploadResultPending && <LoadingOutlined />}
+              {isUploadResultPending
+                ? 'Đang xử lý file...'
+                : isWaitingConfirmApply
+                ? 'Xem danh sách tải lên'
+                : 'Tải lên theo danh sách'}
             </button>
+
+            <UploadFileModal
+              isOpen={isUploadFileModalOpen}
+              onClose={() => setIsUploadFileModalOpen(false)}
+              uploadType="ADMIN_IMPORT_STAFF"
+              type="staff"
+            />
+
+            <PreviewUploadModal
+              isOpen={isPreviewUploadModalOpen}
+              onClose={() => setIsPreviewUploadModalOpen(false)}
+              objectKey={objectKeyStore}
+              type="staff"
+            />
+
             {!isApprover && (
               <Link
                 to={routes.createStaff}

@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { Table, Tag, Space, Button } from 'antd'
-import { EditOutlined, EyeOutlined } from '@ant-design/icons'
+import { EditOutlined, EyeOutlined, LoadingOutlined } from '@ant-design/icons'
 import type { TableProps } from 'antd'
 import { Link, NavLink } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 
 import { routes } from '@/config/routes'
 import {
@@ -19,10 +19,13 @@ import { useFilter } from '@/store/filterSlice/useFilter'
 import { useConfirm } from '@/providers/ConfirmProvider'
 import { useGetFiles } from '@/hooks/useGetFiles'
 import UploadFileModal from '@/components/core/components/UploadFileModal'
+import PreviewUploadModal from '@/components/core/components/PreviewUploadModal'
 const Merchants: React.FC = () => {
+  const { objectKeyMerchant } = useAuth()
   const { merchantFilters, setMerchantFilters } = useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
   const [isUploadFileModalOpen, setIsUploadFileModalOpen] = useState(false)
+  const [isPreviewUploadModalOpen, setIsPreviewUploadModalOpen] = useState(false)
   const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
     null
   )
@@ -32,6 +35,37 @@ const Merchants: React.FC = () => {
   const { data: file, isPending: isFilesPending } = useGetFiles({
     fields: ['admin_stores_create.xlsx'],
   })
+  const { data: uploadResult, isPending: isUploadResultPending } = useQuery({
+    queryKey: ['uploadResult', objectKeyMerchant],
+    queryFn: async () => {
+      const response = await axiosInstance.post(
+        '/v1/admin/file/upload/get-transaction-result',
+        { object_key: objectKeyMerchant }
+      )
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data
+      }
+      if (response.data.status_code === 'REJECT') {
+        toast.error(response.data.reason_message || 'Xử lý file thất bại')
+      }
+      if (response.data.status_code === 'PROCESSING') {
+        throw { response: { data: response.data } }
+      }
+      return response.data
+    },
+    enabled: !!objectKeyMerchant,
+    retry: (failureCount, error: any) => {
+      if (error?.response?.data?.status_code === 'PROCESSING') {
+        return failureCount < 30
+      }
+      return false
+    },
+    retryDelay: 10000,
+  })
+
+  const isWaitingConfirmApply =
+    uploadResult?.data?.validate_status === 'VALIDATE_SUCCESSFUL' &&
+    !isUploadResultPending
 
   const handleDownloadTemplate = () => {
     if (file?.full_url) {
@@ -225,13 +259,18 @@ const Merchants: React.FC = () => {
     })
   }
 
-  const handleUploadSuccess = (objectKey: string, uploadUrl: string) => {
-    console.log('Upload success:', objectKey, uploadUrl)
+  const handleOpenUploadFileModal = () => {
+    if (!objectKeyMerchant && !isUploadResultPending) {
+      setIsUploadFileModalOpen(true)
+    }
+
+    if (isWaitingConfirmApply) {
+      setIsPreviewUploadModalOpen(true)
+    }
   }
 
   return (
     <>
-      {/* Breadcrumbs */}
       <div className="flex justify-start items-center gap-2 mb-4">
         <NavLink
           to={routes.merchant}
@@ -262,19 +301,32 @@ const Merchants: React.FC = () => {
             >
               Tải về file mẫu
             </button>
+
             <button
-              onClick={() => setIsUploadFileModalOpen(true)}
+              disabled={isUploadResultPending}
+              onClick={handleOpenUploadFileModal}
               className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]"
             >
-              {/* SVG for download */}
-              Tải lên theo danh sách
+              {isUploadResultPending && <LoadingOutlined />}
+              {isUploadResultPending
+                ? 'Đang xử lý file...'
+                : isWaitingConfirmApply
+                ? 'Xem danh sách tải lên'
+                : 'Tải lên theo danh sách'}
             </button>
 
             <UploadFileModal
               isOpen={isUploadFileModalOpen}
               onClose={() => setIsUploadFileModalOpen(false)}
-              onUploadSuccess={handleUploadSuccess}
               uploadType="ADMIN_IMPORT_STORE"
+              type="staff"
+            />
+
+            <PreviewUploadModal
+              isOpen={isPreviewUploadModalOpen}
+              onClose={() => setIsPreviewUploadModalOpen(false)}
+              objectKey={objectKeyMerchant}
+              type="merchant"
             />
 
             {!isApprover && (
