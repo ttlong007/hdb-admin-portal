@@ -211,7 +211,7 @@ const Merchants: React.FC = () => {
 
   const rowSelection: TableProps['rowSelection'] = isApprover
     ? {
-        onChange: (selectedKeys: React.Key[], selectedRows: any[]) => {
+        onChange: (_selectedKeys: React.Key[], selectedRows: any[]) => {
           // Only select rows with waiting_approve status
           const waitingApproveRows = selectedRows.filter(
             (row) => row.status?.toLowerCase() === 'waiting_approve'
