@@ -211,6 +211,7 @@ const Merchants: React.FC = () => {
 
   const rowSelection: TableProps['rowSelection'] = isApprover
     ? {
+        hideSelectAll: true,
         onChange: (_selectedKeys: React.Key[], selectedRows: any[]) => {
           // Only select rows with waiting_approve status
           const waitingApproveRows = selectedRows.filter(
@@ -227,14 +228,6 @@ const Merchants: React.FC = () => {
               : {},
         }),
         selectedRowKeys: selectedRowKeys,
-        // Only select waiting_approve items when using Select All
-        onSelectAll: (selected: boolean, selectedRows: any[]) => {
-          const waitingApproveRows = selectedRows.filter(
-            (row) => row.status?.toLowerCase() === 'waiting_approve'
-          )
-          const waitingApproveKeys = waitingApproveRows.map((row) => row.id)
-          setSelectedRowKeys(selected ? waitingApproveKeys : [])
-        }
       }
     : undefined
 
