@@ -18,9 +18,11 @@ import { useAuth } from '@/store/authSlice/useAuth'
 import { useFilter } from '@/store/filterSlice/useFilter'
 import { useConfirm } from '@/providers/ConfirmProvider'
 import { useGetFiles } from '@/hooks/useGetFiles'
+import UploadFileModal from '@/components/core/components/UploadFileModal'
 const Merchants: React.FC = () => {
   const { merchantFilters, setMerchantFilters } = useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
+  const [isUploadFileModalOpen, setIsUploadFileModalOpen] = useState(false)
   const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
     null
   )
@@ -223,6 +225,10 @@ const Merchants: React.FC = () => {
     })
   }
 
+  const handleUploadSuccess = (objectKey: string, uploadUrl: string) => {
+    console.log('Upload success:', objectKey, uploadUrl)
+  }
+
   return (
     <>
       {/* Breadcrumbs */}
@@ -256,10 +262,21 @@ const Merchants: React.FC = () => {
             >
               Tải về file mẫu
             </button>
-            <button className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]">
+            <button
+              onClick={() => setIsUploadFileModalOpen(true)}
+              className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]"
+            >
               {/* SVG for download */}
               Tải lên theo danh sách
             </button>
+
+            <UploadFileModal
+              isOpen={isUploadFileModalOpen}
+              onClose={() => setIsUploadFileModalOpen(false)}
+              onUploadSuccess={handleUploadSuccess}
+              uploadType="ADMIN_IMPORT_STORE"
+            />
+
             {!isApprover && (
               <Link
                 to={routes.createMerchant}

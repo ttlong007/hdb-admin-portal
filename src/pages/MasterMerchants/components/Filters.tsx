@@ -100,23 +100,29 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
     { label: 'STT', key: 'stt' },
     { label: 'Mã CIF', key: 'cif' },
     { label: 'Tên công ty', key: 'name' },
-    { label: 'Giấy phép kinh doanh', key: 'tax_number' },
+    { label: 'Giấy phép kinh doanh', key: 'business_license' },
     { label: 'Tên đại diện', key: 'representative' },
-    { label: 'Số điểm đại lý', key: 'store_count' },
     { label: 'Trạng thái', key: 'status' },
+    { label: 'Số điểm đại lý', key: 'store_count' }
   ]
 
   const prepareCsvData = (data: any[]) => {
-    return data.map((item, index) => ({
-      stt: index + 1,
-      cif: item.cif || '---',
-      name: item.name || '---',
-      tax_number: item.tax_number || '---',
-      representative: item.representative || '---',
-      store_count:
-        item.store_count || item.store_count === 0 ? item.store_count : '---',
-      status: item.status === 'P' ? 'Pending' : item.status || '---',
-    }))
+    return data.map((item, index) => {
+      const statusOption = MASTER_MERCHANT_STATUS.find(
+        (s) => s.value === item.status
+      )
+      const statusLabel = statusOption ? statusOption.label : '---'
+
+      return {
+        stt: index + 1,
+        cif: item.cif || '---',
+        name: item.name || '---',
+        business_license: item.business_license || '---',
+        representative: item.representative || '---',
+        status: statusLabel,
+        store_count: item.store_count || item.store_count === 0 ? item.store_count : '---'
+      }
+    })
   }
 
   return (

@@ -1632,3 +1632,7 @@ div[style='z-index: 1000001;'],
 [type='radio']:checked {
   @apply bg-[#da2128] !border-[#da2128];
 }
+
+.ant-upload.ant-upload-select {
+  width: 100% !important;
+}
