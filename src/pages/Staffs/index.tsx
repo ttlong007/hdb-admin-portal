@@ -47,7 +47,7 @@ const Staffs: React.FC = () => {
   const { data: file, isPending: isFilesPending } = useGetFiles({
     fields: ['admin_staffs_create.xlsx'],
   })
-  const { data: uploadResult, isPending: isUploadResultPending } = useQuery({
+  const { data: uploadResult, isLoading: isUploadResultPending } = useQuery({
     queryKey: ['uploadResult', objectKeyStore],
     queryFn: async () => {
       const response = await axiosInstance.post(

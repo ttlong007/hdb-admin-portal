@@ -35,7 +35,7 @@ const Merchants: React.FC = () => {
   const { data: file, isPending: isFilesPending } = useGetFiles({
     fields: ['admin_stores_create.xlsx'],
   })
-  const { data: uploadResult, isPending: isUploadResultPending } = useQuery({
+  const { data: uploadResult, isLoading: isUploadResultPending } = useQuery({
     queryKey: ['uploadResult', objectKeyMerchant],
     queryFn: async () => {
       const response = await axiosInstance.post(
@@ -63,6 +63,7 @@ const Merchants: React.FC = () => {
     retryDelay: 10000,
   })
 
+  console.log('isUploadResultPending', isUploadResultPending)
   const isWaitingConfirmApply =
     uploadResult?.data?.validate_status === 'VALIDATE_SUCCESSFUL' &&
     !isUploadResultPending
