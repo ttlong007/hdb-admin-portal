@@ -47,7 +47,7 @@ const Staffs: React.FC = () => {
   const { data: file, isPending: isFilesPending } = useGetFiles({
     fields: ['admin_staffs_create.xlsx'],
   })
-  const { data: uploadResult, isLoading: isUploadResultPending } = useQuery({
+  const { data: uploadResult, isPending: isUploadResultPending } = useQuery({
     queryKey: ['uploadResult', objectKeyStore],
     queryFn: async () => {
       const response = await axiosInstance.post(
@@ -78,6 +78,11 @@ const Staffs: React.FC = () => {
   const isWaitingConfirmApply =
     uploadResult?.data?.validate_status === 'VALIDATE_SUCCESSFUL' &&
     !isUploadResultPending
+
+  const isLoadingUploadResult =
+    objectKeyStore &&
+    uploadResult?.data?.validate_status !== 'VALIDATE_SUCCESSFUL' &&
+    isUploadResultPending
 
   const handleDownloadTemplate = () => {
     if (file?.full_url) {
@@ -314,11 +319,11 @@ const Staffs: React.FC = () => {
             </button>
             <button
               onClick={handleOpenUploadFileModal}
-              disabled={isUploadResultPending}
+              disabled={!!isLoadingUploadResult}
               className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]"
             >
-              {isUploadResultPending && <LoadingOutlined />}
-              {isUploadResultPending
+              {isLoadingUploadResult && <LoadingOutlined />}
+              {isLoadingUploadResult
                 ? 'Đang xử lý file...'
                 : isWaitingConfirmApply
                 ? 'Xem danh sách tải lên'

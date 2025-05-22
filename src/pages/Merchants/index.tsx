@@ -25,7 +25,8 @@ const Merchants: React.FC = () => {
   const { merchantFilters, setMerchantFilters } = useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
   const [isUploadFileModalOpen, setIsUploadFileModalOpen] = useState(false)
-  const [isPreviewUploadModalOpen, setIsPreviewUploadModalOpen] = useState(false)
+  const [isPreviewUploadModalOpen, setIsPreviewUploadModalOpen] =
+    useState(false)
   const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
     null
   )
@@ -35,7 +36,7 @@ const Merchants: React.FC = () => {
   const { data: file, isPending: isFilesPending } = useGetFiles({
     fields: ['admin_stores_create.xlsx'],
   })
-  const { data: uploadResult, isLoading: isUploadResultPending } = useQuery({
+  const { data: uploadResult, isPending: isUploadResultPending } = useQuery({
     queryKey: ['uploadResult', objectKeyMerchant],
     queryFn: async () => {
       const response = await axiosInstance.post(
@@ -63,10 +64,13 @@ const Merchants: React.FC = () => {
     retryDelay: 10000,
   })
 
-  console.log('isUploadResultPending', isUploadResultPending)
   const isWaitingConfirmApply =
     uploadResult?.data?.validate_status === 'VALIDATE_SUCCESSFUL' &&
     !isUploadResultPending
+  const isLoadingUploadResult =
+    objectKeyMerchant &&
+    uploadResult?.data?.validate_status !== 'VALIDATE_SUCCESSFUL' &&
+    isUploadResultPending
 
   const handleDownloadTemplate = () => {
     if (file?.full_url) {
@@ -304,12 +308,12 @@ const Merchants: React.FC = () => {
             </button>
 
             <button
-              disabled={isUploadResultPending}
+              disabled={!!isLoadingUploadResult}
               onClick={handleOpenUploadFileModal}
               className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]"
             >
-              {isUploadResultPending && <LoadingOutlined />}
-              {isUploadResultPending
+              {isLoadingUploadResult && <LoadingOutlined />}
+              {isLoadingUploadResult
                 ? 'Đang xử lý file...'
                 : isWaitingConfirmApply
                 ? 'Xem danh sách tải lên'
