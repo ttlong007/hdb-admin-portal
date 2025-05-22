@@ -40,25 +40,27 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
       }
     },
     onSuccess: () => {
+      debugger;
       if (type === 'merchant') {
         setAuthState({
           objectKeyMerchant: null,
         })
       } else {
         setAuthState({
-          objectKeyStore: null,
+          objectKeyStaff: null,
         })
       }
       onClose()
     },
     onError: () => {
+      debugger;
       if (type === 'merchant') {
         setAuthState({
           objectKeyMerchant: null,
         })
       } else {
         setAuthState({
-          objectKeyStore: null,
+          objectKeyStaff: null,
         })
       }
       onClose()

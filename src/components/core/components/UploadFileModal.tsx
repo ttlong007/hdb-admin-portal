@@ -4,7 +4,7 @@ import { useState } from 'react'
 import type { UploadFile } from 'antd/es/upload/interface'
 import axiosInstance from '@/config/axios'
 import axios from 'axios'
-import { useAuth } from '@/store/layoutSlice/useLayout'
+import { useAuth } from '@/store/authSlice/useAuth'
 
 interface UploadFileModalProps {
   isOpen: boolean
@@ -51,9 +51,10 @@ export default function UploadFileModal({
           },
         })
 
+        debugger;
         if (type === 'staff') {
           setAuthState({
-            objectKeyStore: object_key,
+            objectKeyStaff: object_key,
           })
         } else {
           setAuthState({

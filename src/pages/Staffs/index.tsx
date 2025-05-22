@@ -34,7 +34,7 @@ interface Staff {
 const Staffs: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { isApprover, isCreator } = useAuth()
-  const { objectKeyStore } = useAuth()
+  const { objectKeyStaff } = useAuth()
   const confirm = useConfirm()
   const { staffFilters, setStaffFilters } = useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
@@ -48,11 +48,11 @@ const Staffs: React.FC = () => {
     fields: ['admin_staffs_create.xlsx'],
   })
   const { data: uploadResult, isPending: isUploadResultPending } = useQuery({
-    queryKey: ['uploadResult', objectKeyStore],
+    queryKey: ['uploadResult', objectKeyStaff],
     queryFn: async () => {
       const response = await axiosInstance.post(
         '/v1/admin/file/upload/get-transaction-result',
-        { object_key: objectKeyStore }
+        { object_key: objectKeyStaff }
       )
       if (response.data.status_code === 'ACCEPT') {
         return response.data
@@ -65,7 +65,7 @@ const Staffs: React.FC = () => {
       }
       return response.data
     },
-    enabled: !!objectKeyStore,
+    enabled: !!objectKeyStaff,
     retry: (failureCount, error: any) => {
       if (error?.response?.data?.status_code === 'PROCESSING') {
         return failureCount < 30
@@ -80,7 +80,7 @@ const Staffs: React.FC = () => {
     !isUploadResultPending
 
   const isLoadingUploadResult =
-    objectKeyStore &&
+    objectKeyStaff &&
     uploadResult?.data?.validate_status !== 'VALIDATE_SUCCESSFUL' &&
     isUploadResultPending
 
@@ -273,7 +273,7 @@ const Staffs: React.FC = () => {
   }
 
   const handleOpenUploadFileModal = () => {
-    if (!objectKeyStore && !isUploadResultPending) {
+    if (!objectKeyStaff && !isUploadResultPending) {
       setIsUploadFileModalOpen(true)
     }
   }
@@ -340,7 +340,7 @@ const Staffs: React.FC = () => {
             <PreviewUploadModal
               isOpen={isPreviewUploadModalOpen}
               onClose={() => setIsPreviewUploadModalOpen(false)}
-              objectKey={objectKeyStore}
+              objectKey={objectKeyStaff}
               type="staff"
             />
 

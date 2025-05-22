@@ -36,6 +36,8 @@ const Merchants: React.FC = () => {
   const { data: file, isPending: isFilesPending } = useGetFiles({
     fields: ['admin_stores_create.xlsx'],
   })
+
+  console.log('objectKeyMerchant', objectKeyMerchant)
   const { data: uploadResult, isPending: isUploadResultPending } = useQuery({
     queryKey: ['uploadResult', objectKeyMerchant],
     queryFn: async () => {
@@ -324,7 +326,7 @@ const Merchants: React.FC = () => {
               isOpen={isUploadFileModalOpen}
               onClose={() => setIsUploadFileModalOpen(false)}
               uploadType="ADMIN_IMPORT_STORE"
-              type="staff"
+              type="merchant"
             />
 
             <PreviewUploadModal
