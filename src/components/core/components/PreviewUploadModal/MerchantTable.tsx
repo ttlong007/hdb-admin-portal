@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
 
 interface MerchantTableProps {
-  objectKey: string
+  objectKey: string | null
   isOpen: boolean
 }
 
