@@ -47,7 +47,6 @@ export default function UploadFileModal({
       if (initResponse.data.status_code === 'ACCEPT') {
         const { object_key, upload_url } = initResponse.data.data
 
-        // Upload file to S3
         await axios.put(upload_url, file.originFileObj, {
           headers: {
             'Content-Type': file.type,
