@@ -72,8 +72,15 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
     })
     resetMasterMerchantFilters()
   }
+  const exportMutation = useExportMasterMerchants({
+    filter: {
+      status: masterMerchantFilters.status,
+      cif: masterMerchantFilters.cif,
+      name: masterMerchantFilters.name,
+      business_license: masterMerchantFilters.business_license,
+    }
+  })
 
-  const exportMutation = useExportMasterMerchants()
   const [isExporting, setIsExporting] = React.useState(false)
   const csvLinkRef = React.useRef<any>(null)
 

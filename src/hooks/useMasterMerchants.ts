@@ -30,7 +30,6 @@ export const useMasterMerchants = ({
       { page, limit, filter, sortField, sortOrder },
     ],
     queryFn: async () => {
-      console.log('filter', JSON.stringify(filter))
       const cleanFilter: MasterMerchantFilters = {}
 
       if (filter?.status?.value) {

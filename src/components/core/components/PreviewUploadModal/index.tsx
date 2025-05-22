@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Modal, Button } from 'antd'
 import MerchantTable from './MerchantTable'
 import { useConfirm } from '@/providers/ConfirmProvider'
@@ -22,25 +22,49 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
 }) => {
   const confirm = useConfirm()
   const { setAuthState } = useAuth()
+  const [currentPage, setCurrentPage] = useState(1)
+  const pageSize = 5
 
   const { mutate: approveTransaction, isPending } = useMutation({
     mutationFn: async () => {
-      const response = await axiosInstance.post(
-        '/v1/admin/file/upload/accept-transaction',
+      // First call to get total
+      const firstResponse = await axiosInstance.post(
+        '/v1/admin/file/upload/get-transaction-data',
         {
           object_key: objectKey,
+          page: 1,
+          page_size: pageSize,
         }
       )
-      if (response.data.status_code === 'ACCEPT') {
-        toast.success('Gửi duyệt thành công')
-        return response.data
-      } else {
-        toast.error(response.data.reason_message)
-        throw new Error(response.data.reason_message)
+
+      if (firstResponse.data.status_code !== 'ACCEPT') {
+        throw new Error(firstResponse.data.reason_message)
       }
+
+      const total = firstResponse.data.data.total
+      const totalPages = Math.ceil(total / pageSize)
+
+      // Process all pages
+      for (let page = 1; page <= totalPages; page++) {
+        const response = await axiosInstance.post(
+          '/v1/admin/file/upload/accept-transaction',
+          {
+            object_key: objectKey,
+            page,
+            page_size: pageSize,
+          }
+        )
+
+        if (response.data.status_code !== 'ACCEPT') {
+          toast.error(response.data.reason_message)
+          throw new Error(response.data.reason_message)
+        }
+      }
+
+      toast.success('Gửi duyệt thành công')
+      return { success: true }
     },
     onSuccess: () => {
-      debugger;
       if (type === 'merchant') {
         setAuthState({
           objectKeyMerchant: null,
@@ -53,7 +77,6 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
       onClose()
     },
     onError: () => {
-      debugger;
       if (type === 'merchant') {
         setAuthState({
           objectKeyMerchant: null,
