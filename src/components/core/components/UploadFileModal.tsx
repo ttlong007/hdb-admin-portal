@@ -31,7 +31,7 @@ export default function UploadFileModal({
 
     try {
       setIsLoading(true)
-      const file = fileList[0] as any
+      const file = fileList[0]
 
       // Initialize upload
       const initResponse = await axiosInstance.post(
@@ -48,9 +48,10 @@ export default function UploadFileModal({
         const { object_key, upload_url } = initResponse.data.data
 
         // Upload file to S3
-        await fetch(upload_url, {
-          method: 'PUT',
-          body: file,
+        await axios.put(upload_url, file.originFileObj, {
+          headers: {
+            'Content-Type': file.type,
+          },
         })
         const resultResponse = await axiosInstance.post(
           '/v1/admin/file/upload/get-transaction-result',
