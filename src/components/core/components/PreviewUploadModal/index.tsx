@@ -6,6 +6,7 @@ import axiosInstance from '@/config/axios'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { useAuth } from '@/store/authSlice/useAuth'
+import StaffTable from './StaffTable'
 
 interface PreviewUploadModalProps {
   isOpen: boolean
@@ -143,6 +144,9 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
     >
       {type === 'merchant' && (
         <MerchantTable objectKey={objectKey} isOpen={isOpen} />
+      )}
+      {type === 'staff' && (
+        <StaffTable objectKey={objectKey} isOpen={isOpen} />
       )}
     </Modal>
   )

@@ -33,7 +33,7 @@ interface Staff {
 
 const Staffs: React.FC = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
-  const { isApprover, isCreator } = useAuth()
+  const { isApprover, isCreator, setAuthState } = useAuth()
   const { objectKeyStaff } = useAuth()
   const confirm = useConfirm()
   const { staffFilters, setStaffFilters } = useFilter()
@@ -274,12 +274,13 @@ const Staffs: React.FC = () => {
   }
 
   const handleOpenUploadFileModal = () => {
-    if (!objectKeyStaff && !isUploadResultPending) {
+    if (!objectKeyStaff && !isLoadingUploadResult) {
+      setAuthState({
+        objectKeyStaff: null,
+      })
       setIsUploadFileModalOpen(true)
     }
-  }
 
-  const handleOpenPreviewUploadModal = () => {
     if (isWaitingConfirmApply) {
       setIsPreviewUploadModalOpen(true)
     }
