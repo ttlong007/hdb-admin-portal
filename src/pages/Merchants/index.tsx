@@ -69,11 +69,11 @@ const Merchants: React.FC = () => {
   })
 
   const isWaitingConfirmApply =
-    uploadResult?.data?.validate_status === 'VALIDATE_SUCCESSFUL' &&
+    uploadResult?.data?.validate_status === 'ACCEPT' &&
     !isUploadResultPending
   const isLoadingUploadResult =
     objectKeyMerchant &&
-    uploadResult?.data?.validate_status !== 'VALIDATE_SUCCESSFUL' &&
+    uploadResult?.data?.validate_status !== 'ACCEPT' &&
     isUploadResultPending
 
   const handleDownloadTemplate = () => {
