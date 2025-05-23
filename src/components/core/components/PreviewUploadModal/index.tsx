@@ -103,11 +103,23 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
     })
   }
 
+  const handleClose = () => {
+    if (type === 'merchant') {
+      setAuthState({
+        objectKeyMerchant: null,
+      })
+    } else {
+      setAuthState({
+        objectKeyStaff: null,
+      })
+    }
+    onClose()
+  }
   return (
     <Modal
       title="Xem trước danh sách tải lên"
       open={isOpen}
-      onCancel={onClose}
+      onCancel={handleClose}
       width={1600}
       maskClosable={false}
       style={{ zIndex: 1000 }}
@@ -115,7 +127,7 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
         body: { maxHeight: 'calc(100vh - 200px)', overflow: 'auto' },
       }}
       footer={[
-        <Button key="cancel" onClick={onClose}>
+        <Button key="cancel" onClick={handleClose}>
           Hủy bỏ
         </Button>,
         <Button

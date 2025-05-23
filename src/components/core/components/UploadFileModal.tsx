@@ -51,7 +51,6 @@ export default function UploadFileModal({
           },
         })
 
-        debugger;
         if (type === 'staff') {
           setAuthState({
             objectKeyStaff: object_key,
@@ -61,6 +60,8 @@ export default function UploadFileModal({
             objectKeyMerchant: object_key,
           })
         }
+
+        await new Promise((resolve) => setTimeout(resolve, 5000))
 
         setFileList([])
         onClose()
