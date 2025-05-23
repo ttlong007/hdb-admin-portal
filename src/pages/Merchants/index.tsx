@@ -271,6 +271,9 @@ const Merchants: React.FC = () => {
 
   const handleOpenUploadFileModal = () => {
     if (!objectKeyMerchant && !isLoadingUploadResult) {
+      setAuthState({
+        objectKeyMerchant: null,
+      })
       setIsUploadFileModalOpen(true)
     }
 

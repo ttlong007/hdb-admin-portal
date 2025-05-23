@@ -119,7 +119,7 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
     <Modal
       title="Xem trước danh sách tải lên"
       open={isOpen}
-      onCancel={handleClose}
+      onCancel={onClose}
       width={1600}
       maskClosable={false}
       style={{ zIndex: 1000 }}
