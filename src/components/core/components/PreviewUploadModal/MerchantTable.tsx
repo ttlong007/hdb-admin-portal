@@ -38,7 +38,7 @@ const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
       width: 70,
     },
     {
-      title: 'Mã CIF',
+      title: 'CIF Công ty',
       dataIndex: 'CompanyCIF',
       key: 'CompanyCIF',
     },
@@ -48,14 +48,14 @@ const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
       key: 'CompanyName',
     },
     {
-      title: 'Mã đại lý',
-      dataIndex: 'StoreCode',
-      key: 'StoreCode',
-    },
-    {
-      title: 'Tên đại lý',
+      title: 'Tên điểm đại lý',
       dataIndex: 'StoreName',
       key: 'StoreName',
+    },
+    {
+      title: 'Mã điểm đại lý',
+      dataIndex: 'StoreCode',
+      key: 'StoreCode',
     },
     {
       title: 'Địa chỉ',
@@ -63,19 +63,74 @@ const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
       key: 'Address',
     },
     {
-      title: 'Quận/Huyện',
-      dataIndex: 'District',
-      key: 'District',
+      title: 'Mã địa chỉ',
+      dataIndex: 'AddressID',
+      key: 'AddressID',
     },
     {
-      title: 'Phường/Xã',
-      dataIndex: 'Ward',
-      key: 'Ward',
+      title: 'Tài khoản chuyên chi',
+      dataIndex: 'IncomeAccount',
+      key: 'IncomeAccount',
     },
     {
-      title: 'Tỉnh/Thành phố',
-      dataIndex: 'Province',
-      key: 'Province',
+      title: 'Tài khoản chuyên thu',
+      dataIndex: 'ExpenseAccount',
+      key: 'ExpenseAccount',
+    },
+    {
+      title: 'Hạn mức trong tháng',
+      dataIndex: 'MonthlyLimit',
+      key: 'MonthlyLimit',
+    },
+    {
+      title: 'Hạn mức trong ngày',
+      dataIndex: 'DailyLimit',
+      key: 'DailyLimit',
+    },
+    {
+      title: 'Yêu cầu trưởng cửa hàng duyệt',
+      dataIndex: 'NeedStoreManagerApprove',
+      key: 'NeedStoreManagerApprove',
+    },
+    {
+      title: 'Ngưỡng giá trị cần duyệt',
+      dataIndex: 'ApprovalThreshold',
+      key: 'ApprovalThreshold',
+    },
+    {
+      title: 'Rút tiền',
+      dataIndex: 'AllowWithdraw',
+      key: 'AllowWithdraw',
+    },
+    {
+      title: 'Nộp tiền',
+      dataIndex: 'AllowDeposit',
+      key: 'AllowDeposit',
+    },
+    {
+      title: 'Chuyển tiền',
+      dataIndex: 'AllowTransfer',
+      key: 'AllowTransfer',
+    },
+    {
+      title: 'Thu hộ',
+      dataIndex: 'AllowCollection',
+      key: 'AllowCollection',
+    },
+    {
+      title: 'Chi hộ',
+      dataIndex: 'AllowPayment',
+      key: 'AllowPayment',
+    },
+    {
+      title: 'Ủy nhiệm thu',
+      dataIndex: 'AllowCollectionAuthorization',
+      key: 'AllowCollectionAuthorization',
+    },
+    {
+      title: 'Ủy nhiệm chi',
+      dataIndex: 'AllowPaymentAuthorization',
+      key: 'AllowPaymentAuthorization',
     },
     {
       title: 'Lý do thất bại',
