@@ -96,13 +96,6 @@ const Filters: React.FC = () => {
     },
   })
   const [isExporting, setIsExporting] = React.useState(false)
-  const csvLinkRef = React.useRef<any>(null)
-
-  React.useEffect(() => {
-    if (exportMutation.data && csvLinkRef.current) {
-      csvLinkRef.current.link.click()
-    }
-  }, [exportMutation.data])
 
   const handleExport = async () => {
     try {
@@ -115,30 +108,6 @@ const Filters: React.FC = () => {
     } finally {
       setIsExporting(false)
     }
-  }
-
-  const csvHeaders = [
-    { label: 'STT', key: 'stt' },
-    { label: 'Mã CIF', key: 'company_cif' },
-    { label: 'Tên công ty', key: 'company_name' },
-    { label: 'Mã điểm đại lý', key: 'code' },
-    { label: 'Tên điểm đại lý', key: 'name' },
-    { label: 'Tên quản lý', key: 'manager_name' },
-    { label: 'Mã nhân viên', key: 'manager_code' },
-    { label: 'Trạng thái', key: 'status' },
-  ]
-
-  const prepareCsvData = (data: any[]) => {
-    return data.map((item, index) => ({
-      stt: index + 1,
-      company_cif: item.company_cif || '---',
-      company_name: item.company_name || '---',
-      code: item.code || '---',
-      name: item.name || '---',
-      manager_name: item.manager_name || '---',
-      manager_code: item.manager_code || '---',
-      status: MERCHANT_STATUS_MAP[item.status] || '---',
-    }))
   }
 
   return (
@@ -238,15 +207,7 @@ const Filters: React.FC = () => {
               ? 'Đang tải...'
               : 'Tải xuống'}
           </button>
-          <CSVLink
-            ref={csvLinkRef}
-            data={
-              exportMutation.data ? prepareCsvData(exportMutation.data) : []
-            }
-            headers={csvHeaders}
-            filename="merchants.csv"
-            className="hidden"
-          />
+
           <button
             type="button"
             onClick={handleReset}

@@ -1,5 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
+import { saveAs } from 'file-saver'
 
 interface ExportMasterMerchantsProps {
   filter: {
@@ -10,7 +11,33 @@ interface ExportMasterMerchantsProps {
   }
 }
 
-export const useExportMasterMerchants = ({ filter }: ExportMasterMerchantsProps) => {
+export const base64ToExcel = (base64: any, fileName = 'download.xlsx') => {
+  const contentType =
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+  const sliceSize = 512
+
+  const byteCharacters = atob(base64) // Decode base64 string
+  const byteArrays: any = []
+
+  for (let offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+    const slice = byteCharacters.slice(offset, offset + sliceSize)
+
+    const byteNumbers = new Array(slice.length)
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i)
+    }
+
+    const byteArray: any = new Uint8Array(byteNumbers)
+    byteArrays.push(byteArray)
+  }
+
+  const blob = new Blob(byteArrays, { type: contentType })
+  saveAs(blob, fileName) // Use file-saver to save the Blob as an Excel file
+}
+
+export const useExportMasterMerchants = ({
+  filter,
+}: ExportMasterMerchantsProps) => {
   return useMutation({
     mutationFn: async () => {
       const cleanFilter: any = {}
@@ -27,41 +54,39 @@ export const useExportMasterMerchants = ({ filter }: ExportMasterMerchantsProps)
         cleanFilter.business_license = filter.business_license
       }
 
-      // First call to get total
-      const firstResponse = await axiosInstance.get('/v1/admin/company/list', {
-        params: {
-          ...cleanFilter,
-          page: 1,
-          limit: 500,
-        },
-      })
-
-      if (firstResponse.data.status_code !== 'ACCEPT') {
-        throw new Error('Export failed')
-      }
-
-      const total = firstResponse.data.page_data.total
-      const totalPages = Math.ceil(total / 500)
-      let allData = [...firstResponse.data.data]
-
-      // Process remaining pages
-      for (let page = 2; page <= totalPages; page++) {
-        const response = await axiosInstance.get('/v1/admin/company/list', {
+      const response = await axiosInstance.get(
+        '/v1/admin/company/export-data',
+        {
           params: {
             ...cleanFilter,
-            page,
-            limit: 500,
           },
-        })
-
-        if (response.data.status_code === 'ACCEPT') {
-          allData = [...allData, ...response.data.data]
-        } else {
-          throw new Error('Export failed')
+          responseType: 'blob', // <-- Add this line
         }
+      )
+
+      // 2. Get filename from Content-Disposition header
+      const disposition = response.headers['content-disposition']
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      let filename = `company_${timestamp}.xlsx` // fallback with timestamp
+      if (disposition && disposition.includes('filename=')) {
+        const baseFilename = disposition
+          .split('filename=')[1]
+          .split(';')[0]
+          .replace(/["']/g, '')
+          .trim()
+        // Add timestamp before the extension
+        filename = baseFilename.replace(/\.xlsx$/, `_${timestamp}.xlsx`)
       }
 
-      return allData
+      // 3. Create a download link and click it
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', filename)
+      document.body.appendChild(link)
+      link.click()
+      window.URL.revokeObjectURL(url)
+      link.remove()
     },
   })
 }

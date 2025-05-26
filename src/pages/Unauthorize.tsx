@@ -2,9 +2,17 @@ import React from 'react'
 
 import Atom from '@/components/core/components/AtomLoading'
 import { getEnv } from '@/config/env'
+import { useAuth } from '@/store/authSlice/useAuth';
 
 const Unauthorize: React.FC = () => {
+  const {setAuthState} = useAuth();
   const handleLogin = () => {
+    setAuthState({
+      accessToken: null,
+      refreshToken: null,
+      objectKeyStaff: null,
+      objectKeyMerchant: null,
+    })
     const ROOT_CALLBACK_URL = getEnv(
       'VITE_ROOT_CALLBACK_URL',
       'https://ungdung.hdbank.com.vn/Login'

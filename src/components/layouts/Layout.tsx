@@ -44,6 +44,12 @@ const Layout = () => {
   }, [token, isAuthenticated])
 
   const handleLogin = () => {
+    setAuthState({
+      accessToken: null,
+      refreshToken: null,
+      objectKeyStaff: null,
+      objectKeyMerchant: null,
+    })
     const ROOT_CALLBACK_URL = getEnv(
       'VITE_ROOT_CALLBACK_URL',
       'https://ungdung.hdbank.com.vn/Login'
