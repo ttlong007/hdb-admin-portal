@@ -388,7 +388,7 @@ const CreateMerchant = () => {
     },
     onSuccess: () => {
       toast.success('Tạo đại lý thành công!')
-      // Navigate or show success message as needed.
+      navigate(routes.merchant)
     },
     onError: (error: any) => {
       toast.error(error.message)

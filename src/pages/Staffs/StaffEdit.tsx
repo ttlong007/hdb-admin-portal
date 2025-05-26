@@ -141,7 +141,9 @@ export default function EditStaff() {
       : defaultTransactionTypes
 
   const schema = yup.object().shape({
-    name: yup.string(),
+    name: yup
+      .string()
+      .matches(/^[a-zA-ZÀ-ỹ\s]+$/, 'Họ tên không được chứa ký tự đặc biệt và số'),
     email: yup.string().email('Email không hợp lệ'),
     phone_number: yup
       .string()

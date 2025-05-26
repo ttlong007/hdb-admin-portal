@@ -35,31 +35,33 @@ export const useExportStaffs = ({ filter }: ExportStaffsProps) => {
       const response = await axiosInstance.get('/v1/admin/staff/list', {
         params: {
           ...cleanFilter,
-          limit: 500,
-        }
+        },
+        responseType: 'blob', // <-- Add this line
       })
 
-      const total = response.data.page_data.total
-      const totalPages = Math.ceil(total / 500)
-      let allData = [...response.data.data]
-
-      for (let page = 2; page <= totalPages; page++) {
-        const response = await axiosInstance.get('/v1/admin/staff/list', {
-          params: {
-            ...cleanFilter,
-            page,
-            limit: 500,
-          },
-        })
-
-        if (response.data.status_code === 'ACCEPT') {
-          allData = [...allData, ...response.data.data]
-        } else {
-          throw new Error('Export failed')
-        }
+      // 2. Get filename from Content-Disposition header
+      const disposition = response.headers['content-disposition']
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      let filename = `staff_${timestamp}.xlsx` // fallback with timestamp
+      if (disposition && disposition.includes('filename=')) {
+        const baseFilename = disposition
+          .split('filename=')[1]
+          .split(';')[0]
+          .replace(/["']/g, '')
+          .trim()
+        // Add timestamp before the extension
+        filename = baseFilename.replace(/\.xlsx$/, `_${timestamp}.xlsx`)
       }
 
-      return allData
+      // 3. Create a download link and click it
+      const url = window.URL.createObjectURL(new Blob([response.data]))
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', filename)
+      document.body.appendChild(link)
+      link.click()
+      window.URL.revokeObjectURL(url)
+      link.remove()
     },
   })
 }

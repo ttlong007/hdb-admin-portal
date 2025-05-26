@@ -87,39 +87,6 @@ const Filters: React.FC = () => {
     },
   })
   const [isExporting, setIsExporting] = React.useState(false)
-  const csvLinkRef = React.useRef<any>(null)
-
-  React.useEffect(() => {
-    if (exportMutation.data && csvLinkRef.current) {
-      csvLinkRef.current.link.click()
-    }
-  }, [exportMutation.data])
-
-  const csvHeaders = [
-    { label: 'STT', key: 'stt' },
-    { label: 'Mã tham chiếu', key: 'ref_code' },
-    { label: 'Số tiền', key: 'amount' },
-    { label: 'Trạng thái', key: 'status' },
-    { label: 'Loại GD', key: 'transaction_type_name' },
-    { label: 'Thời gian GD', key: 'created_at' },
-    { label: 'Mã - Tên điểm đại lý', key: 'store_code_name' },
-    { label: 'Mã nhân viên', key: 'created_by_staff_code' },
-    { label: 'Phí giao dịch', key: 'transaction_fee' },
-  ]
-
-  const prepareCsvData = (data: any[]) => {
-    return data.map((item, index) => ({
-      stt: index + 1,
-      ref_code: item.ref_code || '---',
-      amount: item.amount ? item.amount.toLocaleString('en-US') : '---',
-      status: TRANSACTION_STATUS.find((s) => s.value === item.status?.toUpperCase())?.label || '---',
-      transaction_type_name: item.transaction_type_name || '---',
-      created_at: item.created_at ? new Date(item.created_at).toLocaleString('en-US') : '---',
-      store_code_name: item.store_code_name || '---',
-      created_by_staff_code: item.created_by_staff_code || '---',
-      transaction_fee: item.transaction_fee ? item.transaction_fee.toLocaleString('en-US') : '---',
-    }))
-  }
 
   const onSubmit = (data: FiltersFormValues) => {
     // Transform select fields to only use their 'value'
@@ -303,15 +270,7 @@ const Filters: React.FC = () => {
               ? 'Đang tải...'
               : 'Tải xuống'}
           </button>
-          <CSVLink
-            ref={csvLinkRef}
-            data={
-              exportMutation.data ? prepareCsvData(exportMutation.data) : []
-            }
-            headers={csvHeaders}
-            filename="transactions.csv"
-            className="hidden"
-          />
+
           <button
             type="button"
             onClick={handleReset}

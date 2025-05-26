@@ -87,7 +87,13 @@ export default function CreateStaff() {
         }))
       : defaultTransactionTypes
   const schema = yup.object().shape({
-    name: yup.string().required('Họ tên là bắt buộc'),
+    name: yup
+      .string()
+      .required('Họ tên là bắt buộc')
+      .matches(
+        /^[a-zA-ZÀ-ỹ\s]+$/,
+        'Họ tên không được chứa ký tự đặc biệt và số'
+      ),
     email: yup
       .string()
       .email('Email không hợp lệ')
@@ -284,7 +290,7 @@ export default function CreateStaff() {
     onSuccess: () => {
       toast.success('Staff created successfully!')
       reset()
-      navigate(routes.staff) // Adjust the route as needed
+      navigate(routes.staff)
     },
     onError: (error: any) => {
       toast.error(error.message)
