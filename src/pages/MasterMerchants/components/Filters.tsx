@@ -78,7 +78,7 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
       cif: masterMerchantFilters.cif,
       name: masterMerchantFilters.name,
       business_license: masterMerchantFilters.business_license,
-    }
+    },
   })
 
   const [isExporting, setIsExporting] = React.useState(false)
@@ -110,7 +110,7 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
     { label: 'Giấy phép kinh doanh', key: 'business_license' },
     { label: 'Tên đại diện', key: 'representative' },
     { label: 'Trạng thái', key: 'status' },
-    { label: 'Số điểm đại lý', key: 'store_count' }
+    { label: 'Số điểm đại lý', key: 'store_count' },
   ]
 
   const prepareCsvData = (data: any[]) => {
@@ -127,7 +127,8 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
         business_license: item.business_license || '---',
         representative: item.representative || '---',
         status: statusLabel,
-        store_count: item.store_count || item.store_count === 0 ? item.store_count : '---'
+        store_count:
+          item.store_count || item.store_count === 0 ? item.store_count : '---',
       }
     })
   }
@@ -208,15 +209,7 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
               ? 'Đang tải...'
               : 'Tải xuống'}
           </button>
-          <CSVLink
-            ref={csvLinkRef}
-            data={
-              exportMutation.data ? prepareCsvData(exportMutation.data) : []
-            }
-            headers={csvHeaders}
-            filename="master-merchants.csv"
-            className="hidden"
-          />
+
           <button
             type="button"
             onClick={sync}
