@@ -69,8 +69,7 @@ const Merchants: React.FC = () => {
   })
 
   const isWaitingConfirmApply =
-    uploadResult?.data?.validate_status === 'ACCEPT' &&
-    !isUploadResultPending
+    uploadResult?.data?.validate_status === 'ACCEPT' && !isUploadResultPending
   const isLoadingUploadResult =
     objectKeyMerchant &&
     uploadResult?.data?.validate_status !== 'ACCEPT' &&
@@ -379,6 +378,9 @@ const Merchants: React.FC = () => {
           {isApprover && (
             <div className="flex justify-end gap-4 w-full mt-8">
               <button
+                disabled={
+                  approveMutation.isPending || selectedRowKeys.length === 0
+                }
                 onClick={handleApprove}
                 className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
               >
