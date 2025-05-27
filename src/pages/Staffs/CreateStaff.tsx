@@ -90,6 +90,7 @@ export default function CreateStaff() {
     name: yup
       .string()
       .required('Họ tên là bắt buộc')
+      .max(50, 'Họ tên không được vượt quá 50 ký tự')
       .matches(
         /^[a-zA-ZÀ-ỹ\s]+$/,
         'Họ tên không được chứa ký tự đặc biệt và số'

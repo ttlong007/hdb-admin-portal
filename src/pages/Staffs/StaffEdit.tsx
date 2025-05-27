@@ -143,7 +143,11 @@ export default function EditStaff() {
   const schema = yup.object().shape({
     name: yup
       .string()
-      .matches(/^[a-zA-ZÀ-ỹ\s]+$/, 'Họ tên không được chứa ký tự đặc biệt và số'),
+      .max(50, 'Họ tên không được vượt quá 50 ký tự')
+      .matches(
+        /^[a-zA-ZÀ-ỹ\s]+$/,
+        'Họ tên không được chứa ký tự đặc biệt và số'
+      ),
     email: yup.string().email('Email không hợp lệ'),
     phone_number: yup
       .string()

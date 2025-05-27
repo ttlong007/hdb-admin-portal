@@ -385,8 +385,8 @@ const Staffs: React.FC = () => {
                 disabled={
                   approveMutation.isPending || selectedRowKeys.length === 0
                 }
-                className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
                 onClick={handleApprove}
+                className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 Đồng ý duyệt
               </button>
