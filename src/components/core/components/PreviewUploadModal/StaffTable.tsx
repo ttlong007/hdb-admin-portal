@@ -20,7 +20,7 @@ const StaffTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
         {
           object_key: objectKey,
           page: currentPage,
-          page_size: pageSize
+          page_size: pageSize,
         }
       )
       return response.data
@@ -36,6 +36,12 @@ const StaffTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
       dataIndex: 'STT',
       key: 'STT',
       width: 70,
+    },
+    {
+      title: 'Lý do thất bại',
+      dataIndex: 'FailedReason',
+      key: 'FailedReason',
+      render: (text: string) => (text ? <Tag color="error">{text}</Tag> : null),
     },
     {
       title: 'Họ tên',
@@ -107,12 +113,6 @@ const StaffTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
       dataIndex: 'CustomerReferral',
       key: 'CustomerReferral',
     },
-    {
-      title: 'Lý do thất bại',
-      dataIndex: 'FailedReason',
-      key: 'FailedReason',
-      render: (text: string) => (text ? <Tag color="error">{text}</Tag> : null),
-    },
   ]
 
   return (
@@ -125,7 +125,7 @@ const StaffTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
         pageSize: pageSize,
         total: total,
         onChange: (page) => setCurrentPage(page),
-        showSizeChanger: false
+        showSizeChanger: false,
       }}
       rowKey="STT"
       scroll={{ x: 'max-content' }}

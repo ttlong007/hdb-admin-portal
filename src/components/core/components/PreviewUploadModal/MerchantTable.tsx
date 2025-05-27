@@ -20,7 +20,7 @@ const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
         {
           object_key: objectKey,
           page: currentPage,
-          page_size: pageSize
+          page_size: pageSize,
         }
       )
       return response.data
@@ -36,6 +36,12 @@ const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
       dataIndex: 'STT',
       key: 'STT',
       width: 70,
+    },
+    {
+      title: 'Lý do thất bại',
+      dataIndex: 'FailedReason',
+      key: 'FailedReason',
+      render: (text: string) => (text ? <Tag color="error">{text}</Tag> : null),
     },
     {
       title: 'CIF Công ty',
@@ -132,12 +138,6 @@ const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
       dataIndex: 'AllowPaymentAuthorization',
       key: 'AllowPaymentAuthorization',
     },
-    {
-      title: 'Lý do thất bại',
-      dataIndex: 'FailedReason',
-      key: 'FailedReason',
-      render: (text: string) => (text ? <Tag color="error">{text}</Tag> : null),
-    },
   ]
 
   return (
@@ -150,7 +150,7 @@ const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
         pageSize: pageSize,
         total: total,
         onChange: (page) => setCurrentPage(page),
-        showSizeChanger: false
+        showSizeChanger: false,
       }}
       rowKey="STT"
       scroll={{ x: 'max-content' }}
