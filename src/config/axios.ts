@@ -15,15 +15,6 @@ export const setNavigate = (nav: any) => {
   navigate = nav
 }
 
-function goToUnauthorize() {
-  const queryParams = new URLSearchParams(window.location.search)
-  const token = queryParams.get('token')
-
-  if (!token) {
-    navigate?.('/unauthorize')
-  }
-}
-
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: getEnv('VITE_API_URL', 'http://localhost:4000'),
   headers: {
@@ -92,7 +83,6 @@ axiosInstance.interceptors.response.use(
             store.dispatch(
               setState({ accessToken: null, refreshToken: null, user: null })
             )
-            goToUnauthorize()
             return Promise.reject(refreshResponse.data.reason_message)
           }
         } catch (refreshError) {
@@ -100,7 +90,6 @@ axiosInstance.interceptors.response.use(
           store.dispatch(
             setState({ accessToken: null, refreshToken: null, user: null })
           )
-          goToUnauthorize()
           console.error('Refresh token error:', refreshError)
           return Promise.reject(refreshError)
         }
@@ -109,7 +98,6 @@ axiosInstance.interceptors.response.use(
         store.dispatch(
           setState({ accessToken: null, refreshToken: null, user: null })
         )
-        goToUnauthorize()
         return Promise.reject(error)
       }
     }
