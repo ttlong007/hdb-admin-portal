@@ -15,6 +15,15 @@ export const setNavigate = (nav: any) => {
   navigate = nav
 }
 
+function goToUnauthorize() {
+  const queryParams = new URLSearchParams(window.location.search)
+  const token = queryParams.get('token')
+
+  if (!token) {
+    navigate?.('/unauthorize')
+  }
+}
+
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: getEnv('VITE_API_URL', 'http://localhost:4000'),
   headers: {
@@ -41,19 +50,6 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ErrorResponse>) => {
-    // Handle 403 unauthorized access
-    // if (
-    //   error.response?.status === 403 &&
-    //   error.response?.data?.status_code === 'REJECT' &&
-    //   error.response?.data?.reason_code === 'unauthorized'
-    // ) {
-    //   store.dispatch(
-    //     setState({ accessToken: null, refreshToken: null, user: null })
-    //   )
-    //   navigate?.('/unauthorize')
-    //   return Promise.reject(error)
-    // }
-
     if (
       error.response?.status === 401 &&
       !(error.config as any).__isRetryRequest
@@ -61,7 +57,6 @@ axiosInstance.interceptors.response.use(
       ;(error.config as any).__isRetryRequest = true
 
       const { refreshToken } = store.getState().auth || {}
-      console.log('refreshToken', refreshToken)
       if (refreshToken) {
         try {
           const refreshResponse = await axiosInstance.post(
@@ -97,7 +92,7 @@ axiosInstance.interceptors.response.use(
             store.dispatch(
               setState({ accessToken: null, refreshToken: null, user: null })
             )
-            navigate?.('/unauthorize')
+            goToUnauthorize()
             return Promise.reject(refreshResponse.data.reason_message)
           }
         } catch (refreshError) {
@@ -105,7 +100,7 @@ axiosInstance.interceptors.response.use(
           store.dispatch(
             setState({ accessToken: null, refreshToken: null, user: null })
           )
-          navigate?.('/unauthorize')
+          goToUnauthorize()
           console.error('Refresh token error:', refreshError)
           return Promise.reject(refreshError)
         }
@@ -114,7 +109,7 @@ axiosInstance.interceptors.response.use(
         store.dispatch(
           setState({ accessToken: null, refreshToken: null, user: null })
         )
-        navigate?.('/unauthorize')
+        goToUnauthorize()
         return Promise.reject(error)
       }
     }
