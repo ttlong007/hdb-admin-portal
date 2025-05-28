@@ -51,7 +51,9 @@ const Merchants: React.FC = () => {
         setAuthState({
           objectKeyMerchant: null,
         })
-        return null
+        if (response.data.reason_message) {
+          toast.error(response.data.reason_message)
+        }
       }
       if (response.data.status_code === 'PROCESSING') {
         throw { response: { data: response.data } }

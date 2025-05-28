@@ -34,7 +34,7 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
         {
           object_key: objectKey,
           page: 1,
-          page_size: pageSize,
+          limit: pageSize,
         }
       )
 
@@ -52,7 +52,7 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
           {
             object_key: objectKey,
             page,
-            page_size: pageSize,
+            limit: pageSize,
           }
         )
 

@@ -20,7 +20,7 @@ const StaffTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
         {
           object_key: objectKey,
           page: currentPage,
-          page_size: pageSize,
+          limit: pageSize,
         }
       )
       return response.data

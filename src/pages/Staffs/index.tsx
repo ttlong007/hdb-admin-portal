@@ -58,7 +58,12 @@ const Staffs: React.FC = () => {
         return response.data
       }
       if (response.data.status_code === 'REJECT') {
-        toast.error(response.data.reason_message || 'Xử lý file thất bại')
+        setAuthState({
+          objectKeyStaff: null,
+        })
+        if (response.data.reason_message) {
+          toast.error(response.data.reason_message)
+        }
       }
       if (response.data.status_code === 'PROCESSING') {
         throw { response: { data: response.data } }
