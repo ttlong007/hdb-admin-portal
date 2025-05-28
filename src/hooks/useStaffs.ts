@@ -33,7 +33,7 @@ export const useStaffs = ({
       const cleanFilter: StaffFilters = {}
 
       if (filter?.status?.value) {
-        cleanFilter.status = filter.status.value
+        cleanFilter.status = [filter.status.value]
       }
       if (filter?.company_id?.value) {
         cleanFilter.company_id = filter.company_id.value
@@ -51,7 +51,7 @@ export const useStaffs = ({
         cleanFilter.role = filter.role.value
       }
 
-      const params = {
+      const requestBody = {
         page,
         limit,
         ...cleanFilter,
@@ -59,9 +59,10 @@ export const useStaffs = ({
         descending: sortOrder === 'descend',
       }
 
-      const response = await axiosInstance.get('/v1/admin/staff/list', {
-        params,
-      })
+      const response = await axiosInstance.post(
+        '/v1/admin/staff/list',
+        requestBody
+      )
       if (response.data.status_code === 'ACCEPT') {
         return {
           data: response.data.data,

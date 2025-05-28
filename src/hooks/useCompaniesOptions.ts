@@ -10,8 +10,13 @@ export function useCompaniesOptions(isActive = true) {
   return useQuery<CompanyOption[]>({
     queryKey: ['companies-options'],
     queryFn: async () => {
-      const response = await axiosInstance.get(
-        `/v1/admin/company/list${isActive ? '?status=ACTIVE' : ''}`
+      const response = await axiosInstance.post(
+        `/v1/admin/company/list`,
+        isActive
+          ? {
+              status: ['ACTIVE', 'WAITING_APPROVAL_FOR_EDIT'],
+            }
+          : {}
       )
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.map((company: any) => ({

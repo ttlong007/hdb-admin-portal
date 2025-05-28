@@ -33,7 +33,7 @@ export const useMasterMerchants = ({
       const cleanFilter: MasterMerchantFilters = {}
 
       if (filter?.status?.value) {
-        cleanFilter.status = filter.status.value
+        cleanFilter.status = [filter.status.value]
       }
       if (filter?.cif) {
         cleanFilter.cif = filter.cif
@@ -45,7 +45,7 @@ export const useMasterMerchants = ({
         cleanFilter.business_license = filter.business_license
       }
 
-      const params = {
+      const requestBody = {
         page,
         limit,
         ...cleanFilter,
@@ -53,9 +53,7 @@ export const useMasterMerchants = ({
         descending: sortOrder === 'descend',
       }
 
-      const response = await axiosInstance.get('/v1/admin/company/list', {
-        params,
-      })
+      const response = await axiosInstance.post('/v1/admin/company/list', requestBody)
       if (response.data.status_code === 'ACCEPT') {
         return {
           data: response.data.data,

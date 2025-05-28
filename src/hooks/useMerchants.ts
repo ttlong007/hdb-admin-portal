@@ -31,7 +31,7 @@ export const useMerchants = ({
       const cleanFilter: MerchantFilters = {}
 
       if (filter?.status?.value) {
-        cleanFilter.status = filter.status.value
+        cleanFilter.status = [filter.status.value]
       }
       if (filter?.cif) {
         cleanFilter.cif = filter.cif
@@ -46,7 +46,7 @@ export const useMerchants = ({
         cleanFilter.code = filter.code
       }
 
-      const params = {
+      const requestBody = {
         page,
         limit,
         ...cleanFilter,
@@ -54,9 +54,10 @@ export const useMerchants = ({
         descending: sortOrder === 'descend',
       }
 
-      const response = await axiosInstance.get('/v1/admin/store/list', {
-        params,
-      })
+      const response = await axiosInstance.post(
+        '/v1/admin/store/list',
+        requestBody
+      )
       if (response.data.status_code === 'ACCEPT') {
         return {
           data: response.data.data,
