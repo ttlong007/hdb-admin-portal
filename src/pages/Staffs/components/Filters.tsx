@@ -88,10 +88,8 @@ const Filters: React.FC = () => {
     queryKey: ['stores-by-company', selectedCompanyId?.value],
     queryFn: async () => {
       if (!selectedCompanyId?.value) return []
-      const response = await axiosInstance.get(`/v1/admin/store/list`, {
-        params: {
-          company_id: selectedCompanyId.value,
-        },
+      const response = await axiosInstance.post(`/v1/admin/store/list`, {
+        company_id: selectedCompanyId.value,
       })
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data
