@@ -7,9 +7,9 @@ import { useAuth } from '@/store/authSlice/useAuth';
 const Unauthorize: React.FC = () => {
   const {setAuthState} = useAuth();
   const handleLogin = () => {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
     setAuthState({
-      accessToken: null,
-      refreshToken: null,
       objectKeyStaff: null,
       objectKeyMerchant: null,
     })

@@ -14,7 +14,7 @@ export const useAuth = () => {
   const authState = useAuthState()
   const dispatch = useDispatch()
 
-  const isAuthenticated = !!authState.accessToken
+  const isAuthenticated = !!localStorage.getItem('accessToken')
 
   const setAuthState = (newState: any) => {
     dispatch(setState(newState))

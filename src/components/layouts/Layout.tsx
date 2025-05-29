@@ -25,10 +25,8 @@ const Layout = () => {
         data
       )
       if (response.data.status_code === 'ACCEPT') {
-        setAuthState({
-          accessToken: response.data.data.access_token,
-          refreshToken: response.data.data.refresh_token,
-        })
+        localStorage.setItem('accessToken', response.data.data.access_token)
+        localStorage.setItem('refreshToken', response.data.data.refresh_token)
         navigate(routes.masterMerchant, { replace: true })
       } else {
         toast.error(response.data.reason_message)
@@ -44,9 +42,9 @@ const Layout = () => {
   }, [token, isAuthenticated])
 
   const handleLogin = () => {
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
     setAuthState({
-      accessToken: null,
-      refreshToken: null,
       objectKeyStaff: null,
       objectKeyMerchant: null,
     })

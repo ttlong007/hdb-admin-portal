@@ -25,7 +25,7 @@ const axiosInstance: AxiosInstance = axios.create({
 // Add a request interceptor to dynamically inject Authorization header
 axiosInstance.interceptors.request.use(
   (config) => {
-    const accessToken = store.getState().auth?.accessToken
+    const accessToken = localStorage.getItem('accessToken')
     if (accessToken) {
       config.headers = config.headers || {}
       config.headers['Authorization'] = `Bearer ${accessToken}`
@@ -47,7 +47,7 @@ axiosInstance.interceptors.response.use(
     ) {
       ;(error.config as any).__isRetryRequest = true
 
-      const { refreshToken } = store.getState().auth || {}
+      const refreshToken = localStorage.getItem('refreshToken')
       if (refreshToken) {
         try {
           const refreshResponse = await axiosInstance.post(
@@ -60,13 +60,7 @@ axiosInstance.interceptors.response.use(
 
           if (refreshResponse.data.status_code === 'ACCEPT') {
             const newAccessToken = refreshResponse.data.data.access_token
-            // Update store
-            store.dispatch(
-              setState({
-                accessToken: newAccessToken,
-              })
-            )
-            // Update original request header before retrying
+            localStorage.setItem('accessToken', newAccessToken)
             if (error.config) {
               error.config.headers = error.config.headers || {}
               error.config.headers['Authorization'] = `Bearer ${newAccessToken}`
@@ -79,25 +73,22 @@ axiosInstance.interceptors.response.use(
 
             return axiosInstance.request(error.config as AxiosRequestConfig)
           } else {
-            // Clear auth state and redirect to unauthorized page
-            store.dispatch(
-              setState({ accessToken: null, refreshToken: null, user: null })
-            )
+            localStorage.removeItem('accessToken')
+            localStorage.removeItem('refreshToken')
+            store.dispatch(setState({ user: null }))
             return Promise.reject(refreshResponse.data.reason_message)
           }
         } catch (refreshError) {
-          // Clear auth state and redirect to unauthorized page
-          store.dispatch(
-            setState({ accessToken: null, refreshToken: null, user: null })
-          )
+          localStorage.removeItem('accessToken')
+          localStorage.removeItem('refreshToken')
+          store.dispatch(setState({ user: null }))
           console.error('Refresh token error:', refreshError)
           return Promise.reject(refreshError)
         }
       } else {
-        // No refresh token available, clear auth and redirect
-        store.dispatch(
-          setState({ accessToken: null, refreshToken: null, user: null })
-        )
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        store.dispatch(setState({ user: null }))
         return Promise.reject(error)
       }
     }
