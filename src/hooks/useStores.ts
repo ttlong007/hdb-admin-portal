@@ -13,9 +13,10 @@ export function useStores(companyId?: number) {
       if (!companyId) {
         return []
       }
-      const response = await axiosInstance.get('/v1/admin/store/list', {
-        params: { company_id: companyId },
+      const response = await axiosInstance.post('/v1/admin/store/list', {
+        company_id: companyId,
       })
+
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.map((store: any) => ({
           label: store.name,

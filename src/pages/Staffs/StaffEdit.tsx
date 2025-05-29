@@ -266,8 +266,8 @@ export default function EditStaff() {
       if (staffDetail.company_id && staffDetail.store_id) {
         const fetchStores = async () => {
           try {
-            const response = await axiosInstance.get('/v1/admin/store/list', {
-              params: { company_id: staffDetail.company_id },
+            const response = await axiosInstance.post('/v1/admin/store/list', {
+              company_id: staffDetail.company_id,
             })
             if (response.data.status_code === 'ACCEPT') {
               const storeOptions = response.data.data.map((store: any) => ({
