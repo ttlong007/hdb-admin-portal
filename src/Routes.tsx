@@ -25,15 +25,9 @@ function RootRoutes() {
       path: '/',
       element: <Layout />,
       children: [
-        // Default route: if authenticated, redirect to masterMerchant
         {
           index: true,
-          element: isAuthenticated ? (
-            <Navigate to={routes.masterMerchant} replace />
-          ) : (
-            // Optionally, set another default route for non-authenticated users.
-            <Navigate to={routes.unauthorize} replace />
-          ),
+          element: <Navigate to={routes.masterMerchant} replace />,
         },
         { path: routes.unauthorize, element: <Unauthorize /> },
         { path: routes.masterMerchant, element: <MasterMerchants /> },
