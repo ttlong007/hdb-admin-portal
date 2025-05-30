@@ -68,5 +68,8 @@ export const useExportMerchants = ({ filter }: ExportMerchantsProps) => {
         toast.error('Xuất dữ liệu thất bại. Vui lòng thử lại sau.')
       }
     },
+    onError: () => {
+      toast.error('Xuất dữ liệu thất bại. Vui lòng thử lại sau.')
+    },
   })
 }

@@ -93,8 +93,8 @@ export const useExportMasterMerchants = ({
         toast.error('Xuất dữ liệu thất bại. Vui lòng thử lại sau.')
       }
     },
-    onError: (error: any) => {
-      toast.error(error.response.data.reason_message)
+    onError: () => {
+      toast.error('Xuất dữ liệu thất bại. Vui lòng thử lại sau.')
     },
   })
 }

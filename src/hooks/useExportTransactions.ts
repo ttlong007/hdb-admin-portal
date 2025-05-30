@@ -117,7 +117,7 @@ export const useExportTransactions = ({ filter }: ExportTransactionsProps) => {
         }, 120000)
       }
     },
-    onError: (error: any) => {
+    onError: () => {
       toast.error('Xuất dữ liệu thất bại. Vui lòng thử lại sau.')
     },
   })
