@@ -25,13 +25,6 @@ const Unauthorize: React.FC = () => {
     )
   }
 
-  React.useEffect(() => {
-    const token = localStorage.getItem('accessToken')
-    if (token) {
-      navigate(routes.masterMerchant, { replace: true })
-    }
-  }, [])
-
   return (
     <div className="h-screen flex flex-col items-center justify-center">
       <div className="mt-10 flex flex-col items-center">
