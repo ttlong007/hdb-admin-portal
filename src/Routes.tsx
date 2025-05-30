@@ -14,12 +14,9 @@ import MerchantDetail from './pages/Merchants/MerchantDetail'
 import MasterMerchantEdit from './pages/MasterMerchants/MasterMerchantEdit'
 import StaffEdit from './pages/Staffs/StaffEdit'
 import MerchantEdit from './pages/Merchants/MerchantEdit'
-import { useAuth } from './store/authSlice/useAuth'
 import Unauthorize from './pages/Unauthorize'
 
 function RootRoutes() {
-  const { isAuthenticated } = useAuth()
-
   const rootRoutes = [
     {
       path: '/',
