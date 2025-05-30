@@ -31,7 +31,7 @@ export const useExportMerchants = ({ filter }: ExportMerchantsProps) => {
         cleanFilter.name = filter.name
       }
 
-      const response = await axiosInstance.get('/v1/admin/store/list', {
+      const response = await axiosInstance.post('/v1/admin/store/export-data', {
         params: {
           ...cleanFilter,
         },

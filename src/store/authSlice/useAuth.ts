@@ -30,6 +30,8 @@ export const useAuth = () => {
     localStorage.removeItem('refreshToken')
     setAuthState({
       user: null,
+      bjectKeyStaff: null,
+      objectKeyMerchant: null,
     })
   }
 

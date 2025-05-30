@@ -32,7 +32,7 @@ export const useExportStaffs = ({ filter }: ExportStaffsProps) => {
         cleanFilter.status = filter.status.value
       }
 
-      const response = await axiosInstance.get('/v1/admin/staff/list', {
+      const response = await axiosInstance.get('/v1/admin/staff/export-data', {
         params: {
           ...cleanFilter,
         },
