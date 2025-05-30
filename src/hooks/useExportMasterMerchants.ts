@@ -43,7 +43,7 @@ export const useExportMasterMerchants = ({
     mutationFn: async () => {
       const cleanFilter: any = {}
       if (filter?.status?.value) {
-        cleanFilter.status = filter.status.value
+        cleanFilter.status = [filter.status.value]
       }
       if (filter?.cif) {
         cleanFilter.cif = filter.cif
@@ -57,12 +57,7 @@ export const useExportMasterMerchants = ({
 
       const response = await axiosInstance.post(
         '/v1/admin/company/export-data',
-        {
-          params: {
-            ...cleanFilter,
-          },
-          responseType: 'blob', // <-- Add this line
-        }
+        { ...cleanFilter }
       )
       if (response.data.status_code === 'ACCEPT') {
         // 2. Get filename from Content-Disposition header

@@ -17,7 +17,7 @@ export const useExportMerchants = ({ filter }: ExportMerchantsProps) => {
     mutationFn: async () => {
       const cleanFilter: any = {}
       if (filter?.status?.value) {
-        cleanFilter.status = filter.status.value
+        cleanFilter.status = [filter.status.value]
       }
       if (filter?.cif) {
         cleanFilter.cif = filter.cif
@@ -33,10 +33,7 @@ export const useExportMerchants = ({ filter }: ExportMerchantsProps) => {
       }
 
       const response = await axiosInstance.post('/v1/admin/store/export-data', {
-        params: {
-          ...cleanFilter,
-        },
-        responseType: 'blob', // <-- Add this line
+        ...cleanFilter,
       })
 
       if (response.data.status_code === 'ACCEPT') {

@@ -30,14 +30,11 @@ export const useExportStaffs = ({ filter }: ExportStaffsProps) => {
         cleanFilter.name = filter.name
       }
       if (filter?.status?.value) {
-        cleanFilter.status = filter.status.value
+        cleanFilter.status = [filter.status.value]
       }
 
       const response = await axiosInstance.post('/v1/admin/staff/export-data', {
-        params: {
-          ...cleanFilter,
-        },
-        responseType: 'blob', // <-- Add this line
+        ...cleanFilter,
       })
 
       if (response.data.status_code === 'ACCEPT') {
