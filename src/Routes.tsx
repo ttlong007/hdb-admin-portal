@@ -27,7 +27,7 @@ function RootRoutes() {
       children: [
         {
           index: true,
-          element: <Navigate to={routes.masterMerchant} replace />,
+          element: <Navigate to={routes.masterMerchant} replace state={{ from: location }} />,
         },
         { path: routes.unauthorize, element: <Unauthorize /> },
         { path: routes.masterMerchant, element: <MasterMerchants /> },
