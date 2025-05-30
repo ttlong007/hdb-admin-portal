@@ -45,7 +45,7 @@ export const useExportMerchants = ({ filter }: ExportMerchantsProps) => {
       // 2. Get filename from Content-Disposition header
       const disposition = response.headers['content-disposition']
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
-      let filename = `company_${timestamp}.xlsx` // fallback with timestamp
+      let filename = `store_${timestamp}.xlsx` // fallback with timestamp
       if (disposition && disposition.includes('filename=')) {
         const baseFilename = disposition
           .split('filename=')[1]
