@@ -70,8 +70,8 @@ const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
     },
     {
       title: 'Mã địa chỉ',
-      dataIndex: 'AddressID',
-      key: 'AddressID',
+      dataIndex: 'AddressCode',
+      key: 'AddressCode',
     },
     {
       title: 'Tài khoản chuyên chi',
