@@ -84,16 +84,7 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
   const [isExporting, setIsExporting] = React.useState(false)
 
   const handleExport = async () => {
-    try {
-      setIsExporting(true)
-      await exportMutation.mutateAsync()
-      toast.success('Xuất dữ liệu thành công!')
-    } catch (error) {
-      console.error('Export failed:', error)
-      toast.error('Xuất dữ liệu thất bại. Vui lòng thử lại sau.')
-    } finally {
-      setIsExporting(false)
-    }
+    await exportMutation.mutateAsync()
   }
 
   return (
