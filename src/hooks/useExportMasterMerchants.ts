@@ -54,7 +54,7 @@ export const useExportMasterMerchants = ({
         cleanFilter.business_license = filter.business_license
       }
 
-      const response = await axiosInstance.get(
+      const response = await axiosInstance.post(
         '/v1/admin/company/export-data',
         {
           params: {
