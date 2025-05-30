@@ -17,6 +17,8 @@ import MerchantEdit from './pages/Merchants/MerchantEdit'
 import Unauthorize from './pages/Unauthorize'
 
 function RootRoutes() {
+  const isAuthenticated = Boolean(localStorage.getItem('accessToken'))
+
   const rootRoutes = [
     {
       path: '/',
@@ -24,8 +26,14 @@ function RootRoutes() {
       children: [
         {
           index: true,
-          element: <Unauthorize />,
+          element: isAuthenticated ? (
+            <Navigate to={routes.masterMerchant} replace />
+          ) : (
+            // Optionally, set another default route for non-authenticated users.
+            <Navigate to={routes.unauthorize} replace />
+          ),
         },
+
         { path: routes.unauthorize, element: <Unauthorize /> },
         { path: routes.masterMerchant, element: <MasterMerchants /> },
         {
