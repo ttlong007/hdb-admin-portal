@@ -50,7 +50,7 @@ export const useExportTransactions = ({ filter }: ExportTransactionsProps) => {
         cleanFilter.transaction_type = filter.transaction_type.value
       }
       if (filter?.status) {
-        cleanFilter.status = filter.status
+        cleanFilter.status = [filter.status]
       }
       if (filter?.store_code) {
         cleanFilter.store_code = filter.store_code

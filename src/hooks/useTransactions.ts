@@ -5,7 +5,7 @@ import { useFilter } from '@/store/filterSlice/useFilter'
 interface TransactionRequestBody {
   page?: number
   limit?: number
-  status?: string
+  status?: any
   duration?: any
   company_id?: number
   store_id?: number
@@ -50,7 +50,7 @@ export const useTransactions = ({
 
       // Only add status if it's not empty
       if (transactionFilters.status) {
-        requestBody.status = transactionFilters.status
+        requestBody.status = [transactionFilters.status]
       }
 
       // Remove empty/null/blank/empty array fields
