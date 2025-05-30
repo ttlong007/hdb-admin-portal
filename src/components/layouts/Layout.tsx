@@ -36,10 +36,10 @@ const Layout = () => {
   })
 
   React.useEffect(() => {
-    if (token && !isAuthenticated) {
+    if (token ) {
       loginByTokenMutation.mutate({ token, party_code: 'HDA' })
     }
-  }, [token, isAuthenticated])
+  }, [token])
 
   const handleLogin = () => {
     localStorage.removeItem('accessToken')
