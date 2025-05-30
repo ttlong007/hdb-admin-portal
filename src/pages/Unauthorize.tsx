@@ -3,9 +3,12 @@ import React from 'react'
 import Atom from '@/components/core/components/AtomLoading'
 import { getEnv } from '@/config/env'
 import { useAuth } from '@/store/authSlice/useAuth';
+import { routes } from '@/config/routes';
+import { useNavigate } from 'react-router-dom';
 
 const Unauthorize: React.FC = () => {
   const {setAuthState} = useAuth();
+  const navigate = useNavigate()
   const handleLogin = () => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
@@ -21,6 +24,13 @@ const Unauthorize: React.FC = () => {
       ROOT_CALLBACK_URL || 'https://ungdung.hdbank.com.vn/Login'
     )
   }
+
+  React.useEffect(() => {
+    const token = localStorage.getItem('accessToken')
+    if (token) {
+      navigate(routes.masterMerchant, { replace: true })
+    }
+  }, [])
 
   return (
     <div className="h-screen flex flex-col items-center justify-center">
