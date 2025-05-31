@@ -348,6 +348,7 @@ const Staffs: React.FC = () => {
               onClose={() => setIsPreviewUploadModalOpen(false)}
               objectKey={objectKeyStaff}
               type="staff"
+              uploadResult={uploadResult?.data}
             />
 
             {!isApprover && (
