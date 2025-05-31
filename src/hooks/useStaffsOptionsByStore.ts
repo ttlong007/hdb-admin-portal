@@ -25,6 +25,7 @@ export const useStaffsOptionsByStore = ({
     queryFn: async () => {
       const response = await axiosInstance.post('/v1/admin/staff/list', {
         store_id: storeId,
+        role: 'STORE_EMPLOYEE',
       })
       return response.data
     },

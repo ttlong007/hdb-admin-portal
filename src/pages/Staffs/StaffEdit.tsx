@@ -345,6 +345,15 @@ export default function EditStaff() {
   // Use custom hook for updating staff
   const updateStaffMutation = useUpdateStaff(id, () => reset())
 
+  // Add useEffect to set isDelegation based on role
+  useEffect(() => {
+    if (staffDetail?.role === 'STORE_MANAGER') {
+      setIsDelegation(true)
+    } else {
+      setIsDelegation(false)
+    }
+  }, [staffDetail?.role])
+
   const onSubmit = (data: FormData) => {
     // Create base payload with all fields
     const basePayload: StaffPayload = {
@@ -446,7 +455,7 @@ export default function EditStaff() {
         store_id: data.store_id!.value,
         start_date: formatDate(startDate),
         end_date: formatDate(endDate),
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       }
     }
 
@@ -718,91 +727,95 @@ export default function EditStaff() {
           </div>
         </InfoCard>
 
-        <InfoCard title="Thông tin ủy quyền">
-          <div>
-            <div className="my-4">
-              <Switch
-                checked={isDelegation}
-                onChange={handleDelegationChange}
-              />
-              <label className="ml-2">Cho phép ủy quyền</label>
-            </div>
+        {staffDetail?.role === 'STORE_MANAGER' ? (
+          <InfoCard title="Thông tin ủy quyền">
+            <div>
+              <>
+                <div className="my-4">
+                  <Switch
+                    checked={isDelegation}
+                    onChange={handleDelegationChange}
+                  />
+                  <label className="ml-2">Cho phép ủy quyền</label>
+                </div>
 
-            {isDelegation ? (
-              <div className="grid grid-cols-4 gap-6 w-full">
-                <Controller
-                  name="delegated_staff_id"
-                  control={control}
-                  render={({ field }) => (
-                    <div className="w-full">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Tên người được ủy quyền
-                      </label>
-                      <ReactSelect
-                        {...field}
-                        isLoading={isLoadingStaffOptions}
-                        options={staffOptions as any}
-                        placeholder="Chọn người được ủy quyền"
-                        onChange={(option) => {
-                          field.onChange(option)
-                          setSelectedDelegatedStaff(option)
-                        }}
+                {isDelegation ? (
+                  <div className="grid grid-cols-4 gap-6 w-full">
+                    <Controller
+                      name="delegated_staff_id"
+                      control={control}
+                      render={({ field }) => (
+                        <div className="w-full">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Tên người được ủy quyền
+                          </label>
+                          <ReactSelect
+                            {...field}
+                            isLoading={isLoadingStaffOptions}
+                            options={staffOptions as any}
+                            placeholder="Chọn người được ủy quyền"
+                            onChange={(option) => {
+                              field.onChange(option)
+                              setSelectedDelegatedStaff(option)
+                            }}
+                          />
+                          {errors.delegated_staff_id && (
+                            <span className="text-red-500 text-sm">
+                              {errors.delegated_staff_id.message?.toString()}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    />
+                    <Input
+                      label="Số điện thoại"
+                      placeholder="Nhập số điện thoại"
+                      className="w-full"
+                      disabled={true}
+                      value={selectedDelegatedStaff?.phone_number || ''}
+                    />
+                    <Input
+                      label="Số CCCD"
+                      placeholder="Nhập số CCCD"
+                      className="w-full"
+                      disabled={true}
+                      value={selectedDelegatedStaff?.national_id_number || ''}
+                    />
+                    <Input
+                      label="Email"
+                      placeholder="Nhập email"
+                      className="w-full"
+                      disabled={true}
+                      value={selectedDelegatedStaff?.email || ''}
+                    />
+
+                    <div>
+                      <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
+                        Thời gian
+                      </div>
+                      <Controller
+                        name="delegation_duration"
+                        control={control}
+                        render={({ field }) => (
+                          <RangePicker
+                            rootClassName="px-3.5 py-2 w-full"
+                            value={field.value}
+                            onChange={(dates) => field.onChange(dates)}
+                          />
+                        )}
                       />
-                      {errors.delegated_staff_id && (
+                      {errors.delegation_duration && (
                         <span className="text-red-500 text-sm">
-                          {errors.delegated_staff_id.message?.toString()}
+                          {'Vui lòng chọn thời gian ủy quyền'}
                         </span>
                       )}
                     </div>
-                  )}
-                />
-                <Input
-                  label="Số điện thoại"
-                  placeholder="Nhập số điện thoại"
-                  className="w-full"
-                  disabled={true}
-                  value={selectedDelegatedStaff?.phone_number || ''}
-                />
-                <Input
-                  label="Số CCCD"
-                  placeholder="Nhập số CCCD"
-                  className="w-full"
-                  disabled={true}
-                  value={selectedDelegatedStaff?.national_id_number || ''}
-                />
-                <Input
-                  label="Email"
-                  placeholder="Nhập email"
-                  className="w-full"
-                  disabled={true}
-                  value={selectedDelegatedStaff?.email || ''}
-                />
-
-                <div>
-                  <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
-                    Thời gian
                   </div>
-                  <Controller
-                    name="delegation_duration"
-                    control={control}
-                    render={({ field }) => (
-                      <RangePicker
-                        rootClassName="px-3.5 py-2 w-full"
-                        value={field.value}
-                        onChange={(dates) => field.onChange(dates)}
-                      />
-                    )}
-                  />
-                  {errors.delegation_duration && (
-                    <span className="text-red-500 text-sm">
-                      {'Vui lòng chọn thời gian ủy quyền'}
-                    </span>
-                  )}
-                </div>
-              </div>
-            ) : null}
-          </div>
-        </InfoCard>
+                ) : null}
+              </>
+            </div>
+          </InfoCard>
+        ) : null}
 
         <InfoCard title="">
           <Controller
