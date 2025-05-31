@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { NavLink, useParams, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { Input, NumberInput } from 'rizzui'
@@ -14,12 +14,15 @@ import { useAuth } from '@/store/authSlice/useAuth'
 import { CloseCircleOutlined } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
-import { Checkbox, Switch } from 'antd'
+import { Checkbox, DatePicker, Switch } from 'antd'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
 import InfoCard from '@/components/core/components/InfoCard'
 import { STATUS_WAITING_APPROVE } from '@/config/constants'
 import { useConfirm } from '@/providers/ConfirmProvider'
+import { useStaffsOptionsByStore } from '@/hooks/useStaffsOptionsByStore'
+
+const { RangePicker } = DatePicker
 
 type Option<T> = { label: string; value: T }
 
@@ -36,6 +39,8 @@ type FormData = {
   transactionTypes: number[]
   active: boolean
   can_make_transaction: boolean
+  delegated_staff_id?: Option<number> | null
+  delegation_duration?: any
 }
 
 type StaffPayload = {
@@ -53,6 +58,14 @@ type StaffPayload = {
   transaction_type_ids: number[]
   status?: string
   can_make_transaction: boolean
+  delegation?: {
+    delegator_staff_id: number
+    delegated_staff_id: number
+    store_id: number
+    start_date: string
+    end_date: string
+    status: string
+  }
 }
 
 // Add role options constant
@@ -111,6 +124,10 @@ function mapStaffToDefaultValues(staffDetail: any): FormData {
 }
 
 export default function EditStaff() {
+  const [isDelegation, setIsDelegation] = useState(false)
+  const [selectedDelegatedStaff, setSelectedDelegatedStaff] =
+    useState<any>(null)
+
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { isApprover, systemConfig } = useAuth()
@@ -226,6 +243,14 @@ export default function EditStaff() {
     transactionTypes: yup.array().of(yup.mixed()),
     active: yup.boolean(),
     can_make_transaction: yup.boolean(),
+    delegated_staff_id: yup.mixed<Option<number>>().when('isDelegation', {
+      is: true,
+      then: (schema) => schema.required('Vui lòng chọn người được ủy quyền'),
+    }),
+    delegation_duration: yup.array().when('isDelegation', {
+      is: true,
+      then: (schema) => schema.required('Vui lòng chọn thời gian ủy quyền'),
+    }),
   }) as yup.ObjectSchema<FormData>
 
   const {
@@ -249,6 +274,8 @@ export default function EditStaff() {
       transactionTypes: [],
       active: false,
       can_make_transaction: false,
+      delegated_staff_id: null,
+      delegation_duration: null,
     },
     resolver: yupResolver(schema),
     mode: 'all',
@@ -287,6 +314,11 @@ export default function EditStaff() {
       }
     }
   }, [staffDetail, reset, setValue])
+
+  const { staffOptions, isLoading: isLoadingStaffOptions } =
+    useStaffsOptionsByStore({
+      storeId: staffDetail?.store_id,
+    })
 
   // Fetch company options via custom hook
   const { data: companyOptions = [], isLoading: isLoadingCompanies } =
@@ -401,6 +433,23 @@ export default function EditStaff() {
       }
     }
 
+    // Add delegation data if isDelegation is true
+    if (isDelegation && data.delegated_staff_id && data.delegation_duration) {
+      const [startDate, endDate] = data.delegation_duration
+      const formatDate = (date: any) => {
+        return date.format('DD-MM-YYYY')
+      }
+
+      changedFields.delegation = {
+        delegator_staff_id: Number(id),
+        delegated_staff_id: data.delegated_staff_id.value,
+        store_id: data.store_id!.value,
+        start_date: formatDate(startDate),
+        end_date: formatDate(endDate),
+        status: 'ACTIVE'
+      }
+    }
+
     // Only proceed if there are actual changes
     if (Object.keys(changedFields).length === 0) {
       toast.error('Không có thay đổi nào được thực hiện')
@@ -419,6 +468,10 @@ export default function EditStaff() {
     })
   }
 
+  const handleDelegationChange = (checked: boolean) => {
+    setIsDelegation(checked)
+  }
+
   useEffect(() => {
     if (
       isApprover ||
@@ -429,6 +482,7 @@ export default function EditStaff() {
     }
   }, [isApprover, staffDetail?.status])
 
+  console.log(selectedDelegatedStaff, 'selectedDelegatedStaff')
   return (
     <>
       <div className="flex justify-start items-center gap-2 mb-4">
@@ -661,6 +715,92 @@ export default function EditStaff() {
                 </div>
               )}
             />
+          </div>
+        </InfoCard>
+
+        <InfoCard title="Thông tin ủy quyền">
+          <div>
+            <div className="my-4">
+              <Switch
+                checked={isDelegation}
+                onChange={handleDelegationChange}
+              />
+              <label className="ml-2">Cho phép ủy quyền</label>
+            </div>
+
+            {isDelegation ? (
+              <div className="grid grid-cols-4 gap-6 w-full">
+                <Controller
+                  name="delegated_staff_id"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="w-full">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Tên người được ủy quyền
+                      </label>
+                      <ReactSelect
+                        {...field}
+                        isLoading={isLoadingStaffOptions}
+                        options={staffOptions as any}
+                        placeholder="Chọn người được ủy quyền"
+                        onChange={(option) => {
+                          field.onChange(option)
+                          setSelectedDelegatedStaff(option)
+                        }}
+                      />
+                      {errors.delegated_staff_id && (
+                        <span className="text-red-500 text-sm">
+                          {errors.delegated_staff_id.message?.toString()}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                />
+                <Input
+                  label="Số điện thoại"
+                  placeholder="Nhập số điện thoại"
+                  className="w-full"
+                  disabled={true}
+                  value={selectedDelegatedStaff?.phone_number || ''}
+                />
+                <Input
+                  label="Số CCCD"
+                  placeholder="Nhập số CCCD"
+                  className="w-full"
+                  disabled={true}
+                  value={selectedDelegatedStaff?.national_id_number || ''}
+                />
+                <Input
+                  label="Email"
+                  placeholder="Nhập email"
+                  className="w-full"
+                  disabled={true}
+                  value={selectedDelegatedStaff?.email || ''}
+                />
+
+                <div>
+                  <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
+                    Thời gian
+                  </div>
+                  <Controller
+                    name="delegation_duration"
+                    control={control}
+                    render={({ field }) => (
+                      <RangePicker
+                        rootClassName="px-3.5 py-2 w-full"
+                        value={field.value}
+                        onChange={(dates) => field.onChange(dates)}
+                      />
+                    )}
+                  />
+                  {errors.delegation_duration && (
+                    <span className="text-red-500 text-sm">
+                      {'Vui lòng chọn thời gian ủy quyền'}
+                    </span>
+                  )}
+                </div>
+              </div>
+            ) : null}
           </div>
         </InfoCard>
 
