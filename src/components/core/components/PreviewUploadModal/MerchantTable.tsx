@@ -8,6 +8,30 @@ interface MerchantTableProps {
   isOpen: boolean
 }
 
+interface TableRecord {
+  STT: number
+  FailedReason?: string
+  CompanyCIF: string
+  CompanyName: string
+  StoreName: string
+  StoreCode: string
+  Address: string
+  AddressCode: string
+  IncomeAccount: string
+  ExpenseAccount: string
+  MonthlyLimit: string
+  DailyLimit: string
+  NeedStoreManagerApprove: string
+  ApprovalThreshold: string
+  AllowWithdraw: string
+  AllowDeposit: string
+  AllowTransfer: string
+  AllowCollection: string
+  AllowPayment: string
+  AllowCollectionAuthorization: string
+  AllowPaymentAuthorization: string
+}
+
 const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
   const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 10
@@ -155,6 +179,11 @@ const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
       rowKey="STT"
       scroll={{ x: 'max-content' }}
       style={{ width: '100%' }}
+      onRow={(record: TableRecord) => ({
+        style: {
+          backgroundColor: record.FailedReason ? '#fff1f0' : 'inherit',
+        },
+      })}
     />
   )
 }

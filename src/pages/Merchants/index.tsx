@@ -341,6 +341,7 @@ const Merchants: React.FC = () => {
               onClose={() => setIsPreviewUploadModalOpen(false)}
               objectKey={objectKeyMerchant}
               type="merchant"
+              uploadResult={uploadResult?.data}
             />
 
             {!isApprover && (

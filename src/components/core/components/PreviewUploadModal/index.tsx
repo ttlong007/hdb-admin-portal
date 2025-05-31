@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { Modal, Button } from 'antd'
+import _get from 'lodash/get'
+
 import MerchantTable from './MerchantTable'
 import { useConfirm } from '@/providers/ConfirmProvider'
 import axiosInstance from '@/config/axios'
@@ -7,12 +9,15 @@ import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { useAuth } from '@/store/authSlice/useAuth'
 import StaffTable from './StaffTable'
+import { DownloadOutlined } from '@ant-design/icons'
+import { useExportTransactionData } from '@/hooks/useExportTransactionData'
 
 interface PreviewUploadModalProps {
   isOpen: boolean
   onClose: () => void
   objectKey: string | null
   type: 'merchant' | 'staff'
+  uploadResult: any
 }
 
 const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
@@ -20,11 +25,22 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
   onClose,
   objectKey,
   type,
+  uploadResult,
 }) => {
   const confirm = useConfirm()
   const { setAuthState } = useAuth()
-  const [currentPage, setCurrentPage] = useState(1)
   const pageSize = 5
+  const { mutate: exportTransactionData, isPending: isExporting } = useExportTransactionData({
+    objectKey,
+  })
+
+  const handleExportTransactionData = (status: 'ACCEPT' | 'FAILED') => {
+    exportTransactionData(status)
+  }
+
+  const failedRows = _get(uploadResult, 'failed_rows', 0)
+  const successRows = _get(uploadResult, 'success_rows', 0)
+  const totalImportRows = _get(uploadResult, 'total_import_rows', 0)
 
   const { mutate: approveTransaction, isPending } = useMutation({
     mutationFn: async () => {
@@ -142,12 +158,33 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
         </Button>,
       ]}
     >
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-12">
+          <span className="text-sm text-gray-500">
+            Tổng số dòng: <strong>{totalImportRows}</strong>
+          </span>
+          <span className="text-sm text-green-600">
+            Số dòng đúng: <strong>{successRows}</strong>{' '}
+            <DownloadOutlined
+              className="cursor-pointer text-[24px] ml-3"
+              onClick={() => handleExportTransactionData('ACCEPT')}
+              spin={isExporting}
+            />
+          </span>
+          <span className="text-sm text-red-600">
+            Số dòng sai: <strong>{failedRows}</strong>
+            <DownloadOutlined
+              className="cursor-pointer text-[24px] ml-3"
+              onClick={() => handleExportTransactionData('FAILED')}
+              spin={isExporting}
+            />
+          </span>
+        </div>
+      </div>
       {type === 'merchant' && (
         <MerchantTable objectKey={objectKey} isOpen={isOpen} />
       )}
-      {type === 'staff' && (
-        <StaffTable objectKey={objectKey} isOpen={isOpen} />
-      )}
+      {type === 'staff' && <StaffTable objectKey={objectKey} isOpen={isOpen} />}
     </Modal>
   )
 }
