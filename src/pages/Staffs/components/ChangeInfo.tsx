@@ -3,6 +3,7 @@ import { Tag } from 'antd'
 import InfoCard from '@/components/core/components/InfoCard'
 import { STAFF_STATUS, STAFF_STATUS_COLOR_MAP } from '@/config/constants'
 import { ROLE } from '@/config/enums'
+import DelegateInfo from './DelegateInfo'
 
 interface ChangeInfoProps {
   isWaitingApprovalForEdit: boolean
@@ -143,6 +144,13 @@ export function ChangeInfo({
             ) : null}
           </div>
         </InfoCard>
+      ) : null}
+
+      {changeRequestData.delegation ? (
+        <DelegateInfo
+          delegation={changeRequestData.delegation}
+          isWaitingApprovalForEdit={isWaitingApprovalForEdit}
+        />
       ) : null}
 
       <div className="grid grid-cols-3 gap-6">
