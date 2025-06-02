@@ -34,6 +34,8 @@ const DelegateInfo: React.FC<DelegateInfoProps> = ({
     enabled: !!delegation.delegated_staff_id,
   })
 
+  console.log(staffData)
+
   return (
     <InfoCard
       title="Thông tin ủy quyền"

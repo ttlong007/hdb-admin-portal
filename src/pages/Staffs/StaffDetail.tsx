@@ -20,6 +20,8 @@ import { useChangeRequestDetail } from '@/hooks/useChangeRequestDetail'
 import CompanyInfo from './components/CompanyInfo'
 import { ChangeInfo } from './components/ChangeInfo'
 import { useConfirm } from '@/providers/ConfirmProvider'
+import DelegateInfo from './components/DelegateInfo'
+import dayjs from 'dayjs'
 
 const StaffDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -241,7 +243,9 @@ const StaffDetail: React.FC = () => {
 
               {staff.role === ROLE.STORE_MANAGER && (
                 <div className="flex flex-col gap-2">
-                  <span className="text-sm text-gray-400">Quyền thực hiện giao dịch</span>
+                  <span className="text-sm text-gray-400">
+                    Quyền thực hiện giao dịch
+                  </span>
                   <span className="text-base font-semibold">
                     {staff.can_make_transaction ? 'Có' : 'Không'}
                   </span>
@@ -355,6 +359,22 @@ const StaffDetail: React.FC = () => {
             </div>
           </div>
         </>
+
+        {staff.delegation ? (
+          <DelegateInfo
+            delegation={{
+              delegated_staff_id: staff.delegation.delegated_staff_id,
+              delegator_staff_id: staff.id,
+              end_date: dayjs(staff.delegation.end_date).format('DD/MM/YYYY'),
+              start_date: dayjs(staff.delegation.start_date).format(
+                'DD/MM/YYYY'
+              ),
+              status: staff.delegation.status,
+              store_id: staff.store_id,
+            }}
+            isWaitingApprovalForEdit={false}
+          />
+        ) : null}
 
         {staff.status === 'WAITING_APPROVAL_FOR_EDIT' ? (
           <ChangeInfo
