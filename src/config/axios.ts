@@ -86,9 +86,6 @@ axiosInstance.interceptors.response.use(
           return Promise.reject(refreshError)
         }
       } else {
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        store.dispatch(setState({ user: null }))
         return Promise.reject(error)
       }
     }
