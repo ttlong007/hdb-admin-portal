@@ -9,7 +9,6 @@ interface ErrorResponse {
   reason_message: string
 }
 
-// Create a navigation utility
 let navigate: any = null
 export const setNavigate = (nav: any) => {
   navigate = nav
@@ -22,7 +21,25 @@ const axiosInstance: AxiosInstance = axios.create({
   },
 })
 
-// Add a request interceptor to dynamically inject Authorization header
+// --- Token refresh queue state ---
+let isRefreshing = false
+let failedQueue: {
+  resolve: (value?: any) => void
+  reject: (reason?: any) => void
+}[] = []
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (token) {
+      prom.resolve(token)
+    } else {
+      prom.reject(error)
+    }
+  })
+  failedQueue = []
+}
+
+// Request interceptor for Authorization header
 axiosInstance.interceptors.request.use(
   (config) => {
     const accessToken = localStorage.getItem('accessToken')
@@ -32,61 +49,77 @@ axiosInstance.interceptors.request.use(
     }
     return config
   },
-  (error) => {
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
 
-// Add a response interceptor to handle token refresh
+// Response interceptor with refresh logic + queue
 axiosInstance.interceptors.response.use(
   (response) => response,
   async (error: AxiosError<ErrorResponse>) => {
+    const originalRequest = error.config as AxiosRequestConfig & { __isRetryRequest?: boolean }
+
     if (
       error.response?.status === 401 &&
-      !(error.config as any).__isRetryRequest
+      !originalRequest.__isRetryRequest
     ) {
-      ;(error.config as any).__isRetryRequest = true
+      if (isRefreshing) {
+        try {
+          const token = await new Promise<string>((resolve, reject) => {
+            failedQueue.push({ resolve, reject })
+          })
+          if (originalRequest.headers) {
+            originalRequest.headers['Authorization'] = `Bearer ${token}`
+          }
+          originalRequest.__isRetryRequest = true
+          return axiosInstance(originalRequest)
+        } catch (err) {
+          return Promise.reject(err)
+        }
+      }
+
+      originalRequest.__isRetryRequest = true
+      isRefreshing = true
 
       const refreshToken = localStorage.getItem('refreshToken')
-      if (refreshToken) {
-        try {
-          const refreshResponse = await axiosInstance.post(
-            '/v1/admin/auth/refresh-token',
-            {
-              refresh_token: refreshToken,
-              user_id: store.getState().auth?.user?.id,
-            }
-          )
+      if (!refreshToken) {
+        processQueue(error, null)
+        return Promise.reject(error)
+      }
 
-          if (refreshResponse.data.status_code === 'ACCEPT') {
-            const newAccessToken = refreshResponse.data.data.access_token
-            localStorage.setItem('accessToken', newAccessToken)
-            if (error.config) {
-              error.config.headers = error.config.headers || {}
-              error.config.headers['Authorization'] = `Bearer ${newAccessToken}`
-            }
-
-            // Optionally update global axios default if you want
-            axiosInstance.defaults.headers.common[
-              'Authorization'
-            ] = `Bearer ${newAccessToken}`
-
-            return axiosInstance.request(error.config as AxiosRequestConfig)
-          } else {
-            localStorage.removeItem('accessToken')
-            localStorage.removeItem('refreshToken')
-            store.dispatch(setState({ user: null }))
-            return Promise.reject(refreshResponse.data.reason_message)
+      try {
+        const refreshResponse = await axios.post(
+          `${getEnv('VITE_API_URL', 'http://localhost:4000')}/v1/admin/auth/refresh-token`,
+          {
+            refresh_token: refreshToken,
+            user_id: store.getState().auth?.user?.id,
           }
-        } catch (refreshError) {
+        )
+
+        if (refreshResponse.data.status_code === 'ACCEPT') {
+          const newAccessToken = refreshResponse.data.data.access_token
+          localStorage.setItem('accessToken', newAccessToken)
+          axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`
+          processQueue(null, newAccessToken)
+
+          if (originalRequest.headers) {
+            originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`
+          }
+          return axiosInstance(originalRequest)
+        } else {
           localStorage.removeItem('accessToken')
           localStorage.removeItem('refreshToken')
           store.dispatch(setState({ user: null }))
-          console.error('Refresh token error:', refreshError)
-          return Promise.reject(refreshError)
+          processQueue(refreshResponse.data.reason_message, null)
+          return Promise.reject(refreshResponse.data.reason_message)
         }
-      } else {
-        return Promise.reject(error)
+      } catch (refreshError) {
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        store.dispatch(setState({ user: null }))
+        processQueue(refreshError, null)
+        return Promise.reject(refreshError)
+      } finally {
+        isRefreshing = false
       }
     }
 
