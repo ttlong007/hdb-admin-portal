@@ -28,7 +28,6 @@ const Filters: React.FC = () => {
   const { transactionFilters, setTransactionFilters, resetTransactionFilters } =
     useFilter()
 
-  console.log(transactionFilters)
   const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
     defaultValues: {
       code: transactionFilters.code || '',

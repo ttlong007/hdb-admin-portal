@@ -307,34 +307,60 @@ const Merchants: React.FC = () => {
           <div className="justify-start text-black text-3xl font-bold">
             Quản lý điểm đại lý
           </div>
+
           <div className="flex justify-start items-center gap-3">
-            <button
-              onClick={handleDownloadTemplate}
-              disabled={isFilesPending}
-              className="text-[#366AE2] text-xs font-medium underline cursor-pointer hover:text-[#2d57b8] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Tải về file mẫu
-            </button>
+            {isCreator ? (
+              <>
+                <button
+                  onClick={handleDownloadTemplate}
+                  disabled={isFilesPending}
+                  className="text-[#366AE2] text-xs font-medium underline cursor-pointer hover:text-[#2d57b8] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Tải về file mẫu
+                </button>
 
-            <button
-              onClick={handleOpenUploadFileModal}
-              disabled={!!isLoadingUploadResult}
-              className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]"
-            >
-              {isLoadingUploadResult && <LoadingOutlined />}
-              {isLoadingUploadResult
-                ? 'Đang xử lý file...'
-                : isWaitingConfirmApply
-                ? 'Xem danh sách tải lên'
-                : 'Tải lên theo danh sách'}
-            </button>
+                <UploadFileModal
+                  isOpen={isUploadFileModalOpen}
+                  onClose={() => setIsUploadFileModalOpen(false)}
+                  uploadType="ADMIN_IMPORT_STORE"
+                  type="merchant"
+                />
 
-            <UploadFileModal
-              isOpen={isUploadFileModalOpen}
-              onClose={() => setIsUploadFileModalOpen(false)}
-              uploadType="ADMIN_IMPORT_STORE"
-              type="merchant"
-            />
+                <>
+                  <button
+                    onClick={handleOpenUploadFileModal}
+                    disabled={!!isLoadingUploadResult}
+                    className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]"
+                  >
+                    {isLoadingUploadResult && <LoadingOutlined />}
+                    {isLoadingUploadResult
+                      ? 'Đang xử lý file...'
+                      : isWaitingConfirmApply
+                      ? 'Xem danh sách tải lên'
+                      : 'Tải lên theo danh sách'}
+                  </button>
+
+                  <Link
+                    to={routes.createMerchant}
+                    className="rounded-sm flex justify-center items-center gap-2 bg-[#DA2128] px-3 py-2 font-medium text-[14px] text-white"
+                  >
+                    Đăng ký điểm đại lý
+                  </Link>
+                </>
+              </>
+            ) : (
+              <>
+                {isWaitingConfirmApply ? (
+                  <button
+                    onClick={handleOpenUploadFileModal}
+                    disabled={!!isLoadingUploadResult}
+                    className="rounded-sm flex justify-center items-center gap-2 bg-[#F2F5F8] px-3 py-2 font-medium text-[14px]"
+                  >
+                    Xem danh sách tải lên
+                  </button>
+                ) : null}
+              </>
+            )}
 
             <PreviewUploadModal
               isOpen={isPreviewUploadModalOpen}
@@ -343,16 +369,6 @@ const Merchants: React.FC = () => {
               type="merchant"
               uploadResult={uploadResult?.data}
             />
-
-            {!isApprover && (
-              <Link
-                to={routes.createMerchant}
-                className="rounded-sm flex justify-center items-center gap-2 bg-[#DA2128] px-3 py-2 font-medium text-[14px] text-white"
-              >
-                {/* SVG for create */}
-                Đăng ký điểm đại lý
-              </Link>
-            )}
           </div>
         </div>
 
