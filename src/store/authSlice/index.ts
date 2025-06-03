@@ -1,21 +1,19 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface State {
-  accessToken: string | null
-  refreshToken: string | null
   user: any
   systemConfig: any
   objectKeyMerchant: string | null
   objectKeyStaff: string | null
+  isAuthenticated: boolean
 }
 
 const initialState: State = {
-  accessToken: null,
-  refreshToken: null,
   user: null,
   systemConfig: null,
   objectKeyMerchant: null,
   objectKeyStaff: null,
+  isAuthenticated: false,
 }
 
 const authSlice = createSlice({

@@ -7,11 +7,13 @@ import RootRoutes from './Routes'
 import { toast } from 'react-toastify'
 import { useMutation } from '@tanstack/react-query'
 import { routes } from './config/routes'
+import { useAuth } from './store/authSlice/useAuth'
 
 function App() {
   const navigate = useNavigate()
   const queryParams = new URLSearchParams(window.location.search)
   const token = queryParams.get('token')
+  const { setAuthState } = useAuth()
 
   const loginByTokenMutation = useMutation({
     mutationFn: async (data: { token: string; party_code: string }) => {
@@ -20,6 +22,9 @@ function App() {
         data
       )
       if (response.data.status_code === 'ACCEPT') {
+        setAuthState({
+          isAuthenticated: true,
+        })
         localStorage.setItem('accessToken', response.data.data.access_token)
         localStorage.setItem('refreshToken', response.data.data.refresh_token)
         navigate(routes.masterMerchant, { replace: true })
@@ -31,7 +36,7 @@ function App() {
   })
 
   useEffect(() => {
-    if (token ) {
+    if (token) {
       loginByTokenMutation.mutate({ token, party_code: 'HDA' })
     }
   }, [token])

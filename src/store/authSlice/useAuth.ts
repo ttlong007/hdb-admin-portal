@@ -14,7 +14,6 @@ export const useAuth = () => {
   const authState = useAuthState()
   const dispatch = useDispatch()
 
-  const isAuthenticated = !!localStorage.getItem('accessToken')
   const role = authState.user?.role
   const isApprover = role === 'HDB_APPROVAL'
   const isCreator = role === 'HDB_CREATION'
@@ -37,7 +36,6 @@ export const useAuth = () => {
 
   return {
     ...authState,
-    isAuthenticated,
     role,
     setAuthState,
     logout,
