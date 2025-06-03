@@ -9,6 +9,7 @@ import { toast } from 'react-toastify'
 import { useAuth } from '@/store/authSlice/useAuth'
 import * as yup from 'yup'
 import { yupResolver } from '@hookform/resolvers/yup'
+import AsyncSelect from 'react-select/async'
 
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
@@ -174,6 +175,8 @@ const EditMerchant = () => {
     control,
     reset,
     formState: { errors, dirtyFields },
+    getValues,
+    setValue,
   } = useForm<any>({
     defaultValues: {
       name: '',
@@ -407,8 +410,21 @@ const EditMerchant = () => {
   })
 
   // Fetch companies for the select field.
-  const { data: companyOptions, isLoading: isLoadingCompanies } =
-    useCompaniesOptions()
+  const { loadOptions, loadInitialOption } = useCompaniesOptions()
+
+  // Load initial company data if company_id exists in form
+  useEffect(() => {
+    const loadInitialCompany = async () => {
+      const currentCompanyId = getValues('company_id')?.value
+      if (currentCompanyId) {
+        const initialCompany = await loadInitialOption(currentCompanyId)
+        if (initialCompany) {
+          setValue('company_id', initialCompany)
+        }
+      }
+    }
+    loadInitialCompany()
+  }, [])
 
   const editMerchantMutation = useMutation({
     mutationFn: async (data: any) => {
@@ -581,13 +597,15 @@ const EditMerchant = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Công ty
                     </label>
-                    <Select
+                    <AsyncSelect
                       {...field}
-                      options={companyOptions}
-                      placeholder={
-                        isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
-                      }
+                      loadOptions={loadOptions}
+                      cacheOptions
+                      defaultOptions
                       isDisabled={true}
+                      placeholder="Chọn công ty"
+                      className="react-select-container"
+                      classNamePrefix="react-select"
                     />
                   </div>
                 )}
