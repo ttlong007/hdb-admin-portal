@@ -262,13 +262,17 @@ export default function EditStaff() {
     active: yup.boolean(),
     can_make_transaction: yup.boolean(),
     can_delegate: yup.boolean(),
-    delegated_staff_id: yup.mixed<Option<number>>().when('can_delegate', {
-      is: true,
+    delegated_staff_id: yup.mixed<Option<number>>().when(['can_delegate', 'role'], {
+      is: (can_delegate: boolean, role: Option<string>) =>
+        can_delegate && role?.value === 'STORE_MANAGER',
       then: (schema) => schema.required('Vui lòng chọn người được ủy quyền'),
+      otherwise: (schema) => schema.nullable(),
     }),
-    delegation_duration: yup.array().when('can_delegate', {
-      is: true,
+    delegation_duration: yup.array().when(['can_delegate', 'role'], {
+      is: (can_delegate: boolean, role: Option<string>) =>
+        can_delegate && role?.value === 'STORE_MANAGER',
       then: (schema) => schema.required('Vui lòng chọn thời gian ủy quyền'),
+      otherwise: (schema) => schema.nullable(),
     }),
   }) as yup.ObjectSchema<FormData>
 
@@ -538,6 +542,7 @@ export default function EditStaff() {
     }
   }, [isApprover, staffDetail?.status])
 
+  console.log('errors', errors)
   return (
     <>
       <div className="flex justify-start items-center gap-2 mb-4">
