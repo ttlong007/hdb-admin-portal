@@ -30,9 +30,10 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
   const confirm = useConfirm()
   const { setAuthState } = useAuth()
   const pageSize = 5
-  const { mutate: exportTransactionData, isPending: isExporting } = useExportTransactionData({
-    objectKey,
-  })
+  const { mutate: exportTransactionData, isPending: isExporting } =
+    useExportTransactionData({
+      objectKey,
+    })
 
   const handleExportTransactionData = (status: 'ACCEPT' | 'FAILED') => {
     exportTransactionData(status)
@@ -154,7 +155,7 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
           onClick={handleApprove}
           loading={isPending}
         >
-          Gửi duyệt
+          Gửi duyệt dòng đúng
         </Button>,
       ]}
     >

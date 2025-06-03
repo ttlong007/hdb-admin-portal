@@ -188,6 +188,11 @@ export default function EditStaff() {
       .string()
       .matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số')
       .matches(/^0/, 'Số điện thoại phải bắt đầu bằng số 0')
+      .test(
+        'no-double-zero',
+        'Số điện thoại không được bắt đầu bằng 00',
+        (value) => !value || !value.startsWith('00')
+      )
       .min(10, 'Số điện thoại phải có ít nhất 10 số')
       .max(11, 'Số điện thoại không được vượt quá 11 số'),
     national_id_number: yup
@@ -262,12 +267,14 @@ export default function EditStaff() {
     active: yup.boolean(),
     can_make_transaction: yup.boolean(),
     can_delegate: yup.boolean(),
-    delegated_staff_id: yup.mixed<Option<number>>().when(['can_delegate', 'role'], {
-      is: (can_delegate: boolean, role: Option<string>) =>
-        can_delegate && role?.value === 'STORE_MANAGER',
-      then: (schema) => schema.required('Vui lòng chọn người được ủy quyền'),
-      otherwise: (schema) => schema.nullable(),
-    }),
+    delegated_staff_id: yup
+      .mixed<Option<number>>()
+      .when(['can_delegate', 'role'], {
+        is: (can_delegate: boolean, role: Option<string>) =>
+          can_delegate && role?.value === 'STORE_MANAGER',
+        then: (schema) => schema.required('Vui lòng chọn người được ủy quyền'),
+        otherwise: (schema) => schema.nullable(),
+      }),
     delegation_duration: yup.array().when(['can_delegate', 'role'], {
       is: (can_delegate: boolean, role: Option<string>) =>
         can_delegate && role?.value === 'STORE_MANAGER',
