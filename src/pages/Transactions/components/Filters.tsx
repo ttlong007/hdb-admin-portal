@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Input } from 'rizzui'
 import Select from 'react-select'
 import { BsDownload, BsArrowClockwise, BsTrash } from 'react-icons/bs'
@@ -49,6 +49,28 @@ const Filters: React.FC = () => {
       staff_code: transactionFilters.staff_code || '',
     },
   })
+
+  useEffect(() => {
+    reset({
+      code: transactionFilters.code || '',
+      transaction_type: transactionFilters.transaction_type
+        ? { value: transactionFilters.transaction_type }
+        : null,
+      status: transactionFilters.status
+        ? TRANSACTION_STATUS.find(
+            (s) => s.value === transactionFilters.status
+          ) || null
+        : null,
+      store_code: transactionFilters.store_code || '',
+      duration: transactionFilters.duration
+        ? [
+            dayjs(transactionFilters.duration[0]),
+            dayjs(transactionFilters.duration[1]),
+          ]
+        : null,
+      staff_code: transactionFilters.staff_code || '',
+    })
+  }, [JSON.stringify(transactionFilters)])
 
   // Fetch transaction types from API.
   const { data: transactionTypes, isLoading: isLoadingTransactionTypes } =

@@ -44,7 +44,7 @@ export const MERCHANT_STATUS = [
   { value: 'WAITING_APPROVAL_FOR_EDIT', label: 'Chờ duyệt chỉnh sửa' },
   { value: 'ACTIVE', label: 'Hoạt động' },
   { value: 'REJECTED', label: 'Từ chối' },
-  { value: 'INACTIVE', label: 'Ngưng hoạt động' },
+  { value: ['INACTIVE_BY_COMPANY', 'INACTIVE'], label: 'Ngưng hoạt động' },
 ]
 
 export const MASTER_MERCHANT_STATUS = [
@@ -55,22 +55,23 @@ export const MASTER_MERCHANT_STATUS = [
   { value: 'INACTIVE', label: 'Ngưng hoạt động' },
 ]
 
-export const MERCHANT_STATUS_MAP = MERCHANT_STATUS.reduce(
-  (acc, { value, label }) => {
-    acc[value] = label
-    return acc
-  },
-  {} as Record<string, string>
-)
+export const MERCHANT_STATUS_MAP = {
+  WAITING_APPROVE: 'Đang đợi duyệt',
+  WAITING_APPROVAL_FOR_EDIT: 'Chờ duyệt chỉnh sửa',
+  ACTIVE: 'Hoạt động',
+  REJECTED: 'Từ chối',
+  INACTIVE: 'Ngưng hoạt động',
+  INACTIVE_BY_COMPANY: 'Ngưng hoạt động',
+}
 
-// Define color mapping for merchant statuses.
-// Adjust the color values based on your design requirements.
 export const MERCHANT_STATUS_COLOR_MAP: Record<string, string> = {
   WAITING_APPROVE: 'orange',
   WAITING_APPROVAL_FOR_EDIT: 'orange',
   ACTIVE: 'green',
   REJECTED: 'red',
   INACTIVE: 'volcano',
+  INACTIVE_BY_COMPANY: 'volcano',
+  INACTIVE_BY_STORE: 'volcano',
 }
 
 export const MASTER_MERCHANT_STATUS_COLOR_MAP: Record<string, string> = {
@@ -109,7 +110,10 @@ export const STAFF_STATUS = [
   { value: 'WAITING_APPROVAL_FOR_EDIT', label: 'Chờ duyệt chỉnh sửa' },
   { value: 'ACTIVE', label: 'Hoạt động' },
   { value: 'REJECTED', label: 'Từ chối' },
-  { value: 'INACTIVE', label: 'Ngưng hoạt động' },
+  {
+    value: ['INACTIVE_BY_COMPANY', 'INACTIVE_BY_STORE', 'INACTIVE'],
+    label: 'Ngưng hoạt động',
+  },
 ]
 
 export const STAFF_STATUS_MAP: Record<string, string> = {
@@ -119,6 +123,8 @@ export const STAFF_STATUS_MAP: Record<string, string> = {
   ACTIVE: 'Hoạt động',
   REJECTED: 'Từ chối',
   INACTIVE: 'Ngưng hoạt động',
+  INACTIVE_BY_COMPANY: 'Ngưng hoạt động',
+  INACTIVE_BY_STORE: 'Ngưng hoạt động',
 }
 
 export const STAFF_STATUS_COLOR_MAP: Record<string, string> = {
@@ -128,6 +134,8 @@ export const STAFF_STATUS_COLOR_MAP: Record<string, string> = {
   ACTIVE: 'green',
   REJECTED: 'red',
   INACTIVE: 'volcano',
+  INACTIVE_BY_COMPANY: 'volcano',
+  INACTIVE_BY_STORE: 'volcano',
 }
 
 export const SYSTEM_ROLES = {

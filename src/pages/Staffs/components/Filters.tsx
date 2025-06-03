@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Input } from 'rizzui'
 import { BsDownload, BsArrowClockwise, BsTrash } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
@@ -23,25 +23,42 @@ interface FiltersFormValues {
   role: any
 }
 
+function getInitialStatus(status: any) {
+  const initialStatus = status
+    ? STAFF_STATUS.find((s) => s.label === status.label)
+    : null
+
+  return initialStatus
+}
+
 const Filters: React.FC = () => {
   const { staffFilters, setStaffFilters, resetStaffFilters } = useFilter()
 
-  const { control, handleSubmit, reset, watch } = useForm<FiltersFormValues>({
+  const { control, handleSubmit, reset, watch, getValues } = useForm<FiltersFormValues>({
     defaultValues: {
-      company_id: staffFilters.company_id
-        ? { value: staffFilters.company_id }
-        : null,
-      store_id: staffFilters.store_id ? { value: staffFilters.store_id } : null,
+      company_id: staffFilters.company_id || null,
+      store_id: staffFilters.store_id || null,
       code: staffFilters.code || '',
       name: staffFilters.name || '',
-      status: staffFilters.status
-        ? STAFF_STATUS.find((s) => s.value === staffFilters.status) || null
-        : null,
+      status: getInitialStatus(staffFilters?.status),
       role: staffFilters.role
         ? STAFF_ROLES.find((r) => r.value === staffFilters.role) || null
         : null,
     },
   })
+
+  useEffect(() => {
+    reset({
+      company_id: staffFilters.company_id || null,
+      store_id: staffFilters.store_id || null,
+      code: staffFilters.code || '',
+      name: staffFilters.name || '',
+      status: getInitialStatus(staffFilters?.status),
+      role: staffFilters.role
+        ? STAFF_ROLES.find((r) => r.value === staffFilters.role) || null
+        : null,
+    })
+  }, [JSON.stringify(staffFilters)])
 
   // Watch company_id changes
   const selectedCompanyId = watch('company_id')
@@ -121,6 +138,8 @@ const Filters: React.FC = () => {
     await exportMutation.mutateAsync()
   }
 
+  console.log('staffFilters', staffFilters)
+  console.log('getValues', getValues())
   return (
     <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">

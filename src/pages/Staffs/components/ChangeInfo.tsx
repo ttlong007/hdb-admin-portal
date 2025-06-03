@@ -1,7 +1,11 @@
 import { CheckOutlined } from '@ant-design/icons'
 import { Tag } from 'antd'
 import InfoCard from '@/components/core/components/InfoCard'
-import { STAFF_STATUS, STAFF_STATUS_COLOR_MAP } from '@/config/constants'
+import {
+  STAFF_STATUS,
+  STAFF_STATUS_COLOR_MAP,
+  STAFF_STATUS_MAP,
+} from '@/config/constants'
 import { ROLE } from '@/config/enums'
 import DelegateInfo from './DelegateInfo'
 import { ChangeInfoProps } from '../types'
@@ -131,9 +135,7 @@ export function ChangeInfo({
                 <span className="text-sm text-gray-400">Trạng thái</span>
                 <div className="inline-flex">
                   <Tag color={STAFF_STATUS_COLOR_MAP[changeRequestData.status]}>
-                    {STAFF_STATUS.find(
-                      (status) => status.value === changeRequestData.status
-                    )?.label || '---'}
+                    {STAFF_STATUS_MAP[changeRequestData.status]}
                   </Tag>
                 </div>
               </div>

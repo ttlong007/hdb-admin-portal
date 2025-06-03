@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Input, Select } from 'rizzui'
 import { BsArrowClockwise, BsDownload, BsTrash } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
@@ -42,6 +42,19 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
         : null,
     },
   })
+
+  useEffect(() => {
+    reset({
+      cif: masterMerchantFilters.cif || '',
+      name: masterMerchantFilters.name || '',
+      business_license: masterMerchantFilters.business_license || '',
+      status: masterMerchantFilters.status
+        ? MASTER_MERCHANT_STATUS.find(
+            (s) => s.value === masterMerchantFilters.status
+          ) || null
+        : null,
+    })
+  }, [JSON.stringify(masterMerchantFilters)])
 
   const onSubmit = (data: FiltersFormValues) => {
     const payload = Object.entries(data).reduce((acc, [key, value]) => {

@@ -1,5 +1,6 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import _get from 'lodash/get'
+import _isArray from 'lodash/isArray'
 import axiosInstance from '@/config/axios'
 
 interface MerchantFilters {
@@ -31,7 +32,9 @@ export const useMerchants = ({
       const cleanFilter: MerchantFilters = {}
 
       if (filter?.status?.value) {
-        cleanFilter.status = [filter.status.value]
+        cleanFilter.status = _isArray(filter.status.value)
+          ? filter.status.value
+          : [filter.status.value]
       }
       if (filter?.cif) {
         cleanFilter.cif = filter.cif

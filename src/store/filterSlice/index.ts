@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 
 interface FilterState {
   masterMerchant: {
-    status?: string
+    status?: any
     page?: number
     limit?: number
     cif?: string
@@ -10,7 +10,7 @@ interface FilterState {
     business_license?: string
   }
   merchant: {
-    status?: string
+    status?: any
     page?: number
     limit?: number
     cif?: string
@@ -19,7 +19,7 @@ interface FilterState {
     name?: string
   }
   staff: {
-    status?: string
+    status?: any
     page?: number
     limit?: number
     cif?: string
@@ -30,7 +30,7 @@ interface FilterState {
     role?: string
   }
   transaction: {
-    status?: string
+    status?: any
     page?: number
     limit?: number
     duration?: [string, string]

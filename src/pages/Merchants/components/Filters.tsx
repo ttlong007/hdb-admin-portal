@@ -3,8 +3,6 @@ import { Input } from 'rizzui'
 import { BsDownload, BsTrash } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
 import Select from 'react-select'
-import { CSVLink } from 'react-csv'
-import { toast } from 'react-toastify'
 import { useFilter } from '@/store/filterSlice/useFilter'
 
 import { MERCHANT_STATUS, MERCHANT_STATUS_MAP } from '@/config/constants'
@@ -20,24 +18,41 @@ interface FiltersFormValues {
   status: any
 }
 
+function getInitialStatus(status: any) {
+  const initialStatus =
+    MERCHANT_STATUS.find((s) => s.label === status.label) || null
+
+  return initialStatus
+}
+
 const Filters: React.FC = () => {
   const { merchantFilters, setMerchantFilters, resetMerchantFilters } =
     useFilter()
 
-  const { control, handleSubmit, reset, setValue } = useForm<FiltersFormValues>(
-    {
+  const { control, handleSubmit, reset, setValue, getValues } =
+    useForm<FiltersFormValues>({
       defaultValues: {
         cif: merchantFilters.cif || '',
         company_id: null,
         code: merchantFilters.code || '',
         name: merchantFilters.name || '',
-        status: merchantFilters.status
-          ? MERCHANT_STATUS.find((s) => s.value === merchantFilters.status) ||
-            null
-          : null,
+        status: getInitialStatus(merchantFilters.status),
       },
+    })
+
+  useEffect(() => {
+    if (merchantFilters) {
+      reset({
+        cif: merchantFilters.cif || '',
+        company_id: null,
+        code: merchantFilters.code || '',
+        name: merchantFilters.name || '',
+        status: getInitialStatus(merchantFilters.status),
+      })
     }
-  )
+  }, [JSON.stringify(merchantFilters)])
+
+  console.log('getValues', getValues())
 
   const { data: companyOptions, isLoading: isLoadingCompanies } =
     useCompaniesOptions(false)

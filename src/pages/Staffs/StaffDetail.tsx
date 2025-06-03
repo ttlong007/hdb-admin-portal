@@ -12,7 +12,11 @@ import {
   CloseCircleOutlined,
   CheckCircleOutlined,
 } from '@ant-design/icons'
-import { STAFF_STATUS, STAFF_STATUS_COLOR_MAP } from '@/config/constants'
+import {
+  STAFF_STATUS,
+  STAFF_STATUS_COLOR_MAP,
+  STAFF_STATUS_MAP,
+} from '@/config/constants'
 import { useAuth } from '@/store/authSlice/useAuth'
 import { toast } from 'react-toastify'
 import InfoCard from '@/components/core/components/InfoCard'
@@ -234,9 +238,7 @@ const StaffDetail: React.FC = () => {
                 <span className="text-sm text-gray-400">Trạng thái</span>
                 <div className="inline-flex">
                   <Tag color={STAFF_STATUS_COLOR_MAP[staff.status]}>
-                    {STAFF_STATUS.find(
-                      (status) => status.value === staff.status
-                    )?.label || '---'}
+                    {STAFF_STATUS_MAP[staff.status]}
                   </Tag>
                 </div>
               </div>

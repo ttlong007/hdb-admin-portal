@@ -12,7 +12,7 @@ import { Tag, message } from 'antd'
 import { useAuth } from '@/store/authSlice/useAuth'
 import { useMerchantDetail } from '@/hooks/useMerchantDetail'
 import axiosInstance from '@/config/axios'
-import { MERCHANT_STATUS, MERCHANT_STATUS_COLOR_MAP } from '@/config/constants'
+import { MERCHANT_STATUS, MERCHANT_STATUS_COLOR_MAP, MERCHANT_STATUS_MAP } from '@/config/constants'
 import { toast } from 'react-toastify'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import InfoCard from '@/components/core/components/InfoCard'
@@ -207,9 +207,7 @@ export default function MerchantDetail() {
                       <Tag
                         color={MERCHANT_STATUS_COLOR_MAP[merchant.status || '']}
                       >
-                        {MERCHANT_STATUS.find(
-                          (status) => status.value === merchant.status
-                        )?.label || '---'}
+                        {MERCHANT_STATUS_MAP[merchant.status]}
                       </Tag>
                     </div>
                   </div>

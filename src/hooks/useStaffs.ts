@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import _get from 'lodash/get'
+import _isArray from 'lodash/isArray'
 import axiosInstance from '@/config/axios'
 
 interface StaffFilters {
@@ -33,7 +34,9 @@ export const useStaffs = ({
       const cleanFilter: StaffFilters = {}
 
       if (filter?.status?.value) {
-        cleanFilter.status = [filter.status.value]
+        cleanFilter.status = _isArray(filter.status.value)
+          ? filter.status.value
+          : [filter.status.value]
       }
       if (filter?.company_id?.value) {
         cleanFilter.company_id = filter.company_id.value

@@ -1,7 +1,11 @@
 import { CheckOutlined } from '@ant-design/icons'
 import { Tag } from 'antd'
 import InfoCard from '@/components/core/components/InfoCard'
-import { MERCHANT_STATUS, MERCHANT_STATUS_COLOR_MAP } from '@/config/constants'
+import {
+  MERCHANT_STATUS,
+  MERCHANT_STATUS_COLOR_MAP,
+  MERCHANT_STATUS_MAP,
+} from '@/config/constants'
 
 interface MerchantChangeInfoProps {
   isWaitingApprovalForEdit: boolean
@@ -110,9 +114,7 @@ export function MerchantChangeInfo({
                           ]
                         }
                       >
-                        {MERCHANT_STATUS.find(
-                          (status) => status.value === changeRequestData.status
-                        )?.label || '---'}
+                        {MERCHANT_STATUS_MAP[changeRequestData.status]}
                       </Tag>
                     </div>
                   </div>
