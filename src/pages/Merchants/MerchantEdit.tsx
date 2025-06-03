@@ -66,6 +66,7 @@ const EditMerchant = () => {
       ),
     code: yup
       .string()
+      .max(50, 'Mã điểm đại lý không được vượt quá 50 ký tự')
       .matches(
         /^[a-zA-Z0-9\-_]+$/,
         'Mã điểm đại lý chỉ được chứa chữ cái, số và ký tự -_'
