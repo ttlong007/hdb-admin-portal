@@ -3,6 +3,7 @@ import { NavLink, useParams, useNavigate } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { Input, NumberInput } from 'rizzui'
 import ReactSelect from 'react-select'
+import AsyncSelect from 'react-select/async'
 import { useUpdateStaff } from '@/hooks/useUpdateStaff'
 import { toast } from 'react-toastify'
 import { routes } from '@/config/routes'
@@ -289,6 +290,7 @@ export default function EditStaff() {
     reset,
     watch,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<FormData>({
     defaultValues: {
@@ -387,8 +389,21 @@ export default function EditStaff() {
     })
 
   // Fetch company options via custom hook
-  const { data: companyOptions = [], isLoading: isLoadingCompanies } =
-    useCompaniesOptions()
+  const { loadOptions, loadInitialOption } = useCompaniesOptions(false)
+
+  // Load initial company data if company_id exists in form
+  useEffect(() => {
+    const loadInitialCompany = async () => {
+      const currentCompanyId = getValues('company_id')?.value
+      if (currentCompanyId) {
+        const initialCompany = await loadInitialOption(currentCompanyId)
+        if (initialCompany) {
+          setValue('company_id', initialCompany)
+        }
+      }
+    }
+    loadInitialCompany()
+  }, [])
 
   // Watch selected company_id to fetch stores
   const selectedCompany = watch('company_id')
@@ -590,16 +605,23 @@ export default function EditStaff() {
               render={({ field }) => (
                 <div className="w-full">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Công ty
+                    Công ty *
                   </label>
-                  <ReactSelect
+                  <AsyncSelect
                     {...field}
-                    options={companyOptions}
-                    placeholder={
-                      isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
-                    }
-                    isDisabled={true}
+                    isClearable
+                    loadOptions={loadOptions}
+                    value={field.value}
+                    onChange={field.onChange}
+                    placeholder="Chọn công ty"
+                    className="react-select-container"
+                    classNamePrefix="react-select"
                   />
+                  {errors.company_id && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.company_id.message}
+                    </p>
+                  )}
                 </div>
               )}
             />
