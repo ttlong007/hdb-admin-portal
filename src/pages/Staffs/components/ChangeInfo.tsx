@@ -145,7 +145,6 @@ export function ChangeInfo({
       {changeRequestData.delegation ? (
         <DelegateInfo
           delegation={changeRequestData.delegation}
-          delegatedStaff={changeRequestData.delegated_staff}
           isWaitingApprovalForEdit={isWaitingApprovalForEdit}
         />
       ) : null}

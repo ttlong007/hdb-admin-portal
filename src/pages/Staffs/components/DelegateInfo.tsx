@@ -1,13 +1,29 @@
 import React from 'react'
-import InfoCard from '@/components/core/components/InfoCard'
+import { useQuery } from '@tanstack/react-query'
+import axiosInstance from '@/config/axios'
 import { ArrowRightOutlined } from '@ant-design/icons'
+
+import InfoCard from '@/components/core/components/InfoCard'
 import { DelegateInfoProps } from '../types'
 
 const DelegateInfo: React.FC<DelegateInfoProps> = ({
   delegation,
-  delegatedStaff,
   isWaitingApprovalForEdit = false,
 }) => {
+  const { data: staffData, isLoading } = useQuery({
+    queryKey: ['staffDetail', delegation.delegated_staff_id],
+    queryFn: async () => {
+      const response = await axiosInstance.get(
+        `/v1/admin/staff/${delegation.delegated_staff_id}`
+      )
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch staff detail')
+    },
+    enabled: !!delegation.delegated_staff_id,
+  })
+
   return (
     <InfoCard
       title="Thông tin ủy quyền"
@@ -16,47 +32,47 @@ const DelegateInfo: React.FC<DelegateInfoProps> = ({
       badgeColor="blue"
     >
       <div className="grid grid-cols-4 gap-6 mb-6">
-        {delegatedStaff?.code ? (
+        {staffData?.code ? (
           <div className="flex flex-col gap-2">
             <span className="text-sm text-gray-400">Mã nhân viên</span>
             <span className="text-base font-semibold">
-              {delegatedStaff.code || '---'}
+              {staffData.code || '---'}
             </span>
           </div>
         ) : null}
 
-        {delegatedStaff?.name ? (
+        {staffData?.name ? (
           <div className="flex flex-col gap-2">
             <span className="text-sm text-gray-400">Tên nhân viên</span>
             <span className="text-base font-semibold">
-              {delegatedStaff.name || '---'}
+              {staffData.name || '---'}
             </span>
           </div>
         ) : null}
 
-        {delegatedStaff?.phone_number ? (
+        {staffData?.phone_number ? (
           <div className="flex flex-col gap-2">
             <span className="text-sm text-gray-400">Số điện thoại</span>
             <span className="text-base font-semibold">
-              {delegatedStaff.phone_number || '---'}
+              {staffData.phone_number || '---'}
             </span>
           </div>
         ) : null}
 
-        {delegatedStaff?.national_id_number ? (
+        {staffData?.national_id_number ? (
           <div className="flex flex-col gap-2">
             <span className="text-sm text-gray-400">Số CCCD</span>
             <span className="text-base font-semibold">
-              {delegatedStaff.national_id_number || '---'}
+              {staffData.national_id_number || '---'}
             </span>
           </div>
         ) : null}
 
-        {delegatedStaff?.email ? (
+        {staffData?.email ? (
           <div className="flex flex-col gap-2">
             <span className="text-sm text-gray-400">Email</span>
             <span className="text-base font-semibold">
-              {delegatedStaff.email || '---'}
+              {staffData.email || '---'}
             </span>
           </div>
         ) : null}
