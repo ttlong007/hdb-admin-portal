@@ -15,6 +15,7 @@ import { yupResolver } from '@hookform/resolvers/yup'
 import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 import { CloseCircleOutlined } from '@ant-design/icons'
 import { useConfirm } from '@/providers/ConfirmProvider'
+import AsyncSelect from 'react-select/async'
 
 type Option = { label: string; value: string }
 
@@ -209,6 +210,7 @@ const CreateMerchant = () => {
     handleSubmit,
     control,
     setValue,
+    getValues,
     formState: { errors },
   } = useForm<any>({
     defaultValues: {
@@ -313,8 +315,21 @@ const CreateMerchant = () => {
     enabled: !!selectedDistrict,
   })
 
-  const { data: companyOptions, isLoading: isLoadingCompanies } =
-    useCompaniesOptions()
+  const { loadOptions, loadInitialOption } = useCompaniesOptions(false)
+
+  // Load initial company data if company_id exists in form
+  useEffect(() => {
+    const loadInitialCompany = async () => {
+      const currentCompanyId = getValues('company_id')?.value
+      if (currentCompanyId) {
+        const initialCompany = await loadInitialOption(currentCompanyId)
+        if (initialCompany) {
+          setValue('company_id', initialCompany)
+        }
+      }
+    }
+    loadInitialCompany()
+  }, [])
 
   // Watch the selected company from the form.
   const selectedCompany = useWatch({ control, name: 'company_id' })
@@ -476,13 +491,21 @@ const CreateMerchant = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Công ty *
                     </label>
-                    <Select
+                    <AsyncSelect
                       {...field}
-                      options={companyOptions}
-                      placeholder={
-                        isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
-                      }
+                      isClearable
+                      loadOptions={loadOptions}
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Chọn công ty"
+                      className="react-select-container"
+                      classNamePrefix="react-select"
                     />
+                    {errors.company_id && (
+                      <p className="text-red-500 text-sm">
+                        {errors.company_id?.message?.toString()}
+                      </p>
+                    )}
                   </div>
                 )}
               />

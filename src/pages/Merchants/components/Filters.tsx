@@ -4,6 +4,7 @@ import { BsDownload, BsTrash } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
 import Select from 'react-select'
 import { useFilter } from '@/store/filterSlice/useFilter'
+import AsyncSelect from 'react-select/async'
 
 import { MERCHANT_STATUS, MERCHANT_STATUS_MAP } from '@/config/constants'
 import { useExportMerchants } from '@/hooks/useExportMerchants'
@@ -30,11 +31,11 @@ const Filters: React.FC = () => {
   const { merchantFilters, setMerchantFilters, resetMerchantFilters } =
     useFilter()
 
-  const { control, handleSubmit, reset, setValue, getValues } =
+  const { control, handleSubmit, reset, getValues } =
     useForm<FiltersFormValues>({
       defaultValues: {
         cif: merchantFilters.cif || '',
-        company_id: null,
+        company_id: merchantFilters.company_id || null,
         code: merchantFilters.code || '',
         name: merchantFilters.name || '',
         status: getInitialStatus(merchantFilters.status),
@@ -45,7 +46,7 @@ const Filters: React.FC = () => {
     if (merchantFilters) {
       reset({
         cif: merchantFilters.cif || '',
-        company_id: null,
+        company_id: merchantFilters.company_id || null,
         code: merchantFilters.code || '',
         name: merchantFilters.name || '',
         status: getInitialStatus(merchantFilters.status),
@@ -53,23 +54,23 @@ const Filters: React.FC = () => {
     }
   }, [JSON.stringify(merchantFilters)])
 
-  console.log('getValues', getValues())
+  const { loadOptions, loadInitialOption } = useCompaniesOptions(false)
 
-  const { data: companyOptions, isLoading: isLoadingCompanies } =
-    useCompaniesOptions(false)
-
-  // Update company_id when companies data is loaded
+  // Load initial company data if company_id exists in filters
   useEffect(() => {
-    if (companyOptions && merchantFilters.company_id) {
-      const company = companyOptions.find(
-        (c: any) => c.value === merchantFilters.company_id
-      )
-      if (company) {
-        setValue('company_id', { label: company.label, value: company.value })
+    const loadInitialCompany = async () => {
+      if (merchantFilters.company_id) {
+        const initialCompany = await loadInitialOption(merchantFilters.company_id)
+        if (initialCompany) {
+          reset({
+            ...getValues(),
+            company_id: initialCompany,
+          })
+        }
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(companyOptions), merchantFilters.company_id])
+    loadInitialCompany()
+  }, [])
 
   const onSubmit = (data: FiltersFormValues) => {
     const payload = Object.entries(data).reduce((acc, [key, value]) => {
@@ -139,15 +140,13 @@ const Filters: React.FC = () => {
               name="company_id"
               control={control}
               render={({ field }) => (
-                <Select
+                <AsyncSelect
                   {...field}
                   isClearable
-                  options={companyOptions}
+                  loadOptions={loadOptions}
                   value={field.value}
                   onChange={field.onChange}
-                  placeholder={
-                    isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
-                  }
+                  placeholder="Chọn công ty"
                   className="react-select-container"
                   classNamePrefix="react-select"
                 />

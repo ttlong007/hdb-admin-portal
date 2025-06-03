@@ -4,9 +4,9 @@ import { BsDownload, BsArrowClockwise, BsTrash } from 'react-icons/bs'
 import { useForm, Controller } from 'react-hook-form'
 import Select from 'react-select'
 import { useQuery } from '@tanstack/react-query'
-import { CSVLink } from 'react-csv'
-import { toast } from 'react-toastify'
+
 import { useFilter } from '@/store/filterSlice/useFilter'
+import AsyncSelect from 'react-select/async'
 
 import { STAFF_STATUS, STAFF_STATUS_MAP, STAFF_ROLES } from '@/config/constants'
 import axiosInstance from '@/config/axios'
@@ -96,9 +96,23 @@ const Filters: React.FC = () => {
     resetStaffFilters()
   }
 
-  // Fetch all companies (no limit/page)
-  const { data: companyOptions, isLoading: isLoadingCompanies } =
-    useCompaniesOptions(false)
+  const { loadOptions, loadInitialOption } = useCompaniesOptions(false)
+
+  // Load initial company data if company_id exists in filters
+  useEffect(() => {
+    const loadInitialCompany = async () => {
+      if (staffFilters.company_id) {
+        const initialCompany = await loadInitialOption(staffFilters.company_id)
+        if (initialCompany) {
+          reset({
+            ...getValues(),
+            company_id: initialCompany,
+          })
+        }
+      }
+    }
+    loadInitialCompany()
+  }, [])
 
   // Fetch stores based on selected company
   const { data: storesData, isLoading: isLoadingStores } = useQuery({
@@ -150,19 +164,17 @@ const Filters: React.FC = () => {
               name="company_id"
               control={control}
               render={({ field }) => (
-                <Select
+                <AsyncSelect
                   {...field}
                   isClearable
-                  options={companyOptions}
+                  loadOptions={loadOptions}
                   value={field.value}
                   onChange={(newValue) => {
                     field.onChange(newValue)
                     // Reset store_id when company changes
                     reset({ ...control._formValues, store_id: null })
                   }}
-                  placeholder={
-                    isLoadingCompanies ? 'Loading...' : 'Chọn công ty'
-                  }
+                  placeholder="Chọn công ty"
                   className="react-select-container"
                   classNamePrefix="react-select"
                 />
