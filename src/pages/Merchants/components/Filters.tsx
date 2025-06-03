@@ -19,8 +19,9 @@ interface FiltersFormValues {
 }
 
 function getInitialStatus(status: any) {
-  const initialStatus =
-    MERCHANT_STATUS.find((s) => s.label === status.label) || null
+  const initialStatus = status
+    ? MERCHANT_STATUS.find((s) => s.label === status.label)
+    : null
 
   return initialStatus
 }
