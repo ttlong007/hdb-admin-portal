@@ -4,11 +4,7 @@ import InfoCard from '@/components/core/components/InfoCard'
 import { STAFF_STATUS, STAFF_STATUS_COLOR_MAP } from '@/config/constants'
 import { ROLE } from '@/config/enums'
 import DelegateInfo from './DelegateInfo'
-
-interface ChangeInfoProps {
-  isWaitingApprovalForEdit: boolean
-  changeRequestData: any
-}
+import { ChangeInfoProps } from '../types'
 
 export function ChangeInfo({
   isWaitingApprovalForEdit,
@@ -149,6 +145,7 @@ export function ChangeInfo({
       {changeRequestData.delegation ? (
         <DelegateInfo
           delegation={changeRequestData.delegation}
+          delegatedStaff={changeRequestData.delegated_staff}
           isWaitingApprovalForEdit={isWaitingApprovalForEdit}
         />
       ) : null}

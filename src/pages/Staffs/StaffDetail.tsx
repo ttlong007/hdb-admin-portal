@@ -44,6 +44,21 @@ const StaffDetail: React.FC = () => {
     enabled: !!id,
   })
 
+  const { data: staffDelegatedData, isLoading: isLoadingStaffDelegatedData } =
+    useQuery({
+      queryKey: ['staffDelegatedDetail', data?.delegation?.delegated_staff_id],
+      queryFn: async () => {
+        const response = await axiosInstance.get(
+          `/v1/admin/staff/${data?.delegation?.delegated_staff_id}`
+        )
+        if (response.data.status_code === 'ACCEPT') {
+          return response.data.data
+        }
+        throw new Error('Failed to fetch staff detail')
+      },
+      enabled: !!data?.delegation?.delegated_staff_id,
+    })
+
   const isWaitingApprovalForEdit = data?.status === 'WAITING_APPROVAL_FOR_EDIT'
   const isWaitingApprovalForCreate = data?.status === 'WAITING_APPROVE'
 
@@ -372,6 +387,7 @@ const StaffDetail: React.FC = () => {
               status: staff.delegation.status,
               store_id: staff.store_id,
             }}
+            delegatedStaff={staffDelegatedData}
             isWaitingApprovalForEdit={false}
           />
         ) : null}

@@ -21,6 +21,7 @@ import InfoCard from '@/components/core/components/InfoCard'
 import { STATUS_WAITING_APPROVE } from '@/config/constants'
 import { useConfirm } from '@/providers/ConfirmProvider'
 import { useStaffsOptionsByStore } from '@/hooks/useStaffsOptionsByStore'
+import dayjs from 'dayjs'
 
 const { RangePicker } = DatePicker
 
@@ -39,6 +40,7 @@ type FormData = {
   transactionTypes: number[]
   active: boolean
   can_make_transaction: boolean
+  can_delegate: boolean
   delegated_staff_id?: Option<number> | null
   delegation_duration?: any
 }
@@ -58,6 +60,7 @@ type StaffPayload = {
   transaction_type_ids: number[]
   status?: string
   can_make_transaction: boolean
+  can_delegate?: boolean
   delegation?: {
     delegator_staff_id: number
     delegated_staff_id: number
@@ -81,7 +84,10 @@ const defaultTransactionTypes = [
 ]
 
 // Helper to map staffDetail response to form default values
-function mapStaffToDefaultValues(staffDetail: any): FormData {
+function mapStaffToDefaultValues(
+  staffDetail: any,
+  staffDelegatedData?: any
+): FormData {
   // Find daily and monthly quotas from limits array
   const dailyQuota = staffDetail.limits?.find(
     (limit: any) => limit.type === 'TRANSACTION_QUOTA_DAILY'
@@ -120,11 +126,23 @@ function mapStaffToDefaultValues(staffDetail: any): FormData {
       [],
     active: staffDetail.status === 'ACTIVE',
     can_make_transaction: staffDetail.can_make_transaction || false,
+    can_delegate: staffDetail.can_delegate || false,
+    delegated_staff_id: staffDelegatedData
+      ? {
+          label: staffDelegatedData.name,
+          value: staffDelegatedData.id,
+        }
+      : null,
+    delegation_duration: staffDetail.delegation
+      ? [
+          dayjs(staffDetail.delegation.start_date),
+          dayjs(staffDetail.delegation.end_date),
+        ]
+      : null,
   }
 }
 
 export default function EditStaff() {
-  const [isDelegation, setIsDelegation] = useState(false)
   const [selectedDelegatedStaff, setSelectedDelegatedStaff] =
     useState<any>(null)
 
@@ -243,11 +261,12 @@ export default function EditStaff() {
     transactionTypes: yup.array().of(yup.mixed()),
     active: yup.boolean(),
     can_make_transaction: yup.boolean(),
-    delegated_staff_id: yup.mixed<Option<number>>().when('isDelegation', {
+    can_delegate: yup.boolean(),
+    delegated_staff_id: yup.mixed<Option<number>>().when('can_delegate', {
       is: true,
       then: (schema) => schema.required('Vui lòng chọn người được ủy quyền'),
     }),
-    delegation_duration: yup.array().when('isDelegation', {
+    delegation_duration: yup.array().when('can_delegate', {
       is: true,
       then: (schema) => schema.required('Vui lòng chọn thời gian ủy quyền'),
     }),
@@ -274,6 +293,7 @@ export default function EditStaff() {
       transactionTypes: [],
       active: false,
       can_make_transaction: false,
+      can_delegate: false,
       delegated_staff_id: null,
       delegation_duration: null,
     },
@@ -284,10 +304,39 @@ export default function EditStaff() {
   // Fetch staff detail using the id
   const { data: staffDetail } = useStaffDetail(id)
 
+  const { data: staffDelegatedData, isLoading: isLoadingStaffDelegatedData } =
+    useQuery({
+      queryKey: [
+        'staffDelegatedDetail',
+        staffDetail?.delegation?.delegated_staff_id,
+      ],
+      queryFn: async () => {
+        const response = await axiosInstance.get(
+          `/v1/admin/staff/${staffDetail?.delegation?.delegated_staff_id}`
+        )
+        if (response.data.status_code === 'ACCEPT') {
+          return response.data.data
+        }
+        throw new Error('Failed to fetch staff detail')
+      },
+      enabled: !!staffDetail?.delegation?.delegated_staff_id,
+    })
+
   // Once staffDetail is available, map API response to form fields
   useEffect(() => {
     if (staffDetail) {
-      reset(mapStaffToDefaultValues(staffDetail))
+      reset(mapStaffToDefaultValues(staffDetail, staffDelegatedData))
+
+      // Set selectedDelegatedStaff if staffDelegatedData is available
+      if (staffDelegatedData) {
+        setSelectedDelegatedStaff({
+          label: staffDelegatedData.name,
+          value: staffDelegatedData.id,
+          phone_number: staffDelegatedData.phone_number,
+          national_id_number: staffDelegatedData.national_id_number,
+          email: staffDelegatedData.email,
+        })
+      }
 
       // Fetch stores for the company when staff detail is loaded
       if (staffDetail.company_id && staffDetail.store_id) {
@@ -313,7 +362,13 @@ export default function EditStaff() {
         fetchStores()
       }
     }
-  }, [staffDetail, reset, setValue])
+  }, [
+    staffDetail,
+    staffDelegatedData,
+    reset,
+    setValue,
+    setSelectedDelegatedStaff,
+  ])
 
   const { staffOptions, isLoading: isLoadingStaffOptions } =
     useStaffsOptionsByStore({
@@ -344,15 +399,6 @@ export default function EditStaff() {
 
   // Use custom hook for updating staff
   const updateStaffMutation = useUpdateStaff(id, () => reset())
-
-  // Add useEffect to set isDelegation based on role
-  useEffect(() => {
-    if (staffDetail?.role === 'STORE_MANAGER') {
-      setIsDelegation(true)
-    } else {
-      setIsDelegation(false)
-    }
-  }, [staffDetail?.role])
 
   const onSubmit = (data: FormData) => {
     // Create base payload with all fields
@@ -442,8 +488,13 @@ export default function EditStaff() {
       }
     }
 
-    // Add delegation data if isDelegation is true
-    if (isDelegation && data.delegated_staff_id && data.delegation_duration) {
+    changedFields.can_delegate = data.can_delegate
+
+    if (
+      data.can_delegate &&
+      data.delegated_staff_id &&
+      data.delegation_duration
+    ) {
       const [startDate, endDate] = data.delegation_duration
       const formatDate = (date: any) => {
         return date.format('DD-MM-YYYY')
@@ -477,10 +528,6 @@ export default function EditStaff() {
     })
   }
 
-  const handleDelegationChange = (checked: boolean) => {
-    setIsDelegation(checked)
-  }
-
   useEffect(() => {
     if (
       isApprover ||
@@ -491,7 +538,6 @@ export default function EditStaff() {
     }
   }, [isApprover, staffDetail?.status])
 
-  console.log(selectedDelegatedStaff, 'selectedDelegatedStaff')
   return (
     <>
       <div className="flex justify-start items-center gap-2 mb-4">
@@ -732,14 +778,22 @@ export default function EditStaff() {
             <div>
               <>
                 <div className="my-4">
-                  <Switch
-                    checked={isDelegation}
-                    onChange={handleDelegationChange}
+                  <Controller
+                    name="can_delegate"
+                    control={control}
+                    render={({ field }) => (
+                      <>
+                        <Switch
+                          checked={field.value}
+                          onChange={(checked) => field.onChange(checked)}
+                        />
+                        <label className="ml-2">Cho phép ủy quyền</label>
+                      </>
+                    )}
                   />
-                  <label className="ml-2">Cho phép ủy quyền</label>
                 </div>
 
-                {isDelegation ? (
+                {watch('can_delegate') ? (
                   <div className="grid grid-cols-4 gap-6 w-full">
                     <Controller
                       name="delegated_staff_id"

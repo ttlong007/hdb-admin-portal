@@ -25,6 +25,15 @@ export interface StaffDetail {
     name: string
   }[]
   status: string
+  can_delegate?: boolean
+  delegation?: {
+    delegator_staff_id: number
+    delegated_staff_id: number
+    store_id: number
+    start_date: string
+    end_date: string
+    status: string
+  }
 }
 
 export function useStaffDetail(id?: string) {
