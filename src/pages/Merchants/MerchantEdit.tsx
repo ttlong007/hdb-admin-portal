@@ -18,31 +18,8 @@ import { CloseCircleOutlined } from '@ant-design/icons'
 import InfoCard from '@/components/core/components/InfoCard'
 import { STATUS_WAITING_APPROVE } from '@/config/constants'
 import { useConfirm } from '@/providers/ConfirmProvider'
-
-type Option = { label: string; value: string }
-
-interface MerchantFormValues {
-  name: string
-  code: string
-  address: string
-  city: Option | null
-  district: Option | null
-  ward: Option | null
-  expense_account: Option | null
-  income_account: Option | null
-  transaction_monthly_quota: number | string
-  transaction_daily_quota: number | string
-  approveThreshold: number | string
-  transactionTypes: number[]
-  company_id: Option | null
-  active: boolean
-}
-
-interface ChangeRequestPayload {
-  entity_id: number
-  entity_type: string
-  proposed_changes: any
-}
+import { useCompanyAccounts } from '@/hooks/useCompanyAccounts'
+import { Option, MerchantFormValues, ChangeRequestPayload } from './types'
 
 const defaultTransactionTypes = [
   { id: 1, name: 'Giao dịch 1' },
@@ -388,26 +365,9 @@ const EditMerchant = () => {
   // Watch the selected company from the form.
   const selectedCompany = useWatch({ control, name: 'company_id' })
 
-  // Fetch dynamically the account list using the selected company id.
-  const { data: accountList, isLoading: isLoadingAccounts } = useQuery<
-    Option[]
-  >({
-    queryKey: ['companyAccounts', selectedCompany?.value],
-    queryFn: async () => {
-      if (!selectedCompany?.value) return []
-      const response = await axiosInstance.get(
-        `/v1/admin/company/${selectedCompany.value}`
-      )
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data.accts.map((acc: any) => ({
-          label: `${acc.acct_desc} (${acc.acct_no})`,
-          value: acc.acct_no,
-        }))
-      }
-      throw new Error('Failed to fetch accounts')
-    },
-    enabled: !!selectedCompany?.value,
-  })
+  // Fetch account options via custom hook
+  const { data: accountList = [], isLoading: isLoadingAccounts } =
+    useCompanyAccounts(selectedCompany?.value)
 
   // Fetch companies for the select field.
   const { loadOptions, loadInitialOption } = useCompaniesOptions()

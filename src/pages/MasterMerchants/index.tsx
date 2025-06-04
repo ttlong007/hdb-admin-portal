@@ -7,6 +7,7 @@ import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import { useAuth } from '@/store/authSlice/useAuth'
 import { useFilter } from '@/store/filterSlice/useFilter'
+import { Data } from './types'
 
 import Filters from './components/Filters'
 import { routes } from '@/config/routes'
@@ -15,16 +16,6 @@ import {
   MASTER_MERCHANT_STATUS,
   MERCHANT_STATUS_COLOR_MAP,
 } from '@/config/constants'
-
-interface Data {
-  id: string
-  cif?: string
-  name?: string
-  tax_code?: string
-  representative?: string
-  merchant_count?: number
-  status?: string
-}
 
 const MasterMerchants: React.FC = () => {
   const { masterMerchantFilters, setMasterMerchantFilters } = useFilter()

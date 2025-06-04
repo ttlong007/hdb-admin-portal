@@ -20,33 +20,9 @@ import { useMasterMerchantDetail } from '@/hooks/useMasterMerchantDetail'
 import InfoCard from '@/components/core/components/InfoCard'
 import UploadDocument from './components/UploadDocument'
 import { useConfirm } from '@/providers/ConfirmProvider'
+import { ProposedChanges, UpdatePayload } from './types'
 
 const { Option } = Select
-
-interface ProposedChanges {
-  status?: string
-  need_approve_new_store?: boolean
-  need_approve_new_staff?: boolean
-  hdb_can_manage?: boolean
-  fees?: Array<{
-    fee_transaction_type_id: number
-    fixed_fee: number
-    max_fee: number
-    min_fee: number
-    overtime_fee: number
-    percentage_fee_per_txn: number
-  }>
-  limits?: Array<{
-    type: string
-    amount: number
-  }>
-}
-
-interface UpdatePayload {
-  entity_id: number
-  entity_type: string
-  proposed_changes: ProposedChanges
-}
 
 export default function MasterMerchantEdit() {
   const { id } = useParams<{ id: string }>()
