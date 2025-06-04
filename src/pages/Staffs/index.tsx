@@ -186,7 +186,7 @@ const Staffs: React.FC = () => {
       fixed: 'right' as const,
       render: (_: any, record: any) => (
         <Space size="middle">
-          {isCreator && record.status === 'ACTIVE' ? (
+          {isCreator && ['ACTIVE', 'INACTIVE'].includes(record.status) ? (
             <Link to={routes.editStaff.replace(':id', record.id)}>
               <Button type="text" icon={<EditOutlined />} />
             </Link>

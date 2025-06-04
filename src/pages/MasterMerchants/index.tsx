@@ -105,7 +105,7 @@ const MasterMerchants: React.FC = () => {
       align: 'center' as const,
       render: (_: any, record: any) => (
         <Space size="middle">
-          {isCreator && record.status === 'ACTIVE' ? (
+          {isCreator && ['ACTIVE', 'INACTIVE'].includes(record.status) ? (
             <Link to={routes.editMasterMerchant.replace(':id', record.id)}>
               <Button type="text" icon={<EditOutlined />} />
             </Link>
