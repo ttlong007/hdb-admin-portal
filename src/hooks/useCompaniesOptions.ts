@@ -13,6 +13,12 @@ export function useCompaniesOptions(isActive = true) {
         search_value: inputValue,
         is_available: isActive,
       }
+
+      if (!isActive) {
+        // @ts-ignore
+        delete body.is_available
+      }
+
       const response = await axiosInstance.post(`/v1/admin/company/search`, body)
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.map((company: any) => ({
