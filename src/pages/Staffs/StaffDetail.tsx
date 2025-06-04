@@ -399,7 +399,7 @@ const StaffDetail: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate(routes.editStaff.replace(':id', id || ''))}
-            disabled={staff.status !== 'ACTIVE'}
+            disabled={!['ACTIVE', 'INACTIVE'].includes(staff.status)}
             className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <EditOutlined />
