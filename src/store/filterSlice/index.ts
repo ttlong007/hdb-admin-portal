@@ -14,7 +14,7 @@ interface FilterState {
     page?: number
     limit?: number
     cif?: string
-    company_id?: number
+    company_id?: any
     code?: string
     name?: string
   }
@@ -23,7 +23,7 @@ interface FilterState {
     page?: number
     limit?: number
     cif?: string
-    company_id?: number
+    company_id?: any
     store_id?: number
     code?: string
     name?: string

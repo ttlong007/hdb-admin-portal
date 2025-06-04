@@ -370,21 +370,7 @@ const EditMerchant = () => {
     useCompanyAccounts(selectedCompany?.value)
 
   // Fetch companies for the select field.
-  const { loadOptions, loadInitialOption } = useCompaniesOptions()
-
-  // Load initial company data if company_id exists in form
-  useEffect(() => {
-    const loadInitialCompany = async () => {
-      const currentCompanyId = getValues('company_id')?.value
-      if (currentCompanyId) {
-        const initialCompany = await loadInitialOption(currentCompanyId)
-        if (initialCompany) {
-          setValue('company_id', initialCompany)
-        }
-      }
-    }
-    loadInitialCompany()
-  }, [])
+  const { loadOptions } = useCompaniesOptions()
 
   const editMerchantMutation = useMutation({
     mutationFn: async (data: any) => {

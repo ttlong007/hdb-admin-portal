@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
+import { useState } from 'react'
 
 export interface CompanyOption {
   label: string
@@ -7,7 +8,10 @@ export interface CompanyOption {
 }
 
 export function useCompaniesOptions(isActive = true) {
+  const [isLoading, setIsLoading] = useState(false)
+
   const loadOptions = async (inputValue: string): Promise<CompanyOption[]> => {
+    setIsLoading(true)
     try {
       const body = {
         search_value: inputValue,
@@ -19,45 +23,28 @@ export function useCompaniesOptions(isActive = true) {
         delete body.is_available
       }
 
-      const response = await axiosInstance.post(`/v1/admin/company/search`, body)
+      const response = await axiosInstance.post(
+        `/v1/admin/company/search`,
+        body
+      )
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.map((company: any) => ({
           label: company.cif_name,
           value: company.id,
+          cif: company.cif,
         }))
       }
       return []
     } catch (error) {
       console.error('Failed to fetch companies:', error)
       return []
-    }
-  }
-
-  const loadInitialOption = async (companyId: number): Promise<CompanyOption | null> => {
-    try {
-      const body = {
-        search_value: '',
-        is_available: isActive,
-      }
-      const response = await axiosInstance.post(`/v1/admin/company/search`, body)
-      if (response.data.status_code === 'ACCEPT') {
-        const company = response.data.data.find((c: any) => c.id === companyId)
-        if (company) {
-          return {
-            label: company.cif_name,
-            value: company.id,
-          }
-        }
-      }
-      return null
-    } catch (error) {
-      console.error('Failed to fetch initial company:', error)
-      return null
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return {
     loadOptions,
-    loadInitialOption,
+    isLoading,
   }
 }

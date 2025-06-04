@@ -34,18 +34,19 @@ function getInitialStatus(status: any) {
 const Filters: React.FC = () => {
   const { staffFilters, setStaffFilters, resetStaffFilters } = useFilter()
 
-  const { control, handleSubmit, reset, watch, getValues } = useForm<FiltersFormValues>({
-    defaultValues: {
-      company_id: staffFilters.company_id || null,
-      store_id: staffFilters.store_id || null,
-      code: staffFilters.code || '',
-      name: staffFilters.name || '',
-      status: getInitialStatus(staffFilters?.status),
-      role: staffFilters.role
-        ? STAFF_ROLES.find((r) => r.value === staffFilters.role) || null
-        : null,
-    },
-  })
+  const { control, handleSubmit, reset, watch, getValues } =
+    useForm<FiltersFormValues>({
+      defaultValues: {
+        company_id: staffFilters.company_id || null,
+        store_id: staffFilters.store_id || null,
+        code: staffFilters.code || '',
+        name: staffFilters.name || '',
+        status: getInitialStatus(staffFilters?.status),
+        role: staffFilters.role
+          ? STAFF_ROLES.find((r) => r.value === staffFilters.role) || null
+          : null,
+      },
+    })
 
   useEffect(() => {
     reset({
@@ -96,22 +97,22 @@ const Filters: React.FC = () => {
     resetStaffFilters()
   }
 
-  const { loadOptions, loadInitialOption } = useCompaniesOptions(false)
+  const { loadOptions, isLoading } = useCompaniesOptions(false)
 
-  // Load initial company data if company_id exists in filters
+  // Load initial options for AsyncSelect
+  const [defaultOptions, setDefaultOptions] = React.useState<any[]>([])
+
   useEffect(() => {
-    const loadInitialCompany = async () => {
+    const loadInitialCompanyOptions = async () => {
+      let keyword = ''
       if (staffFilters.company_id) {
-        const initialCompany = await loadInitialOption(staffFilters.company_id)
-        if (initialCompany) {
-          reset({
-            ...getValues(),
-            company_id: initialCompany,
-          })
-        }
+        keyword = staffFilters?.company_id?.cif || ''
       }
+
+      const options = await loadOptions(keyword)
+      setDefaultOptions(options)
     }
-    loadInitialCompany()
+    loadInitialCompanyOptions()
   }, [])
 
   // Fetch stores based on selected company
@@ -168,11 +169,19 @@ const Filters: React.FC = () => {
                   {...field}
                   isClearable
                   loadOptions={loadOptions}
+                  defaultOptions={defaultOptions}
+                  cacheOptions
                   value={field.value}
+                  isLoading={isLoading}
                   onChange={(newValue) => {
                     field.onChange(newValue)
                     // Reset store_id when company changes
                     reset({ ...control._formValues, store_id: null })
+                    if (!newValue) {
+                      loadOptions('').then((options) => {
+                        setDefaultOptions(options)
+                      })
+                    }
                   }}
                   placeholder="Chọn công ty"
                   className="react-select-container"

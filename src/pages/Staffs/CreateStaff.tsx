@@ -231,20 +231,20 @@ export default function CreateStaff() {
     }
   }, [options])
 
-  const { loadOptions, loadInitialOption } = useCompaniesOptions()
+  const { loadOptions, isLoading: isLoadingCompaniesOptions } =
+    useCompaniesOptions(false)
 
-  // Load initial company data if company_id exists in form
+  // Load initial options for AsyncSelect
+  const [defaultOptions, setDefaultOptions] = React.useState<any[]>([])
+
   useEffect(() => {
-    const loadInitialCompany = async () => {
-      const currentCompanyId = getValues('company_id')?.value
-      if (currentCompanyId) {
-        const initialCompany = await loadInitialOption(currentCompanyId)
-        if (initialCompany) {
-          setValue('company_id', initialCompany)
-        }
-      }
+    const loadInitialCompanyOptions = async () => {
+      const keyword = ''
+
+      const options = await loadOptions(keyword)
+      setDefaultOptions(options)
     }
-    loadInitialCompany()
+    loadInitialCompanyOptions()
   }, [])
 
   // Watch selected company_id to fetch stores
@@ -404,8 +404,18 @@ export default function CreateStaff() {
                     {...field}
                     isClearable
                     loadOptions={loadOptions}
+                    defaultOptions={defaultOptions}
+                    cacheOptions
                     value={field.value}
-                    onChange={field.onChange}
+                    isLoading={isLoadingCompaniesOptions}
+                    onChange={(newValue) => {
+                      field.onChange(newValue)
+                      if (!newValue) {
+                        loadOptions('').then((options) => {
+                          setDefaultOptions(options)
+                        })
+                      }
+                    }}
                     placeholder="Chọn công ty"
                     className="react-select-container"
                     classNamePrefix="react-select"

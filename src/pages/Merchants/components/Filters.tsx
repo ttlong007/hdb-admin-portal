@@ -54,22 +54,22 @@ const Filters: React.FC = () => {
     }
   }, [JSON.stringify(merchantFilters)])
 
-  const { loadOptions, loadInitialOption } = useCompaniesOptions(false)
+  const { loadOptions, isLoading } = useCompaniesOptions(false)
 
-  // Load initial company data if company_id exists in filters
+  // Load initial options for AsyncSelect
+  const [defaultOptions, setDefaultOptions] = React.useState<any[]>([])
+
   useEffect(() => {
-    const loadInitialCompany = async () => {
+    const loadInitialCompanyOptions = async () => {
+      let keyword = ''
       if (merchantFilters.company_id) {
-        const initialCompany = await loadInitialOption(merchantFilters.company_id)
-        if (initialCompany) {
-          reset({
-            ...getValues(),
-            company_id: initialCompany,
-          })
-        }
+        keyword = merchantFilters?.company_id?.cif || ''
       }
+
+      const options = await loadOptions(keyword)
+      setDefaultOptions(options)
     }
-    loadInitialCompany()
+    loadInitialCompanyOptions()
   }, [])
 
   const onSubmit = (data: FiltersFormValues) => {
@@ -144,8 +144,18 @@ const Filters: React.FC = () => {
                   {...field}
                   isClearable
                   loadOptions={loadOptions}
+                  defaultOptions={defaultOptions}
+                  cacheOptions
                   value={field.value}
-                  onChange={field.onChange}
+                  isLoading={isLoading}
+                  onChange={(newValue) => {
+                    field.onChange(newValue)
+                    if (!newValue) {
+                      loadOptions('').then((options) => {
+                        setDefaultOptions(options)
+                      })
+                    }
+                  }}
                   placeholder="Chọn công ty"
                   className="react-select-container"
                   classNamePrefix="react-select"

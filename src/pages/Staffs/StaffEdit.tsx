@@ -389,21 +389,7 @@ export default function EditStaff() {
     })
 
   // Fetch company options via custom hook
-  const { loadOptions, loadInitialOption } = useCompaniesOptions()
-
-  // Load initial company data if company_id exists in form
-  useEffect(() => {
-    const loadInitialCompany = async () => {
-      const currentCompanyId = getValues('company_id')?.value
-      if (currentCompanyId) {
-        const initialCompany = await loadInitialOption(currentCompanyId)
-        if (initialCompany) {
-          setValue('company_id', initialCompany)
-        }
-      }
-    }
-    loadInitialCompany()
-  }, [])
+  const { loadOptions } = useCompaniesOptions()
 
   // Watch selected company_id to fetch stores
   const selectedCompany = watch('company_id')
@@ -610,6 +596,7 @@ export default function EditStaff() {
                   <AsyncSelect
                     {...field}
                     isClearable
+                    isDisabled={true}
                     loadOptions={loadOptions}
                     value={field.value}
                     onChange={field.onChange}
