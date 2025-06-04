@@ -32,8 +32,6 @@ function RootRoutes() {
             <Navigate to={routes.unauthorize} />
           ),
         },
-
-        { path: routes.unauthorize, element: <Unauthorize /> },
         { path: routes.masterMerchant, element: <MasterMerchants /> },
         {
           path: routes.masterMerchantDetail,
@@ -52,6 +50,7 @@ function RootRoutes() {
         { path: routes.editStaff, element: <StaffEdit /> },
       ],
     },
+    { path: routes.unauthorize, element: <Unauthorize /> },
   ]
 
   return useRoutes(rootRoutes)

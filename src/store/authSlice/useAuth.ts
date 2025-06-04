@@ -3,6 +3,8 @@ import { useDispatch, useSelector } from 'react-redux'
 
 import { RootState } from '..'
 import { setState } from '.'
+import { useNavigate } from 'react-router-dom'
+import { routes } from '@/config/routes'
 
 export const useAuthState = () => {
   const authState = useSelector((state: RootState) => state.auth)
@@ -13,6 +15,7 @@ export const useAuthState = () => {
 export const useAuth = () => {
   const authState = useAuthState()
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const role = authState.user?.role
   const isApprover = role === 'HDB_APPROVAL'
@@ -25,13 +28,13 @@ export const useAuth = () => {
   }
 
   const logout = () => {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
     setAuthState({
+      isAuthenticated: false,
       user: null,
       bjectKeyStaff: null,
       objectKeyMerchant: null,
     })
+    navigate(routes.unauthorize, { replace: true })
   }
 
   return {

@@ -7,10 +7,6 @@ import HydrogenLayout from './hydrogen/layout'
 import Atom from '../core/components/AtomLoading'
 import { useAuth } from '@/store/authSlice/useAuth'
 import { getEnv } from '@/config/env'
-import { useMutation } from '@tanstack/react-query'
-import axiosInstance from '@/config/axios'
-import { routes } from '@/config/routes'
-import { toast } from 'react-toastify'
 
 const Layout = () => {
   const { isAuthenticated, setAuthState } = useAuth() // Assuming you have a setter to update auth state

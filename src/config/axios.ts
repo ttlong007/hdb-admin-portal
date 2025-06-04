@@ -2,6 +2,7 @@ import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from 'axios'
 import { getEnv } from './env'
 import { store } from '@/store'
 import { setState } from '../store/authSlice'
+import { routes } from './routes'
 
 interface ErrorResponse {
   status_code: string
@@ -83,6 +84,7 @@ axiosInstance.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken')
       if (!refreshToken) {
         processQueue(error, null)
+        navigate(routes.unauthorize, { replace: true })
         return Promise.reject(error)
       }
 
