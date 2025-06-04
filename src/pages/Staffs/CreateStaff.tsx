@@ -232,7 +232,7 @@ export default function CreateStaff() {
   }, [options])
 
   const { loadOptions, isLoading: isLoadingCompaniesOptions } =
-    useCompaniesOptions(false)
+    useCompaniesOptions()
 
   // Load initial options for AsyncSelect
   const [defaultOptions, setDefaultOptions] = React.useState<any[]>([])
