@@ -231,7 +231,7 @@ export default function CreateStaff() {
     }
   }, [options])
 
-  const { loadOptions, loadInitialOption } = useCompaniesOptions(false)
+  const { loadOptions, loadInitialOption } = useCompaniesOptions()
 
   // Load initial company data if company_id exists in form
   useEffect(() => {
