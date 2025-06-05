@@ -32,7 +32,7 @@ const Unauthorize: React.FC = () => {
       <div className="mt-10 flex flex-col items-center">
         <Atom size={200} color="#FC0101" animationDuration="700" />
 
-        {!isAuthenticated && !token ? (
+        {!localStorage.getItem('accessToken') && !token ? (
           <button
             className="bg-[#e59a1b] hover:bg-[#cb7614] text-[#713716] hover:text-[#faf1cb] mt-5 px-4 py-2 rounded-md text-lg font-semibold cursor-pointer"
             onClick={handleLogin}

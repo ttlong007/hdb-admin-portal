@@ -55,7 +55,7 @@ export function MerchantChangeInfo({
                     <span className="text-sm text-gray-400">
                       Mã điểm địa lý
                     </span>
-                    <span className="text-base font-semibold">
+                    <span className="text-base font-semibold break-all">
                       {changeRequestData.code || '---'}
                     </span>
                   </div>

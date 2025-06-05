@@ -165,7 +165,7 @@ export default function MerchantDetail() {
                     <span className="text-sm text-gray-400">
                       Mã điểm địa lý
                     </span>
-                    <span className="text-base text-gray-800">
+                    <span className="text-base text-gray-800 break-all">
                       {merchant.code || '---'}
                     </span>
                   </div>
