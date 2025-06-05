@@ -27,7 +27,7 @@ function App() {
         })
         localStorage.setItem('accessToken', response.data.data.access_token)
         localStorage.setItem('refreshToken', response.data.data.refresh_token)
-        navigate(routes.masterMerchant, { replace: true })
+        window.location.href = routes.masterMerchant
       } else {
         toast.error(response.data.reason_message)
         throw new Error('Login failed')
