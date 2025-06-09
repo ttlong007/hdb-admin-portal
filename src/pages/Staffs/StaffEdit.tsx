@@ -185,21 +185,6 @@ export default function EditStaff() {
         'Họ tên không được chứa ký tự đặc biệt và số'
       ),
     email: yup.string().email('Email không hợp lệ'),
-    phone_number: yup
-      .string()
-      .matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số')
-      .matches(/^0/, 'Số điện thoại phải bắt đầu bằng số 0')
-      .test(
-        'no-double-zero',
-        'Số điện thoại không được bắt đầu bằng 00',
-        (value) => !value || !value.startsWith('00')
-      )
-      .min(10, 'Số điện thoại phải có ít nhất 10 số')
-      .max(11, 'Số điện thoại không được vượt quá 11 số'),
-    national_id_number: yup
-      .string()
-      .matches(/^[0-9]+$/, 'Số CCCD chỉ được chứa số')
-      .length(12, 'Số CCCD phải có đúng 12 số'),
     company_id: yup.mixed<Option<number>>().nullable(),
     role: yup.mixed<Option<string>>().nullable(),
     store_id: yup.mixed<Option<number>>().nullable(),
