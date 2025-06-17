@@ -26,6 +26,7 @@ interface EditableCellProps extends React.HTMLAttributes<HTMLElement> {
   record: DataType
   index: number
   feeTypes?: any[]
+  form: any
 }
 
 const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
@@ -36,6 +37,7 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
   record,
   index,
   feeTypes,
+  form,
   children,
   ...restProps
 }) => {
@@ -109,6 +111,21 @@ const EditableCell: React.FC<React.PropsWithChildren<EditableCellProps>> = ({
                         LIMIT_DAILY_MAXIMUM
                       ).toLocaleString()}`
                     )
+                  }
+
+                  // Add validation for minFee and maxFee
+                  if (dataIndex === 'minFee' || dataIndex === 'maxFee') {
+                    const formValues = form.getFieldsValue()
+                    const minFee = dataIndex === 'minFee'
+                      ? numericValue
+                      : parseFloat(formValues.minFee?.toString().replace(/,/g, '') || '0')
+                    const maxFee = dataIndex === 'maxFee'
+                      ? numericValue
+                      : parseFloat(formValues.maxFee?.toString().replace(/,/g, '') || '0')
+
+                    if (minFee > maxFee) {
+                      throw new Error('Phí tối thiểu phải nhỏ hơn hoặc bằng phí tối đa')
+                    }
                   }
                 }
               },
@@ -321,6 +338,7 @@ const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({
         dataIndex: col.dataIndex,
         title: col.title,
         editing: isEditing(record),
+        form,
       }),
     }
   })

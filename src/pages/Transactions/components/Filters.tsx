@@ -25,53 +25,6 @@ interface FiltersFormValues {
 }
 
 const Filters: React.FC = () => {
-  const { transactionFilters, setTransactionFilters, resetTransactionFilters } =
-    useFilter()
-
-  const { control, handleSubmit, reset } = useForm<FiltersFormValues>({
-    defaultValues: {
-      code: transactionFilters.code || '',
-      transaction_type: transactionFilters.transaction_type
-        ? { value: transactionFilters.transaction_type }
-        : null,
-      status: transactionFilters.status
-        ? TRANSACTION_STATUS.find(
-            (s) => s.value === transactionFilters.status
-          ) || null
-        : null,
-      store_code: transactionFilters.store_code || '',
-      duration: transactionFilters.duration
-        ? [
-            dayjs(transactionFilters.duration[0]),
-            dayjs(transactionFilters.duration[1]),
-          ]
-        : null,
-      staff_code: transactionFilters.staff_code || '',
-    },
-  })
-
-  useEffect(() => {
-    reset({
-      code: transactionFilters.code || '',
-      transaction_type: transactionFilters.transaction_type
-        ? { value: transactionFilters.transaction_type }
-        : null,
-      status: transactionFilters.status
-        ? TRANSACTION_STATUS.find(
-            (s) => s.value === transactionFilters.status
-          ) || null
-        : null,
-      store_code: transactionFilters.store_code || '',
-      duration: transactionFilters.duration
-        ? [
-            dayjs(transactionFilters.duration[0]),
-            dayjs(transactionFilters.duration[1]),
-          ]
-        : null,
-      staff_code: transactionFilters.staff_code || '',
-    })
-  }, [JSON.stringify(transactionFilters)])
-
   // Fetch transaction types from API.
   const { data: transactionTypes, isLoading: isLoadingTransactionTypes } =
     useQuery({
@@ -93,6 +46,68 @@ const Filters: React.FC = () => {
       label: type.name,
       value: type.id,
     })) || []
+
+  const { transactionFilters, setTransactionFilters, resetTransactionFilters } =
+    useFilter()
+
+  const { control, handleSubmit, reset, getValues, setValue } =
+    useForm<FiltersFormValues>({
+      defaultValues: {
+        code: transactionFilters.code || '',
+        transaction_type: transactionFilters.transaction_type
+          ? transactionTypeOptions.find(
+              (type: any) => type.value === transactionFilters.transaction_type
+            ) || null
+          : null,
+        status: transactionFilters.status
+          ? TRANSACTION_STATUS.find(
+              (s) => s.value === transactionFilters.status
+            ) || null
+          : null,
+        store_code: transactionFilters.store_code || '',
+        duration: transactionFilters.duration
+          ? [
+              dayjs(transactionFilters.duration[0]),
+              dayjs(transactionFilters.duration[1]),
+            ]
+          : null,
+        staff_code: transactionFilters.staff_code || '',
+      },
+    })
+
+  useEffect(() => {
+    setValue('code', transactionFilters.code || '')
+    setValue(
+      'transaction_type',
+      transactionFilters.transaction_type
+        ? transactionTypeOptions.find(
+            (type: any) => type.value === transactionFilters.transaction_type
+          ) || null
+        : null
+    )
+    setValue(
+      'status',
+      transactionFilters.status
+        ? TRANSACTION_STATUS.find(
+            (s) => s.value === transactionFilters.status
+          ) || null
+        : null
+    )
+    setValue('store_code', transactionFilters.store_code || '')
+    setValue(
+      'duration',
+      transactionFilters.duration
+        ? [
+            dayjs(transactionFilters.duration[0]),
+            dayjs(transactionFilters.duration[1]),
+          ]
+        : null
+    )
+    setValue('staff_code', transactionFilters.staff_code || '')
+  }, [
+    JSON.stringify(transactionFilters),
+    JSON.stringify(transactionTypeOptions),
+  ])
 
   // Map status options from constants
   const statusOptions = TRANSACTION_STATUS
