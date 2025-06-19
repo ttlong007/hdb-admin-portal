@@ -36,7 +36,7 @@ const CreateMerchant = () => {
     queryKey: ['transaction-types'],
     queryFn: async () => {
       const response = await axiosInstance.get(
-        '/v1/admin/transaction/list-types?is_financial=true'
+        '/v1/admin/transaction/list-types?need_approval=true'
       )
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data
