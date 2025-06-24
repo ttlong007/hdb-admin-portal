@@ -66,7 +66,7 @@ const CreateMerchant = () => {
       ),
     code: yup
       .string()
-      .max(50, 'Mã điểm đại lý không được vượt quá 50 ký tự')
+      .max(10, 'Mã điểm đại lý không được vượt quá 10 ký tự')
       .required('Mã điểm đại lý là bắt buộc')
       .matches(
         /^[a-zA-Z0-9\-_]+$/,
