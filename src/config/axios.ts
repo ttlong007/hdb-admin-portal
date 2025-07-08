@@ -84,7 +84,6 @@ axiosInstance.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken')
       if (!refreshToken) {
         processQueue(error, null)
-        navigate(routes.unauthorize, { replace: true })
         return Promise.reject(error)
       }
 
