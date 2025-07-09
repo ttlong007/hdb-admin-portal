@@ -49,7 +49,13 @@ function App() {
     setNavigate(navigate)
   }, [navigate])
 
-  return <RootRoutes />
+  return token ? (
+    <div className="flex items-center justify-center min-h-screen">
+      <Spin size="large" />
+    </div>
+  ) : (
+    <RootRoutes />
+  )
 }
 
 export default App
