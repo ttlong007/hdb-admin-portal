@@ -86,6 +86,28 @@ export default function MasterMerchantDetail() {
     },
   })
 
+  const activeMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post(
+        '/v1/admin/company/approve-companies',
+        {
+          ids: [Number(id)],
+        }
+      )
+      if (response.status !== 204) {
+        throw new Error(response.data.reason_message || 'Kích hoạt thất bại')
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Kích hoạt thành công')
+      queryClient.invalidateQueries({ queryKey: ['companyDetail', id] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi kích hoạt')
+    },
+  })
+
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error loading detail.</div>
 
@@ -236,7 +258,7 @@ export default function MasterMerchantDetail() {
             <ArrowLeftOutlined />
             Quay lại
           </button>
-          {isCreator && (
+          {isCreator && company.status !== 'WAITING_APPROVE' && (
             <button
               type="button"
               onClick={() =>
@@ -249,6 +271,29 @@ export default function MasterMerchantDetail() {
               Chỉnh sửa
             </button>
           )}
+
+          {isApprover && company.status === 'WAITING_APPROVE' ? (
+            <button
+              type="button"
+              onClick={() =>
+                confirm({
+                  title: 'Xác nhận kích hoạt',
+                  message: 'Bạn có chắc chắn muốn kích hoạt đại lý này?',
+                  confirmText: 'Đồng ý',
+                  cancelText: 'Hủy bỏ',
+                }).then((result) => {
+                  if (result) {
+                    activeMutation.mutate()
+                  }
+                })
+              }
+              disabled={activeMutation.isPending}
+              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            >
+              <CheckCircleOutlined />
+              {activeMutation.isPending ? 'Đang xử lý...' : 'Kích hoạt'}
+            </button>
+          ) : null}
 
           {isApprover && company.status === 'WAITING_APPROVAL_FOR_EDIT' && (
             <>

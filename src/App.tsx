@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import axiosInstance, { setNavigate } from '@/config/axios'
 
 import RootRoutes from './Routes'
@@ -8,12 +8,14 @@ import { toast } from 'react-toastify'
 import { useMutation } from '@tanstack/react-query'
 import { routes } from './config/routes'
 import { useAuth } from './store/authSlice/useAuth'
+import { Spin } from 'antd'
 
 function App() {
   const navigate = useNavigate()
   const queryParams = new URLSearchParams(window.location.search)
   const token = queryParams.get('token')
   const { setAuthState } = useAuth()
+  const loginAttempted = useRef(false)
 
   const loginByTokenMutation = useMutation({
     mutationFn: async (data: { token: string; party_code: string }) => {
@@ -27,7 +29,7 @@ function App() {
         })
         localStorage.setItem('accessToken', response.data.data.access_token)
         localStorage.setItem('refreshToken', response.data.data.refresh_token)
-        window.location.href = routes.masterMerchant
+        navigate(routes.masterMerchant, { replace: true })
       } else {
         toast.error(response.data.reason_message)
         throw new Error('Login failed')
@@ -36,16 +38,24 @@ function App() {
   })
 
   useEffect(() => {
-    if (token) {
+    if (token && !loginAttempted.current) {
+      loginAttempted.current = true
       loginByTokenMutation.mutate({ token, party_code: 'HDA' })
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token])
 
   useEffect(() => {
     setNavigate(navigate)
   }, [navigate])
 
-  return <RootRoutes />
+  return token ? (
+    <div className="flex items-center justify-center min-h-screen">
+      <Spin size="large" />
+    </div>
+  ) : (
+    <RootRoutes />
+  )
 }
 
 export default App

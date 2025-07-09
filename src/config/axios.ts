@@ -40,6 +40,15 @@ const processQueue = (error: any, token: string | null = null) => {
   failedQueue = []
 }
 
+const logoutAndRedirect = () => {
+  localStorage.removeItem('accessToken')
+  localStorage.removeItem('refreshToken')
+  store.dispatch(setState({ user: null, isAuthenticated: false }))
+  if (navigate) {
+    navigate(routes.unauthorize)
+  }
+}
+
 // Request interceptor for Authorization header
 axiosInstance.interceptors.request.use(
   (config) => {
@@ -59,69 +68,85 @@ axiosInstance.interceptors.response.use(
   async (error: AxiosError<ErrorResponse>) => {
     const originalRequest = error.config as AxiosRequestConfig & { __isRetryRequest?: boolean }
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest.__isRetryRequest
-    ) {
-      if (isRefreshing) {
-        try {
-          const token = await new Promise<string>((resolve, reject) => {
-            failedQueue.push({ resolve, reject })
-          })
-          if (originalRequest.headers) {
-            originalRequest.headers['Authorization'] = `Bearer ${token}`
-          }
-          originalRequest.__isRetryRequest = true
-          return axiosInstance(originalRequest)
-        } catch (err) {
-          return Promise.reject(err)
-        }
-      }
-
-      originalRequest.__isRetryRequest = true
-      isRefreshing = true
-
-      const refreshToken = localStorage.getItem('refreshToken')
-      if (!refreshToken) {
-        processQueue(error, null)
-        navigate(routes.unauthorize, { replace: true })
+    if (error.response?.status === 401) {
+      // Check if no access token is available - then logout immediately
+      const accessToken = localStorage.getItem('accessToken')
+      if (!accessToken) {
+        logoutAndRedirect()
         return Promise.reject(error)
       }
 
-      try {
-        const refreshResponse = await axios.post(
-          `${getEnv('VITE_API_URL', 'http://localhost:4000')}/v1/admin/auth/refresh-token`,
-          {
-            refresh_token: refreshToken,
-            user_id: store.getState().auth?.user?.id,
+      // If we have access token and get 401, try to refresh
+      if (!originalRequest.__isRetryRequest) {
+        if (isRefreshing) {
+          try {
+            const token = await new Promise<string>((resolve, reject) => {
+              failedQueue.push({ resolve, reject })
+            })
+            if (originalRequest.headers) {
+              originalRequest.headers['Authorization'] = `Bearer ${token}`
+            }
+            originalRequest.__isRetryRequest = true
+            return axiosInstance(originalRequest)
+          } catch (err) {
+            return Promise.reject(err)
           }
-        )
-
-        if (refreshResponse.data.status_code === 'ACCEPT') {
-          const newAccessToken = refreshResponse.data.data.access_token
-          localStorage.setItem('accessToken', newAccessToken)
-          axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`
-          processQueue(null, newAccessToken)
-
-          if (originalRequest.headers) {
-            originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`
-          }
-          return axiosInstance(originalRequest)
-        } else {
-          localStorage.removeItem('accessToken')
-          localStorage.removeItem('refreshToken')
-          store.dispatch(setState({ user: null }))
-          processQueue(refreshResponse.data.reason_message, null)
-          return Promise.reject(refreshResponse.data.reason_message)
         }
-      } catch (refreshError) {
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        store.dispatch(setState({ user: null }))
-        processQueue(refreshError, null)
-        return Promise.reject(refreshError)
-      } finally {
-        isRefreshing = false
+
+        isRefreshing = true
+
+        const refreshToken = localStorage.getItem('refreshToken')
+        if (!refreshToken) {
+          logoutAndRedirect()
+          processQueue(error, null)
+          isRefreshing = false
+          return Promise.reject(error)
+        }
+
+        try {
+          const refreshResponse = await axios.post(
+            `${getEnv('VITE_API_URL', 'http://localhost:4000')}/v1/admin/auth/refresh-token`,
+            {
+              refresh_token: refreshToken,
+              user_id: store.getState().auth?.user?.id,
+            }
+          )
+
+          if (refreshResponse.data.status_code === 'ACCEPT') {
+            const newAccessToken = refreshResponse.data.data.access_token
+            localStorage.setItem('accessToken', newAccessToken)
+            axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${newAccessToken}`
+            processQueue(null, newAccessToken)
+
+            if (originalRequest.headers) {
+              originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`
+            }
+            originalRequest.__isRetryRequest = true
+            return axiosInstance(originalRequest)
+          } else {
+            logoutAndRedirect()
+            processQueue(refreshResponse.data.reason_message, null)
+            return Promise.reject(refreshResponse.data.reason_message)
+          }
+        } catch (refreshError: any) {
+          // Handle refresh token expired (403 with unauthorized)
+          if (
+            refreshError.response?.status === 403 &&
+            refreshError.response?.data?.status_code === 'REJECT' &&
+            refreshError.response?.data?.reason_code === 'unauthorized'
+          ) {
+            logoutAndRedirect()
+            processQueue(refreshError, null)
+            return Promise.reject(refreshError)
+          }
+
+          // Handle other refresh errors
+          logoutAndRedirect()
+          processQueue(refreshError, null)
+          return Promise.reject(refreshError)
+        } finally {
+          isRefreshing = false
+        }
       }
     }
 
