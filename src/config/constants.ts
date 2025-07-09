@@ -48,7 +48,7 @@ export const MERCHANT_STATUS = [
 ]
 
 export const MASTER_MERCHANT_STATUS = [
-  { value: 'WAITING_APPROVE', label: 'Đang đợi duyệt' },
+  { value: 'WAITING_APPROVE', label: 'Chờ kích hoạt' },
   { value: 'WAITING_APPROVAL_FOR_EDIT', label: 'Chờ duyệt chỉnh sửa' },
   { value: 'ACTIVE', label: 'Hoạt động' },
   { value: 'REJECTED', label: 'Từ chối' },

@@ -15,9 +15,12 @@ import MasterMerchantEdit from './pages/MasterMerchants/MasterMerchantEdit'
 import StaffEdit from './pages/Staffs/StaffEdit'
 import MerchantEdit from './pages/Merchants/MerchantEdit'
 import Unauthorize from './pages/Unauthorize'
+import { useAuth } from './store/authSlice/useAuth'
 
 function RootRoutes() {
-  const isAuthenticated = Boolean(localStorage.getItem('accessToken'))
+  const { isAuthenticated } = useAuth()
+  // Fallback to localStorage if auth state is not initialized
+  const hasToken = isAuthenticated || Boolean(localStorage.getItem('accessToken'))
 
   const rootRoutes = [
     {
@@ -26,7 +29,7 @@ function RootRoutes() {
       children: [
         {
           index: true,
-          element: isAuthenticated ? (
+          element: hasToken ? (
             <Navigate to={routes.masterMerchant} />
           ) : (
             <Navigate to={routes.unauthorize} />

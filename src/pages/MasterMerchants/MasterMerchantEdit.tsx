@@ -117,8 +117,6 @@ export default function MasterMerchantEdit() {
     defaultValues: {
       transaction_monthly_quota: '',
       transaction_daily_quota: '',
-      need_approve_new_store: false,
-      need_approve_new_staff: false,
       hdb_can_manage: false,
       active: false,
     },
@@ -131,8 +129,6 @@ export default function MasterMerchantEdit() {
       reset({
         transaction_monthly_quota: monthlyLimit?.toString() || '',
         transaction_daily_quota: dailyLimit?.toString() || '',
-        need_approve_new_store: company.need_approve_new_store,
-        need_approve_new_staff: company.need_approve_new_staff,
         active: company.status === 'ACTIVE',
       })
     }
@@ -152,15 +148,6 @@ export default function MasterMerchantEdit() {
         payload.proposed_changes.status = values.active ? 'ACTIVE' : 'INACTIVE'
       }
 
-      // Only include approval settings if they were changed
-      if (dirtyFields.need_approve_new_store) {
-        payload.proposed_changes.need_approve_new_store =
-          values.need_approve_new_store
-      }
-      if (dirtyFields.need_approve_new_staff) {
-        payload.proposed_changes.need_approve_new_staff =
-          values.need_approve_new_staff
-      }
       if (dirtyFields.hdb_can_manage) {
         payload.proposed_changes.hdb_can_manage = values.hdb_can_manage
       }
@@ -367,36 +354,6 @@ export default function MasterMerchantEdit() {
             <AdminFeeEditTable
               id={Number(id)}
               onFeesChange={(fees) => setValue('fees', fees)}
-            />
-          </div>
-
-          <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4 mt-8">
-            Cấu hình phê duyệt doanh nghiệp đại lý
-          </h4>
-          <div className="flex flex-col gap-4">
-            <Controller
-              name="need_approve_new_store"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <Switch {...field} checked={field.value} />
-                  <label className="ml-2">
-                    Mở điểm đại lý mới có phê duyệt
-                  </label>
-                </div>
-              )}
-            />
-            <Controller
-              name="need_approve_new_staff"
-              control={control}
-              render={({ field }) => (
-                <div>
-                  <Switch {...field} checked={field.value} />
-                  <label className="ml-2">
-                    Khai báo nhân viên mới có phê duyệt
-                  </label>
-                </div>
-              )}
             />
           </div>
 
