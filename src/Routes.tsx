@@ -12,7 +12,7 @@ import MasterMerchants from './pages/MasterMerchants'
 import MasterMerchantDetail from './pages/MasterMerchants/MasterMerchantDetail'
 import MerchantDetail from './pages/Merchants/MerchantDetail'
 import MasterMerchantEdit from './pages/MasterMerchants/MasterMerchantEdit'
-import StaffEdit from './pages/Staffs/StaffEdit'
+// import StaffEdit from './pages/Staffs/StaffEdit'
 import MerchantEdit from './pages/Merchants/MerchantEdit'
 import Unauthorize from './pages/Unauthorize'
 import { useAuth } from './store/authSlice/useAuth'
@@ -50,7 +50,7 @@ function RootRoutes() {
         { path: routes.staff, element: <Staffs /> },
         { path: routes.staffDetail, element: <StaffDetail /> },
         { path: routes.createStaff, element: <CreateStaff /> },
-        { path: routes.editStaff, element: <StaffEdit /> },
+        // { path: routes.editStaff, element: <StaffEdit /> },
       ],
     },
     { path: routes.unauthorize, element: <Unauthorize /> },

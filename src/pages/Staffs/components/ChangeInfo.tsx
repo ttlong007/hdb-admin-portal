@@ -32,7 +32,8 @@ export function ChangeInfo({
     changeRequestData.email ||
     changeRequestData.store?.name ||
     changeRequestData.store?.code ||
-    changeRequestData.status
+    changeRequestData.status ||
+    changeRequestData.can_make_transaction !== undefined
   const isShowAccountInfo =
     changeRequestData.income_account || changeRequestData.expense_account
   const isShowTransactionQuotaInfo = monthlyLimit || dailyLimit
@@ -138,6 +139,17 @@ export function ChangeInfo({
                     {STAFF_STATUS_MAP[changeRequestData.status]}
                   </Tag>
                 </div>
+              </div>
+            ) : null}
+
+            {changeRequestData.can_make_transaction !== undefined ? (
+              <div className="flex flex-col gap-2">
+                <span className="text-sm text-gray-400">
+                  Quyền thực hiện giao dịch
+                </span>
+                <span className="text-base font-semibold">
+                  {changeRequestData.can_make_transaction ? 'Có' : 'Không'}
+                </span>
               </div>
             ) : null}
           </div>

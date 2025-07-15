@@ -395,7 +395,7 @@ const StaffDetail: React.FC = () => {
           <ArrowLeftOutlined />
           Quay lại
         </button>
-        {isCreator && (
+        {/* {isCreator && (
           <button
             type="button"
             onClick={() => navigate(routes.editStaff.replace(':id', id || ''))}
@@ -405,7 +405,7 @@ const StaffDetail: React.FC = () => {
             <EditOutlined />
             Chỉnh sửa
           </button>
-        )}
+        )} */}
         {isApprover && isWaitingApprovalForEdit && (
           <>
             <button
