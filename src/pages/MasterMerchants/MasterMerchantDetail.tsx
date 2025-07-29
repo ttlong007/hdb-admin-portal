@@ -95,7 +95,9 @@ export default function MasterMerchantDetail() {
         }
       )
       if (response.status !== 204) {
-        throw new Error(response.data.reason_message || 'Duyệt kích hoạt thất bại')
+        throw new Error(
+          response.data.reason_message || 'Duyệt kích hoạt thất bại'
+        )
       }
       return response.data
     },
@@ -116,7 +118,7 @@ export default function MasterMerchantDetail() {
           ids: [Number(id)],
         }
       )
-      if (response.data.status_code !== 'ACCEPT') {
+      if (response.status !== 204) {
         throw new Error(response.data.reason_message || 'Kích hoạt thất bại')
       }
       return response.data
@@ -380,7 +382,9 @@ export default function MasterMerchantDetail() {
                 className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
               >
                 <CheckCircleOutlined />
-                {approveChangeRequestMutation.isPending ? 'Đang xử lý...' : 'Đồng ý duyệt'}
+                {approveChangeRequestMutation.isPending
+                  ? 'Đang xử lý...'
+                  : 'Đồng ý duyệt'}
               </button>
             </>
           )}
