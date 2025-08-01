@@ -48,7 +48,8 @@ export const MERCHANT_STATUS = [
 ]
 
 export const MASTER_MERCHANT_STATUS = [
-  { value: 'WAITING_APPROVE', label: 'Chờ kích hoạt' },
+  {value: 'NEW', label: 'Chờ kích hoạt'},
+  { value: 'WAITING_APPROVE', label: 'Đang đợi duyệt' },
   { value: 'WAITING_APPROVAL_FOR_EDIT', label: 'Chờ duyệt chỉnh sửa' },
   { value: 'ACTIVE', label: 'Hoạt động' },
   { value: 'REJECTED', label: 'Từ chối' },
@@ -75,6 +76,7 @@ export const MERCHANT_STATUS_COLOR_MAP: Record<string, string> = {
 }
 
 export const MASTER_MERCHANT_STATUS_COLOR_MAP: Record<string, string> = {
+  NEW: 'blue',
   WAITING_APPROVE: 'orange',
   WAITING_APPROVAL_FOR_EDIT: 'orange',
   ACTIVE: 'green',

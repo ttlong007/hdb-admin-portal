@@ -14,7 +14,7 @@ import { routes } from '@/config/routes'
 import axiosInstance from '@/config/axios'
 import {
   MASTER_MERCHANT_STATUS,
-  MERCHANT_STATUS_COLOR_MAP,
+  MASTER_MERCHANT_STATUS_COLOR_MAP,
 } from '@/config/constants'
 
 const MasterMerchants: React.FC = () => {
@@ -86,7 +86,7 @@ const MasterMerchants: React.FC = () => {
           (s) => s.value === status
         )
         const statusLabel = statusOption ? statusOption.label : '---'
-        const statusColor = MERCHANT_STATUS_COLOR_MAP[status] || 'default'
+        const statusColor = MASTER_MERCHANT_STATUS_COLOR_MAP[status] || 'default'
         return <Tag color={statusColor}>{statusLabel}</Tag>
       },
     },
