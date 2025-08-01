@@ -64,7 +64,7 @@ export default function MasterMerchantDetail() {
     },
   })
 
-  const approveMutation = useMutation({
+  const approveChangeRequestMutation = useMutation({
     mutationFn: async () => {
       const response = await axiosInstance.post(
         '/v1/admin/change-request/approve',
@@ -78,18 +78,42 @@ export default function MasterMerchantDetail() {
       return response.data
     },
     onSuccess: () => {
-      toast.success('Duyệt thành công')
+      toast.success('Duyệt chỉnh sửa thành công')
       queryClient.invalidateQueries({ queryKey: ['companyDetail', id] })
     },
     onError: (error: Error) => {
-      toast.error(error.message || 'Có lỗi xảy ra khi duyệt')
+      toast.error(error.message || 'Có lỗi xảy ra khi duyệt chỉnh sửa')
     },
   })
 
-  const activeMutation = useMutation({
+  const approveActiveMutation = useMutation({
     mutationFn: async () => {
       const response = await axiosInstance.post(
         '/v1/admin/company/approve-companies',
+        {
+          ids: [Number(id)],
+        }
+      )
+      if (response.status !== 204) {
+        throw new Error(
+          response.data.reason_message || 'Duyệt kích hoạt thất bại'
+        )
+      }
+      return response.data
+    },
+    onSuccess: () => {
+      toast.success('Duyệt kích hoạt thành công')
+      queryClient.invalidateQueries({ queryKey: ['companyDetail', id] })
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || 'Có lỗi xảy ra khi duyệt kích hoạt')
+    },
+  })
+
+  const activeCompanyMutation = useMutation({
+    mutationFn: async () => {
+      const response = await axiosInstance.post(
+        '/v1/admin/company/active-companies',
         {
           ids: [Number(id)],
         }
@@ -272,7 +296,7 @@ export default function MasterMerchantDetail() {
             </button>
           )}
 
-          {isApprover && company.status === 'WAITING_APPROVE' ? (
+          {isCreator && company.status === 'NEW' && (
             <button
               type="button"
               onClick={() =>
@@ -283,15 +307,38 @@ export default function MasterMerchantDetail() {
                   cancelText: 'Hủy bỏ',
                 }).then((result) => {
                   if (result) {
-                    activeMutation.mutate()
+                    activeCompanyMutation.mutate()
                   }
                 })
               }
-              disabled={activeMutation.isPending}
+              disabled={activeCompanyMutation.isPending}
               className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
             >
               <CheckCircleOutlined />
-              {activeMutation.isPending ? 'Đang xử lý...' : 'Kích hoạt'}
+              {activeCompanyMutation.isPending ? 'Đang xử lý...' : 'Kích hoạt'}
+            </button>
+          )}
+
+          {isApprover && company.status === 'WAITING_APPROVE' ? (
+            <button
+              type="button"
+              onClick={() =>
+                confirm({
+                  title: 'Xác nhận duyệt',
+                  message: 'Bạn có chắc chắn muốn duyệt đại lý này?',
+                  confirmText: 'Đồng ý',
+                  cancelText: 'Hủy bỏ',
+                }).then((result) => {
+                  if (result) {
+                    approveActiveMutation.mutate()
+                  }
+                })
+              }
+              disabled={approveActiveMutation.isPending}
+              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+            >
+              <CheckCircleOutlined />
+              {approveActiveMutation.isPending ? 'Đang xử lý...' : 'Duyệt'}
             </button>
           ) : null}
 
@@ -327,15 +374,17 @@ export default function MasterMerchantDetail() {
                     cancelText: 'Hủy bỏ',
                   }).then((result) => {
                     if (result) {
-                      approveMutation.mutate()
+                      approveChangeRequestMutation.mutate()
                     }
                   })
                 }
-                disabled={approveMutation.isPending}
+                disabled={approveChangeRequestMutation.isPending}
                 className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
               >
                 <CheckCircleOutlined />
-                {approveMutation.isPending ? 'Đang xử lý...' : 'Đồng ý duyệt'}
+                {approveChangeRequestMutation.isPending
+                  ? 'Đang xử lý...'
+                  : 'Đồng ý duyệt'}
               </button>
             </>
           )}
