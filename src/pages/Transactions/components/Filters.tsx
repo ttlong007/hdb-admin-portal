@@ -64,7 +64,7 @@ const Filters: React.FC = () => {
     const loadInitialCompanyOptions = async () => {
       let keyword = ''
       if (transactionFilters.company_id) {
-        keyword = transactionFilters?.company_id?.cif || ''
+        keyword = _get(transactionFilters, 'company_id.cif', '')
       }
 
       const options = await loadOptions(keyword)
@@ -138,7 +138,7 @@ const Filters: React.FC = () => {
   const statusOptions = TRANSACTION_STATUS
   const exportMutation = useExportTransactions({
     filter: {
-      company_id: _get(transactionFilters, 'company_id.value', null),
+      company_id: _get(transactionFilters, 'company_id.value', undefined),
       code: transactionFilters.code,
       transaction_type: transactionFilters.transaction_type,
       status: transactionFilters.status,
