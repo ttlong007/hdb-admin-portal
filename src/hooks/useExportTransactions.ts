@@ -4,6 +4,7 @@ import { toast } from 'react-toastify'
 
 interface ExportTransactionsProps {
   filter: {
+    company_id?: string
     code?: string
     transaction_type?: any
     status?: any
@@ -60,6 +61,9 @@ export const useExportTransactions = ({ filter }: ExportTransactionsProps) => {
       }
       if (filter?.staff_code) {
         cleanFilter.staff_code = filter.staff_code
+      }
+      if (filter?.company_id) {
+        cleanFilter.company_id = filter.company_id
       }
 
       const response = await axiosInstance.post(
