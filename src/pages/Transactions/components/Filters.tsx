@@ -168,7 +168,11 @@ const Filters: React.FC = () => {
     }
 
     if (transactionFilters.company_id) {
-      processedData.company_id = _get(transactionFilters, 'company_id.value', null)
+      processedData.company_id = _get(
+        transactionFilters,
+        'company_id.value',
+        null
+      )
     }
 
     setTransactionFilters({
@@ -225,22 +229,6 @@ const Filters: React.FC = () => {
                   placeholder="Chọn công ty"
                   className="react-select-container"
                   classNamePrefix="react-select"
-                />
-              )}
-            />
-          </div>
-          <div>
-            <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
-              Thời gian
-            </div>
-            <Controller
-              name="duration"
-              control={control}
-              render={({ field }) => (
-                <RangePicker
-                  rootClassName="px-3.5 py-2 w-full"
-                  value={field.value}
-                  onChange={(dates) => field.onChange(dates)}
                 />
               )}
             />
@@ -334,6 +322,23 @@ const Filters: React.FC = () => {
                   className="react-select-container"
                   classNamePrefix="react-select"
                   placeholder="Chọn trạng thái"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
+              Thời gian
+            </div>
+            <Controller
+              name="duration"
+              control={control}
+              render={({ field }) => (
+                <RangePicker
+                  rootClassName="px-3.5 py-2 w-full"
+                  value={field.value}
+                  onChange={(dates) => field.onChange(dates)}
                 />
               )}
             />
