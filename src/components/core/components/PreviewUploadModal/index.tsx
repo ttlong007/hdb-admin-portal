@@ -45,38 +45,16 @@ const PreviewUploadModal: React.FC<PreviewUploadModalProps> = ({
 
   const { mutate: approveTransaction, isPending } = useMutation({
     mutationFn: async () => {
-      // First call to get total
-      const firstResponse = await axiosInstance.post(
-        '/v1/admin/file/upload/get-transaction-data',
+      const response = await axiosInstance.post(
+        '/v1/admin/file/upload/accept-transaction',
         {
           object_key: objectKey,
-          page: 1,
-          limit: pageSize,
         }
       )
 
-      if (firstResponse.data.status_code !== 'ACCEPT') {
-        throw new Error(firstResponse.data.reason_message)
-      }
-
-      const total = firstResponse.data.data.total
-      const totalPages = Math.ceil(total / pageSize)
-
-      // Process all pages
-      for (let page = 1; page <= totalPages; page++) {
-        const response = await axiosInstance.post(
-          '/v1/admin/file/upload/accept-transaction',
-          {
-            object_key: objectKey,
-            page,
-            limit: pageSize,
-          }
-        )
-
-        if (response.data.status_code !== 'ACCEPT') {
-          toast.error(response.data.reason_message)
-          throw new Error(response.data.reason_message)
-        }
+      if (response.data.status_code !== 'ACCEPT') {
+        toast.error(response.data.reason_message)
+        throw new Error(response.data.reason_message)
       }
 
       toast.success('Gửi duyệt thành công')
