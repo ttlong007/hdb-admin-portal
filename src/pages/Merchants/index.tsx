@@ -28,7 +28,7 @@ const Merchants: React.FC = () => {
   const [isPreviewUploadModalOpen, setIsPreviewUploadModalOpen] =
     useState(false)
   const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
-    null
+    'descend'
   )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { isApprover, isCreator } = useAuth()
@@ -100,6 +100,7 @@ const Merchants: React.FC = () => {
       company_id: merchantFilters.company_id,
       code: merchantFilters.code,
       name: merchantFilters.name,
+      parent_id: merchantFilters.parent_id,
     },
     sortField,
     sortOrder,

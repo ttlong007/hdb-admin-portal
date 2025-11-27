@@ -185,6 +185,16 @@ export default function EditStaff() {
         'Họ tên không được chứa ký tự đặc biệt và số'
       ),
     email: yup.string().email('Email không hợp lệ'),
+    phone_number: yup
+      .string()
+      .matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số')
+      .matches(/^0/, 'Số điện thoại phải bắt đầu bằng số 0')
+      .test(
+        'no-double-zero',
+        'Số điện thoại không được bắt đầu bằng 00',
+        (value) => !value || !value.startsWith('00')
+      )
+      .length(10, 'Số điện thoại phải có đúng 10 số'),
     company_id: yup.mixed<Option<number>>().nullable(),
     role: yup.mixed<Option<string>>().nullable(),
     store_id: yup.mixed<Option<number>>().nullable(),

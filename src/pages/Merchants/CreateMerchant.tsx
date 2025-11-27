@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react'
-import { Checkbox, Button, Switch } from 'antd'
+import { Checkbox, Button, Switch, Tooltip } from 'antd'
 import { Input, NumberInput } from 'rizzui'
+import { InfoCircleOutlined } from '@ant-design/icons'
 import Select from 'react-select'
 import { useForm, Controller, useWatch } from 'react-hook-form'
 import { NavLink, useNavigate } from 'react-router-dom'
@@ -17,6 +18,7 @@ import { CloseCircleOutlined } from '@ant-design/icons'
 import { useConfirm } from '@/providers/ConfirmProvider'
 import AsyncSelect from 'react-select/async'
 import { Option, MerchantFormValues } from './types'
+import { useListSuperiorStores } from '@/hooks/useListSuperiorStores'
 
 const defaultTransactionTypes = []
 
@@ -24,6 +26,10 @@ const CreateMerchant = () => {
   const navigate = useNavigate()
   const { isApprover, systemConfig } = useAuth()
   const confirm = useConfirm()
+
+  const MAX_STORE_LEVEL = systemConfig.MAX_STORE_LEVEL
+
+  console.log('Max store level:', MAX_STORE_LEVEL)
 
   useEffect(() => {
     if (isApprover) {
@@ -188,6 +194,21 @@ const CreateMerchant = () => {
           !value || Number(value) <= Number(systemConfig.LIMIT_DAILY_MAXIMUM)
       ),
     transactionTypes: yup.array().of(yup.mixed()),
+    level: yup.object().nullable().required('Cấp đại lý là bắt buộc'),
+    parent_id: yup
+      .object()
+      .nullable()
+      .test(
+        'required-if-level-greater-than-1',
+        'Đại lý cấp trên là bắt buộc',
+        function (value) {
+          const level = this.parent.level
+          if (level && level.value > 1) {
+            return !!value
+          }
+          return true
+        }
+      ),
   })
   const {
     handleSubmit,
@@ -210,6 +231,8 @@ const CreateMerchant = () => {
       approveThreshold: systemConfig.LIMIT_APPROVAL_DEFAULT?.toString() || '',
       transactionTypes: [], // Initialize as empty array
       company_id: null,
+      level: { label: '1', value: 1 },
+      parent_id: null,
     },
     resolver: yupResolver(schema),
     mode: 'all',
@@ -317,6 +340,44 @@ const CreateMerchant = () => {
   // Watch the selected company from the form.
   const selectedCompany = useWatch({ control, name: 'company_id' })
 
+  // Watch the selected level from the form.
+  const selectedLevel = useWatch({ control, name: 'level' })
+
+  // Fetch max level for the selected company
+  const { data: maxLevelData } = useQuery({
+    queryKey: ['companyMaxLevel', selectedCompany?.value],
+    queryFn: async () => {
+      if (!selectedCompany?.value) return null
+      const response = await axiosInstance.post('/v1/admin/store/list', {
+        company_id: selectedCompany.value,
+        page: 1,
+        limit: 1,
+        order_by_column: 'level',
+        descending: true,
+      })
+      if (
+        response.data.status_code === 'ACCEPT' &&
+        response.data.data?.length > 0
+      ) {
+        return response.data.data[0].level || 0
+      }
+      return 0
+    },
+    enabled: !!selectedCompany?.value,
+  })
+
+  // Generate level options based on MAX_STORE_LEVEL
+  const levelOptions = React.useMemo(() => {
+    const maxLevel = MAX_STORE_LEVEL
+      ? parseInt(MAX_STORE_LEVEL.toString(), 10)
+      : 3
+    const options = []
+    for (let i = maxLevel; i >= 1; i--) {
+      options.push({ label: i.toString(), value: i })
+    }
+    return options
+  }, [MAX_STORE_LEVEL])
+
   // Add effect to update transaction quotas when company is selected
   useEffect(() => {
     if (selectedCompany?.value) {
@@ -374,6 +435,112 @@ const CreateMerchant = () => {
     enabled: !!selectedCompany?.value,
   })
 
+  // Setup mutation for fetching superior stores
+  const superiorStoresMutation = useListSuperiorStores()
+  const [superiorStoreOptions, setSuperiorStoreOptions] = React.useState<
+    Option[]
+  >([])
+  // Keep a map of store id -> full store data so we can access limits when a parent is selected
+  const superiorStoreMap = React.useRef<Record<number, any>>({})
+
+  // Watch selected parent store from the form
+  const selectedParent = useWatch({ control, name: 'parent_id' })
+
+  // Fetch superior stores when company or level changes
+  useEffect(() => {
+    console.log('=== Superior Stores Effect ===')
+    console.log('selectedCompany:', selectedCompany)
+    console.log('selectedLevel:', selectedLevel)
+    console.log('selectedLevel.value:', selectedLevel?.value)
+
+    // If level is 1, don't call API as there are no parent stores (it's the top level)
+    if (selectedLevel?.value === 1) {
+      console.log('Level 1 selected - no parent stores available')
+      setSuperiorStoreOptions([])
+      setValue('parent_id', null)
+      return
+    }
+
+    if (selectedCompany?.value && selectedLevel?.value) {
+      // For level 2, fetch stores at level 1 (to use as parent)
+      // For level 3, fetch stores at level 2 (to use as parent)
+      // So the API level = selected level - 1
+      const apiLevel = selectedLevel.value - 1
+      console.log('Calling API with level:', apiLevel, '(selectedLevel.value:', selectedLevel.value, ')')
+
+      // Call API for all levels to fetch the appropriate parent stores
+      superiorStoresMutation.mutate(
+        {
+          company_id: selectedCompany.value,
+          level: apiLevel,
+          status: ['ACTIVE'],
+        },
+        {
+          onSuccess: (data) => {
+            console.log('API Response:', data)
+            const options =
+              data?.data?.map((store: any) => ({
+                label: `${store.code} - ${store.name}`,
+                value: store.id,
+              })) || []
+
+            // populate map for later lookup
+            data?.data?.forEach((store: any) => {
+              if (store && store.id) superiorStoreMap.current[store.id] = store
+            })
+
+            setSuperiorStoreOptions(options)
+
+            // Reset parent_id if current selection is not in the new options
+            const currentParentId = getValues('parent_id')
+            if (
+              currentParentId &&
+              !options.find(
+                (opt: Option) => opt.value === currentParentId.value
+              )
+            ) {
+              setValue('parent_id', null)
+            }
+          },
+          onError: (error) => {
+            console.error('API Error:', error)
+            setSuperiorStoreOptions([])
+            setValue('parent_id', null)
+          },
+        }
+      )
+    } else {
+      console.log('Clearing options - missing company or level')
+      setSuperiorStoreOptions([])
+      setValue('parent_id', null)
+    }
+  }, [selectedCompany?.value, selectedLevel?.value])
+
+  // When a parent store is selected, copy its limits into the form's quota fields
+  useEffect(() => {
+    if (selectedParent && selectedParent.value) {
+      const store = superiorStoreMap.current[selectedParent.value]
+      if (store && Array.isArray(store.limits)) {
+        const monthlyLimit = store.limits.find(
+          (l: any) => l.type === 'TRANSACTION_QUOTA_MONTHLY'
+        )?.amount
+        const dailyLimit = store.limits.find(
+          (l: any) => l.type === 'TRANSACTION_QUOTA_DAILY'
+        )?.amount
+
+        if (monthlyLimit !== undefined && monthlyLimit !== null) {
+          setValue('transaction_monthly_quota', monthlyLimit.toString())
+        }
+        if (dailyLimit !== undefined && dailyLimit !== null) {
+          setValue('transaction_daily_quota', dailyLimit.toString())
+        }
+      }
+    }
+  }, [selectedParent?.value, setValue])
+
+  // Map superior stores to options
+  const isLoadingSuperiorStores = superiorStoresMutation.isPending
+
   // Create merchant mutation
   const createMerchantMutation = useMutation({
     mutationFn: async (payload: any) => {
@@ -396,7 +563,7 @@ const CreateMerchant = () => {
   })
 
   const onSubmit = (data: MerchantFormValues) => {
-    const payload = {
+    const payload: any = {
       name: data.name,
       code: data.code,
       address: data.address,
@@ -406,6 +573,7 @@ const CreateMerchant = () => {
       income_account: data.income_account?.value || '',
       company_id: data.company_id?.value || 0,
       approve_threshold: Number(data.approveThreshold),
+      level: Number(data.level?.value) || 1,
       // Map limits based on the transaction quotas
       limits: [
         {
@@ -422,6 +590,11 @@ const CreateMerchant = () => {
         approve_amount: Number(data.approveThreshold),
         need_approve_transaction_ids: data.transactionTypes,
       },
+    }
+
+    // Add parent_id only if it exists (for all levels including level 1)
+    if (data.parent_id?.value) {
+      payload.parent_id = Number(data.parent_id.value)
     }
     confirm({
       title: 'Xác nhận tạo đại lý',
@@ -543,6 +716,85 @@ const CreateMerchant = () => {
                     {errors.code && (
                       <p className="text-red-500 text-sm">
                         {errors.code?.message?.toString()}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            {/* Level */}
+            <div>
+              <div className="text-sm font-medium text-gray-700 mb-1">
+                Cấp đại lý *
+              </div>
+              <Controller
+                name="level"
+                control={control}
+                rules={{ required: 'Cấp đại lý là bắt buộc' }}
+                render={({ field }) => (
+                  <>
+                    <Select
+                      {...field}
+                      placeholder="Chọn cấp đại lý"
+                      className="w-full"
+                      options={levelOptions}
+                      value={field.value}
+                      onChange={(newValue) => {
+                        field.onChange(newValue)
+                        // Reset parent_id when level changes
+                        setValue('parent_id', null)
+                      }}
+                    />
+                    {errors.level && (
+                      <p className="text-red-500 text-sm">
+                        {errors.level?.message?.toString()}
+                      </p>
+                    )}
+                  </>
+                )}
+              />
+            </div>
+            {/* Parent Store */}
+            <div>
+              <div className="text-sm font-medium text-gray-700 mb-1 flex items-center gap-1">
+                Đại lý cấp trên {selectedLevel?.value > 1 ? '*' : ''}
+                <Tooltip
+                  title={
+                    <div>
+                      <p>
+                        Chọn thông tin đại lý cấp trên là các cấp n-1 (n là giá
+                        trị của Cấp đại lý)
+                      </p>
+                      <p>List danh sách các đại lý thuộc cấp n-1</p>
+                      <p>
+                        Không thể chọn các đại lý đã có khai báo nhân viên điểm
+                        đại lý đang hoạt động
+                      </p>
+                    </div>
+                  }
+                  placement="top"
+                >
+                  <InfoCircleOutlined className="text-gray-400 cursor-help" />
+                </Tooltip>
+              </div>
+              <Controller
+                name="parent_id"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <Select
+                      {...field}
+                      placeholder="Chọn đại lý cấp trên"
+                      className="w-full"
+                      options={superiorStoreOptions}
+                      value={field.value}
+                      isLoading={isLoadingSuperiorStores}
+                      isClearable={selectedLevel?.value > 1}
+                      isDisabled={selectedLevel?.value === 1}
+                    />
+                    {errors.parent_id && (
+                      <p className="text-red-500 text-sm">
+                        {errors.parent_id?.message?.toString()}
                       </p>
                     )}
                   </>

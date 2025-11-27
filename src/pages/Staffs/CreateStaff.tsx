@@ -109,8 +109,7 @@ export default function CreateStaff() {
         'Số điện thoại không được bắt đầu bằng 00',
         (value) => !value || !value.startsWith('00')
       )
-      .min(10, 'Số điện thoại phải có ít nhất 10 số')
-      .max(11, 'Số điện thoại không được vượt quá 11 số')
+      .length(10, 'Số điện thoại phải có đúng 10 số')
       .required('Số điện thoại là bắt buộc'),
     national_id_number: yup
       .string()

@@ -9,6 +9,7 @@ interface MerchantFilters {
   name?: string
   company_id?: any
   code?: string
+  parent_id?: string | number
 }
 
 interface UseMerchantsParams {
@@ -47,6 +48,9 @@ export const useMerchants = ({
       }
       if (filter?.code) {
         cleanFilter.code = filter.code
+      }
+      if (filter?.parent_id) {
+        cleanFilter.parent_id = Number(filter.parent_id)
       }
 
       const requestBody = {
