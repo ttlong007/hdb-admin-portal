@@ -720,6 +720,7 @@ const EditMerchant = () => {
                       className="w-full"
                       options={levelOptions}
                       value={field.value}
+                      isDisabled={true}
                     />
                     {errors.level?.message ? (
                       <p className="text-red-500 text-sm">
@@ -762,7 +763,7 @@ const EditMerchant = () => {
                       value={field.value}
                       isLoading={isLoadingSuperiorStores}
                       isClearable={selectedLevel?.value > 1}
-                      isDisabled={selectedLevel?.value === 1}
+                      isDisabled={true}
                     />
                     {errors.parent_id && (
                       <p className="text-red-500 text-sm">
