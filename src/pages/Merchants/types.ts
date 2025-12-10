@@ -1,4 +1,4 @@
-export type Option = { label: string; value: string }
+export type Option = { label: string; value: string | number }
 
 export interface MerchantFormValues {
   name: string
@@ -15,6 +15,8 @@ export interface MerchantFormValues {
   transactionTypes: number[]
   company_id: Option | null
   active: boolean
+  level?: Option | null
+  parent_id?: Option | null
 }
 
 export interface ChangeRequestPayload {

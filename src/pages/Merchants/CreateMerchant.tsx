@@ -371,7 +371,7 @@ const CreateMerchant = () => {
     const maxLevel = MAX_STORE_LEVEL
       ? parseInt(MAX_STORE_LEVEL.toString(), 10)
       : 3
-    const options = []
+    const options: Option[] = []
     for (let i = maxLevel; i >= 1; i--) {
       options.push({ label: i.toString(), value: i })
     }
