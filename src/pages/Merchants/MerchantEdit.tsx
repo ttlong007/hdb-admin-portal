@@ -332,7 +332,7 @@ const EditMerchant = () => {
     // If level is 1, don't call API as there are no parent stores (it's the top level)
     if (selectedLevel?.value === 1) {
       setSuperiorStoreOptions([])
-      setValue('parent_id', null)
+      // In edit mode, don't reset parent_id - keep the original value from storeData
       return
     }
 
@@ -351,7 +351,7 @@ const EditMerchant = () => {
         },
         {
           onSuccess: (data) => {
-            const options =
+            let options =
               data?.data?.map((store: any) => ({
                 label: `${store.code} - ${store.name}`,
                 value: store.id,
@@ -362,9 +362,8 @@ const EditMerchant = () => {
               if (store && store.id) superiorStoreMap.current[store.id] = store
             })
 
-            setSuperiorStoreOptions(options)
-
-            // Reset parent_id if current selection is not in the new options
+            // In edit mode, ensure the current parent is included in options
+            // even if it's not returned by the API (e.g., if parent is inactive)
             const currentParentId = getValues('parent_id')
             if (
               currentParentId &&
@@ -372,19 +371,32 @@ const EditMerchant = () => {
                 (opt: Option) => opt.value === currentParentId.value
               )
             ) {
-              setValue('parent_id', null)
+              // Add the current parent to options so it's displayed
+              options = [currentParentId, ...options]
             }
+
+            setSuperiorStoreOptions(options)
           },
           onError: (error) => {
             console.error('API Error:', error)
-            setSuperiorStoreOptions([])
-            setValue('parent_id', null)
+            // In edit mode, keep the parent option from storeData
+            const currentParentId = getValues('parent_id')
+            if (currentParentId) {
+              setSuperiorStoreOptions([currentParentId])
+            } else {
+              setSuperiorStoreOptions([])
+            }
           },
         }
       )
     } else {
-      setSuperiorStoreOptions([])
-      setValue('parent_id', null)
+      // In edit mode, keep the parent option from storeData
+      const currentParentId = getValues('parent_id')
+      if (currentParentId) {
+        setSuperiorStoreOptions([currentParentId])
+      } else {
+        setSuperiorStoreOptions([])
+      }
     }
   }, [selectedCompany?.value, selectedLevel?.value])
 
