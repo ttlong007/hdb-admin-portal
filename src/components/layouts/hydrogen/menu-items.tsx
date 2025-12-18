@@ -85,7 +85,7 @@ export const menuItems = [
     ),
   },
   {
-    name: 'Quản lý điểm đại lý',
+    name: 'Quán lý đại lý',
     href: routes.merchant,
     icon: (
       <svg

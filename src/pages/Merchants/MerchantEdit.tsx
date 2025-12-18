@@ -669,7 +669,7 @@ const EditMerchant = () => {
             }`
           }
         >
-          Quản lý điểm đại lý
+          Quán lý đại lý
         </NavLink>
         <div className="text-base font-semibold text-[#A1AAB2]">/</div>
         <span className="text-base font-semibold text-[#A1AAB2]">
