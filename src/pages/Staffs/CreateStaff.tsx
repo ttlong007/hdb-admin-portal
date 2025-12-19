@@ -55,15 +55,15 @@ const defaultTransactionTypes = []
 
 export default function CreateStaff() {
   const navigate = useNavigate()
-  const { isApprover, systemConfig } = useAuth()
+  const { isApprover, isViewer, systemConfig } = useAuth()
   const confirm = useConfirm()
 
   useEffect(() => {
-    if (isApprover) {
+    if (isApprover || isViewer) {
       toast.error('Bạn không có quyền truy cập trang này')
       navigate(routes.staff)
     }
-  }, [isApprover, navigate])
+  }, [isApprover, isViewer, navigate])
 
   const { data: transactionOptions, isLoading: isLoadingTransactionTypes } =
     useQuery({

@@ -145,6 +145,7 @@ export const STAFF_STATUS_COLOR_MAP: Record<string, string> = {
 export const SYSTEM_ROLES = {
   HDB_CREATION: 'chỉnh sửa',
   HDB_APPROVAL: 'duyệt',
+  HDB_VIEW: 'xem',
 }
 
 export const STATUS_WAITING_APPROVE = [

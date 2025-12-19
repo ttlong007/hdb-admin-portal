@@ -31,7 +31,7 @@ const defaultTransactionTypes = [
 const EditMerchant = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { isApprover, systemConfig } = useAuth()
+  const { isApprover, isViewer, systemConfig } = useAuth()
   const queryClient = useQueryClient()
   const confirm = useConfirm()
 
@@ -662,11 +662,11 @@ const EditMerchant = () => {
   }
 
   useEffect(() => {
-    if (isApprover || STATUS_WAITING_APPROVE.includes(storeData?.status)) {
+    if (isApprover || isViewer || STATUS_WAITING_APPROVE.includes(storeData?.status)) {
       toast.error('Bạn không có quyền truy cập trang này')
       navigate(routes.merchant)
     }
-  }, [isApprover, storeData?.status])
+  }, [isApprover, isViewer, storeData?.status])
 
   if (isLoadingStore) return <div>Loading store details...</div>
 

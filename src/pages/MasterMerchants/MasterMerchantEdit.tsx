@@ -27,7 +27,7 @@ const { Option } = Select
 export default function MasterMerchantEdit() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { isApprover, systemConfig } = useAuth()
+  const { isApprover, isViewer, systemConfig } = useAuth()
   const queryClient = useQueryClient()
   const confirm = useConfirm()
 
@@ -35,11 +35,11 @@ export default function MasterMerchantEdit() {
     useMasterMerchantDetail(id)
 
   useEffect(() => {
-    if (isApprover) {
+    if (isApprover || isViewer) {
       toast.error('Bạn không có quyền truy cập trang này')
       navigate(routes.masterMerchant)
     }
-  }, [isApprover, navigate])
+  }, [isApprover, isViewer, navigate])
 
   const schema = yup.object().shape({
     transaction_monthly_quota: yup

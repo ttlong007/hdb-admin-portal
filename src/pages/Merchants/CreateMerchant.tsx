@@ -24,7 +24,7 @@ const defaultTransactionTypes = []
 
 const CreateMerchant = () => {
   const navigate = useNavigate()
-  const { isApprover, systemConfig } = useAuth()
+  const { isApprover, isViewer, systemConfig } = useAuth()
   const confirm = useConfirm()
 
   const MAX_STORE_LEVEL = systemConfig.MAX_STORE_LEVEL
@@ -32,11 +32,11 @@ const CreateMerchant = () => {
   console.log('Max store level:', MAX_STORE_LEVEL)
 
   useEffect(() => {
-    if (isApprover) {
+    if (isApprover || isViewer) {
       toast.error('Bạn không có quyền truy cập trang này')
       navigate(routes.merchant)
     }
-  }, [isApprover, navigate])
+  }, [isApprover, isViewer, navigate])
 
   const { data: transactionOptions, isLoading } = useQuery({
     queryKey: ['transaction-types'],

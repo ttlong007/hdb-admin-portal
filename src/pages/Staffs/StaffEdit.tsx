@@ -149,7 +149,7 @@ export default function EditStaff() {
 
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { isApprover, systemConfig } = useAuth()
+  const { isApprover, isViewer, systemConfig } = useAuth()
   const confirm = useConfirm()
 
   const { data: transactionOptions, isLoading: isLoadingTransactionTypes } =
@@ -538,12 +538,13 @@ export default function EditStaff() {
   useEffect(() => {
     if (
       isApprover ||
+      isViewer ||
       STATUS_WAITING_APPROVE.includes(staffDetail?.status || '')
     ) {
       toast.error('Bạn không có quyền truy cập trang này')
       navigate(routes.staff)
     }
-  }, [isApprover, staffDetail?.status])
+  }, [isApprover, isViewer, staffDetail?.status])
 
   console.log('errors', errors)
   return (
