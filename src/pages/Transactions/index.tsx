@@ -32,6 +32,13 @@ const Transactions: React.FC = () => {
       render: (_: any, __: any, index: number) => index + 1,
     },
     {
+      title: 'Mã giao dịch',
+      dataIndex: 'code',
+      key: 'code',
+      sorter: true,
+      render: (text: string) => text || '---',
+    },
+    {
       title: 'Mã tham chiếu',
       dataIndex: 'ref_code',
       key: 'ref_code',
@@ -165,7 +172,7 @@ const Transactions: React.FC = () => {
             columns={columns}
             dataSource={dataSource}
             loading={isPending}
-            scroll={{ x: 2080 }}
+            scroll={{ x: 2200 }}
             pagination={{
               total,
               current: page,
