@@ -18,6 +18,15 @@ function App() {
   const loginAttempted = useRef(false)
   const [isLoggingIn, setIsLoggingIn] = useState(false)
 
+  // Initialize auth state from localStorage on mount
+  useEffect(() => {
+    const accessToken = localStorage.getItem('accessToken')
+    if (accessToken && !token) {
+      // User already has a valid session
+      setAuthState({ isAuthenticated: true })
+    }
+  }, [])
+
   const loginByTokenMutation = useMutation({
     mutationFn: async (data: { token: string; party_code: string }) => {
       const response = await axiosInstance.post(
@@ -25,11 +34,14 @@ function App() {
         data
       )
       if (response.data.status_code === 'ACCEPT') {
+        // CRITICAL: Set tokens and auth state synchronously
+        localStorage.setItem('accessToken', response.data.data.access_token)
+        localStorage.setItem('refreshToken', response.data.data.refresh_token)
+
+        // Set auth state after tokens are in localStorage
         setAuthState({
           isAuthenticated: true,
         })
-        localStorage.setItem('accessToken', response.data.data.access_token)
-        localStorage.setItem('refreshToken', response.data.data.refresh_token)
 
         // Remove token from URL before navigating
         const url = new URL(window.location.href)

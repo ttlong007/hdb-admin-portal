@@ -201,7 +201,7 @@ const Filters: React.FC = () => {
   }
 
   return (
-    <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
+    <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4 w-full">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="grid grid-cols-3 gap-4 w-full">
           <div>

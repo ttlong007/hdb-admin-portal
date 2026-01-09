@@ -8,7 +8,7 @@ import {
   CloseCircleOutlined,
   CheckCircleOutlined,
 } from '@ant-design/icons'
-import AdminFeeTable from './components/AdminFeeTable'
+import AdminFeeTable from '../components/AdminFeeTable'
 import {
   MASTER_MERCHANT_STATUS,
   MERCHANT_STATUS_COLOR_MAP,
@@ -18,10 +18,11 @@ import { useAuth } from '@/store/authSlice/useAuth'
 import axiosInstance from '@/config/axios'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
-import { ChangedInfo } from './components/ChangedInfo'
+import { ChangedInfo } from '../components/ChangedInfo'
 import InfoCard from '@/components/core/components/InfoCard'
 import { useChangeRequestDetail } from '@/hooks/useChangeRequestDetail'
 import { useConfirm } from '@/providers/ConfirmProvider'
+import UserManagement from './components/UserManagement'
 
 export default function MasterMerchantDetail() {
   const { id } = useParams<{ id: string }>()
@@ -144,57 +145,58 @@ export default function MasterMerchantDetail() {
   return (
     <>
       {/* Breadcrumbs */}
-      <div className="flex justify-start items-center gap-2 mb-4">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 mb-6">
         <Link
           to={routes.masterMerchant}
-          className="text-base font-semibold hover:underline"
+          className="text-sm font-medium text-gray-600 hover:text-red-600 transition-colors"
         >
           Quản lý đại lý tổng
         </Link>
-        <div className="text-base font-semibold text-[#A1AAB2]">/</div>
-        <span className="text-base font-semibold text-[#A1AAB2]">Chi tiết</span>
+        <span className="text-sm text-gray-400">/</span>
+        <span className="text-sm font-medium text-gray-900">Chi tiết</span>
       </div>
 
-      <section className="flex flex-col gap-4">
+      <section className="flex flex-col gap-6">
         <InfoCard title="Thông tin công ty">
-          <div className="flex gap-6 mb-6 max-sm:flex-col">
-            <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">Mã Cif</span>
-              <span className="text-base font-semibold">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Mã Cif</span>
+              <span className="text-base font-semibold text-gray-900">
                 {company.cif || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">Tên công ty</span>
-              <span className="text-base font-semibold">
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Tên công ty</span>
+              <span className="text-base font-semibold text-gray-900">
                 {company.company_name || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">Người đại diện</span>
-              <span className="text-base font-semibold">
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Người đại diện</span>
+              <span className="text-base font-semibold text-gray-900">
                 {company.representative || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">Số giấy phép ĐKKD</span>
-              <span className="text-base font-semibold">
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Số giấy phép ĐKKD</span>
+              <span className="text-base font-semibold text-gray-900">
                 {company.business_license || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">Số điểm đại lý</span>
-              <span className="text-base font-semibold">
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Số điểm đại lý</span>
+              <span className="text-base font-semibold text-gray-900">
                 {company.store_count || '---'}
               </span>
             </div>
 
-            <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">Trạng thái</span>
+            <div className="flex flex-col gap-2">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Trạng thái</span>
               <Tag color={statusColor} className="w-fit">
                 {statusLabel}
               </Tag>
@@ -208,60 +210,70 @@ export default function MasterMerchantDetail() {
           badgeText="Thông tin cũ"
           badgeColor="green"
         >
-          <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4">
-            Hạn mức giao dịch
-          </h4>
-
-          <div className="flex gap-6 mb-6 max-sm:flex-col">
-            <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">Hạn mức trong tháng</span>
-              <span className="text-base font-semibold">
-                {monthlyLimit
-                  ? monthlyLimit.toLocaleString('en-US') + ' VND'
-                  : '---'}
-              </span>
-            </div>
-            <div className="flex flex-col flex-1 gap-2">
-              <span className="text-sm text-gray-400">Hạn mức trong ngày</span>
-              <span className="text-base font-semibold">
-                {dailyLimit
-                  ? dailyLimit.toLocaleString('en-US') + ' VND'
-                  : '---'}
-              </span>
+          {/* Hạn mức giao dịch */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+              Hạn mức giao dịch
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Hạn mức trong tháng
+                </span>
+                <span className="text-base font-semibold text-gray-900">
+                  {monthlyLimit
+                    ? monthlyLimit.toLocaleString('en-US') + ' VND'
+                    : '---'}
+                </span>
+              </div>
+              <div className="flex flex-col gap-2">
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                  Hạn mức trong ngày
+                </span>
+                <span className="text-base font-semibold text-gray-900">
+                  {dailyLimit
+                    ? dailyLimit.toLocaleString('en-US') + ' VND'
+                    : '---'}
+                </span>
+              </div>
             </div>
           </div>
 
-          <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mt-8">
-            Phí giao dịch
-          </h4>
-          <div className="mt-4">
+          {/* Phí giao dịch */}
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+              Phí giao dịch
+            </h3>
             <AdminFeeTable companyFees={company.fees} />
           </div>
 
-          <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4 mt-8">
-            Cấu hình phê duyệt doanh nghiệp đại lý
-          </h4>
-          <div className="flex flex-col gap-4">
-            <div>
-              <Switch
-                id="need_approve_new_store"
-                checked={company.need_approve_new_store}
-                disabled
-              />
-              <label htmlFor="need_approve_new_store" className="ml-2">
-                Mở điểm đại lý mới có phê duyệt
-              </label>
-            </div>
+          {/* Cấu hình phê duyệt */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 pb-2 border-b border-gray-200">
+              Cấu hình phê duyệt doanh nghiệp đại lý
+            </h3>
+            <div className="space-y-4">
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <Switch
+                  id="need_approve_new_store"
+                  checked={company.need_approve_new_store}
+                    disabled
+                />
+                <label htmlFor="need_approve_new_store" className="text-sm font-medium text-gray-700 cursor-pointer">
+                  Mở điểm đại lý mới có phê duyệt
+                </label>
+              </div>
 
-            <div>
-              <Switch
-                id="need_approve_new_staff"
-                checked={company.need_approve_new_staff}
-                disabled
-              />
-              <label htmlFor="need_approve_new_staff" className="ml-2">
-                Khai báo nhân viên mới có phê duyệt
-              </label>
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                <Switch
+                  id="need_approve_new_staff"
+                  checked={company.need_approve_new_staff}
+                  disabled
+                />
+                <label htmlFor="need_approve_new_staff" className="text-sm font-medium text-gray-700 cursor-pointer">
+                  Khai báo nhân viên mới có phê duyệt
+                </label>
+              </div>
             </div>
           </div>
         </InfoCard>
@@ -273,11 +285,13 @@ export default function MasterMerchantDetail() {
           />
         ) : null}
 
-        <div className="flex items-center justify-end gap-4 w-full mt-8">
+        <UserManagement />
+
+        <div className="flex items-center justify-end gap-3 pt-6 mt-6 border-t border-gray-200">
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+            className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors inline-flex items-center gap-2"
           >
             <ArrowLeftOutlined />
             Quay lại
@@ -289,7 +303,7 @@ export default function MasterMerchantDetail() {
                 navigate(routes.editMasterMerchant.replace(':id', id || ''))
               }
               disabled={!['ACTIVE', 'INACTIVE'].includes(company.status)}
-              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2.5 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 transition-colors inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-red-600"
             >
               <EditOutlined />
               Chỉnh sửa
@@ -312,7 +326,7 @@ export default function MasterMerchantDetail() {
                 })
               }
               disabled={activeCompanyMutation.isPending}
-              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+              className="px-4 py-2.5 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 transition-colors inline-flex items-center gap-2"
             >
               <CheckCircleOutlined />
               {activeCompanyMutation.isPending ? 'Đang xử lý...' : 'Kích hoạt'}
@@ -335,7 +349,7 @@ export default function MasterMerchantDetail() {
                 })
               }
               disabled={approveActiveMutation.isPending}
-              className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+              className="px-4 py-2.5 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 transition-colors inline-flex items-center gap-2"
             >
               <CheckCircleOutlined />
               {approveActiveMutation.isPending ? 'Đang xử lý...' : 'Duyệt'}
@@ -359,7 +373,7 @@ export default function MasterMerchantDetail() {
                   })
                 }
                 disabled={rejectMutation.isPending}
-                className="bg-white rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 text-black/60 text-base font-semibold"
+                className="px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors inline-flex items-center gap-2"
               >
                 <CloseCircleOutlined />
                 {rejectMutation.isPending ? 'Đang xử lý...' : 'Từ chối'}
@@ -379,7 +393,7 @@ export default function MasterMerchantDetail() {
                   })
                 }
                 disabled={approveChangeRequestMutation.isPending}
-                className="rounded-sm outline outline-1 outline-offset-[-1px] outline-sky-900/20 inline-flex justify-center items-center gap-2 px-4 py-2 bg-[#DA2128] text-base font-semibold text-white"
+                className="px-4 py-2.5 text-sm font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 transition-colors inline-flex items-center gap-2"
               >
                 <CheckCircleOutlined />
                 {approveChangeRequestMutation.isPending
