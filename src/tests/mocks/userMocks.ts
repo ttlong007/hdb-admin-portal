@@ -24,17 +24,6 @@ export const mockUsers: User[] = [
     status: 'INACTIVE',
     created_at: '2024-01-02T00:00:00Z',
   },
-  {
-    id: 3,
-    username: 'adminuser',
-    full_name: 'Admin User',
-    email: 'admin@example.com',
-    phone_number: '0111222333',
-    company_id: 1,
-    role: 'AG_ADMIN',
-    status: 'ACTIVE',
-    created_at: '2024-01-03T00:00:00Z',
-  },
 ]
 
 export const mockUserService = {

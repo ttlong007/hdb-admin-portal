@@ -30,16 +30,6 @@ describe('UserTable', () => {
       role: 'AG_APPROVAL',
       status: 'INACTIVE',
     },
-    {
-      id: 3,
-      username: 'admin',
-      full_name: 'Admin User',
-      email: 'admin@example.com',
-      phone_number: '0111222333',
-      company_id: 1,
-      role: 'AG_ADMIN',
-      status: 'ACTIVE',
-    },
   ]
 
   beforeEach(() => {
@@ -81,8 +71,6 @@ describe('UserTable', () => {
       expect(screen.getByText('User One')).toBeInTheDocument()
       expect(screen.getByText('user2')).toBeInTheDocument()
       expect(screen.getByText('User Two')).toBeInTheDocument()
-      expect(screen.getByText('admin')).toBeInTheDocument()
-      expect(screen.getByText('Admin User')).toBeInTheDocument()
     })
 
     it('should show empty message when no users', () => {
@@ -111,7 +99,7 @@ describe('UserTable', () => {
       const activeBadges = screen.getAllByText('Đang hoạt động')
       const inactiveBadges = screen.getAllByText('Vô hiệu hóa')
 
-      expect(activeBadges).toHaveLength(2) // 2 active users
+      expect(activeBadges).toHaveLength(1) // 1 active user
       expect(inactiveBadges).toHaveLength(1) // 1 inactive user
     })
 
@@ -127,7 +115,6 @@ describe('UserTable', () => {
 
       expect(screen.getByText('Người tạo')).toBeInTheDocument()
       expect(screen.getByText('Người duyệt')).toBeInTheDocument()
-      expect(screen.getByText('Quản trị viên')).toBeInTheDocument()
     })
   })
 
@@ -143,7 +130,7 @@ describe('UserTable', () => {
         />
       )
 
-      // Get all edit buttons (should be 3, one for each user)
+      // Get all edit buttons (should be 2, one for each user)
       const editButtons = screen.getAllByLabelText(/Chỉnh sửa/i)
       await user.click(editButtons[0])
 
@@ -200,7 +187,6 @@ describe('UserTable', () => {
       // First row is header, so data rows start from index 1
       expect(rows[1]).toHaveTextContent('1')
       expect(rows[2]).toHaveTextContent('2')
-      expect(rows[3]).toHaveTextContent('3')
     })
   })
 })
