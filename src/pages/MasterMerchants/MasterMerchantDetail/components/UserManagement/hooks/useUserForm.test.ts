@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { renderHook, act } from '@testing-library/react'
 import { useUserForm } from './useUserForm'
-import { User } from '../../types'
+import { User } from '../types'
 
 describe('useUserForm', () => {
   const mockUser: User = {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Input, Button, Text, Pagination } from 'rizzui'
+import { Input, Button, Text } from 'rizzui'
+import { Pagination } from 'antd'
 import { PiPlusBold, PiMagnifyingGlass, PiLockKey, PiToggleLeft, PiToggleRight } from 'react-icons/pi'
 import Card from '@/components/core/components/Card'
 import { useUsers } from '../hooks/useUsers'

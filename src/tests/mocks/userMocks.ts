@@ -40,7 +40,7 @@ export const mockUsers: User[] = [
 export const mockUserService = {
   getUsers: vi.fn().mockResolvedValue(mockUsers),
   getUserById: vi.fn().mockResolvedValue(mockUsers[0]),
-  createUser: vi.fn().mockResolvedValue({ id: 4, ...mockUsers[0] }),
+  createUser: vi.fn().mockResolvedValue({ ...mockUsers[0], id: 4 }),
   updateUser: vi.fn().mockResolvedValue(mockUsers[0]),
   toggleUserStatus: vi.fn().mockResolvedValue({ ...mockUsers[0], status: 'INACTIVE' }),
   resetPassword: vi.fn().mockResolvedValue({ success: true }),
