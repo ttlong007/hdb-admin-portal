@@ -66,7 +66,8 @@ export const useUsers = (companyId?: number) => {
       // Refetch current page
       await fetchUsers(pagination.page, searchTerm, pagination.limit)
     } catch (error: any) {
-      toast.error(error?.response?.data?.reason_message || 'Có lỗi xảy ra khi thêm người dùng')
+      const errorMessage = error?.message || error?.response?.data?.reason_message || 'Có lỗi xảy ra khi thêm người dùng'
+      toast.error(errorMessage)
       throw error
     }
   }
@@ -78,7 +79,8 @@ export const useUsers = (companyId?: number) => {
       // Refetch current page
       await fetchUsers(pagination.page, searchTerm, pagination.limit)
     } catch (error: any) {
-      toast.error(error?.response?.data?.reason_message || 'Có lỗi xảy ra khi cập nhật')
+      const errorMessage = error?.message || error?.response?.data?.reason_message || 'Có lỗi xảy ra khi cập nhật'
+      toast.error(errorMessage)
       throw error
     }
   }
@@ -91,7 +93,8 @@ export const useUsers = (companyId?: number) => {
       // Refetch current page
       await fetchUsers(pagination.page, searchTerm, pagination.limit)
     } catch (error: any) {
-      toast.error(error?.response?.data?.reason_message || 'Có lỗi xảy ra khi cập nhật trạng thái')
+      const errorMessage = error?.message || error?.response?.data?.reason_message || 'Có lỗi xảy ra khi cập nhật trạng thái'
+      toast.error(errorMessage)
       throw error
     }
   }
@@ -101,7 +104,8 @@ export const useUsers = (companyId?: number) => {
       await userService.resetPassword(userId)
       toast.success('Đặt lại mật khẩu thành công!')
     } catch (error: any) {
-      toast.error(error?.response?.data?.reason_message || 'Có lỗi xảy ra khi đặt lại mật khẩu')
+      const errorMessage = error?.message || error?.response?.data?.reason_message || 'Có lỗi xảy ra khi đặt lại mật khẩu'
+      toast.error(errorMessage)
       throw error
     }
   }

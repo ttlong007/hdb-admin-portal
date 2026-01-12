@@ -29,7 +29,12 @@ export const userService = {
   async getUserById(id: number): Promise<User> {
     try {
       const response = await axiosInstance.get(`/v1/admin/agent-manager/${id}`)
-      return response.data.data
+
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+
+      throw new Error(response.data.reason_message || 'Failed to fetch user')
     } catch (error) {
       console.error('Error fetching user:', error)
       throw error
@@ -40,6 +45,11 @@ export const userService = {
   async createUser(data: UserFormData): Promise<User> {
     try {
       const response = await axiosInstance.post('/v1/admin/agent-manager/create', data)
+
+      if (response.data.status_code === 'REJECT') {
+        throw new Error(response.data.reason_message || 'Failed to create user')
+      }
+
       return response.data.data
     } catch (error) {
       console.error('Error creating user:', error)
@@ -51,6 +61,11 @@ export const userService = {
   async updateUser(id: number, data: Partial<UserFormData>): Promise<User> {
     try {
       const response = await axiosInstance.patch(`/v1/admin/agent-manager/${id}`, data)
+
+      if (response.data.status_code === 'REJECT') {
+        throw new Error(response.data.reason_message || 'Failed to update user')
+      }
+
       return response.data.data
     } catch (error) {
       console.error('Error updating user:', error)
@@ -61,7 +76,11 @@ export const userService = {
   // Toggle user status (activate/deactivate)
   async toggleUserStatus(id: number, status: 'ACTIVE' | 'INACTIVE'): Promise<void> {
     try {
-      await axiosInstance.patch(`/v1/admin/agent-manager/${id}`, { status })
+      const response = await axiosInstance.patch(`/v1/admin/agent-manager/${id}`, { status })
+
+      if (response.data.status_code === 'REJECT') {
+        throw new Error(response.data.reason_message || 'Failed to update user status')
+      }
     } catch (error) {
       console.error('Error updating user status:', error)
       throw error
@@ -71,7 +90,11 @@ export const userService = {
   // Reset password
   async resetPassword(id: number): Promise<void> {
     try {
-      await axiosInstance.post('/v1/admin/agent-manager/reset-password', { id })
+      const response = await axiosInstance.post('/v1/admin/agent-manager/reset-password', { id })
+
+      if (response.data.status_code === 'REJECT') {
+        throw new Error(response.data.reason_message || 'Failed to reset password')
+      }
     } catch (error) {
       console.error('Error resetting password:', error)
       throw error
