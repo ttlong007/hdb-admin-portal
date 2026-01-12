@@ -7,7 +7,7 @@ import {
   TRANSACTION_STATUS,
   TRANSACTION_STATUS_COLOR_MAP,
 } from '@/config/constants'
-import { useTransactions } from '@/hooks/useTransactions'
+import { useTransactionHistory } from '@/hooks/useTransactionHistory'
 import Filters from './Filters'
 import { useFilter } from '@/store/filterSlice/useFilter'
 
@@ -18,9 +18,7 @@ const NonFinancialTransactions: React.FC = () => {
     null
   )
 
-  // TODO: Create a separate hook for non-financial transactions
-  // For now, using the same hook but this should be replaced with useNonFinancialTransactions
-  const { isPending, dataSource, total, page, limit } = useTransactions({
+  const { isPending, dataSource, total, page, limit } = useTransactionHistory({
     sortField,
     sortOrder,
   })
@@ -40,13 +38,6 @@ const NonFinancialTransactions: React.FC = () => {
       render: (text: string) => text || '---',
     },
     {
-      title: 'Mã tham chiếu',
-      dataIndex: 'ref_code',
-      key: 'ref_code',
-      sorter: true,
-      render: (text: string) => text || '---',
-    },
-    {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
@@ -61,37 +52,37 @@ const NonFinancialTransactions: React.FC = () => {
     },
     {
       title: 'Loại GD',
-      dataIndex: 'transaction_type_name',
-      key: 'transaction_type_name',
+      dataIndex: 'transaction_type',
+      key: 'transaction_type',
       sorter: true,
       render: (name: string) => name || '---',
     },
     {
       title: 'Thời gian GD',
-      dataIndex: 'created_at',
-      key: 'created_at',
+      dataIndex: 'transaction_time',
+      key: 'transaction_time',
       sorter: true,
       render: (date: string) =>
-        date ? new Date(date).toLocaleString('en-US') : '---',
+        date ? new Date(date).toLocaleString('vi-VN') : '---',
     },
     {
-      title: 'Mã - Tên điểm đại lý',
-      dataIndex: 'store_code_name',
-      key: 'store_code_name',
+      title: 'Mã điểm đại lý',
+      dataIndex: 'store_code',
+      key: 'store_code',
+      sorter: true,
+      render: (text: string) => text || '---',
+    },
+    {
+      title: 'Tên điểm đại lý',
+      dataIndex: 'store_name',
+      key: 'store_name',
       sorter: true,
       render: (text: string) => text || '---',
     },
     {
       title: 'Mã nhân viên',
-      dataIndex: 'created_by_staff_code',
-      key: 'created_by_staff_code',
-      sorter: true,
-      render: (text: string) => text || '---',
-    },
-    {
-      title: 'Mô tả',
-      dataIndex: 'description',
-      key: 'description',
+      dataIndex: 'staff_code',
+      key: 'staff_code',
       sorter: true,
       render: (text: string) => text || '---',
     },
