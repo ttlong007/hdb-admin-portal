@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
-import { Tag } from 'antd'
-import { ArrowLeftOutlined } from '@ant-design/icons'
+import { Tag, Spin } from 'antd'
+import { ArrowLeftOutlined, EyeOutlined } from '@ant-design/icons'
+import InfoCard from '@/components/core/components/InfoCard'
+import { PhotoProvider, PhotoView } from 'react-photo-view'
+import 'react-photo-view/dist/react-photo-view.css'
 import {
   TRANSACTION_STATUS,
   TRANSACTION_STATUS_COLOR_MAP,
@@ -11,10 +14,59 @@ import {
   MASTER_MERCHANT_STATUS_COLOR_MAP,
 } from '@/config/constants'
 
+// Function to get national ID image URLs
+const getNationalIdImage = async (transactionId: number, imageType: 'FRONT_IMG' | 'BACK_IMG') => {
+  try {
+    const response = await axiosInstance.post('/v1/admin/transaction/get-image-url', {
+      id: transactionId,
+      image_type: imageType,
+    })
+
+    if (response.data.status_code === 'ACCEPT') {
+      return response.data.data.link_download // Use link_download from the response
+    }
+    throw new Error('Failed to get image URL')
+  } catch (error) {
+    console.error(`Failed to get ${imageType} image:`, error)
+    return null
+  }
+}
+
+// Custom hook to get images on demand
+const useNationalIdImages = (transactionId: string | undefined, shouldFetchFront: boolean, shouldFetchBack: boolean) => {
+  const frontImageQuery = useQuery({
+    queryKey: ['nationalIdImage', transactionId, 'FRONT_IMG'],
+    queryFn: () => getNationalIdImage(Number(transactionId), 'FRONT_IMG'),
+    enabled: !!transactionId && shouldFetchFront,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  const backImageQuery = useQuery({
+    queryKey: ['nationalIdImage', transactionId, 'BACK_IMG'],
+    queryFn: () => getNationalIdImage(Number(transactionId), 'BACK_IMG'),
+    enabled: !!transactionId && shouldFetchBack,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  })
+
+  return {
+    frontImageUrl: frontImageQuery.data,
+    backImageUrl: backImageQuery.data,
+    isLoadingFront: frontImageQuery.isLoading,
+    isLoadingBack: backImageQuery.isLoading,
+    frontError: frontImageQuery.error,
+    backError: backImageQuery.error,
+  }
+}
+
 const TransactionDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
 
+  // State to track when to fetch images
+  const [shouldFetchFront, setShouldFetchFront] = useState(false)
+  const [shouldFetchBack, setShouldFetchBack] = useState(false)
+
+  // Fetch transaction details
   const { data, isLoading, error } = useQuery({
     queryKey: ['transactionDetail', id],
     queryFn: async () => {
@@ -26,6 +78,16 @@ const TransactionDetail: React.FC = () => {
     },
     enabled: !!id,
   })
+
+  // Fetch national ID images on demand
+  const {
+    frontImageUrl,
+    backImageUrl,
+    isLoadingFront,
+    isLoadingBack,
+    frontError,
+    backError,
+  } = useNationalIdImages(id, shouldFetchFront, shouldFetchBack)
 
   if (isLoading) return <div>Loading...</div>
   if (error) return <div>Error loading transaction details.</div>
@@ -378,6 +440,125 @@ const TransactionDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Thông tin chứng từ */}
+      <InfoCard title="Thông tin chứng từ">
+        <PhotoProvider>
+          <div className="grid grid-cols-2 gap-6">
+            {/* Front Image */}
+            <div className="flex flex-col">
+              <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal mb-2">
+                Mặt trước CCCD/CMND
+              </label>
+              <div className="w-full h-64 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                {!shouldFetchFront ? (
+                  // Default state - show eye icon
+                  <div
+                    className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors w-full h-full rounded-lg"
+                    onClick={() => setShouldFetchFront(true)}
+                  >
+                    <EyeOutlined className="text-gray-400 text-4xl mb-2" />
+                    <span className="text-gray-500 text-sm">Xem mặt trước CCCD/CMND</span>
+                  </div>
+                ) : isLoadingFront ? (
+                  <Spin size="large" />
+                ) : frontImageUrl ? (
+                  <PhotoView src={frontImageUrl}>
+                    <div className="relative group cursor-pointer w-full h-full flex items-center justify-center">
+                      <img
+                        src={frontImageUrl}
+                        alt="Mặt trước CCCD/CMND"
+                        className="max-w-full max-h-full object-contain rounded-lg group-hover:opacity-80 transition-opacity"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
+                        <EyeOutlined className="text-white text-3xl" />
+                      </div>
+                    </div>
+                  </PhotoView>
+                ) : frontError ? (
+                  <div className="text-red-500 text-center">
+                    <div>Không thể tải ảnh</div>
+                    <div className="text-sm">{frontError.message}</div>
+                    <button
+                      className="mt-2 text-blue-500 hover:text-blue-700"
+                      onClick={() => setShouldFetchFront(false)}
+                    >
+                      Thử lại
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-gray-500 text-center">
+                    <div>Không có ảnh</div>
+                    <div className="text-sm">Mặt trước CCCD/CMND</div>
+                    <button
+                      className="mt-2 text-blue-500 hover:text-blue-700"
+                      onClick={() => setShouldFetchFront(false)}
+                    >
+                      Quay lại
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Back Image */}
+            <div className="flex flex-col">
+              <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal mb-2">
+                Mặt sau CCCD/CMND
+              </label>
+              <div className="w-full h-64 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                {!shouldFetchBack ? (
+                  // Default state - show eye icon
+                  <div
+                    className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-colors w-full h-full rounded-lg"
+                    onClick={() => setShouldFetchBack(true)}
+                  >
+                    <EyeOutlined className="text-gray-400 text-4xl mb-2" />
+                    <span className="text-gray-500 text-sm">Xem mặt sau CCCD/CMND</span>
+                  </div>
+                ) : isLoadingBack ? (
+                  <Spin size="large" />
+                ) : backImageUrl ? (
+                  <PhotoView src={backImageUrl}>
+                    <div className="relative group cursor-pointer w-full h-full flex items-center justify-center">
+                      <img
+                        src={backImageUrl}
+                        alt="Mặt sau CCCD/CMND"
+                        className="max-w-full max-h-full object-contain rounded-lg group-hover:opacity-80 transition-opacity"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/20 rounded-lg">
+                        <EyeOutlined className="text-white text-3xl" />
+                      </div>
+                    </div>
+                  </PhotoView>
+                ) : backError ? (
+                  <div className="text-red-500 text-center">
+                    <div>Không thể tải ảnh</div>
+                    <div className="text-sm">{backError.message}</div>
+                    <button
+                      className="mt-2 text-blue-500 hover:text-blue-700"
+                      onClick={() => setShouldFetchBack(false)}
+                    >
+                      Thử lại
+                    </button>
+                  </div>
+                ) : (
+                  <div className="text-gray-500 text-center">
+                    <div>Không có ảnh</div>
+                    <div className="text-sm">Mặt sau CCCD/CMND</div>
+                    <button
+                      className="mt-2 text-blue-500 hover:text-blue-700"
+                      onClick={() => setShouldFetchBack(false)}
+                    >
+                      Quay lại
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </PhotoProvider>
+      </InfoCard>
 
       <div className="flex items-center justify-end gap-4 w-full mt-8">
         <button

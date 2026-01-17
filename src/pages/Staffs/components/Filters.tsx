@@ -153,8 +153,6 @@ const Filters: React.FC = () => {
     await exportMutation.mutateAsync()
   }
 
-  console.log('staffFilters', staffFilters)
-  console.log('getValues', getValues())
   return (
     <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">

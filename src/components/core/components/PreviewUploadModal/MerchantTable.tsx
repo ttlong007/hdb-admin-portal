@@ -15,6 +15,8 @@ interface TableRecord {
   CompanyName: string
   StoreName: string
   StoreCode: string
+  ParentCode: string
+  Level: number
   Address: string
   AddressCode: string
   IncomeAccount: string
@@ -86,6 +88,16 @@ const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
       title: 'Mã điểm đại lý',
       dataIndex: 'StoreCode',
       key: 'StoreCode',
+    },
+    {
+      title: 'Mã điểm đại lý cha',
+      dataIndex: 'ParentCode',
+      key: 'ParentCode',
+    },
+    {
+      title: 'Cấp điểm đại lý',
+      dataIndex: 'Level',
+      key: 'Level',
     },
     {
       title: 'Địa chỉ',

@@ -28,7 +28,7 @@ const Merchants: React.FC = () => {
   const [isPreviewUploadModalOpen, setIsPreviewUploadModalOpen] =
     useState(false)
   const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
-    null
+    'descend'
   )
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([])
   const { isApprover, isCreator } = useAuth()
@@ -100,6 +100,7 @@ const Merchants: React.FC = () => {
       company_id: merchantFilters.company_id,
       code: merchantFilters.code,
       name: merchantFilters.name,
+      parent_id: merchantFilters.parent_id,
     },
     sortField,
     sortOrder,
@@ -294,7 +295,7 @@ const Merchants: React.FC = () => {
             }`
           }
         >
-          Quản lý điểm đại lý
+          Quán lý đại lý
         </NavLink>
         <div className="text-base font-semibold text-[#A1AAB2]">/</div>
         <span className="text-base font-semibold text-[#A1AAB2]">
@@ -305,7 +306,7 @@ const Merchants: React.FC = () => {
       <div className="px-6 py-4 bg-white rounded-lg shadow-[0px_1px_4px_0px_rgba(51,49,65,0.25)] flex flex-col justify-start items-start gap-4">
         <div className="self-stretch inline-flex justify-between items-center border-b border-[#DDE4EE] py-4">
           <div className="justify-start text-black text-3xl font-bold">
-            Quản lý điểm đại lý
+            Quán lý đại lý
           </div>
 
           <div className="flex justify-start items-center gap-3">
