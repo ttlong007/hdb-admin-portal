@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import axiosInstance from '@/config/axios'
+import _get from 'lodash/get'
 import { useFilter } from '@/store/filterSlice/useFilter'
 
 interface TransactionRequestBody {
@@ -37,7 +38,6 @@ export const useTransactions = ({
         page: transactionFilters.page,
         limit: transactionFilters.limit,
         duration: transactionFilters.duration,
-        company_id: transactionFilters.company_id,
         store_id: transactionFilters.store_id,
         staff_id: transactionFilters.staff_id,
         code: transactionFilters.code,
@@ -51,6 +51,10 @@ export const useTransactions = ({
       // Only add status if it's not empty
       if (transactionFilters.status) {
         requestBody.status = [transactionFilters.status]
+      }
+
+      if (transactionFilters.company_id) {
+        requestBody.company_id = _get(transactionFilters, 'company_id.value', undefined)
       }
 
       // Remove empty/null/blank/empty array fields

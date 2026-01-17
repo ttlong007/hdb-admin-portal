@@ -20,6 +20,7 @@ export const useAuth = () => {
   const role = authState.user?.role
   const isApprover = role === 'HDB_APPROVAL'
   const isCreator = role === 'HDB_CREATION'
+  const isViewer = role === 'HDB_VIEW'
   const objectKeyStaff = authState.objectKeyStaff
   const objectKeyMerchant = authState.objectKeyMerchant
 
@@ -44,6 +45,7 @@ export const useAuth = () => {
     logout,
     isApprover,
     isCreator,
+    isViewer,
     objectKeyStaff,
     objectKeyMerchant,
   }

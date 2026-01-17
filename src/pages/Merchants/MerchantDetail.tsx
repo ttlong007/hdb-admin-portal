@@ -219,6 +219,26 @@ export default function MerchantDetail() {
                       {merchant.full_address || '---'}
                     </span>
                   </div>
+
+                  {/* Cấp đại lý */}
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">Cấp đại lý</span>
+                    <span className="text-base text-gray-800">
+                      {merchant.level !== undefined && merchant.level !== null
+                        ? merchant.level
+                        : '---'}
+                    </span>
+                  </div>
+
+                  {/* Đại lý cấp trên - only show when parent_name exists */}
+                  {merchant.parent_name ? (
+                    <div className="flex flex-col flex-1 gap-2">
+                      <span className="text-sm text-gray-400">Đại lý cấp trên</span>
+                      <span className="text-base text-gray-800">
+                        {merchant.parent_name}
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
               </InfoCard>
 

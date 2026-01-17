@@ -17,6 +17,7 @@ interface FiltersFormValues {
   code: string
   name: string
   status: any
+  parent_id: string
 }
 
 function getInitialStatus(status: any) {
@@ -39,6 +40,7 @@ const Filters: React.FC = () => {
         code: merchantFilters.code || '',
         name: merchantFilters.name || '',
         status: getInitialStatus(merchantFilters.status),
+        parent_id: merchantFilters.parent_id || '',
       },
     })
 
@@ -50,6 +52,7 @@ const Filters: React.FC = () => {
         code: merchantFilters.code || '',
         name: merchantFilters.name || '',
         status: getInitialStatus(merchantFilters.status),
+        parent_id: merchantFilters.parent_id || '',
       })
     }
   }, [JSON.stringify(merchantFilters)])
@@ -87,6 +90,7 @@ const Filters: React.FC = () => {
       company_id: payload.company_id,
       code: payload.code,
       name: payload.name,
+      parent_id: payload.parent_id,
       page: 1,
       limit: merchantFilters.limit,
     })
@@ -99,6 +103,7 @@ const Filters: React.FC = () => {
       code: '',
       name: '',
       status: null,
+      parent_id: '',
     })
     resetMerchantFilters()
   }
@@ -110,6 +115,7 @@ const Filters: React.FC = () => {
       company_id: merchantFilters.company_id,
       code: merchantFilters.code,
       name: merchantFilters.name,
+      parent_id: merchantFilters.parent_id,
     },
   })
   const [isExporting, setIsExporting] = React.useState(false)
@@ -183,6 +189,18 @@ const Filters: React.FC = () => {
                 {...field}
                 label="Tên đại lý"
                 placeholder="Tên đại lý"
+                inputClassName="bg-white"
+              />
+            )}
+          />
+          <Controller
+            name="parent_id"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                label="Mã đại lý cấp trên"
+                placeholder="Mã đại lý cấp trên"
                 inputClassName="bg-white"
               />
             )}

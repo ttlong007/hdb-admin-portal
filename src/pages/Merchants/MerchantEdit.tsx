@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useParams, NavLink, useNavigate } from 'react-router-dom'
 import { useForm, Controller, useWatch } from 'react-hook-form'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Checkbox, Switch } from 'antd'
+import { Checkbox, Switch, Tooltip } from 'antd'
 import { Input, NumberInput } from 'rizzui'
 import Select from 'react-select'
 import { toast } from 'react-toastify'
@@ -14,12 +14,13 @@ import AsyncSelect from 'react-select/async'
 import axiosInstance from '@/config/axios'
 import { routes } from '@/config/routes'
 import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
-import { CloseCircleOutlined } from '@ant-design/icons'
+import { CloseCircleOutlined, InfoCircleOutlined } from '@ant-design/icons'
 import InfoCard from '@/components/core/components/InfoCard'
 import { STATUS_WAITING_APPROVE } from '@/config/constants'
 import { useConfirm } from '@/providers/ConfirmProvider'
 import { useCompanyAccounts } from '@/hooks/useCompanyAccounts'
 import { Option, MerchantFormValues, ChangeRequestPayload } from './types'
+import { useListSuperiorStores } from '@/hooks/useListSuperiorStores'
 
 const defaultTransactionTypes = [
   { id: 1, name: 'Giao dịch 1' },
@@ -30,7 +31,7 @@ const defaultTransactionTypes = [
 const EditMerchant = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { isApprover, systemConfig } = useAuth()
+  const { isApprover, isViewer, systemConfig } = useAuth()
   const queryClient = useQueryClient()
   const confirm = useConfirm()
 
@@ -145,6 +146,21 @@ const EditMerchant = () => {
           !value || Number(value) <= Number(systemConfig.LIMIT_DAILY_MAXIMUM)
       ),
     transactionTypes: yup.array().of(yup.mixed()),
+    level: yup.object().nullable().required('Cấp đại lý là bắt buộc'),
+    parent_id: yup
+      .object()
+      .nullable()
+      .test(
+        'required-if-level-greater-than-1',
+        'Đại lý cấp trên là bắt buộc',
+        function (value) {
+          const level = this.parent.level
+          if (level && level.value > 1) {
+            return !!value
+          }
+          return true
+        }
+      ),
   })
 
   const {
@@ -170,6 +186,8 @@ const EditMerchant = () => {
       transactionTypes: [],
       company_id: null,
       active: false,
+      level: null,
+      parent_id: null,
     },
     resolver: yupResolver(schema),
     mode: 'all',
@@ -255,6 +273,18 @@ const EditMerchant = () => {
             : null,
         // Set active based on status
         active: storeData.status === 'ACTIVE',
+        // Map level
+        level: storeData.level
+          ? { label: storeData.level.toString(), value: storeData.level }
+          : null,
+        // Map parent_id
+        parent_id:
+          storeData.parent_id && storeData.parent_name
+            ? {
+                label: `${storeData.parent_code || ''} - ${storeData.parent_name}`,
+                value: storeData.parent_id,
+              }
+            : null,
       })
 
       // Set the needApprove flag based on whether any approval transaction types exist.
@@ -269,6 +299,128 @@ const EditMerchant = () => {
   const handleApporveChange = (checked: boolean) => {
     setNeedApprove(checked)
   }
+
+  const MAX_STORE_LEVEL = systemConfig.MAX_STORE_LEVEL
+
+  // Watch the selected company and level from the form
+  const selectedCompany = useWatch({ control, name: 'company_id' })
+  const selectedLevel = useWatch({ control, name: 'level' })
+  const selectedParent = useWatch({ control, name: 'parent_id' })
+
+  // Generate level options based on MAX_STORE_LEVEL
+  const levelOptions = React.useMemo(() => {
+    const maxLevel = MAX_STORE_LEVEL
+      ? parseInt(MAX_STORE_LEVEL.toString(), 10)
+      : 3
+    const options: Option[] = []
+    for (let i = maxLevel; i >= 1; i--) {
+      options.push({ label: i.toString(), value: i })
+    }
+    return options
+  }, [MAX_STORE_LEVEL])
+
+  // Setup mutation for fetching superior stores
+  const superiorStoresMutation = useListSuperiorStores()
+  const [superiorStoreOptions, setSuperiorStoreOptions] = React.useState<
+    Option[]
+  >([])
+  const superiorStoreMap = React.useRef<Record<number, any>>({})
+  const isLoadingSuperiorStores = superiorStoresMutation.isPending
+
+  // Fetch superior stores when company or level changes
+  useEffect(() => {
+    // If level is 1, don't call API as there are no parent stores (it's the top level)
+    if (selectedLevel?.value === 1) {
+      setSuperiorStoreOptions([])
+      // In edit mode, don't reset parent_id - keep the original value from storeData
+      return
+    }
+
+    if (selectedCompany?.value && selectedLevel?.value) {
+      // For level 2, fetch stores at level 1 (to use as parent)
+      // For level 3, fetch stores at level 2 (to use as parent)
+      // So the API level = selected level - 1
+      const apiLevel = selectedLevel.value - 1
+
+      // Call API for all levels to fetch the appropriate parent stores
+      superiorStoresMutation.mutate(
+        {
+          company_id: selectedCompany.value,
+          level: apiLevel,
+          status: ['ACTIVE'],
+        },
+        {
+          onSuccess: (data) => {
+            let options =
+              data?.data?.map((store: any) => ({
+                label: `${store.code} - ${store.name}`,
+                value: store.id,
+              })) || []
+
+            // populate map for later lookup
+            data?.data?.forEach((store: any) => {
+              if (store && store.id) superiorStoreMap.current[store.id] = store
+            })
+
+            // In edit mode, ensure the current parent is included in options
+            // even if it's not returned by the API (e.g., if parent is inactive)
+            const currentParentId = getValues('parent_id')
+            if (
+              currentParentId &&
+              !options.find(
+                (opt: Option) => opt.value === currentParentId.value
+              )
+            ) {
+              // Add the current parent to options so it's displayed
+              options = [currentParentId, ...options]
+            }
+
+            setSuperiorStoreOptions(options)
+          },
+          onError: (error) => {
+            console.error('API Error:', error)
+            // In edit mode, keep the parent option from storeData
+            const currentParentId = getValues('parent_id')
+            if (currentParentId) {
+              setSuperiorStoreOptions([currentParentId])
+            } else {
+              setSuperiorStoreOptions([])
+            }
+          },
+        }
+      )
+    } else {
+      // In edit mode, keep the parent option from storeData
+      const currentParentId = getValues('parent_id')
+      if (currentParentId) {
+        setSuperiorStoreOptions([currentParentId])
+      } else {
+        setSuperiorStoreOptions([])
+      }
+    }
+  }, [selectedCompany?.value, selectedLevel?.value])
+
+  // When a parent store is selected, copy its limits into the form's quota fields
+  useEffect(() => {
+    if (selectedParent && selectedParent.value) {
+      const store = superiorStoreMap.current[selectedParent.value]
+      if (store && Array.isArray(store.limits)) {
+        const monthlyLimit = store.limits.find(
+          (l: any) => l.type === 'TRANSACTION_QUOTA_MONTHLY'
+        )?.amount
+        const dailyLimit = store.limits.find(
+          (l: any) => l.type === 'TRANSACTION_QUOTA_DAILY'
+        )?.amount
+
+        if (monthlyLimit !== undefined && monthlyLimit !== null) {
+          setValue('transaction_monthly_quota', monthlyLimit.toString())
+        }
+        if (dailyLimit !== undefined && dailyLimit !== null) {
+          setValue('transaction_daily_quota', dailyLimit.toString())
+        }
+      }
+    }
+  }, [selectedParent?.value, setValue])
 
   const { data: transactionOptions } = useQuery({
     queryKey: ['transaction-types'],
@@ -362,9 +514,6 @@ const EditMerchant = () => {
     enabled: !!selectedDistrict,
   })
 
-  // Watch the selected company from the form.
-  const selectedCompany = useWatch({ control, name: 'company_id' })
-
   // Fetch account options via custom hook
   const { data: accountList = [], isLoading: isLoadingAccounts } =
     useCompanyAccounts(selectedCompany?.value)
@@ -417,7 +566,9 @@ const EditMerchant = () => {
         key !== 'approveThreshold' &&
         key !== 'transactionTypes' &&
         key !== 'expense_account' &&
-        key !== 'income_account'
+        key !== 'income_account' &&
+        key !== 'level' &&
+        key !== 'parent_id'
       ) {
         payload[key] = (data as any)[key]
       }
@@ -428,6 +579,14 @@ const EditMerchant = () => {
     }
     if (dirtyFields.income_account && data.income_account) {
       payload.income_account = data.income_account.value
+    }
+
+    if (dirtyFields.level && data.level) {
+      payload.level = Number(data.level.value)
+    }
+
+    if (dirtyFields.parent_id && data.parent_id) {
+      payload.parent_id = Number(data.parent_id.value)
     }
 
     if (dirtyFields.ward && data.ward) {
@@ -503,11 +662,11 @@ const EditMerchant = () => {
   }
 
   useEffect(() => {
-    if (isApprover || STATUS_WAITING_APPROVE.includes(storeData?.status)) {
+    if (isApprover || isViewer || STATUS_WAITING_APPROVE.includes(storeData?.status)) {
       toast.error('Bạn không có quyền truy cập trang này')
       navigate(routes.merchant)
     }
-  }, [isApprover, storeData?.status])
+  }, [isApprover, isViewer, storeData?.status])
 
   if (isLoadingStore) return <div>Loading store details...</div>
 
@@ -522,7 +681,7 @@ const EditMerchant = () => {
             }`
           }
         >
-          Quản lý điểm đại lý
+          Quán lý đại lý
         </NavLink>
         <div className="text-base font-semibold text-[#A1AAB2]">/</div>
         <span className="text-base font-semibold text-[#A1AAB2]">
@@ -554,6 +713,76 @@ const EditMerchant = () => {
                       classNamePrefix="react-select"
                     />
                   </div>
+                )}
+              />
+            </div>
+            {/* Level */}
+            <div>
+              <div className="text-sm font-medium text-gray-700 mb-1">
+                Cấp đại lý *
+              </div>
+              <Controller
+                name="level"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <Select
+                      {...field}
+                      placeholder="Chọn cấp đại lý"
+                      className="w-full"
+                      options={levelOptions}
+                      value={field.value}
+                      isDisabled={true}
+                    />
+                    {errors.level?.message ? (
+                      <p className="text-red-500 text-sm">
+                        {errors.level?.message?.toString()}
+                      </p>
+                    ) : null}
+                  </>
+                )}
+              />
+            </div>
+            {/* Parent Store */}
+            <div>
+              <div className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+                Đại lý cấp trên {selectedLevel?.value > 1 ? '*' : ''}
+                <Tooltip
+                  title={
+                    <div className="text-xs">
+                      <p className="font-semibold mb-1">Hướng dẫn:</p>
+                      <p>
+                        Chọn thông tin đại lý cấp trên là các cấp n-1 (n là giá
+                        trị của field cấp đại lý)
+                      </p>
+                    </div>
+                  }
+                  placement="top"
+                >
+                  <InfoCircleOutlined className="text-gray-400 cursor-help" />
+                </Tooltip>
+              </div>
+              <Controller
+                name="parent_id"
+                control={control}
+                render={({ field }) => (
+                  <>
+                    <Select
+                      {...field}
+                      placeholder="Chọn đại lý cấp trên"
+                      className="w-full"
+                      options={superiorStoreOptions}
+                      value={field.value}
+                      isLoading={isLoadingSuperiorStores}
+                      isClearable={selectedLevel?.value > 1}
+                      isDisabled={true}
+                    />
+                    {errors.parent_id && (
+                      <p className="text-red-500 text-sm">
+                        {errors.parent_id?.message?.toString()}
+                      </p>
+                    )}
+                  </>
                 )}
               />
             </div>
