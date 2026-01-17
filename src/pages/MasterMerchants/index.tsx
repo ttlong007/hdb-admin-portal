@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLink, Link } from 'react-router-dom'
+import { NavLink, Link, useNavigate } from 'react-router-dom'
 import { Table, Tag, Space, Button } from 'antd'
 import { EditOutlined, EyeOutlined } from '@ant-design/icons'
 import { useMasterMerchants } from '@/hooks/useMasterMerchants'
@@ -18,6 +18,7 @@ import {
 } from '@/config/constants'
 
 const MasterMerchants: React.FC = () => {
+  const navigate = useNavigate()
   const { masterMerchantFilters, setMasterMerchantFilters } = useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
   const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
@@ -25,7 +26,7 @@ const MasterMerchants: React.FC = () => {
   )
   const { isCreator } = useAuth()
 
-  const { data, isPending, refetch } = useMasterMerchants({
+  const { data, isPending, isError, error, refetch } = useMasterMerchants({
     page: masterMerchantFilters.page || 1,
     limit: masterMerchantFilters.limit || 10,
     filter: {
@@ -37,6 +38,16 @@ const MasterMerchants: React.FC = () => {
     sortField,
     sortOrder,
   })
+
+  // Handle 401 errors
+  React.useEffect(() => {
+    if (isError && error) {
+      const axiosError = error as any
+      if (axiosError?.response?.status === 401) {
+        navigate(routes.unauthorize, { replace: true })
+      }
+    }
+  }, [isError, error, navigate])
 
   const dataSource = data?.data ?? []
   const total = data?.page_data?.total ?? 0
