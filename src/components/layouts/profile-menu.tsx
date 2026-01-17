@@ -16,7 +16,11 @@ export default function ProfileMenu({
   avatarClassName?: string
   username?: boolean
 }) {
-  const { setAuthState } = useAuth()
+  const { setAuthState, isAuthenticated } = useAuth()
+
+  // Check both state and localStorage for authentication
+  const hasToken = isAuthenticated || Boolean(localStorage.getItem('accessToken'))
+
   const {
     data: profile,
     isLoading,
@@ -44,6 +48,10 @@ export default function ProfileMenu({
       }
       throw new Error(response.data.reason_message || 'Failed to fetch profile')
     },
+    // CRITICAL: Only fetch when authenticated and has token
+    enabled: hasToken,
+    staleTime: 5 * 60 * 1000, // 5 minutes - avoid unnecessary refetches
+    retry: 1, // Only retry once on failure
   })
   useQuery({
     queryKey: ['systemConfig'],
@@ -62,6 +70,10 @@ export default function ProfileMenu({
         response.data.reason_message || 'Failed to fetch system config'
       )
     },
+    // CRITICAL: Only fetch when authenticated and has token
+    enabled: hasToken,
+    staleTime: 10 * 60 * 1000, // 10 minutes - system config rarely changes
+    retry: 1,
   })
 
   return (

@@ -149,7 +149,7 @@ export default function EditStaff() {
 
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { isApprover, systemConfig } = useAuth()
+  const { isApprover, isViewer, systemConfig } = useAuth()
   const confirm = useConfirm()
 
   const { data: transactionOptions, isLoading: isLoadingTransactionTypes } =
@@ -185,6 +185,16 @@ export default function EditStaff() {
         'Họ tên không được chứa ký tự đặc biệt và số'
       ),
     email: yup.string().email('Email không hợp lệ'),
+    phone_number: yup
+      .string()
+      .matches(/^[0-9]+$/, 'Số điện thoại chỉ được chứa số')
+      .matches(/^0/, 'Số điện thoại phải bắt đầu bằng số 0')
+      .test(
+        'no-double-zero',
+        'Số điện thoại không được bắt đầu bằng 00',
+        (value) => !value || !value.startsWith('00')
+      )
+      .length(10, 'Số điện thoại phải có đúng 10 số'),
     company_id: yup.mixed<Option<number>>().nullable(),
     role: yup.mixed<Option<string>>().nullable(),
     store_id: yup.mixed<Option<number>>().nullable(),
@@ -528,12 +538,13 @@ export default function EditStaff() {
   useEffect(() => {
     if (
       isApprover ||
+      isViewer ||
       STATUS_WAITING_APPROVE.includes(staffDetail?.status || '')
     ) {
       toast.error('Bạn không có quyền truy cập trang này')
       navigate(routes.staff)
     }
-  }, [isApprover, staffDetail?.status])
+  }, [isApprover, isViewer, staffDetail?.status])
 
   console.log('errors', errors)
   return (

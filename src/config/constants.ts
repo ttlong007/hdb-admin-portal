@@ -48,7 +48,7 @@ export const MERCHANT_STATUS = [
 ]
 
 export const MASTER_MERCHANT_STATUS = [
-  {value: 'NEW', label: 'Chờ kích hoạt'},
+  { value: 'NEW', label: 'Chờ kích hoạt' },
   { value: 'WAITING_APPROVE', label: 'Đang đợi duyệt' },
   { value: 'WAITING_APPROVAL_FOR_EDIT', label: 'Chờ duyệt chỉnh sửa' },
   { value: 'ACTIVE', label: 'Hoạt động' },
@@ -85,14 +85,20 @@ export const MASTER_MERCHANT_STATUS_COLOR_MAP: Record<string, string> = {
 }
 
 export const TRANSACTION_STATUS = [
+  { label: 'Tất cả', value: 'ALL' },
   { label: 'Thành công', value: 'SUCCESSFUL' },
   { label: 'Thất bại', value: 'FAILED' },
+  { label: 'Đang xử lý', value: 'TIME_OUT' },
   { label: 'Đang đợi duyệt', value: 'WAITING_APPROVE' },
+  { label: 'Đã tạo', value: 'CREATED' },
 ]
 export const TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
+  ALL: 'default',
   SUCCESSFUL: 'green',
   FAILED: 'red',
+  TIME_OUT: 'orange',
   WAITING_APPROVE: 'orange',
+  CREATED: 'blue',
 }
 
 export const TRANSACTION_TYPE = [
@@ -143,6 +149,7 @@ export const STAFF_STATUS_COLOR_MAP: Record<string, string> = {
 export const SYSTEM_ROLES = {
   HDB_CREATION: 'chỉnh sửa',
   HDB_APPROVAL: 'duyệt',
+  HDB_VIEW: 'xem',
 }
 
 export const STATUS_WAITING_APPROVE = [

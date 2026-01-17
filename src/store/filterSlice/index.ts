@@ -17,6 +17,7 @@ interface FilterState {
     company_id?: any
     code?: string
     name?: string
+    parent_id?: string
   }
   staff: {
     status?: any
@@ -61,6 +62,7 @@ const initialState: FilterState = {
     company_id: undefined,
     code: '',
     name: '',
+    parent_id: '',
   },
   staff: {
     status: '',
