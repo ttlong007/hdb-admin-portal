@@ -14,8 +14,43 @@ import App from './App.tsx'
 import { Providers } from '@core/providers'
 import './index.css'
 import { ConfirmProvider } from './providers/ConfirmProvider.tsx'
+import { toast } from 'react-toastify'
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error: any) => {
+        // Don't retry on CORS or network errors
+        if (!error.response) {
+          console.error('Network/CORS error detected:', error.message)
+          return false
+        }
+        // Don't retry on 401 (will be handled by axios interceptor)
+        if (error.response?.status === 401) {
+          return false
+        }
+        // Retry other errors up to 1 time
+        return failureCount < 1
+      },
+      onError: (error: any) => {
+        // Handle CORS and network errors
+        if (!error.response) {
+          toast.error('Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng hoặc cấu hình CORS.')
+          console.error('Network/CORS error:', error.message)
+        }
+      },
+    },
+    mutations: {
+      onError: (error: any) => {
+        // Handle CORS and network errors for mutations
+        if (!error.response) {
+          toast.error('Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.')
+          console.error('Network/CORS error:', error.message)
+        }
+      },
+    },
+  },
+})
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
