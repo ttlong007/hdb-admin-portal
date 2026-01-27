@@ -32,22 +32,6 @@ const queryClient = new QueryClient({
         // Retry other errors up to 1 time
         return failureCount < 1
       },
-      onError: (error: any) => {
-        // Handle CORS and network errors
-        if (!error.response) {
-          toast.error('Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng hoặc cấu hình CORS.')
-          console.error('Network/CORS error:', error.message)
-        }
-      },
-    },
-    mutations: {
-      onError: (error: any) => {
-        // Handle CORS and network errors for mutations
-        if (!error.response) {
-          toast.error('Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.')
-          console.error('Network/CORS error:', error.message)
-        }
-      },
     },
   },
 })
