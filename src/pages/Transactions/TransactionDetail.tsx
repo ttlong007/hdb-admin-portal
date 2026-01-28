@@ -185,7 +185,7 @@ const TransactionDetail: React.FC = () => {
           Thông tin công ty
         </div>
 
-        <div className="grid grid-cols-5 gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full">
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
               Mã Cif
@@ -244,7 +244,7 @@ const TransactionDetail: React.FC = () => {
           Thông tin cửa hàng đại lý
         </div>
 
-        <div className="grid grid-cols-5 gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full">
           {/* Mã cửa hàng */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
@@ -324,7 +324,7 @@ const TransactionDetail: React.FC = () => {
           Thông tin giao dịch
         </div>
 
-        <div className="grid grid-cols-5 gap-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 w-full">
           {/* Mã tham chiếu */}
           <div className="flex flex-col">
             <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">

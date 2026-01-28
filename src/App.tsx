@@ -24,6 +24,15 @@ function App() {
     if (accessToken && !token) {
       // User already has a valid session
       setAuthState({ isAuthenticated: true })
+
+      // Verify API connectivity with a lightweight health check
+      // This helps detect CORS/network issues early
+      axiosInstance.get('/v1/admin/health-check').catch((error) => {
+        // If health check fails, it might be CORS or network issue
+        // Log it but don't logout immediately as it might be temporary
+        console.warn('API health check failed:', error.message)
+        // User will be redirected to unauthorized when they try to access protected routes
+      })
     }
   }, [])
 
