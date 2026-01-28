@@ -9,6 +9,7 @@ import { User } from '../types'
 import UserForm from './UserForm'
 import UserTable from './UserTable'
 import CustomModal from './CustomModal'
+import { useAuth } from '@/store/authSlice/useAuth'
 
 const UserManagement: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -24,6 +25,7 @@ const UserManagement: React.FC = () => {
     handleSearch,
     handlePageChange,
   } = useUsers(companyId)
+   const { isViewer } = useAuth()
 
   const [searchInput, setSearchInput] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -132,13 +134,15 @@ const UserManagement: React.FC = () => {
                 Tổng số: <span className="font-medium text-gray-900">{pagination.total}</span> người dùng
               </p>
             </div>
-            <Button
-              onClick={handleOpenCreate}
-              className="bg-red-600 hover:bg-red-700 text-white whitespace-nowrap transition-colors duration-200 shadow-sm"
-            >
-              <PiPlusBold className="mr-2 h-4 w-4" />
-              Thêm người dùng
-            </Button>
+            {!isViewer && (
+              <Button
+                onClick={handleOpenCreate}
+                className="bg-red-600 hover:bg-red-700 text-white whitespace-nowrap transition-colors duration-200 shadow-sm"
+              >
+                <PiPlusBold className="mr-2 h-4 w-4" />
+                Thêm người dùng
+              </Button>
+            )}
           </div>
         </div>
 
@@ -170,6 +174,7 @@ const UserManagement: React.FC = () => {
           onEdit={handleOpenEdit}
           onToggleStatus={handleOpenToggleStatusModal}
           onResetPassword={handleOpenResetPasswordModal}
+          isViewer={isViewer}
         />
 
         {/* Pagination */}

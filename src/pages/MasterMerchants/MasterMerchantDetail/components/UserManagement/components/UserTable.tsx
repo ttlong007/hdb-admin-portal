@@ -9,9 +9,10 @@ interface UserTableProps {
   onEdit: (user: User) => void
   onToggleStatus: (user: User) => void
   onResetPassword: (user: User) => void
+  isViewer?: boolean
 }
 
-const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggleStatus, onResetPassword }) => {
+const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggleStatus, onResetPassword, isViewer }) => {
   const getRoleName = (role: string) => {
     const roleMap: Record<string, string> = {
       AG_CREATION: 'Người tạo',
@@ -46,15 +47,17 @@ const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggl
             <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
               Trạng thái
             </th>
-            <th className="text-center py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
-              Thao tác
-            </th>
+            {!isViewer && (
+              <th className="text-center py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                Thao tác
+              </th>
+            )}
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
           {isLoading ? (
             <tr>
-              <td colSpan={8} className="text-center py-12">
+              <td colSpan={isViewer ? 7 : 8} className="text-center py-12">
                 <div className="flex flex-col items-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4"></div>
                   <p className="text-sm text-gray-500">Đang tải dữ liệu...</p>
@@ -63,7 +66,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggl
             </tr>
           ) : users.length === 0 ? (
             <tr>
-              <td colSpan={8} className="text-center py-12">
+              <td colSpan={isViewer ? 7 : 8} className="text-center py-12">
                 <div className="flex flex-col items-center">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                     <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,50 +113,52 @@ const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggl
                     {user.status === 'ACTIVE' ? 'Đang hoạt động' : 'Vô hiệu hóa'}
                   </span>
                 </td>
-                <td className="py-4 px-6">
-                  <div className="flex justify-center gap-2">
-                    <ActionIcon
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onEdit(user)}
-                      aria-label="Chỉnh sửa"
-                      title="Chỉnh sửa"
-                      className="hover:bg-red-50 hover:border-red-500 transition-colors"
-                    >
-                      <PiPencilSimple className="h-4 w-4 text-gray-600" />
-                    </ActionIcon>
+                {!isViewer && (
+                  <td className="py-4 px-6">
+                    <div className="flex justify-center gap-2">
+                      <ActionIcon
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onEdit(user)}
+                        aria-label="Chỉnh sửa"
+                        title="Chỉnh sửa"
+                        className="hover:bg-red-50 hover:border-red-500 transition-colors"
+                      >
+                        <PiPencilSimple className="h-4 w-4 text-gray-600" />
+                      </ActionIcon>
 
-                    <ActionIcon
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onResetPassword(user)}
-                      aria-label="Đặt lại mật khẩu"
-                      title="Đặt lại mật khẩu"
-                      className="hover:bg-yellow-50 hover:border-yellow-500 transition-colors"
-                    >
-                      <PiLockKey className="h-4 w-4 text-gray-600" />
-                    </ActionIcon>
+                      <ActionIcon
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onResetPassword(user)}
+                        aria-label="Đặt lại mật khẩu"
+                        title="Đặt lại mật khẩu"
+                        className="hover:bg-yellow-50 hover:border-yellow-500 transition-colors"
+                      >
+                        <PiLockKey className="h-4 w-4 text-gray-600" />
+                      </ActionIcon>
 
-                    <ActionIcon
-                      size="sm"
-                      variant="outline"
-                      onClick={() => onToggleStatus(user)}
-                      aria-label={user.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'}
-                      title={user.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'}
-                      className={
-                        user.status === 'ACTIVE'
-                          ? 'hover:bg-red-50 hover:border-red-500 transition-colors'
-                          : 'hover:bg-green-50 hover:border-green-500 transition-colors'
-                      }
-                    >
-                      {user.status === 'ACTIVE' ? (
-                        <PiToggleRight className="h-4 w-4 text-gray-600" />
-                      ) : (
-                        <PiToggleLeft className="h-4 w-4 text-gray-600" />
-                      )}
-                    </ActionIcon>
-                  </div>
-                </td>
+                      <ActionIcon
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onToggleStatus(user)}
+                        aria-label={user.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                        title={user.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'}
+                        className={
+                          user.status === 'ACTIVE'
+                            ? 'hover:bg-red-50 hover:border-red-500 transition-colors'
+                            : 'hover:bg-green-50 hover:border-green-500 transition-colors'
+                        }
+                      >
+                        {user.status === 'ACTIVE' ? (
+                          <PiToggleRight className="h-4 w-4 text-gray-600" />
+                        ) : (
+                          <PiToggleLeft className="h-4 w-4 text-gray-600" />
+                        )}
+                      </ActionIcon>
+                    </div>
+                  </td>
+                )}
               </tr>
             ))
           )}

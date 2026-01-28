@@ -68,6 +68,19 @@ axiosInstance.interceptors.response.use(
   async (error: AxiosError<ErrorResponse>) => {
     const originalRequest = error.config as AxiosRequestConfig & { __isRetryRequest?: boolean }
 
+    // Handle network errors (CORS, Network failure, etc.)
+    if (!error.response) {
+      // No response means network error, CORS, or server down
+      // Only logout if user was supposed to be authenticated
+      const accessToken = localStorage.getItem('accessToken')
+      if (accessToken) {
+        console.error('Network error or CORS issue detected:', error.message)
+        // Don't logout immediately for network errors as they might be temporary
+        // Just reject the error and let the component handle it
+      }
+      return Promise.reject(error)
+    }
+
     if (error.response?.status === 401) {
       // Check if no access token is available - then logout immediately
       const accessToken = localStorage.getItem('accessToken')
