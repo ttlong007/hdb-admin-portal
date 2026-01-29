@@ -85,7 +85,7 @@ const Filters: React.FC = () => {
           : null,
         status: transactionFilters.status
           ? TRANSACTION_STATUS.find(
-              (s) => s.value === transactionFilters.status
+              (s) => JSON.stringify(s.value) === JSON.stringify(transactionFilters.status)
             ) || null
           : null,
         store_code: transactionFilters.store_code || '',
@@ -114,7 +114,7 @@ const Filters: React.FC = () => {
       'status',
       transactionFilters.status
         ? TRANSACTION_STATUS.find(
-            (s) => s.value === transactionFilters.status
+            (s) => JSON.stringify(s.value) === JSON.stringify(transactionFilters.status)
           ) || null
         : null
     )
@@ -151,32 +151,34 @@ const Filters: React.FC = () => {
 
   const onSubmit = (data: FiltersFormValues) => {
     // Transform select fields to only use their 'value'
-    const processedData = {
-      ...data,
+    const processedData: any = {
+      code: data.code,
       transaction_type: data.transaction_type
         ? data.transaction_type.value
         : null,
-      status: data.status ? data.status.value : null,
+      status: data.status ? data.status.value.flat() : null,
+      store_code: data.store_code,
+      staff_code: data.staff_code,
     }
 
     // If duration exists and is an array, parse the dates
-    if (processedData.duration && Array.isArray(processedData.duration)) {
+    if (data.duration && Array.isArray(data.duration)) {
       // Assuming Moment objects, format them to 'YYYY-MM-DD'
-      const startDate = processedData.duration[0].format('YYYY-MM-DD')
-      const endDate = processedData.duration[1].format('YYYY-MM-DD')
+      const startDate = data.duration[0].format('YYYY-MM-DD')
+      const endDate = data.duration[1].format('YYYY-MM-DD')
       processedData.duration = [startDate, endDate]
+    } else {
+      processedData.duration = null
     }
 
-    if (transactionFilters.company_id) {
-      processedData.company_id = _get(
-        transactionFilters,
-        'company_id.value',
-        null
-      )
+    // Handle company_id
+    if (data.company_id) {
+      processedData.company_id = data.company_id
+    } else {
+      processedData.company_id = null
     }
 
     setTransactionFilters({
-      ...transactionFilters,
       ...processedData,
       page: 1,
       limit: 10,

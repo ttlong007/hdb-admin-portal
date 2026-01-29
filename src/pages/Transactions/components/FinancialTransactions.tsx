@@ -60,7 +60,7 @@ const FinancialTransactions: React.FC = () => {
       render: (status: string) => {
         const statusKey = status?.toUpperCase()
         const label =
-          TRANSACTION_STATUS.find((s) => s.value === statusKey)?.label || '---'
+          TRANSACTION_STATUS.find((s) => s.value.includes(statusKey))?.label || '---'
         const color = TRANSACTION_STATUS_COLOR_MAP[statusKey] || 'default'
         return <Tag color={color}>{label}</Tag>
       },

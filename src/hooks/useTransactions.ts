@@ -50,7 +50,7 @@ export const useTransactions = ({
 
       // Only add status if it's not empty
       if (transactionFilters.status) {
-        requestBody.status = [transactionFilters.status]
+        requestBody.status = transactionFilters.status
       }
 
       if (transactionFilters.company_id) {
