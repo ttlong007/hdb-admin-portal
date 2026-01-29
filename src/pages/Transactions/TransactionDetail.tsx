@@ -433,7 +433,7 @@ const TransactionDetail: React.FC = () => {
                 color={TRANSACTION_STATUS_COLOR_MAP[transaction.status || '']}
               >
                 {TRANSACTION_STATUS.find(
-                  (status) => status.value === transaction.status
+                  (status) => status.value.includes(transaction.status)
                 )?.label || '---'}
               </Tag>
             </div>
