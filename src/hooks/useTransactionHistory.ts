@@ -12,6 +12,8 @@ interface TransactionHistoryRequestBody {
   staff_code?: string
   time_start?: string
   time_end?: string
+  order_by_column?: string
+  descending?: boolean
 }
 
 interface TransactionHistoryRequestParams {
@@ -32,6 +34,8 @@ export const useTransactionHistory = ({
       let requestBody: TransactionHistoryRequestBody = {
         page: transactionFilters.page,
         limit: transactionFilters.limit,
+        order_by_column: sortField || 'transaction_time',
+        descending: sortOrder === 'descend',
       }
 
       // Add transaction_type_ids if exists

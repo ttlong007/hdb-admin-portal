@@ -31,7 +31,7 @@ export const useTransactions = ({
   const { transactionFilters } = useFilter()
 
   const { isPending, data } = useQuery({
-    queryKey: ['transactions', transactionFilters],
+    queryKey: ['transactions', transactionFilters, sortField, sortOrder],
     queryFn: async () => {
       // Create request body and remove empty values
       let requestBody: TransactionRequestBody = {

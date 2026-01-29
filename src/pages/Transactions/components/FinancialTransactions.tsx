@@ -69,7 +69,6 @@ const FinancialTransactions: React.FC = () => {
       title: 'Loại GD',
       dataIndex: 'transaction_type_name',
       key: 'transaction_type_name',
-      sorter: true,
       render: (name: string) => name || '---',
     },
     {
