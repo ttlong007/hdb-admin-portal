@@ -16,7 +16,8 @@ function App() {
   const token = queryParams.get("token");
   const { setAuthState } = useAuth();
   const loginAttempted = useRef(false);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  // CRITICAL: Set initial state based on token presence to prevent premature render
+  const [isLoggingIn, setIsLoggingIn] = useState(Boolean(token));
 
   // Initialize auth state from localStorage on mount
   useEffect(() => {
@@ -52,11 +53,17 @@ function App() {
         setIsLoggingIn(false);
         navigate(routes.masterMerchant, { replace: true });
       } else {
-        toast.error(response.data.reason_message);
+        toast.error(response.data.reason_message || "Đăng nhập thất bại");
         setIsLoggingIn(false);
         navigate(routes.unauthorize, { replace: true });
         throw new Error("Login failed");
       }
+    },
+    onError: (error: any) => {
+      console.error("Login by token failed:", error);
+      toast.error("Không thể đăng nhập. Vui lòng thử lại.");
+      setIsLoggingIn(false);
+      navigate(routes.unauthorize, { replace: true });
     },
   });
 
@@ -64,6 +71,7 @@ function App() {
     if (token && !loginAttempted.current) {
       loginAttempted.current = true;
       setIsLoggingIn(true);
+      console.log("Starting login by token...");
       loginByTokenMutation.mutate({ token, party_code: "HDA" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -74,8 +82,9 @@ function App() {
   }, [navigate]);
 
   return isLoggingIn ? (
-    <div className="flex items-center justify-center min-h-screen">
+    <div className="flex flex-col items-center justify-center min-h-screen gap-4">
       <Spin size="large" />
+      <p className="text-gray-600">Đang xác thực...</p>
     </div>
   ) : (
     <RootRoutes />
