@@ -96,6 +96,7 @@ const UserForm: React.FC<UserFormProps> = ({ user, companyId, onSubmit, onCancel
           <option value="" disabled>Chọn vai trò</option>
           <option value="AG_CREATION">Người tạo</option>
           <option value="AG_APPROVAL">Người duyệt</option>
+          <option value="AG_VIEW">Người xem</option>
         </select>
         {errors.role && (
           <p className="mt-1 text-sm text-red-500">{errors.role}</p>

@@ -19,7 +19,7 @@ export interface UserFormData {
   role: string
 }
 
-export type UserRole = 'AG_CREATION' | 'AG_APPROVAL'
+export type UserRole = 'AG_CREATION' | 'AG_APPROVAL' | 'AG_VIEW'
 
 export type UserStatus = 'ACTIVE' | 'INACTIVE'
 

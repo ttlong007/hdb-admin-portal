@@ -17,6 +17,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggl
     const roleMap: Record<string, string> = {
       AG_CREATION: 'Người tạo',
       AG_APPROVAL: 'Người duyệt',
+      AG_VIEW: 'Người xem',
     }
     return roleMap[role] || role
   }
