@@ -288,16 +288,24 @@ const EditMerchant = () => {
       })
 
       // Set the needApprove flag based on whether any approval transaction types exist.
-      setNeedApprove(
-        storeData.need_approve_transaction_types &&
-          storeData.need_approve_transaction_types.length > 0
-      )
+      const initialValue = !!(storeData.need_approve_transaction_types &&
+          storeData.need_approve_transaction_types.length > 0)
+      setNeedApprove(initialValue)
+      initialNeedApprove.current = initialValue
     }
   }, [storeData, reset])
 
   const [needApprove, setNeedApprove] = React.useState(false)
+  const initialNeedApprove = React.useRef<boolean>(false)
   const handleApporveChange = (checked: boolean) => {
     setNeedApprove(checked)
+    // When needApprove changes, mark the approveThreshold field as dirty
+    // to ensure the change is tracked
+    if (checked === false && initialNeedApprove.current === true) {
+      // User is disabling approval - mark fields as changed
+      setValue('approveThreshold', '', { shouldDirty: true })
+      setValue('transactionTypes', [], { shouldDirty: true })
+    }
   }
 
   const MAX_STORE_LEVEL = systemConfig.MAX_STORE_LEVEL
@@ -622,22 +630,31 @@ const EditMerchant = () => {
       }
     }
 
-    // Handle approval data if approveThreshold or transactionTypes changed.
-    if (dirtyFields.approveThreshold || dirtyFields.transactionTypes) {
-      // Map selected transaction type codes to their corresponding IDs.
-      const selectedIds = (data.transactionTypes as any)
-        .map((code) => {
-          const option = options.find(
-            (opt: { id: number; code: string; name: string }) =>
-              opt.code === code
-          )
-          return option ? option.id : null
-        })
-        .filter((id): id is number => id !== null)
+    // Handle approval data if needApprove changed or if approveThreshold/transactionTypes changed
+    const needApproveChanged = needApprove !== initialNeedApprove.current
+    if (needApproveChanged || dirtyFields.approveThreshold || dirtyFields.transactionTypes) {
+      if (needApprove) {
+        // When needApprove is true, send the approval data
+        const selectedIds = (data.transactionTypes as any)
+          .map((code) => {
+            const option = options.find(
+              (opt: { id: number; code: string; name: string }) =>
+                opt.code === code
+            )
+            return option ? option.id : null
+          })
+          .filter((id): id is number => id !== null)
 
-      payload.need_approve_transaction_data = {
-        approve_amount: Number(data.approveThreshold),
-        need_approve_transaction_ids: selectedIds,
+        payload.need_approve_transaction_data = {
+          approve_amount: Number(data.approveThreshold) || 0,
+          need_approve_transaction_ids: selectedIds,
+        }
+      } else {
+        // When needApprove is false, send empty data to clear approval settings
+        payload.need_approve_transaction_data = {
+          approve_amount: 0,
+          need_approve_transaction_ids: [],
+        }
       }
     }
 
