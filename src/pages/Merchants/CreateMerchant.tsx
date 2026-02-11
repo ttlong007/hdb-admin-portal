@@ -572,7 +572,6 @@ const CreateMerchant = () => {
       expense_account: data.expense_account?.value || '',
       income_account: data.income_account?.value || '',
       company_id: data.company_id?.value || 0,
-      approve_threshold: Number(data.approveThreshold),
       level: Number(data.level?.value) || 1,
       // Map limits based on the transaction quotas
       limits: [
@@ -585,11 +584,14 @@ const CreateMerchant = () => {
           type: 'TRANSACTION_QUOTA_MONTHLY',
         },
       ],
-      // Map approval data using the approveThreshold and selected transaction types
-      need_approve_transaction_data: {
+    }
+
+    if (needApprove) {
+      payload.approve_threshold = Number(data.approveThreshold)
+      payload.need_approve_transaction_data = {
         approve_amount: Number(data.approveThreshold),
         need_approve_transaction_ids: data.transactionTypes,
-      },
+      }
     }
 
     // Add parent_id only if it exists (for all levels including level 1)
