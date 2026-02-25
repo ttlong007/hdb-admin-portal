@@ -1,6 +1,8 @@
 import { CheckOutlined } from '@ant-design/icons'
 import { Tag } from 'antd'
+import { useQuery } from '@tanstack/react-query'
 import InfoCard from '@/components/core/components/InfoCard'
+import axiosInstance from '@/config/axios'
 import {
   MERCHANT_STATUS,
   MERCHANT_STATUS_COLOR_MAP,
@@ -34,6 +36,31 @@ export function MerchantChangeInfo({
     changeRequestData.status
 
   const isShowTransactionQuotaInfo = monthlyLimit || dailyLimit
+
+  // Handle need_approve_transaction_data from proposed changes
+  const needApproveData = changeRequestData.need_approve_transaction_data
+  const isDisablingApproval =
+    needApproveData &&
+    needApproveData.approve_amount === 0 &&
+    (!needApproveData.need_approve_transaction_ids ||
+      needApproveData.need_approve_transaction_ids.length === 0)
+  const isEnablingOrChangingApproval = needApproveData && !isDisablingApproval
+  // Fetch transaction type names when enabling/changing approval
+  const { data: transactionTypes } = useQuery({
+    queryKey: ['transaction-types'],
+    queryFn: async () => {
+      const response = await axiosInstance.get(
+        '/v1/admin/transaction/list-types?need_approval=true'
+      )
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch transaction types')
+    },
+    enabled:
+      isEnablingOrChangingApproval &&
+      needApproveData?.need_approve_transaction_ids?.length > 0,
+  })
 
   return (
     <div className="mt-8 flex flex-col gap-6">
@@ -157,7 +184,76 @@ export function MerchantChangeInfo({
           ) : null}
         </div>
 
-        {changeRequestData.need_approve_transaction_types ? (
+        {needApproveData ? (
+          <div id="B" className="w-1/3">
+            <InfoCard
+              title="Duyệt giao dịch"
+              showBadge={isWaitingApprovalForEdit}
+              badgeText="Thông tin chỉnh sửa"
+              badgeColor="blue"
+            >
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col flex-1 gap-2">
+                  <span className="text-sm text-gray-400">
+                    Yêu cầu duyệt giao dịch
+                  </span>
+                  <span className="text-base font-semibold">
+                    {isDisablingApproval ? 'Tắt' : 'Bật'}
+                  </span>
+                </div>
+
+                {isEnablingOrChangingApproval ? (
+                  <>
+                    <div className="flex flex-col flex-1 gap-2">
+                      <span className="text-sm text-gray-400">
+                        Số tiền giao dịch
+                      </span>
+                      <span className="text-base font-semibold">
+                        {needApproveData.approve_amount
+                          ? Number(
+                              needApproveData.approve_amount
+                            ).toLocaleString('vi-VN') + ' VND'
+                          : '---'}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-col flex-1 gap-2">
+                      <span className="text-sm text-gray-400">
+                        Loại giao dịch yêu cầu
+                      </span>
+                      <div className="flex flex-col gap-1">
+                        {needApproveData.need_approve_transaction_ids?.length >
+                        0 ? (
+                          needApproveData.need_approve_transaction_ids.map(
+                            (id: number) => {
+                              const typeName =
+                                transactionTypes?.find(
+                                  (t: any) => t.id === id
+                                )?.name || `ID: ${id}`
+                              return (
+                                <div
+                                  key={id}
+                                  className="flex items-center gap-2"
+                                >
+                                  <CheckOutlined />
+                                  <span className="text-base font-semibold">
+                                    {typeName}
+                                  </span>
+                                </div>
+                              )
+                            }
+                          )
+                        ) : (
+                          <span className="text-base font-semibold">---</span>
+                        )}
+                      </div>
+                    </div>
+                  </>
+                ) : null}
+              </div>
+            </InfoCard>
+          </div>
+        ) : changeRequestData.need_approve_transaction_types ? (
           <div id="B" className="w-1/3">
             <InfoCard title="Xác nhận phê duyệt">
               <div className="flex flex-col gap-4">
