@@ -4,6 +4,17 @@ import userEvent from '@testing-library/user-event'
 import UserForm from './UserForm'
 import { User } from '../types'
 
+// Mock useStores hook
+vi.mock('@/hooks/useStores', () => ({
+  useStores: () => ({
+    data: [
+      { label: 'Chi nhánh A', value: 1 },
+      { label: 'Chi nhánh B', value: 2 },
+    ],
+    isLoading: false,
+  }),
+}))
+
 describe('UserForm', () => {
   const mockOnSubmit = vi.fn()
   const mockOnCancel = vi.fn()
@@ -27,6 +38,7 @@ describe('UserForm', () => {
       expect(screen.getByPlaceholderText(/Nhập họ và tên/i)).toBeInTheDocument()
       expect(screen.getByPlaceholderText(/example@email.com/i)).toBeInTheDocument()
       expect(screen.getByPlaceholderText(/0123456789/i)).toBeInTheDocument()
+      expect(screen.getByText(/Chọn chi nhánh/i)).toBeInTheDocument()
       expect(screen.getByText(/Chọn vai trò/i)).toBeInTheDocument()
     })
 
@@ -55,10 +67,11 @@ describe('UserForm', () => {
       expect(screen.getByPlaceholderText(/Nhập họ và tên/i)).toBeInTheDocument()
       expect(screen.getByText(/Chọn vai trò/i)).toBeInTheDocument()
 
-      // Should NOT have username, email, phone
+      // Should NOT have username, email, phone, chi nhánh
       expect(screen.queryByPlaceholderText(/Nhập tên đăng nhập/i)).not.toBeInTheDocument()
       expect(screen.queryByPlaceholderText(/example@email.com/i)).not.toBeInTheDocument()
       expect(screen.queryByPlaceholderText(/0123456789/i)).not.toBeInTheDocument()
+      expect(screen.queryByText(/Chọn chi nhánh/i)).not.toBeInTheDocument()
     })
 
     it('should show "Thêm mới" button when creating new user', () => {
@@ -246,7 +259,8 @@ describe('UserForm', () => {
       await user.type(screen.getByPlaceholderText(/example@email.com/i), 'test@example.com')
       await user.type(screen.getByPlaceholderText(/0123456789/i), '0123456789')
 
-      const roleSelect = screen.getByRole('combobox')
+      const selects = screen.getAllByRole('combobox')
+      const roleSelect = selects[selects.length - 1] // Role is the last select
       await user.selectOptions(roleSelect, 'AG_CREATION')
 
       const submitButton = screen.getByRole('button', { name: /Thêm mới/i })
@@ -275,14 +289,15 @@ describe('UserForm', () => {
         />
       )
 
-      const roleSelect = screen.getByRole('combobox')
+      const selects = screen.getAllByRole('combobox')
+      const roleSelect = selects[selects.length - 1] // Role is the last select
       const options = roleSelect.querySelectorAll('option')
 
       expect(options).toHaveLength(4) // placeholder + 3 roles
       expect(options[0]).toHaveTextContent('Chọn vai trò')
       expect(options[1]).toHaveTextContent('Người tạo')
       expect(options[2]).toHaveTextContent('Người duyệt')
-      expect(options[3]).toHaveTextContent('Quản trị viên')
+      expect(options[3]).toHaveTextContent('Người xem')
     })
 
     it('should show error state on role select when validation fails', async () => {
@@ -299,7 +314,8 @@ describe('UserForm', () => {
       await user.click(submitButton)
 
       await waitFor(() => {
-        const roleSelect = screen.getByRole('combobox')
+        const selects = screen.getAllByRole('combobox')
+        const roleSelect = selects[selects.length - 1] // Role is the last select
         expect(roleSelect).toHaveClass('border-red-500')
       })
     })
