@@ -24,6 +24,7 @@ interface TableRecord {
   CashWithdrawal: string
   CashDeposit: string
   MoneyTransfer: string
+  CreditCardPayment: string
   CustomerReferral: string
 }
 
@@ -126,6 +127,11 @@ const StaffTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
       title: 'Chuyển tiền',
       dataIndex: 'MoneyTransfer',
       key: 'MoneyTransfer',
+    },
+    {
+      title: 'Thanh toán thẻ tín dụng',
+      dataIndex: 'CreditCardPayment',
+      key: 'CreditCardPayment',
     },
     {
       title: 'Giới thiệu khách hàng',

@@ -74,7 +74,6 @@ const UploadDocument: React.FC<UploadDocumentProps> = ({
     fileList,
   }
 
-  console.log(fileList)
   return (
     <div className="mt-6">
       <h4 className="text-[#212B36] text-[20px] not-italic font-bold leading-[20px] mb-4 mt-8">
