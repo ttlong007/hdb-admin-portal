@@ -254,7 +254,7 @@ const AdminFeeEditTable: React.FC<AdminFeeEditTableProps> = ({
         setEditingKey('')
       }
     } catch (errInfo) {
-      console.log('Validate Failed:', errInfo)
+      // Validation failed
     }
   }
 

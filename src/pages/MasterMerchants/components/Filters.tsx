@@ -46,8 +46,6 @@ const Filters: React.FC<Props> = ({ syncLoading, sync }) => {
     })
   }, [JSON.stringify(masterMerchantFilters)])
 
-  console.log('masterMerchantFilters', masterMerchantFilters)
-
   const onSubmit = (data: FiltersFormValues) => {
     const payload = Object.entries(data).reduce((acc, [key, value]) => {
       if (value) {

@@ -35,7 +35,7 @@ export function downloadFromPresignedUrl(
       a.remove()
     })
     .catch((error) => {
-      console.log('Failed to download file: ' + error.message)
+      console.error('Failed to download file: ' + error.message)
     })
 }
 

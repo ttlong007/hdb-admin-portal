@@ -157,7 +157,6 @@ function DropdownMenu({ profile }: DropdownMenuProps) {
     logout()
   }
 
-  console.log('profile', profile)
   return (
     <div className="text-left rtl:text-right">
       <div className="flex items-center border-b border-gray-300 px-6 pb-5 pt-6">
