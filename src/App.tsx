@@ -71,7 +71,6 @@ function App() {
     if (token && !loginAttempted.current) {
       loginAttempted.current = true;
       setIsLoggingIn(true);
-      console.log("Starting login by token...");
       loginByTokenMutation.mutate({ token, party_code: "HDA" });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

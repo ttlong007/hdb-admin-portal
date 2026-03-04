@@ -2,6 +2,7 @@ import React from 'react'
 import { Input, Button } from 'rizzui'
 import { User, UserFormData } from '../types'
 import { useUserForm } from '../hooks/useUserForm'
+import { useStores } from '@/hooks/useStores'
 
 interface UserFormProps {
   user?: User | null
@@ -12,11 +13,17 @@ interface UserFormProps {
 
 const UserForm: React.FC<UserFormProps> = ({ user, companyId, onSubmit, onCancel }) => {
   const { formData, errors, handleChange, validate } = useUserForm(user, companyId)
+  const { data: stores = [], isLoading: isLoadingStores } = useStores(companyId)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (validate()) {
-      onSubmit(formData)
+      // Strip store_id if not selected
+      const submitData = { ...formData }
+      if (!submitData.store_id) {
+        delete submitData.store_id
+      }
+      onSubmit(submitData)
     }
   }
 
@@ -78,6 +85,28 @@ const UserForm: React.FC<UserFormProps> = ({ user, companyId, onSubmit, onCancel
             onChange={(e) => handleChange('phone_number', e.target.value)}
             error={errors.phone_number}
           />
+        </div>
+      )}
+
+      {/* Chi nhánh - Only show when creating */}
+      {!user && (
+        <div>
+          <label className="block text-sm font-medium text-gray-900 mb-2">
+            Chi nhánh
+          </label>
+          <select
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+            value={formData.store_id || ''}
+            onChange={(e) => handleChange('store_id', e.target.value ? Number(e.target.value) : 0)}
+            disabled={isLoadingStores}
+          >
+            <option value="">{isLoadingStores ? 'Đang tải...' : 'Chọn chi nhánh'}</option>
+            {stores.map((store) => (
+              <option key={store.value} value={store.value}>
+                {store.label}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 

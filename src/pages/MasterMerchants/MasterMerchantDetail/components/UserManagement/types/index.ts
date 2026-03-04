@@ -16,6 +16,7 @@ export interface UserFormData {
   email: string
   phone_number: string
   company_id: number
+  store_id?: number
   role: string
 }
 

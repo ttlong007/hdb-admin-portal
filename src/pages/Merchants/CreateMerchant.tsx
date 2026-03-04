@@ -29,8 +29,6 @@ const CreateMerchant = () => {
 
   const MAX_STORE_LEVEL = systemConfig.MAX_STORE_LEVEL
 
-  console.log('Max store level:', MAX_STORE_LEVEL)
-
   useEffect(() => {
     if (isApprover || isViewer) {
       toast.error('Bạn không có quyền truy cập trang này')
@@ -448,14 +446,8 @@ const CreateMerchant = () => {
 
   // Fetch superior stores when company or level changes
   useEffect(() => {
-    console.log('=== Superior Stores Effect ===')
-    console.log('selectedCompany:', selectedCompany)
-    console.log('selectedLevel:', selectedLevel)
-    console.log('selectedLevel.value:', selectedLevel?.value)
-
     // If level is 1, don't call API as there are no parent stores (it's the top level)
     if (selectedLevel?.value === 1) {
-      console.log('Level 1 selected - no parent stores available')
       setSuperiorStoreOptions([])
       setValue('parent_id', null)
       return
@@ -466,7 +458,6 @@ const CreateMerchant = () => {
       // For level 3, fetch stores at level 2 (to use as parent)
       // So the API level = selected level - 1
       const apiLevel = selectedLevel.value - 1
-      console.log('Calling API with level:', apiLevel, '(selectedLevel.value:', selectedLevel.value, ')')
 
       // Call API for all levels to fetch the appropriate parent stores
       superiorStoresMutation.mutate(
@@ -477,7 +468,6 @@ const CreateMerchant = () => {
         },
         {
           onSuccess: (data) => {
-            console.log('API Response:', data)
             const options =
               data?.data?.map((store: any) => ({
                 label: `${store.code} - ${store.name}`,
@@ -510,7 +500,6 @@ const CreateMerchant = () => {
         }
       )
     } else {
-      console.log('Clearing options - missing company or level')
       setSuperiorStoreOptions([])
       setValue('parent_id', null)
     }

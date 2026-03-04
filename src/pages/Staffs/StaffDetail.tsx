@@ -151,7 +151,6 @@ const StaffDetail: React.FC = () => {
   if (isLoading) return <div>Loading staff detail...</div>
   if (error) return <div>Error loading staff detail.</div>
 
-  console.log('Staff Detail:', staff)
   return (
     <>
       <div className="flex justify-start items-center gap-2 mb-4">

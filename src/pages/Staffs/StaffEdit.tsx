@@ -546,7 +546,6 @@ export default function EditStaff() {
     }
   }, [isApprover, isViewer, staffDetail?.status])
 
-  console.log('errors', errors)
   return (
     <>
       <div className="flex justify-start items-center gap-2 mb-4">

@@ -32,10 +32,18 @@ export default function UploadFileModal({
       setIsLoading(true)
       const file = fileList[0]
 
+      // Truncate file name to max 64 characters (DB column limit)
+      let fileName = file.name || 'upload.xlsx'
+      if (fileName.length > 64) {
+        const extIndex = fileName.lastIndexOf('.')
+        const ext = extIndex !== -1 ? fileName.slice(extIndex) : ''
+        fileName = fileName.slice(0, 64 - ext.length) + ext
+      }
+
       const initResponse = await axiosInstance.post(
         '/v1/admin/file/upload/init-transaction',
         {
-          file_name: file.name,
+          file_name: fileName,
           content_type: file.type,
           file_size: file.size,
           upload_type: uploadType,
