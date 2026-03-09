@@ -857,6 +857,10 @@ const EditMerchant = () => {
                       options={provinces || []}
                       isLoading={isLoadingProvinces}
                       value={field.value}
+                      onChange={(newValue) => {
+                        field.onChange(newValue)
+                        setValue('ward', null)
+                      }}
                     />
                     {errors.city?.message ? (
                       <p className="text-red-500 text-sm">

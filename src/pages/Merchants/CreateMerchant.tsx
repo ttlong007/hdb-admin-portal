@@ -809,6 +809,10 @@ const CreateMerchant = () => {
                       options={provinces || []}
                       isLoading={isLoadingProvinces}
                       value={field.value}
+                      onChange={(newValue) => {
+                        field.onChange(newValue)
+                        setValue('ward', null)
+                      }}
                     />
                     {errors.city && (
                       <p className="text-red-500 text-sm">
