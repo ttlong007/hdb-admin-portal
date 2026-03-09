@@ -14,7 +14,7 @@ interface UserFormProps {
 
 const UserForm: React.FC<UserFormProps> = ({ user, companyId, onSubmit, onCancel }) => {
   const { formData, errors, handleChange, validate } = useUserForm(user, companyId)
-  const { data: stores = [], isLoading: isLoadingStores } = useStores(companyId)
+  const { data: stores = [], isLoading: isLoadingStores } = useStores(companyId, 1)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
