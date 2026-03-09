@@ -58,7 +58,6 @@ const EditMerchant = () => {
         'Địa chỉ không được chứa ký tự đặc biệt'
       ),
     city: yup.object().nullable(),
-    district: yup.object().nullable(),
     ward: yup.object().nullable(),
     expense_account: yup.object().nullable(),
     income_account: yup.object().nullable(),
@@ -176,7 +175,6 @@ const EditMerchant = () => {
       code: '',
       address: '',
       city: null,
-      district: null,
       ward: null,
       expense_account: null,
       income_account: null,
@@ -225,12 +223,6 @@ const EditMerchant = () => {
           ? {
               label: storeData.location.province_name,
               value: storeData.location.province_code,
-            }
-          : null,
-        district: storeData.location
-          ? {
-              label: storeData.location.district_name,
-              value: storeData.location.district_code,
             }
           : null,
         ward: storeData.location
@@ -482,34 +474,13 @@ const EditMerchant = () => {
 
   const selectedCity = useWatch({ control, name: 'city' })
 
-  // Fetch districts based on selected city
-  const { data: districts, isLoading: isLoadingDistrict } = useQuery<Option[]>({
-    queryKey: ['location', 'district', selectedCity?.value],
-    queryFn: async () => {
-      const response = await axiosInstance.post('/v1/admin/location/get-list', {
-        location_type: 'district',
-        parent_code: selectedCity?.value || '',
-      })
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data.map((d: any) => ({
-          label: d.name,
-          value: d.code,
-        }))
-      }
-      throw new Error('Failed to fetch districts')
-    },
-    enabled: !!selectedCity,
-  })
-
-  const selectedDistrict = useWatch({ control, name: 'district' })
-
-  // Fetch wards based on selected district
+  // Fetch wards based on selected city
   const { data: wards, isLoading: isLoadingWard } = useQuery<Option[]>({
-    queryKey: ['location', 'ward', selectedDistrict?.value],
+    queryKey: ['location', 'ward', selectedCity?.value],
     queryFn: async () => {
       const response = await axiosInstance.post('/v1/admin/location/get-list', {
         location_type: 'ward',
-        parent_code: selectedDistrict?.value || '',
+        parent_code: selectedCity?.value || '',
       })
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.map((w: any) => ({
@@ -519,7 +490,7 @@ const EditMerchant = () => {
       }
       throw new Error('Failed to fetch wards')
     },
-    enabled: !!selectedDistrict,
+    enabled: !!selectedCity,
   })
 
   // Fetch account options via custom hook
@@ -659,7 +630,6 @@ const EditMerchant = () => {
     }
 
     if (payload.ward) delete payload.ward
-    if (payload.district) delete payload.district
     if (payload.city) delete payload.city
     if (payload.active) delete payload.active
     if (payload.need_approve_transaction_data === undefined) {
@@ -891,33 +861,6 @@ const EditMerchant = () => {
                     {errors.city?.message ? (
                       <p className="text-red-500 text-sm">
                         {errors.city?.message?.toString()}
-                      </p>
-                    ) : null}
-                  </>
-                )}
-              />
-            </div>
-            {/* District Field */}
-            <div>
-              <div className="text-sm font-medium text-gray-700 mb-1">
-                Quận/Huyện
-              </div>
-              <Controller
-                name="district"
-                control={control}
-                render={({ field }) => (
-                  <>
-                    <Select
-                      {...field}
-                      placeholder="Chọn quận/huyện"
-                      className="w-full"
-                      options={districts || []}
-                      isLoading={isLoadingDistrict}
-                      value={field.value}
-                    />
-                    {errors.district?.message ? (
-                      <p className="text-red-500 text-sm">
-                        {errors.district?.message?.toString()}
                       </p>
                     ) : null}
                   </>
