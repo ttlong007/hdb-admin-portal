@@ -8,7 +8,7 @@ export const useUserForm = (user?: User | null, companyId?: number) => {
     email: user?.email || '',
     phone_number: user?.phone_number || '',
     company_id: user?.company_id || companyId || 0,
-    store_id: undefined,
+    store_id: user?.store_id || undefined,
     role: user?.role || '',
   })
 
