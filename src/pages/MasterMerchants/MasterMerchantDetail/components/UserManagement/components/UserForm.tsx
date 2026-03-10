@@ -1,5 +1,6 @@
 import React from 'react'
 import { Input, Button } from 'rizzui'
+import Select from 'react-select'
 import { User, UserFormData } from '../types'
 import { useUserForm } from '../hooks/useUserForm'
 import { useStores } from '@/hooks/useStores'
@@ -13,7 +14,7 @@ interface UserFormProps {
 
 const UserForm: React.FC<UserFormProps> = ({ user, companyId, onSubmit, onCancel }) => {
   const { formData, errors, handleChange, validate } = useUserForm(user, companyId)
-  const { data: stores = [], isLoading: isLoadingStores } = useStores(companyId)
+  const { data: stores = [], isLoading: isLoadingStores } = useStores(companyId, 1)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -88,27 +89,37 @@ const UserForm: React.FC<UserFormProps> = ({ user, companyId, onSubmit, onCancel
         </div>
       )}
 
-      {/* Chi nhánh - Only show when creating */}
-      {!user && (
-        <div>
-          <label className="block text-sm font-medium text-gray-900 mb-2">
-            Chi nhánh
-          </label>
-          <select
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-            value={formData.store_id || ''}
-            onChange={(e) => handleChange('store_id', e.target.value ? Number(e.target.value) : 0)}
-            disabled={isLoadingStores}
-          >
-            <option value="">{isLoadingStores ? 'Đang tải...' : 'Chọn chi nhánh'}</option>
-            {stores.map((store) => (
-              <option key={store.value} value={store.value}>
-                {store.label}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
+      {/* Chi nhánh */}
+      <div>
+        <label className="block text-sm font-medium text-gray-900 mb-2">
+          Chi nhánh
+        </label>
+        <Select
+          options={stores}
+          value={stores.find((s) => s.value === formData.store_id) || null}
+          onChange={(option) => handleChange('store_id', option ? option.value : 0)}
+          isLoading={isLoadingStores}
+          placeholder={isLoadingStores ? 'Đang tải...' : 'Chọn chi nhánh'}
+          isClearable
+          isSearchable
+          noOptionsMessage={() => 'Không tìm thấy chi nhánh'}
+          styles={{
+            control: (base, state) => ({
+              ...base,
+              borderColor: state.isFocused ? '#ef4444' : '#d1d5db',
+              boxShadow: state.isFocused ? '0 0 0 2px rgba(239, 68, 68, 0.2)' : 'none',
+              '&:hover': { borderColor: '#ef4444' },
+              borderRadius: '0.375rem',
+              minHeight: '38px',
+            }),
+            option: (base, state) => ({
+              ...base,
+              backgroundColor: state.isSelected ? '#ef4444' : state.isFocused ? '#fee2e2' : 'white',
+              color: state.isSelected ? 'white' : '#111827',
+            }),
+          }}
+        />
+      </div>
 
       {/* Role */}
       <div>
