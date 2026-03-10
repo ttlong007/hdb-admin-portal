@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useMemo } from 'react'
 import { ActionIcon } from 'rizzui'
 import { PiPencilSimple, PiLockKey, PiToggleLeft, PiToggleRight } from 'react-icons/pi'
 import { User } from '../types'
+import { StoreOption } from '@/hooks/useStores'
 
 interface UserTableProps {
   users: User[]
@@ -10,9 +11,10 @@ interface UserTableProps {
   onToggleStatus: (user: User) => void
   onResetPassword: (user: User) => void
   isViewer?: boolean
+  stores?: StoreOption[]
 }
 
-const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggleStatus, onResetPassword, isViewer }) => {
+const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggleStatus, onResetPassword, isViewer, stores = [] }) => {
   const getRoleName = (role: string) => {
     const roleMap: Record<string, string> = {
       AG_CREATION: 'Người tạo',
@@ -21,6 +23,12 @@ const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggl
     }
     return roleMap[role] || role
   }
+
+  const storeMap = useMemo(() => {
+    const map: Record<number, string> = {}
+    stores.forEach((s) => { map[s.value] = s.label })
+    return map
+  }, [stores])
 
   return (
     <div className="overflow-x-auto rounded-lg border border-gray-200">
@@ -43,6 +51,9 @@ const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggl
               Số điện thoại
             </th>
             <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+              Chi nhánh
+            </th>
+            <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
               Vai trò
             </th>
             <th className="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -58,7 +69,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggl
         <tbody className="bg-white divide-y divide-gray-200">
           {isLoading ? (
             <tr>
-              <td colSpan={isViewer ? 7 : 8} className="text-center py-12">
+              <td colSpan={isViewer ? 8 : 9} className="text-center py-12">
                 <div className="flex flex-col items-center">
                   <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4"></div>
                   <p className="text-sm text-gray-500">Đang tải dữ liệu...</p>
@@ -67,7 +78,7 @@ const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggl
             </tr>
           ) : users.length === 0 ? (
             <tr>
-              <td colSpan={isViewer ? 7 : 8} className="text-center py-12">
+              <td colSpan={isViewer ? 8 : 9} className="text-center py-12">
                 <div className="flex flex-col items-center">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                     <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,6 +110,9 @@ const UserTable: React.FC<UserTableProps> = ({ users, isLoading, onEdit, onToggl
                 </td>
                 <td className="py-4 px-6 text-sm text-gray-500">
                   {user.phone_number}
+                </td>
+                <td className="py-4 px-6 text-sm text-gray-500">
+                  {(user.store_id && storeMap[user.store_id]) || '—'}
                 </td>
                 <td className="py-4 px-6">
                   <span className="text-sm text-gray-700">{getRoleName(user.role)}</span>

@@ -5,6 +5,8 @@ export interface User {
   email: string
   phone_number: string
   company_id: number
+  store_id?: number
+  store_name?: string
   role: string
   status?: 'ACTIVE' | 'INACTIVE'
   created_at?: string

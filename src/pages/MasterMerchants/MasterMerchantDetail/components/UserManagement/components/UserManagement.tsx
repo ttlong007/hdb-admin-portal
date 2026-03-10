@@ -10,10 +10,12 @@ import UserForm from './UserForm'
 import UserTable from './UserTable'
 import CustomModal from './CustomModal'
 import { useAuth } from '@/store/authSlice/useAuth'
+import { useStores } from '@/hooks/useStores'
 
 const UserManagement: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const companyId = id ? parseInt(id) : undefined
+  const { data: stores = [] } = useStores(companyId)
   const {
     users,
     isLoading,
@@ -48,10 +50,10 @@ const UserManagement: React.FC = () => {
   const handleSubmit = async (data: any) => {
     try {
       if (selectedUser) {
-        // Chỉ gửi full_name và role khi update
         await updateUser(selectedUser.id, {
           full_name: data.full_name,
           role: data.role,
+          store_id: data.store_id || undefined,
         })
       } else {
         await createUser(data)
@@ -175,6 +177,7 @@ const UserManagement: React.FC = () => {
           onToggleStatus={handleOpenToggleStatusModal}
           onResetPassword={handleOpenResetPasswordModal}
           isViewer={isViewer}
+          stores={stores}
         />
 
         {/* Pagination */}
