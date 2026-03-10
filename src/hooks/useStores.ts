@@ -6,16 +6,20 @@ export interface StoreOption {
   value: number
 }
 
-export function useStores(companyId?: number) {
+export function useStores(companyId?: number, level?: number) {
   return useQuery<StoreOption[]>({
-    queryKey: ['stores', companyId],
+    queryKey: ['stores', companyId, level],
     queryFn: async () => {
       if (!companyId) {
         return []
       }
-      const response = await axiosInstance.post('/v1/admin/store/list', {
+      const body: Record<string, unknown> = {
         company_id: companyId,
-      })
+      }
+      if (level !== undefined) {
+        body.level = level
+      }
+      const response = await axiosInstance.post('/v1/admin/store/search', body)
 
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.map((store: any) => ({
