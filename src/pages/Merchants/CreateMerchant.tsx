@@ -85,7 +85,6 @@ const CreateMerchant = () => {
         'Địa chỉ không được chứa ký tự đặc biệt'
       ),
     city: yup.object().nullable().required('Tỉnh/Thành phố là bắt buộc'),
-    district: yup.object().nullable().required('Quận/Huyện là bắt buộc'),
     ward: yup.object().nullable().required('Phường/Xã là bắt buộc'),
     expense_account: yup
       .object()
@@ -220,7 +219,6 @@ const CreateMerchant = () => {
       code: '',
       address: '',
       city: null,
-      district: null,
       ward: null,
       expense_account: null,
       income_account: null,
@@ -278,35 +276,13 @@ const CreateMerchant = () => {
   // Watch selected city
   const selectedCity = useWatch({ control, name: 'city' })
 
-  // Fetch districts when a city is selected
-  const { data: districts, isLoading: isLoadingDistrict } = useQuery<Option[]>({
-    queryKey: ['location', 'district', selectedCity?.value],
-    queryFn: async () => {
-      const response = await axiosInstance.post('/v1/admin/location/get-list', {
-        location_type: 'district',
-        parent_code: selectedCity?.value || '',
-      })
-      if (response.data.status_code === 'ACCEPT') {
-        return response.data.data.map((d: any) => ({
-          label: d.name,
-          value: d.code,
-        }))
-      }
-      throw new Error('Failed to fetch districts')
-    },
-    enabled: !!selectedCity,
-  })
-
-  // Watch selected district
-  const selectedDistrict = useWatch({ control, name: 'district' })
-
-  // Fetch wards when a district is selected
+  // Fetch wards when a city is selected
   const { data: wards, isLoading: isLoadingWard } = useQuery<Option[]>({
-    queryKey: ['location', 'ward', selectedDistrict?.value],
+    queryKey: ['location', 'ward', selectedCity?.value],
     queryFn: async () => {
       const response = await axiosInstance.post('/v1/admin/location/get-list', {
         location_type: 'ward',
-        parent_code: selectedDistrict?.value || '',
+        parent_code: selectedCity?.value || '',
       })
       if (response.data.status_code === 'ACCEPT') {
         return response.data.data.map((w: any) => ({
@@ -316,7 +292,7 @@ const CreateMerchant = () => {
       }
       throw new Error('Failed to fetch wards')
     },
-    enabled: !!selectedDistrict,
+    enabled: !!selectedCity,
   })
 
   const { loadOptions, isLoading: isLoadingCompaniesOptions } =
@@ -833,38 +809,14 @@ const CreateMerchant = () => {
                       options={provinces || []}
                       isLoading={isLoadingProvinces}
                       value={field.value}
+                      onChange={(newValue) => {
+                        field.onChange(newValue)
+                        setValue('ward', null)
+                      }}
                     />
                     {errors.city && (
                       <p className="text-red-500 text-sm">
                         {errors.city?.message?.toString()}
-                      </p>
-                    )}
-                  </>
-                )}
-              />
-            </div>
-            {/* District Field */}
-            <div>
-              <div className="text-sm font-medium text-gray-700 mb-1">
-                Quận/Huyện *
-              </div>
-              <Controller
-                name="district"
-                control={control}
-                rules={{ required: 'Quận/Huyện là bắt buộc' }}
-                render={({ field }) => (
-                  <>
-                    <Select
-                      {...field}
-                      placeholder="Chọn quận/huyện"
-                      className="w-full"
-                      options={districts || []}
-                      isLoading={isLoadingDistrict}
-                      value={field.value}
-                    />
-                    {errors.district && (
-                      <p className="text-red-500 text-sm">
-                        {errors.district?.message?.toString()}
                       </p>
                     )}
                   </>
