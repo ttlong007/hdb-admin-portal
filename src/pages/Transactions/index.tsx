@@ -1,13 +1,24 @@
 import React from 'react'
 import { Tabs } from 'antd'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useSearchParams } from 'react-router-dom'
 import { routes } from '@/config/routes'
 import FinancialTransactions from './components/FinancialTransactions'
 import NonFinancialTransactions from './components/NonFinancialTransactions'
 
 const { TabPane } = Tabs
 
+const TAB_KEYS = ['financial', 'non-financial'] as const
+
 const Transactions: React.FC = () => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const activeTab = TAB_KEYS.includes(searchParams.get('tab') as any)
+    ? searchParams.get('tab')!
+    : 'financial'
+
+  const handleTabChange = (key: string) => {
+    setSearchParams({ tab: key }, { replace: true })
+  }
+
   const tabItems = [
     {
       key: 'financial',
@@ -50,7 +61,8 @@ const Transactions: React.FC = () => {
 
         <div className="w-full">
           <Tabs
-            defaultActiveKey="financial"
+            activeKey={activeTab}
+            onChange={handleTabChange}
             items={tabItems}
             className="transaction-tabs"
           />

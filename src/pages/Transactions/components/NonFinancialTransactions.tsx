@@ -8,6 +8,7 @@ import {
   TRANSACTION_STATUS_COLOR_MAP,
 } from '@/config/constants'
 import { useTransactionHistory } from '@/hooks/useTransactionHistory'
+import { useExportNonFinancialTransactions } from '@/hooks/useExportNonFinancialTransactions'
 import Filters from './Filters'
 import { useFilter } from '@/store/filterSlice/useFilter'
 
@@ -21,6 +22,23 @@ const NonFinancialTransactions: React.FC = () => {
   const { isPending, dataSource, total, page, limit } = useTransactionHistory({
     sortField,
     sortOrder,
+  })
+
+  const exportMutation = useExportNonFinancialTransactions({
+    filter: {
+      transaction_type_ids: transactionFilters.transaction_type
+        ? [Number(transactionFilters.transaction_type)]
+        : undefined,
+      status: transactionFilters.status
+        ? (Array.isArray(transactionFilters.status)
+            ? transactionFilters.status
+            : [transactionFilters.status])
+        : undefined,
+      store_code: transactionFilters.store_code || undefined,
+      staff_code: transactionFilters.staff_code || undefined,
+      time_start: transactionFilters.duration?.[0] || undefined,
+      time_end: transactionFilters.duration?.[1] || undefined,
+    },
   })
 
   const columns = [
@@ -49,6 +67,20 @@ const NonFinancialTransactions: React.FC = () => {
         const color = TRANSACTION_STATUS_COLOR_MAP[statusKey] || 'default'
         return <Tag color={color}>{label}</Tag>
       },
+    },
+    {
+      title: 'Họ tên',
+      dataIndex: 'full_name',
+      key: 'full_name',
+      sorter: true,
+      render: (text: string) => text || '---',
+    },
+    {
+      title: 'Số điện thoại',
+      dataIndex: 'phone_number',
+      key: 'phone_number',
+      sorter: true,
+      render: (text: string) => text || '---',
     },
     {
       title: 'Loại GD',
@@ -94,7 +126,7 @@ const NonFinancialTransactions: React.FC = () => {
       fixed: 'right' as const,
       render: (_: any, record: any) => (
         <Space size="middle">
-          <Link to={`/transactions/${record.id}`}>
+          <Link to={`/transactions/non-financial/${record.id}`}>
             <Button type="text" icon={<BsEye />} />
           </Link>
         </Space>
@@ -124,9 +156,9 @@ const NonFinancialTransactions: React.FC = () => {
 
   return (
     <>
-      <Filters />
+      <Filters exportMutationOverride={exportMutation} />
 
-      <div className="w-full mt-4">
+      <div className="w-full">
         <Table
           columns={columns}
           dataSource={dataSource}

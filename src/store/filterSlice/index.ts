@@ -42,6 +42,7 @@ interface FilterState {
     transaction_type?: string
     store_code?: string
     staff_code?: string
+    staff_phone?: string
   }
 }
 
@@ -87,6 +88,7 @@ const initialState: FilterState = {
     transaction_type: '',
     store_code: '',
     staff_code: '',
+    staff_phone: '',
   },
 }
 
