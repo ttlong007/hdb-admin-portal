@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react'
 import { Input } from 'rizzui'
 import Select from 'react-select'
-import AsyncSelect from 'react-select/async'
 import { BsDownload, BsArrowClockwise, BsTrash } from 'react-icons/bs'
 import { DatePicker } from 'antd'
 import { useForm, Controller } from 'react-hook-form'
@@ -9,27 +8,28 @@ import { useQuery } from '@tanstack/react-query'
 import { CSVLink } from 'react-csv'
 import axiosInstance from '@/config/axios'
 import { useExportTransactions } from '@/hooks/useExportTransactions'
-import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 import { toast } from 'react-toastify'
 import { TRANSACTION_STATUS } from '@/config/constants'
 import { useFilter } from '@/store/filterSlice/useFilter'
 import dayjs from 'dayjs'
 import { FilterOutlined } from '@ant-design/icons'
-import _get from 'lodash/get'
-
 const { RangePicker } = DatePicker
 
 interface FiltersFormValues {
-  company_id: any
   code: string
   transaction_type: any
   status: any
   store_code: string
   duration: any
   staff_code: string
+  staff_phone: string
 }
 
-const Filters: React.FC = () => {
+interface FiltersProps {
+  exportMutationOverride?: any
+}
+
+const Filters: React.FC<FiltersProps> = ({ exportMutationOverride }) => {
   // Fetch transaction types from API.
   const { data: transactionTypes, isLoading: isLoadingTransactionTypes } =
     useQuery({
@@ -55,28 +55,9 @@ const Filters: React.FC = () => {
   const { transactionFilters, setTransactionFilters, resetTransactionFilters } =
     useFilter()
 
-  const { loadOptions, isLoading } = useCompaniesOptions(false)
-
-  // Load initial options for AsyncSelect
-  const [defaultOptions, setDefaultOptions] = React.useState<any[]>([])
-
-  useEffect(() => {
-    const loadInitialCompanyOptions = async () => {
-      let keyword = ''
-      if (transactionFilters.company_id) {
-        keyword = _get(transactionFilters, 'company_id.cif', '')
-      }
-
-      const options = await loadOptions(keyword)
-      setDefaultOptions(options)
-    }
-    loadInitialCompanyOptions()
-  }, [])
-
   const { control, handleSubmit, reset, getValues, setValue } =
     useForm<FiltersFormValues>({
       defaultValues: {
-        company_id: transactionFilters.company_id || null,
         code: transactionFilters.code || '',
         transaction_type: transactionFilters.transaction_type
           ? transactionTypeOptions.find(
@@ -96,11 +77,11 @@ const Filters: React.FC = () => {
             ]
           : null,
         staff_code: transactionFilters.staff_code || '',
+        staff_phone: transactionFilters.staff_phone || '',
       },
     })
 
   useEffect(() => {
-    setValue('company_id', transactionFilters.company_id || null)
     setValue('code', transactionFilters.code || '')
     setValue(
       'transaction_type',
@@ -129,6 +110,7 @@ const Filters: React.FC = () => {
         : null
     )
     setValue('staff_code', transactionFilters.staff_code || '')
+    setValue('staff_phone', transactionFilters.staff_phone || '')
   }, [
     JSON.stringify(transactionFilters),
     JSON.stringify(transactionTypeOptions),
@@ -136,17 +118,19 @@ const Filters: React.FC = () => {
 
   // Map status options from constants
   const statusOptions = TRANSACTION_STATUS
-  const exportMutation = useExportTransactions({
+
+  const defaultExportMutation = useExportTransactions({
     filter: {
-      company_id: _get(transactionFilters, 'company_id.value', undefined),
       code: transactionFilters.code,
       transaction_type: transactionFilters.transaction_type,
       status: transactionFilters.status,
       store_code: transactionFilters.store_code,
       duration: transactionFilters.duration,
       staff_code: transactionFilters.staff_code,
+      staff_phone: transactionFilters.staff_phone,
     },
   })
+  const exportMutation = exportMutationOverride || defaultExportMutation
   const [isExporting, setIsExporting] = React.useState(false)
 
   const onSubmit = (data: FiltersFormValues) => {
@@ -159,6 +143,7 @@ const Filters: React.FC = () => {
       status: data.status ? data.status.value.flat() : null,
       store_code: data.store_code,
       staff_code: data.staff_code,
+      staff_phone: data.staff_phone,
     }
 
     // If duration exists and is an array, parse the dates
@@ -171,13 +156,6 @@ const Filters: React.FC = () => {
       processedData.duration = null
     }
 
-    // Handle company_id
-    if (data.company_id) {
-      processedData.company_id = data.company_id
-    } else {
-      processedData.company_id = null
-    }
-
     setTransactionFilters({
       ...processedData,
       page: 1,
@@ -187,13 +165,13 @@ const Filters: React.FC = () => {
 
   const handleReset = () => {
     reset({
-      company_id: null,
       code: '',
       transaction_type: null,
       status: null,
       store_code: '',
       duration: null,
       staff_code: '',
+      staff_phone: '',
     })
     resetTransactionFilters()
   }
@@ -203,34 +181,25 @@ const Filters: React.FC = () => {
   }
 
   return (
-    <div className="self-stretch p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4 w-full">
+    <div className="w-full p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="grid grid-cols-3 gap-4 w-full">
           <div>
-            <div className="text-sm text-[#000000] mb-[6px]">Công ty</div>
+            <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
+              Thời gian
+            </div>
             <Controller
-              name="company_id"
+              name="duration"
               control={control}
               render={({ field }) => (
-                <AsyncSelect
-                  {...field}
-                  isClearable
-                  loadOptions={loadOptions}
-                  defaultOptions={defaultOptions}
-                  cacheOptions
+                <RangePicker
+                  rootClassName="px-3.5 py-2 w-full"
                   value={field.value}
-                  isLoading={isLoading}
-                  onChange={(newValue) => {
-                    field.onChange(newValue)
-                    if (!newValue) {
-                      loadOptions('').then((options) => {
-                        setDefaultOptions(options)
-                      })
-                    }
+                  onChange={(dates) => field.onChange(dates)}
+                  disabledDate={(current) => {
+                    // Disable dates after today
+                    return current && current.valueOf() > dayjs().endOf('day').valueOf()
                   }}
-                  placeholder="Chọn công ty"
-                  className="react-select-container"
-                  classNamePrefix="react-select"
                 />
               )}
             />
@@ -309,6 +278,21 @@ const Filters: React.FC = () => {
           </div>
 
           <div>
+            <Controller
+              name="staff_phone"
+              control={control}
+              render={({ field }) => (
+                <Input
+                  {...field}
+                  label="SĐT nhân viên"
+                  placeholder="SĐT nhân viên"
+                  inputClassName="bg-white"
+                />
+              )}
+            />
+          </div>
+
+          <div>
             <div className="text-sm text-[#000000] mb-[6px]">Trạng thái</div>
 
             <Controller
@@ -324,23 +308,6 @@ const Filters: React.FC = () => {
                   className="react-select-container"
                   classNamePrefix="react-select"
                   placeholder="Chọn trạng thái"
-                />
-              )}
-            />
-          </div>
-
-          <div>
-            <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
-              Thời gian
-            </div>
-            <Controller
-              name="duration"
-              control={control}
-              render={({ field }) => (
-                <RangePicker
-                  rootClassName="px-3.5 py-2 w-full"
-                  value={field.value}
-                  onChange={(dates) => field.onChange(dates)}
                 />
               )}
             />

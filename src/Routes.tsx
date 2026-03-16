@@ -8,6 +8,7 @@ import StaffDetail from './pages/Staffs/StaffDetail'
 import CreateStaff from './pages/Staffs/CreateStaff'
 import { routes } from './config/routes'
 import TransactionDetail from './pages/Transactions/TransactionDetail'
+import NonFinancialTransactionDetail from './pages/Transactions/NonFinancialTransactionDetail'
 import MasterMerchants from './pages/MasterMerchants'
 import MasterMerchantDetail from './pages/MasterMerchants/MasterMerchantDetail'
 import MerchantDetail from './pages/Merchants/MerchantDetail'
@@ -46,6 +47,7 @@ function RootRoutes() {
         { path: routes.editMerchant, element: <MerchantEdit /> },
         { path: routes.merchantDetail, element: <MerchantDetail /> },
         { path: routes.transaction, element: <Transactions /> },
+        { path: routes.nonFinancialTransactionDetail, element: <NonFinancialTransactionDetail /> },
         { path: routes.transactionDetail, element: <TransactionDetail /> },
         { path: routes.staff, element: <Staffs /> },
         { path: routes.staffDetail, element: <StaffDetail /> },

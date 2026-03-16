@@ -80,7 +80,7 @@ export const useTransactionHistory = ({
       ) as TransactionHistoryRequestBody
 
       const response = await axiosInstance.post(
-        '/v1/admin/transaction/history/list',
+        '/v1/admin/transaction/non-financial/list',
         requestBody
       )
 
