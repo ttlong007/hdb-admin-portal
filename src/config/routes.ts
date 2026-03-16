@@ -12,6 +12,7 @@ export interface Routes {
     editStaff: string;
     transaction: string;
     transactionDetail: string;
+    nonFinancialTransactionDetail: string;
     unauthorize: string;
 }
 
@@ -29,5 +30,6 @@ export const routes: Routes = {
     editStaff: '/staffs/:id/edit',
     transaction: '/transactions',
     transactionDetail: '/transactions/:id',
+    nonFinancialTransactionDetail: '/transactions/non-financial/:id',
     unauthorize: '/unauthorize',
 };

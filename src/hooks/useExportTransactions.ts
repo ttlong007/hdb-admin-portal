@@ -11,6 +11,7 @@ interface ExportTransactionsProps {
     store_code?: string
     duration?: any
     staff_code?: string
+    staff_phone?: string
   }
 }
 
@@ -61,6 +62,9 @@ export const useExportTransactions = ({ filter }: ExportTransactionsProps) => {
       }
       if (filter?.staff_code) {
         cleanFilter.staff_code = filter.staff_code
+      }
+      if (filter?.staff_phone) {
+        cleanFilter.staff_phone = filter.staff_phone
       }
       if (filter?.company_id) {
         cleanFilter.company_id = filter.company_id
