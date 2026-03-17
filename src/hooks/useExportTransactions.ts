@@ -48,11 +48,11 @@ export const useExportTransactions = ({ filter }: ExportTransactionsProps) => {
       if (filter?.code) {
         cleanFilter.code = filter.code
       }
-      if (filter?.transaction_type?.value) {
-        cleanFilter.transaction_type = filter.transaction_type.value
+      if (filter?.transaction_type) {
+        cleanFilter.transaction_type = filter.transaction_type
       }
       if (filter?.status) {
-        cleanFilter.status = [filter.status]
+        cleanFilter.status = filter.status
       }
       if (filter?.store_code) {
         cleanFilter.store_code = filter.store_code
