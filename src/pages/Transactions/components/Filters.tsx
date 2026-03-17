@@ -122,7 +122,7 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride }) => {
   const defaultExportMutation = useExportTransactions({
     filter: {
       code: transactionFilters.code,
-      transaction_type: transactionFilters.transaction_type,
+      transaction_type_id: transactionFilters.transaction_type,
       status: transactionFilters.status,
       store_code: transactionFilters.store_code,
       duration: transactionFilters.duration,
