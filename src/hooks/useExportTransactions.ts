@@ -6,7 +6,7 @@ interface ExportTransactionsProps {
   filter: {
     company_id?: string
     code?: string
-    transaction_type?: any
+    transaction_type_id?: any
     status?: any
     store_code?: string
     duration?: any
@@ -48,8 +48,8 @@ export const useExportTransactions = ({ filter }: ExportTransactionsProps) => {
       if (filter?.code) {
         cleanFilter.code = filter.code
       }
-      if (filter?.transaction_type) {
-        cleanFilter.transaction_type = filter.transaction_type
+      if (filter?.transaction_type_id) {
+        cleanFilter.transaction_type_id = filter.transaction_type_id
       }
       if (filter?.status) {
         cleanFilter.status = filter.status
