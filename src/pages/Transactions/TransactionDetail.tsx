@@ -417,7 +417,7 @@ const TransactionDetail: React.FC = () => {
               Phí giao dịch
             </label>
             <span className="text-[#344054] text-[16px] font-medium leading-normal">
-              {transaction.transaction_fee !== undefined
+              {transaction.transaction_fee != null
                 ? transaction.transaction_fee.toLocaleString('en-US') + ' VND'
                 : '---'}
             </span>
