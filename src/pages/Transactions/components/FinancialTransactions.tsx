@@ -99,7 +99,7 @@ const FinancialTransactions: React.FC = () => {
       dataIndex: 'transaction_fee',
       key: 'transaction_fee',
       sorter: true,
-      render: (fee: number) => (fee ? fee.toLocaleString('en-US') : '---'),
+      render: (fee: number) => (fee != null ? fee.toLocaleString('en-US') : '---'),
     },
     {
       title: 'Tác vụ',
