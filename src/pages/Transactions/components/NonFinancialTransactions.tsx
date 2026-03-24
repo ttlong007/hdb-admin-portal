@@ -156,7 +156,7 @@ const NonFinancialTransactions: React.FC = () => {
 
   return (
     <>
-      <Filters exportMutationOverride={exportMutation} />
+      <Filters exportMutationOverride={exportMutation} tabType="non-financial" />
 
       <div className="w-full">
         <Table
