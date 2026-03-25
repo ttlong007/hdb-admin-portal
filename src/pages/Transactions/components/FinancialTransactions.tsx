@@ -138,7 +138,7 @@ const FinancialTransactions: React.FC = () => {
 
   return (
     <>
-      <Filters />
+      <Filters tabType="financial" />
 
       <div className="w-full mt-4">
         <Table
