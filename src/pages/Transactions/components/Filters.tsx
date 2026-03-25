@@ -9,7 +9,11 @@ import { CSVLink } from 'react-csv'
 import axiosInstance from '@/config/axios'
 import { useExportTransactions } from '@/hooks/useExportTransactions'
 import { toast } from 'react-toastify'
-import { TRANSACTION_STATUS } from '@/config/constants'
+import {
+  TRANSACTION_STATUS,
+  FINANCIAL_TRANSACTION_TYPE_NAMES,
+  NON_FINANCIAL_TRANSACTION_TYPE_NAMES,
+} from '@/config/constants'
 import { useFilter } from '@/store/filterSlice/useFilter'
 import dayjs from 'dayjs'
 import { FilterOutlined } from '@ant-design/icons'
@@ -27,9 +31,10 @@ interface FiltersFormValues {
 
 interface FiltersProps {
   exportMutationOverride?: any
+  tabType?: 'financial' | 'non-financial'
 }
 
-const Filters: React.FC<FiltersProps> = ({ exportMutationOverride }) => {
+const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) => {
   // Fetch transaction types from API.
   const { data: transactionTypes, isLoading: isLoadingTransactionTypes } =
     useQuery({
@@ -45,12 +50,22 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride }) => {
       },
     })
 
-  // Map transaction types to options.
-  const transactionTypeOptions =
+  // Map transaction types to options, filtered by tab type.
+  const allTransactionTypeOptions =
     transactionTypes?.map((type: any) => ({
       label: type.name,
       value: type.id,
     })) || []
+
+  const transactionTypeOptions = tabType
+    ? allTransactionTypeOptions.filter((opt: any) => {
+        const allowedNames =
+          tabType === 'financial'
+            ? FINANCIAL_TRANSACTION_TYPE_NAMES
+            : NON_FINANCIAL_TRANSACTION_TYPE_NAMES
+        return allowedNames.includes(opt.label)
+      })
+    : allTransactionTypeOptions
 
   const { transactionFilters, setTransactionFilters, resetTransactionFilters } =
     useFilter()
