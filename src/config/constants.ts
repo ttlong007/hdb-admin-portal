@@ -109,6 +109,17 @@ export const TRANSACTION_TYPE = [
   { label: 'Thanh toán', value: 'PAYMENT' },
 ]
 
+export const FINANCIAL_TRANSACTION_TYPE_NAMES = [
+  'Nộp tiền',
+  'Rút tiền',
+  'Chuyển tiền',
+  'Thanh toán thẻ TD',
+]
+
+export const NON_FINANCIAL_TRANSACTION_TYPE_NAMES = [
+  'Giới thiệu khách hàng',
+]
+
 export const STAFF_ROLES = [
   { label: 'Quản lý', value: 'STORE_MANAGER' },
   { label: 'Nhân viên', value: 'STORE_EMPLOYEE' },
