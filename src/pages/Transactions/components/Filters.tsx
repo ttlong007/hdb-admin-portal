@@ -11,8 +11,6 @@ import { useExportTransactions } from '@/hooks/useExportTransactions'
 import { toast } from 'react-toastify'
 import {
   TRANSACTION_STATUS,
-  FINANCIAL_TRANSACTION_TYPE_NAMES,
-  NON_FINANCIAL_TRANSACTION_TYPE_NAMES,
 } from '@/config/constants'
 import { useFilter } from '@/store/filterSlice/useFilter'
 import dayjs from 'dayjs'
@@ -50,22 +48,20 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
       },
     })
 
-  // Map transaction types to options, filtered by tab type.
-  const allTransactionTypeOptions =
-    transactionTypes?.map((type: any) => ({
-      label: type.name,
-      value: type.id,
-    })) || []
-
+  // Map transaction types to options, filtered by tab type using is_financial field.
   const transactionTypeOptions = tabType
-    ? allTransactionTypeOptions.filter((opt: any) => {
-        const allowedNames =
-          tabType === 'financial'
-            ? FINANCIAL_TRANSACTION_TYPE_NAMES
-            : NON_FINANCIAL_TRANSACTION_TYPE_NAMES
-        return allowedNames.includes(opt.label)
-      })
-    : allTransactionTypeOptions
+    ? (transactionTypes || [])
+        .filter((type: any) =>
+          tabType === 'financial' ? type.is_financial : !type.is_financial
+        )
+        .map((type: any) => ({
+          label: type.name,
+          value: type.id,
+        }))
+    : (transactionTypes || []).map((type: any) => ({
+        label: type.name,
+        value: type.id,
+      }))
 
   const { transactionFilters, setTransactionFilters, resetTransactionFilters } =
     useFilter()
