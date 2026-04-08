@@ -98,6 +98,12 @@ const NonFinancialTransactions: React.FC = () => {
         date ? new Date(date).toLocaleString('vi-VN') : '---',
     },
     {
+      title: 'Đại lý tổng',
+      dataIndex: 'company_name',
+      key: 'company_name',
+      render: (text: string) => text || '---',
+    },
+    {
       title: 'Mã điểm đại lý',
       dataIndex: 'store_code',
       key: 'store_code',

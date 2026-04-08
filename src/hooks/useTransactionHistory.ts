@@ -12,6 +12,8 @@ interface TransactionHistoryRequestBody {
   staff_code?: string
   time_start?: string
   time_end?: string
+  company_id?: number
+  store_id?: number
   order_by_column?: string
   descending?: boolean
 }
@@ -61,6 +63,22 @@ export const useTransactionHistory = ({
       // Add staff_code if exists
       if (transactionFilters.staff_code) {
         requestBody.staff_code = transactionFilters.staff_code
+      }
+
+      // Add company_id / store_id if exist
+      if (transactionFilters.company_id) {
+        requestBody.company_id = _get(
+          transactionFilters,
+          'company_id.value',
+          undefined
+        )
+      }
+      if (transactionFilters.store_id) {
+        requestBody.store_id = _get(
+          transactionFilters,
+          'store_id.value',
+          transactionFilters.store_id
+        ) as number
       }
 
       // Add duration if exists
