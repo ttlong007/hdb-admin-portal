@@ -138,10 +138,13 @@ const DashboardStats: React.FC = () => {
         ].map((card) => (
           <div
             key={card.label}
-            className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-shadow duration-200"
+            className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-md transition-shadow duration-200"
           >
             <div className="flex items-center gap-4">
-              <div className="w-11 h-11 bg-gray-900 rounded-xl flex items-center justify-center flex-shrink-0">
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(90deg, #DA2128 0.2%, #DA2128 50.07%, #F9A61C 75%, #F9C016 84.97%, #FFDD00 99.93%)' }}
+              >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d={card.iconPath} />
                 </svg>
@@ -156,7 +159,7 @@ const DashboardStats: React.FC = () => {
       </div>
 
       {/* ────────── Tra cứu nhân sự ────────── */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="bg-white rounded-2xl border border-gray-100 p-5">
         <h3 className="text-base font-bold text-gray-900 mb-4">Tra cứu nhân sự theo công ty</h3>
 
         <div className="flex flex-col gap-4">
@@ -179,24 +182,24 @@ const DashboardStats: React.FC = () => {
           </div>
 
           <div className={`grid grid-cols-2 gap-4 transition-all duration-300 ease-out ${lookupCompany && lookupStats ? 'opacity-100 max-h-32' : 'opacity-0 max-h-0 overflow-hidden'}`}>
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex items-center justify-between">
+            <div className="rounded-xl p-4 border border-gray-100 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #FFF5E6 0%, #FFFBEB 100%)' }}>
               <div>
-                <div className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Số đại lý trực thuộc</div>
-                <div className="text-3xl font-bold text-gray-900">{lookupStats?.total_stores ?? '-'}</div>
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-0.5">Số đại lý trực thuộc</div>
+                <div className="text-3xl font-bold" style={{ color: '#DA2128' }}>{lookupStats?.total_stores ?? '-'}</div>
               </div>
-              <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#FEE2E2' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DA2128" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                 </svg>
               </div>
             </div>
-            <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex items-center justify-between">
+            <div className="rounded-xl p-4 border border-gray-100 flex items-center justify-between" style={{ background: 'linear-gradient(135deg, #FFF5E6 0%, #FFFBEB 100%)' }}>
               <div>
-                <div className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-0.5">Số nhân viên công ty</div>
-                <div className="text-3xl font-bold text-gray-900">{lookupStats?.total_staffs ?? '-'}</div>
+                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-0.5">Số nhân viên công ty</div>
+                <div className="text-3xl font-bold" style={{ color: '#F9A61C' }}>{lookupStats?.total_staffs ?? '-'}</div>
               </div>
-              <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: '#FEF3C7' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F9A61C" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8z" />
                 </svg>
               </div>
@@ -206,7 +209,7 @@ const DashboardStats: React.FC = () => {
       </div>
 
       {/* ────────── Thống kê doanh số ────────── */}
-      <div className="bg-white rounded-xl border border-gray-200 p-5">
+      <div className="bg-white rounded-2xl border border-gray-100 p-5">
         <h3 className="text-base font-bold text-gray-900 mb-5">Thống kê doanh số</h3>
 
         {/* Filters */}
@@ -275,7 +278,7 @@ const DashboardStats: React.FC = () => {
             { label: 'Tổng phí', value: isLoadingRevenue ? '---' : revenueStats?.total_fee ? `${revenueStats.total_fee.toLocaleString()}` : '---', suffix: revenueStats?.total_fee ? 'VND' : '' },
             { label: 'Tổng hoa hồng', value: '---' },
           ].map((card) => (
-            <div key={card.label} className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-shadow">
+            <div key={card.label} className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-sm transition-shadow">
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">{card.label}</span>
               </div>
@@ -298,10 +301,11 @@ const DashboardStats: React.FC = () => {
               </div>
             ) : revenueStats?.sales_by_transaction_type?.length ? (
               revenueStats.sales_by_transaction_type.map((item, index) => {
-                const accents = ['text-amber-600', 'text-rose-500', 'text-blue-600', 'text-emerald-600']
-                const bars = ['bg-amber-500', 'bg-rose-500', 'bg-blue-500', 'bg-emerald-500']
-                const iconBgs = ['bg-amber-100', 'bg-rose-100', 'bg-blue-100', 'bg-emerald-100']
-                const iconStrokes = ['#d97706', '#e11d48', '#2563eb', '#059669']
+                // HDBank brand palette: red → orange → yellow → dark
+                const accents = ['text-[#DA2128]', 'text-[#F9A61C]', 'text-[#C99500]', 'text-gray-800']
+                const bars = ['bg-[#DA2128]', 'bg-[#F9A61C]', 'bg-[#FFDD00]', 'bg-gray-800']
+                const iconBgs = ['bg-[#FEE2E2]', 'bg-[#FEF3C7]', 'bg-[#FFFBEB]', 'bg-gray-100']
+                const iconStrokes = ['#DA2128', '#F9A61C', '#C99500', '#1f2937']
                 const accentText = accents[index % accents.length]
                 const barColor = bars[index % bars.length]
                 const iconBg = iconBgs[index % iconBgs.length]
@@ -313,7 +317,7 @@ const DashboardStats: React.FC = () => {
                 return (
                   <div
                     key={item.transaction_type}
-                    className="bg-white rounded-xl border border-gray-200 p-4 hover:shadow-sm transition-shadow"
+                    className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-sm transition-shadow"
                   >
                     <div className="flex items-center gap-2.5 mb-4">
                       <div className={`w-8 h-8 ${iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>

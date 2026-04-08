@@ -17,7 +17,7 @@ const InfoCard: React.FC<InfoCardProps> = ({
   children,
 }) => {
   return (
-    <section className="p-6 bg-white rounded-lg shadow-[0_1px_4px_rgba(51,49,65,0.25)]">
+    <section className="p-6 bg-white rounded-2xl border border-[#fee2e2] shadow-[0_1px_4px_rgba(218,33,40,0.08)]">
       {title ? (
         <div className="flex items-center justify-between mb-6">
           {title ? (
