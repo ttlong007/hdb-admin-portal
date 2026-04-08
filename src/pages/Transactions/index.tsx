@@ -4,6 +4,7 @@ import { NavLink, useSearchParams } from 'react-router-dom'
 import { routes } from '@/config/routes'
 import FinancialTransactions from './components/FinancialTransactions'
 import NonFinancialTransactions from './components/NonFinancialTransactions'
+import { useFilter } from '@/store/filterSlice/useFilter'
 
 const { TabPane } = Tabs
 
@@ -15,7 +16,10 @@ const Transactions: React.FC = () => {
     ? searchParams.get('tab')!
     : 'financial'
 
+  const { resetTransactionFilters } = useFilter()
+
   const handleTabChange = (key: string) => {
+    resetTransactionFilters()
     setSearchParams({ tab: key }, { replace: true })
   }
 
@@ -65,6 +69,7 @@ const Transactions: React.FC = () => {
             onChange={handleTabChange}
             items={tabItems}
             className="transaction-tabs"
+            destroyInactiveTabPane
           />
         </div>
       </div>
