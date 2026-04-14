@@ -121,7 +121,7 @@ const DashboardStats: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {[
           {
-            label: 'Tổng số công ty',
+            label: 'Tổng số lượng Đối tác',
             value: summaryStats?.total_companies ?? '-',
             iconPath: 'M3 21h18M5 21V7l7-4 7 4v14M9 21v-6h6v6M9 9h.01M15 9h.01M9 13h.01M15 13h.01',
           },
@@ -131,7 +131,7 @@ const DashboardStats: React.FC = () => {
             iconPath: 'M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5',
           },
           {
-            label: 'Tổng số nhân viên',
+            label: 'Tổng số lượng Nhân viên Đại lý',
             value: summaryStats?.total_staffs ?? '-',
             iconPath: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8zM23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
           },
@@ -210,7 +210,7 @@ const DashboardStats: React.FC = () => {
 
       {/* ────────── Thống kê doanh số ────────── */}
       <div className="bg-white rounded-2xl border border-gray-100 p-5">
-        <h3 className="text-base font-bold text-gray-900 mb-5">Thống kê doanh số</h3>
+        <h3 className="text-base font-bold text-gray-900 mb-5">Thống kê kết quả</h3>
 
         {/* Filters */}
         <div className="bg-gray-50 rounded-lg p-4 mb-5 border border-gray-100">
@@ -236,7 +236,7 @@ const DashboardStats: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Công ty</label>
+              <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Đối tác</label>
               <AsyncSelect
                 cacheOptions
                 defaultOptions
