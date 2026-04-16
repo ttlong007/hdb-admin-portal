@@ -99,6 +99,7 @@ const DashboardStats: React.FC = () => {
     toDate,
   })
   const revenueStats = salesData?.sales_stats
+  const onboardingStats = salesData?.onboarding_customer_stats
 
   const storeOptionsWithAll = [
     { value: null, label: 'Tất cả đại lý' },
@@ -288,6 +289,39 @@ const DashboardStats: React.FC = () => {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Onboarding customer stats */}
+        <div className="mb-6">
+          <h4 className="text-sm font-bold text-gray-900 mb-4">Onboarding khách hàng</h4>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-sm transition-shadow">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-8 h-8 bg-[#FEE2E2] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#DA2128" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20 21V19C20 16.79 18.21 15 16 15H8C5.79 15 4 16.79 4 19V21M12 11C14.21 11 16 9.21 16 7C16 4.79 14.21 3 12 3C9.79 3 8 4.79 8 7C8 9.21 9.79 11 12 11Z" />
+                  </svg>
+                </div>
+                <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Tổng mở tài khoản</span>
+              </div>
+              <div className="text-2xl font-bold text-gray-900">
+                {isLoadingRevenue ? '...' : (onboardingStats?.total_open_account || 0).toLocaleString()}
+              </div>
+            </div>
+            <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-sm transition-shadow">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-8 h-8 bg-[#FEF3C7] rounded-lg flex items-center justify-center flex-shrink-0">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F9A61C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 8H21M3 8V16H21V8M3 12H21" />
+                  </svg>
+                </div>
+                <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Tổng mở thẻ tín dụng</span>
+              </div>
+              <div className="text-2xl font-bold text-gray-900">
+                {isLoadingRevenue ? '...' : (onboardingStats?.total_open_credit_card || 0).toLocaleString()}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Transaction breakdown */}

@@ -14,10 +14,16 @@ export interface SalesStats {
   sales_by_transaction_type: SalesByTransactionType[]
 }
 
+export interface OnboardingCustomerStats {
+  total_open_account: number
+  total_open_credit_card: number
+}
+
 export interface SalesStatsResponse {
   total_stores?: number
   total_staffs?: number
   sales_stats: SalesStats
+  onboarding_customer_stats?: OnboardingCustomerStats
 }
 
 interface UseSalesStatsParams {
