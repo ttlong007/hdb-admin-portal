@@ -4,6 +4,7 @@ export interface MerchantFormValues {
   name: string
   code: string
   address: string
+  management_unit: string
   city: Option | null
   ward: Option | null
   expense_account: Option | null

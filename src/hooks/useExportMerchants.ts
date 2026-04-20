@@ -10,6 +10,7 @@ interface ExportMerchantsProps {
     code?: string
     name?: string
     parent_id?: string
+    management_unit?: string
   }
 }
 
@@ -34,6 +35,9 @@ export const useExportMerchants = ({ filter }: ExportMerchantsProps) => {
       }
       if (filter?.parent_id) {
         cleanFilter.parent_id = Number(filter.parent_id)
+      }
+      if (filter?.management_unit) {
+        cleanFilter.management_unit = filter.management_unit
       }
 
       const response = await axiosInstance.post(

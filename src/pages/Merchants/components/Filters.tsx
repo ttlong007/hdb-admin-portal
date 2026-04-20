@@ -18,6 +18,7 @@ interface FiltersFormValues {
   name: string
   status: any
   parent_id: string
+  management_unit: string
 }
 
 function getInitialStatus(status: any) {
@@ -41,6 +42,7 @@ const Filters: React.FC = () => {
         name: merchantFilters.name || '',
         status: getInitialStatus(merchantFilters.status),
         parent_id: merchantFilters.parent_id || '',
+        management_unit: merchantFilters.management_unit || '',
       },
     })
 
@@ -53,6 +55,7 @@ const Filters: React.FC = () => {
         name: merchantFilters.name || '',
         status: getInitialStatus(merchantFilters.status),
         parent_id: merchantFilters.parent_id || '',
+        management_unit: merchantFilters.management_unit || '',
       })
     }
   }, [JSON.stringify(merchantFilters)])
@@ -91,6 +94,7 @@ const Filters: React.FC = () => {
       code: payload.code,
       name: payload.name,
       parent_id: payload.parent_id,
+      management_unit: payload.management_unit,
       page: 1,
       limit: merchantFilters.limit,
     })
@@ -104,6 +108,7 @@ const Filters: React.FC = () => {
       name: '',
       status: null,
       parent_id: '',
+      management_unit: '',
     })
     resetMerchantFilters()
   }
@@ -116,6 +121,7 @@ const Filters: React.FC = () => {
       code: merchantFilters.code,
       name: merchantFilters.name,
       parent_id: merchantFilters.parent_id,
+      management_unit: merchantFilters.management_unit,
     },
   })
   const [isExporting, setIsExporting] = React.useState(false)
@@ -201,6 +207,18 @@ const Filters: React.FC = () => {
                 {...field}
                 label="Mã đại lý cấp trên"
                 placeholder="Mã đại lý cấp trên"
+                inputClassName="bg-white"
+              />
+            )}
+          />
+          <Controller
+            name="management_unit"
+            control={control}
+            render={({ field }) => (
+              <Input
+                {...field}
+                label="Đơn vị quản lý"
+                placeholder="Đơn vị quản lý"
                 inputClassName="bg-white"
               />
             )}
