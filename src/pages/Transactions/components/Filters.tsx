@@ -36,8 +36,15 @@ interface FiltersProps {
   tabType?: 'financial' | 'non-financial'
 }
 
+const NON_FINANCIAL_CHANNEL_OPTIONS = [
+  { label: 'Giới thiệu Khách hàng mở TKTT', value: 'HDB_EKYC' },
+  { label: 'Giới thiệu Khách hàng mở Thẻ', value: 'CARD_LMS' },
+]
+
 const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) => {
-  // Fetch transaction types from API.
+  const isNonFinancial = tabType === 'non-financial'
+
+  // Fetch transaction types from API (financial tab only).
   const { data: transactionTypes, isLoading: isLoadingTransactionTypes } =
     useQuery({
       queryKey: ['transaction-types'],
@@ -50,53 +57,69 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
         }
         throw new Error('Failed to fetch transaction types')
       },
+      enabled: !isNonFinancial,
     })
 
-  // Map transaction types to options, filtered by tab type using is_financial field.
-  const transactionTypeOptions = tabType
-    ? (transactionTypes || [])
-        .filter((type: any) =>
-          tabType === 'financial' ? type.is_financial : !type.is_financial
-        )
-        .map((type: any) => ({
+  const transactionTypeOptions = isNonFinancial
+    ? NON_FINANCIAL_CHANNEL_OPTIONS
+    : tabType === 'financial'
+      ? (transactionTypes || [])
+          .filter((type: any) => type.is_financial)
+          .map((type: any) => ({
+            label: type.name,
+            value: type.id,
+          }))
+      : (transactionTypes || []).map((type: any) => ({
           label: type.name,
           value: type.id,
         }))
-    : (transactionTypes || []).map((type: any) => ({
-        label: type.name,
-        value: type.id,
-      }))
 
-  const { transactionFilters, setTransactionFilters, resetTransactionFilters } =
-    useFilter()
+  const {
+    transactionFilters,
+    setTransactionFilters,
+    resetTransactionFilters,
+    nonFinancialTransactionFilters,
+    setNonFinancialTransactionFilters,
+    resetNonFinancialTransactionFilters,
+  } = useFilter()
+
+  const currentFilters = isNonFinancial
+    ? nonFinancialTransactionFilters
+    : transactionFilters
+  const setCurrentFilters = isNonFinancial
+    ? setNonFinancialTransactionFilters
+    : setTransactionFilters
+  const resetCurrentFilters = isNonFinancial
+    ? resetNonFinancialTransactionFilters
+    : resetTransactionFilters
 
   const { control, handleSubmit, reset, getValues, setValue, watch } =
     useForm<FiltersFormValues>({
       defaultValues: {
-        code: transactionFilters.code || '',
-        transaction_type: transactionFilters.transaction_type
+        code: currentFilters.code || '',
+        transaction_type: currentFilters.transaction_type
           ? transactionTypeOptions.find(
-              (type: any) => type.value === transactionFilters.transaction_type
+              (type: any) => type.value === currentFilters.transaction_type
             ) || null
           : null,
-        status: transactionFilters.status
+        status: currentFilters.status
           ? TRANSACTION_STATUS.find(
               (s) =>
                 JSON.stringify(s.value) ===
-                JSON.stringify(transactionFilters.status)
+                JSON.stringify(currentFilters.status)
             ) || null
           : null,
-        store_code: transactionFilters.store_code || '',
-        duration: transactionFilters.duration
+        store_code: currentFilters.store_code || '',
+        duration: currentFilters.duration
           ? [
-              dayjs(transactionFilters.duration[0]),
-              dayjs(transactionFilters.duration[1]),
+              dayjs(currentFilters.duration[0]),
+              dayjs(currentFilters.duration[1]),
             ]
           : null,
-        staff_code: transactionFilters.staff_code || '',
-        staff_phone: transactionFilters.staff_phone || '',
-        company_id: transactionFilters.company_id || null,
-        store_id: transactionFilters.store_id || null,
+        staff_code: currentFilters.staff_code || '',
+        staff_phone: currentFilters.staff_phone || '',
+        company_id: (currentFilters as any).company_id || null,
+        store_id: (currentFilters as any).store_id || null,
       },
     })
 
@@ -143,39 +166,39 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
     })) || []
 
   useEffect(() => {
-    setValue('code', transactionFilters.code || '')
+    setValue('code', currentFilters.code || '')
     setValue(
       'transaction_type',
-      transactionFilters.transaction_type
+      currentFilters.transaction_type
         ? transactionTypeOptions.find(
-            (type: any) => type.value === transactionFilters.transaction_type
+            (type: any) => type.value === currentFilters.transaction_type
           ) || null
         : null
     )
     setValue(
       'status',
-      transactionFilters.status
+      currentFilters.status
         ? TRANSACTION_STATUS.find(
-            (s) => JSON.stringify(s.value) === JSON.stringify(transactionFilters.status)
+            (s) => JSON.stringify(s.value) === JSON.stringify(currentFilters.status)
           ) || null
         : null
     )
-    setValue('store_code', transactionFilters.store_code || '')
+    setValue('store_code', currentFilters.store_code || '')
     setValue(
       'duration',
-      transactionFilters.duration
+      currentFilters.duration
         ? [
-            dayjs(transactionFilters.duration[0]),
-            dayjs(transactionFilters.duration[1]),
+            dayjs(currentFilters.duration[0]),
+            dayjs(currentFilters.duration[1]),
           ]
         : null
     )
-    setValue('staff_code', transactionFilters.staff_code || '')
-    setValue('staff_phone', transactionFilters.staff_phone || '')
-    setValue('company_id', transactionFilters.company_id || null)
-    setValue('store_id', transactionFilters.store_id || null)
+    setValue('staff_code', currentFilters.staff_code || '')
+    setValue('staff_phone', currentFilters.staff_phone || '')
+    setValue('company_id', (currentFilters as any).company_id || null)
+    setValue('store_id', (currentFilters as any).store_id || null)
   }, [
-    JSON.stringify(transactionFilters),
+    JSON.stringify(currentFilters),
     JSON.stringify(transactionTypeOptions),
   ])
 
@@ -221,7 +244,7 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
       processedData.duration = null
     }
 
-    setTransactionFilters({
+    setCurrentFilters({
       ...processedData,
       page: 1,
       limit: 10,
@@ -240,7 +263,7 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
       company_id: null,
       store_id: null,
     })
-    resetTransactionFilters()
+    resetCurrentFilters()
   }
 
   const handleExport = async () => {

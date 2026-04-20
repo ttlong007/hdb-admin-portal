@@ -44,6 +44,20 @@ interface FilterState {
     staff_code?: string
     staff_phone?: string
   }
+  transactionNonFinancial: {
+    status?: any
+    page?: number
+    limit?: number
+    duration?: [string, string]
+    company_id?: number
+    store_id?: number
+    staff_id?: number
+    code?: string
+    transaction_type?: string
+    store_code?: string
+    staff_code?: string
+    staff_phone?: string
+  }
 }
 
 const initialState: FilterState = {
@@ -77,6 +91,20 @@ const initialState: FilterState = {
     role: '',
   },
   transaction: {
+    status: '',
+    page: 1,
+    limit: 10,
+    duration: undefined,
+    company_id: undefined,
+    store_id: undefined,
+    staff_id: undefined,
+    code: '',
+    transaction_type: '',
+    store_code: '',
+    staff_code: '',
+    staff_phone: '',
+  },
+  transactionNonFinancial: {
     status: '',
     page: 1,
     limit: 10,
@@ -144,6 +172,18 @@ const filterSlice = createSlice({
     resetTransactionFilter: (state) => {
       state.transaction = initialState.transaction
     },
+    setTransactionNonFinancialFilter: (
+      state,
+      action: PayloadAction<Partial<FilterState['transactionNonFinancial']>>
+    ) => {
+      state.transactionNonFinancial = {
+        ...state.transactionNonFinancial,
+        ...action.payload,
+      }
+    },
+    resetTransactionNonFinancialFilter: (state) => {
+      state.transactionNonFinancial = initialState.transactionNonFinancial
+    },
     resetAllFilters: () => {
       return initialState
     },
@@ -155,10 +195,12 @@ export const {
   setMerchantFilter,
   setStaffFilter,
   setTransactionFilter,
+  setTransactionNonFinancialFilter,
   resetMasterMerchantFilter,
   resetMerchantFilter,
   resetStaffFilter,
   resetTransactionFilter,
+  resetTransactionNonFinancialFilter,
   resetAllFilters,
 } = filterSlice.actions
 
