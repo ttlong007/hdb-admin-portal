@@ -220,6 +220,14 @@ export default function MerchantDetail() {
                     </span>
                   </div>
 
+                  {/* Đơn vị quản lý */}
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">Đơn vị quản lý</span>
+                    <span className="text-base text-gray-800 break-all">
+                      {merchant.management_unit || '---'}
+                    </span>
+                  </div>
+
                   {/* Cấp đại lý */}
                   <div className="flex flex-col flex-1 gap-2">
                     <span className="text-sm text-gray-400">Cấp đại lý</span>

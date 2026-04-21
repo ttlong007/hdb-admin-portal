@@ -19,8 +19,9 @@ export function SidebarMenu() {
   }
 
   return (
-    <div className="mt-4 pb-3 3xl:mt-6">
+    <div className="mt-2 pb-3 3xl:mt-4">
       {menuItems.map((item: any, index: any) => {
+        const showAllServicesLabel = index === 1
         // Use includes for isActive check.
         const isActive = item?.href ? pathname.includes(item.href) : false
         const pathnameExistInDropdowns: any = item?.dropdownItems?.filter(
@@ -112,35 +113,44 @@ export function SidebarMenu() {
                     )}
                   </Collapse>
                 ) : (
-                  <Link
-                    to={item?.href}
-                    onClick={handleMenuClick}
-                    className={cn(
-                      'group relative mx-3 my-0.5 flex items-center justify-between rounded-md px-3 py-2 font-medium capitalize lg:my-1 2xl:mx-5 2xl:my-2',
-                      isActive
-                        ? 'before:top-2/5 text-primary before:absolute before:-start-3 before:block before:h-4/5 before:w-1 before:rounded-ee-md before:rounded-se-md before:bg-primary 2xl:before:-start-5'
-                        : 'text-gray-700 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-700/90'
+                  <>
+                    {showAllServicesLabel && (
+                      <div className="mx-4 mb-2 mt-4 px-3 text-sm font-medium tracking-[-0.2px] text-[#a1aab2] 2xl:mx-6">
+                        Tất cả dịch vụ
+                      </div>
                     )}
-                  >
-                    <div className="flex items-center truncate">
-                      {item?.icon && (
+                    <Link
+                      to={item?.href}
+                      onClick={handleMenuClick}
+                      className={cn(
+                        'group relative mx-4 my-1 flex items-center justify-between rounded-lg p-3 font-medium capitalize transition-colors 2xl:mx-6',
+                        isActive
+                          ? 'bg-white shadow-sm'
+                          : 'hover:bg-white/60'
+                      )}
+                    >
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        {item?.icon && (
+                          <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg [&>svg]:h-8 [&>svg]:w-8">
+                            {item?.icon}
+                          </span>
+                        )}
                         <span
                           className={cn(
-                            'me-2 inline-flex size-5 items-center justify-center rounded-md [&>svg]:size-5',
+                            'min-w-0 truncate text-sm leading-[1.3] tracking-[-0.2px]',
                             isActive
-                              ? 'text-primary'
-                              : 'text-gray-800 dark:text-gray-500 dark:group-hover:text-gray-700'
+                              ? 'font-bold text-[#e14e53]'
+                              : 'font-medium text-[#333333]'
                           )}
                         >
-                          {item?.icon}
+                          {item.name}
                         </span>
-                      )}
-                      <span className="truncate">{item.name}</span>
-                    </div>
-                    {item?.badge?.length ? (
-                      <StatusBadge status={item?.badge} />
-                    ) : null}
-                  </Link>
+                      </div>
+                      {item?.badge?.length ? (
+                        <StatusBadge status={item?.badge} />
+                      ) : null}
+                    </Link>
+                  </>
                 )}
               </>
             ) : (

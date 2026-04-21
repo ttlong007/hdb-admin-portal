@@ -1,4 +1,5 @@
 export interface Routes {
+    dashboard: string;
     masterMerchant: string;
     masterMerchantDetail: string;
     editMasterMerchant: string;
@@ -17,6 +18,7 @@ export interface Routes {
 }
 
 export const routes: Routes = {
+    dashboard: '/dashboard',
     masterMerchant: '/master-merchants',
     masterMerchantDetail: '/master-merchants/:id',
     editMasterMerchant: '/master-merchants/:id/edit',

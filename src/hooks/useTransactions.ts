@@ -38,7 +38,7 @@ export const useTransactions = ({
         page: transactionFilters.page,
         limit: transactionFilters.limit,
         duration: transactionFilters.duration,
-        store_id: transactionFilters.store_id,
+        store_id: _get(transactionFilters, 'store_id.value', transactionFilters.store_id),
         staff_id: transactionFilters.staff_id,
         code: transactionFilters.code,
         transaction_type_id: transactionFilters.transaction_type,

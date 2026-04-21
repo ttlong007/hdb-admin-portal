@@ -7,10 +7,12 @@ import {
   setMerchantFilter,
   setStaffFilter,
   setTransactionFilter,
+  setTransactionNonFinancialFilter,
   resetMasterMerchantFilter,
   resetMerchantFilter,
   resetStaffFilter,
   resetTransactionFilter,
+  resetTransactionNonFinancialFilter,
   resetAllFilters
 } from '.'
 
@@ -42,12 +44,22 @@ export const useFilter = () => {
     dispatch(resetStaffFilter())
   }
 
-  // Transaction filters
+  // Transaction filters (financial)
   const setTransactionFilters = (filters: Partial<typeof filterState.transaction>) => {
     dispatch(setTransactionFilter(filters))
   }
   const resetTransactionFilters = () => {
     dispatch(resetTransactionFilter())
+  }
+
+  // Transaction filters (non-financial)
+  const setNonFinancialTransactionFilters = (
+    filters: Partial<typeof filterState.transactionNonFinancial>
+  ) => {
+    dispatch(setTransactionNonFinancialFilter(filters))
+  }
+  const resetNonFinancialTransactionFilters = () => {
+    dispatch(resetTransactionNonFinancialFilter())
   }
 
   // Reset all filters
@@ -61,6 +73,7 @@ export const useFilter = () => {
     merchantFilters: filterState.merchant,
     staffFilters: filterState.staff,
     transactionFilters: filterState.transaction,
+    nonFinancialTransactionFilters: filterState.transactionNonFinancial,
 
     // Master Merchant actions
     setMasterMerchantFilters,
@@ -74,9 +87,13 @@ export const useFilter = () => {
     setStaffFilters,
     resetStaffFilters,
 
-    // Transaction actions
+    // Transaction actions (financial)
     setTransactionFilters,
     resetTransactionFilters,
+
+    // Transaction actions (non-financial)
+    setNonFinancialTransactionFilters,
+    resetNonFinancialTransactionFilters,
 
     // Global actions
     resetAll

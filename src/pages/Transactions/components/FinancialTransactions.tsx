@@ -80,6 +80,12 @@ const FinancialTransactions: React.FC = () => {
         date ? new Date(date).toLocaleString('en-US') : '---',
     },
     {
+      title: 'Đại lý tổng',
+      dataIndex: 'company_name',
+      key: 'company_name',
+      render: (text: string) => text || '---',
+    },
+    {
       title: 'Mã - Tên điểm đại lý',
       dataIndex: 'store_code_name',
       key: 'store_code_name',

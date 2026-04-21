@@ -43,9 +43,9 @@
     /* ----------------------------------- */
     /* primary/brand colors */
     /* ----------------------------------- */
-    --primary-lighter: 227 227 227; /* #e3e3e3 */
-    --primary-default: 17 17 17; /* #111111 */
-    --primary-dark: 0 0 0; /* #000000 */
+    --primary-lighter: 254 226 226; /* #fee2e2 */
+    --primary-default: 218 33 40; /* #DA2128 - HDBank red */
+    --primary-dark: 190 17 40; /* #BE1128 */
     --primary-foreground: 255 255 255; /* #ffffff */
 
     /* ----------------------------------- */
@@ -1635,4 +1635,48 @@ div[style='z-index: 1000001;'],
 
 .ant-upload.ant-upload-select {
   width: 100% !important;
+}
+
+/* ----------------------------------- */
+/* HDBank gradient primary button      */
+/* ----------------------------------- */
+button.bg-primary,
+.rizzui-button.bg-primary,
+a.bg-primary,
+button.\[\&\]\:bg-\[\#da2128\],
+button.bg-\[\#da2128\],
+button.bg-\[\#DA2128\],
+a.bg-\[\#da2128\],
+a.bg-\[\#DA2128\] {
+  background-color: transparent !important;
+  background-image: linear-gradient(
+    90deg,
+    #da2128 0%,
+    #da2128 50%,
+    #f9a61c 75%,
+    #f9c016 85%,
+    #ffdd00 100%
+  ) !important;
+  background-size: 100% 100% !important;
+  background-repeat: no-repeat !important;
+  border-color: transparent !important;
+  color: #ffffff !important;
+  transition: filter 0.2s ease, box-shadow 0.2s ease;
+}
+
+button.bg-primary:hover:not(:disabled),
+.rizzui-button.bg-primary:hover:not(:disabled),
+a.bg-primary:hover,
+button.bg-\[\#da2128\]:hover:not(:disabled),
+button.bg-\[\#DA2128\]:hover:not(:disabled) {
+  filter: brightness(1.05);
+  box-shadow: 0 4px 12px rgba(218, 33, 40, 0.25);
+}
+
+button.bg-primary:disabled,
+.rizzui-button.bg-primary:disabled,
+button.bg-\[\#da2128\]:disabled,
+button.bg-\[\#DA2128\]:disabled {
+  filter: grayscale(0.4) brightness(0.95);
+  opacity: 0.7;
 }
