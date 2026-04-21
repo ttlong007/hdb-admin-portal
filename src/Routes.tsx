@@ -1,5 +1,6 @@
 import { useRoutes, Navigate } from 'react-router-dom'
 import Layout from './components/layouts/Layout'
+import Dashboard from './pages/Dashboard'
 import Home from './pages/Merchants'
 import CreateMerchant from './pages/Merchants/CreateMerchant'
 import Transactions from './pages/Transactions'
@@ -31,11 +32,12 @@ function RootRoutes() {
         {
           index: true,
           element: hasToken ? (
-            <Navigate to={routes.masterMerchant} />
+            <Navigate to={routes.dashboard} />
           ) : (
             <Navigate to={routes.unauthorize} />
           ),
         },
+        { path: routes.dashboard, element: <Dashboard /> },
         { path: routes.masterMerchant, element: <MasterMerchants /> },
         {
           path: routes.masterMerchantDetail,

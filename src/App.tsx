@@ -51,7 +51,7 @@ function App() {
 
         // Set logging in to false before navigating
         setIsLoggingIn(false);
-        navigate(routes.masterMerchant, { replace: true });
+        navigate(routes.dashboard, { replace: true });
       } else {
         toast.error(response.data.reason_message || "Đăng nhập thất bại");
         setIsLoggingIn(false);

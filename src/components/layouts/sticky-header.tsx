@@ -7,17 +7,20 @@ import { useWindowScroll } from '@core/hooks/use-window-scroll';
 type StickyHeaderProps = {
   className?: string;
   offset?: number;
+  style?: React.CSSProperties;
 };
 
 export default function StickyHeader({
   offset = 2,
   className,
+  style,
   children,
 }: React.PropsWithChildren<StickyHeaderProps>) {
   const isMounted = useIsMounted();
   const windowScroll = useWindowScroll();
   return (
     <header
+      style={style}
       className={cn(
         'sticky top-0 z-[9999] flex items-center bg-gray-0/80 p-4 backdrop-blur-xl bg-white md:px-5 lg:px-6',
         ((isMounted && windowScroll.y) as number) > offset ? 'card-shadow' : '',
