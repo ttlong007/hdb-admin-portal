@@ -5,7 +5,7 @@ import { downloadFromPresignedUrl } from './useExportTransactions'
 
 interface ExportNonFinancialTransactionsProps {
   filter: {
-    transaction_type_ids?: number[]
+    channel?: string
     status?: string[]
     store_code?: string
     staff_code?: string
@@ -21,8 +21,8 @@ export const useExportNonFinancialTransactions = ({
     mutationFn: async () => {
       const cleanFilter: any = {}
 
-      if (filter?.transaction_type_ids?.length) {
-        cleanFilter.transaction_type_ids = filter.transaction_type_ids
+      if (filter?.channel) {
+        cleanFilter.channel = filter.channel
       }
       if (filter?.status?.length) {
         cleanFilter.status = filter.status
