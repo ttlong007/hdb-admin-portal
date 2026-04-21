@@ -63,18 +63,18 @@ export const useTransactionHistory = ({
       }
 
       // Add company_id / store_id if exist
-      if (transactionFilters.company_id) {
+      if ((nonFinancialTransactionFilters as any).company_id) {
         requestBody.company_id = _get(
-          transactionFilters,
+          nonFinancialTransactionFilters,
           'company_id.value',
           undefined
         )
       }
-      if (transactionFilters.store_id) {
+      if ((nonFinancialTransactionFilters as any).store_id) {
         requestBody.store_id = _get(
-          transactionFilters,
+          nonFinancialTransactionFilters,
           'store_id.value',
-          transactionFilters.store_id
+          (nonFinancialTransactionFilters as any).store_id
         ) as number
       }
 
