@@ -10,6 +10,7 @@ interface MerchantFilters {
   company_id?: any
   code?: string
   parent_id?: string | number
+  management_unit?: string
 }
 
 interface UseMerchantsParams {
@@ -51,6 +52,9 @@ export const useMerchants = ({
       }
       if (filter?.parent_id) {
         cleanFilter.parent_id = Number(filter.parent_id)
+      }
+      if (filter?.management_unit) {
+        cleanFilter.management_unit = filter.management_unit
       }
 
       const requestBody = {
