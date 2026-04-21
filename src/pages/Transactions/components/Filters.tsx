@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react'
 import { Input } from 'rizzui'
 import Select from 'react-select'
+import AsyncSelect from 'react-select/async'
 import { BsDownload, BsArrowClockwise, BsTrash } from 'react-icons/bs'
 import { DatePicker } from 'antd'
 import { useForm, Controller } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
 import { CSVLink } from 'react-csv'
 import axiosInstance from '@/config/axios'
+import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 import { useExportTransactions } from '@/hooks/useExportTransactions'
 import { toast } from 'react-toastify'
 import {
@@ -25,6 +27,8 @@ interface FiltersFormValues {
   duration: any
   staff_code: string
   staff_phone: string
+  company_id: any
+  store_id: any
 }
 
 interface FiltersProps {
@@ -66,7 +70,7 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
   const { transactionFilters, setTransactionFilters, resetTransactionFilters } =
     useFilter()
 
-  const { control, handleSubmit, reset, getValues, setValue } =
+  const { control, handleSubmit, reset, getValues, setValue, watch } =
     useForm<FiltersFormValues>({
       defaultValues: {
         code: transactionFilters.code || '',
@@ -77,7 +81,9 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
           : null,
         status: transactionFilters.status
           ? TRANSACTION_STATUS.find(
-              (s) => JSON.stringify(s.value) === JSON.stringify(transactionFilters.status)
+              (s) =>
+                JSON.stringify(s.value) ===
+                JSON.stringify(transactionFilters.status)
             ) || null
           : null,
         store_code: transactionFilters.store_code || '',
@@ -89,8 +95,52 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
           : null,
         staff_code: transactionFilters.staff_code || '',
         staff_phone: transactionFilters.staff_phone || '',
+        company_id: transactionFilters.company_id || null,
+        store_id: transactionFilters.store_id || null,
       },
     })
+
+  const selectedCompanyId = watch('company_id')
+
+  const { loadOptions: loadCompanyOptions, isLoading: isLoadingCompanies } =
+    useCompaniesOptions(false)
+
+  const [defaultCompanyOptions, setDefaultCompanyOptions] = React.useState<any[]>(
+    []
+  )
+
+  useEffect(() => {
+    const loadInitialCompanyOptions = async () => {
+      let keyword = ''
+      if (transactionFilters.company_id) {
+        keyword = (transactionFilters as any)?.company_id?.cif || ''
+      }
+      const options = await loadCompanyOptions(keyword)
+      setDefaultCompanyOptions(options)
+    }
+    loadInitialCompanyOptions()
+  }, [])
+
+  const { data: storesData, isLoading: isLoadingStores } = useQuery({
+    queryKey: ['stores-by-company', selectedCompanyId?.value],
+    queryFn: async () => {
+      if (!selectedCompanyId?.value) return []
+      const response = await axiosInstance.post(`/v1/admin/store/list`, {
+        company_id: selectedCompanyId.value,
+      })
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch stores')
+    },
+    enabled: !!selectedCompanyId?.value,
+  })
+
+  const storeOptions =
+    storesData?.map((store: any) => ({
+      label: store.code_name,
+      value: store.id,
+    })) || []
 
   useEffect(() => {
     setValue('code', transactionFilters.code || '')
@@ -122,6 +172,8 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
     )
     setValue('staff_code', transactionFilters.staff_code || '')
     setValue('staff_phone', transactionFilters.staff_phone || '')
+    setValue('company_id', transactionFilters.company_id || null)
+    setValue('store_id', transactionFilters.store_id || null)
   }, [
     JSON.stringify(transactionFilters),
     JSON.stringify(transactionTypeOptions),
@@ -155,6 +207,8 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
       store_code: data.store_code,
       staff_code: data.staff_code,
       staff_phone: data.staff_phone,
+      company_id: data.company_id || null,
+      store_id: data.store_id || null,
     }
 
     // If duration exists and is an array, parse the dates
@@ -183,6 +237,8 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
       duration: null,
       staff_code: '',
       staff_phone: '',
+      company_id: null,
+      store_id: null,
     })
     resetTransactionFilters()
   }
@@ -195,6 +251,60 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
     <div className="w-full p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="grid grid-cols-3 gap-4 w-full">
+          <div>
+            <div className="text-sm text-[#000000] mb-[6px]">Công ty</div>
+            <Controller
+              name="company_id"
+              control={control}
+              render={({ field }) => (
+                <AsyncSelect
+                  {...field}
+                  isClearable
+                  loadOptions={loadCompanyOptions}
+                  defaultOptions={defaultCompanyOptions}
+                  cacheOptions
+                  value={field.value}
+                  isLoading={isLoadingCompanies}
+                  onChange={(newValue) => {
+                    field.onChange(newValue)
+                    setValue('store_id', null)
+                    if (!newValue) {
+                      loadCompanyOptions('').then((options) => {
+                        setDefaultCompanyOptions(options)
+                      })
+                    }
+                  }}
+                  placeholder="Chọn công ty"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <div className="text-sm text-[#000000] mb-[6px]">Điểm đại lý</div>
+            <Controller
+              name="store_id"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  isClearable
+                  options={storeOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder={
+                    isLoadingStores ? 'Loading...' : 'Chọn điểm đại lý'
+                  }
+                  isDisabled={!selectedCompanyId?.value}
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
+              )}
+            />
+          </div>
+
           <div>
             <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
               Thời gian
