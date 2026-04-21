@@ -13,7 +13,8 @@ import Filters from './Filters'
 import { useFilter } from '@/store/filterSlice/useFilter'
 
 const NonFinancialTransactions: React.FC = () => {
-  const { transactionFilters, setTransactionFilters } = useFilter()
+  const { nonFinancialTransactionFilters, setNonFinancialTransactionFilters } =
+    useFilter()
   const [sortField, setSortField] = React.useState<string | null>(null)
   const [sortOrder, setSortOrder] = React.useState<'ascend' | 'descend' | null>(
     null
@@ -26,18 +27,16 @@ const NonFinancialTransactions: React.FC = () => {
 
   const exportMutation = useExportNonFinancialTransactions({
     filter: {
-      transaction_type_ids: transactionFilters.transaction_type
-        ? [Number(transactionFilters.transaction_type)]
+      channel: nonFinancialTransactionFilters.transaction_type || undefined,
+      status: nonFinancialTransactionFilters.status
+        ? (Array.isArray(nonFinancialTransactionFilters.status)
+            ? nonFinancialTransactionFilters.status
+            : [nonFinancialTransactionFilters.status])
         : undefined,
-      status: transactionFilters.status
-        ? (Array.isArray(transactionFilters.status)
-            ? transactionFilters.status
-            : [transactionFilters.status])
-        : undefined,
-      store_code: transactionFilters.store_code || undefined,
-      staff_code: transactionFilters.staff_code || undefined,
-      time_start: transactionFilters.duration?.[0] || undefined,
-      time_end: transactionFilters.duration?.[1] || undefined,
+      store_code: nonFinancialTransactionFilters.store_code || undefined,
+      staff_code: nonFinancialTransactionFilters.staff_code || undefined,
+      time_start: nonFinancialTransactionFilters.duration?.[0] || undefined,
+      time_end: nonFinancialTransactionFilters.duration?.[1] || undefined,
     },
   })
 
@@ -98,6 +97,12 @@ const NonFinancialTransactions: React.FC = () => {
         date ? new Date(date).toLocaleString('vi-VN') : '---',
     },
     {
+      title: 'Đại lý tổng',
+      dataIndex: 'company_name',
+      key: 'company_name',
+      render: (text: string) => text || '---',
+    },
+    {
       title: 'Mã điểm đại lý',
       dataIndex: 'store_code',
       key: 'store_code',
@@ -135,8 +140,8 @@ const NonFinancialTransactions: React.FC = () => {
   ]
 
   const onPaginationChange = (pagination: any) => {
-    setTransactionFilters({
-      ...transactionFilters,
+    setNonFinancialTransactionFilters({
+      ...nonFinancialTransactionFilters,
       page: pagination.current,
       limit: pagination.pageSize,
     })

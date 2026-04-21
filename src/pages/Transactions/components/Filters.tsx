@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react'
 import { Input } from 'rizzui'
 import Select from 'react-select'
+import AsyncSelect from 'react-select/async'
 import { BsDownload, BsArrowClockwise, BsTrash } from 'react-icons/bs'
 import { DatePicker } from 'antd'
 import { useForm, Controller } from 'react-hook-form'
 import { useQuery } from '@tanstack/react-query'
 import { CSVLink } from 'react-csv'
 import axiosInstance from '@/config/axios'
+import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
 import { useExportTransactions } from '@/hooks/useExportTransactions'
 import { toast } from 'react-toastify'
 import {
@@ -25,6 +27,8 @@ interface FiltersFormValues {
   duration: any
   staff_code: string
   staff_phone: string
+  company_id: any
+  store_id: any
 }
 
 interface FiltersProps {
@@ -32,8 +36,15 @@ interface FiltersProps {
   tabType?: 'financial' | 'non-financial'
 }
 
+const NON_FINANCIAL_CHANNEL_OPTIONS = [
+  { label: 'Giới thiệu Khách hàng mở TKTT', value: 'HDB_EKYC' },
+  { label: 'Giới thiệu Khách hàng mở Thẻ', value: 'CARD_LMS' },
+]
+
 const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) => {
-  // Fetch transaction types from API.
+  const isNonFinancial = tabType === 'non-financial'
+
+  // Fetch transaction types from API (financial tab only).
   const { data: transactionTypes, isLoading: isLoadingTransactionTypes } =
     useQuery({
       queryKey: ['transaction-types'],
@@ -46,84 +57,148 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
         }
         throw new Error('Failed to fetch transaction types')
       },
+      enabled: !isNonFinancial,
     })
 
-  // Map transaction types to options, filtered by tab type using is_financial field.
-  const transactionTypeOptions = tabType
-    ? (transactionTypes || [])
-        .filter((type: any) =>
-          tabType === 'financial' ? type.is_financial : !type.is_financial
-        )
-        .map((type: any) => ({
+  const transactionTypeOptions = isNonFinancial
+    ? NON_FINANCIAL_CHANNEL_OPTIONS
+    : tabType === 'financial'
+      ? (transactionTypes || [])
+          .filter((type: any) => type.is_financial)
+          .map((type: any) => ({
+            label: type.name,
+            value: type.id,
+          }))
+      : (transactionTypes || []).map((type: any) => ({
           label: type.name,
           value: type.id,
         }))
-    : (transactionTypes || []).map((type: any) => ({
-        label: type.name,
-        value: type.id,
-      }))
 
-  const { transactionFilters, setTransactionFilters, resetTransactionFilters } =
-    useFilter()
+  const {
+    transactionFilters,
+    setTransactionFilters,
+    resetTransactionFilters,
+    nonFinancialTransactionFilters,
+    setNonFinancialTransactionFilters,
+    resetNonFinancialTransactionFilters,
+  } = useFilter()
 
-  const { control, handleSubmit, reset, getValues, setValue } =
+  const currentFilters = isNonFinancial
+    ? nonFinancialTransactionFilters
+    : transactionFilters
+  const setCurrentFilters = isNonFinancial
+    ? setNonFinancialTransactionFilters
+    : setTransactionFilters
+  const resetCurrentFilters = isNonFinancial
+    ? resetNonFinancialTransactionFilters
+    : resetTransactionFilters
+
+  const { control, handleSubmit, reset, getValues, setValue, watch } =
     useForm<FiltersFormValues>({
       defaultValues: {
-        code: transactionFilters.code || '',
-        transaction_type: transactionFilters.transaction_type
+        code: currentFilters.code || '',
+        transaction_type: currentFilters.transaction_type
           ? transactionTypeOptions.find(
-              (type: any) => type.value === transactionFilters.transaction_type
+              (type: any) => type.value === currentFilters.transaction_type
             ) || null
           : null,
-        status: transactionFilters.status
+        status: currentFilters.status
           ? TRANSACTION_STATUS.find(
-              (s) => JSON.stringify(s.value) === JSON.stringify(transactionFilters.status)
+              (s) =>
+                JSON.stringify(s.value) ===
+                JSON.stringify(currentFilters.status)
             ) || null
           : null,
-        store_code: transactionFilters.store_code || '',
-        duration: transactionFilters.duration
+        store_code: currentFilters.store_code || '',
+        duration: currentFilters.duration
           ? [
-              dayjs(transactionFilters.duration[0]),
-              dayjs(transactionFilters.duration[1]),
+              dayjs(currentFilters.duration[0]),
+              dayjs(currentFilters.duration[1]),
             ]
           : null,
-        staff_code: transactionFilters.staff_code || '',
-        staff_phone: transactionFilters.staff_phone || '',
+        staff_code: currentFilters.staff_code || '',
+        staff_phone: currentFilters.staff_phone || '',
+        company_id: (currentFilters as any).company_id || null,
+        store_id: (currentFilters as any).store_id || null,
       },
     })
 
+  const selectedCompanyId = watch('company_id')
+
+  const { loadOptions: loadCompanyOptions, isLoading: isLoadingCompanies } =
+    useCompaniesOptions(false)
+
+  const [defaultCompanyOptions, setDefaultCompanyOptions] = React.useState<any[]>(
+    []
+  )
+
   useEffect(() => {
-    setValue('code', transactionFilters.code || '')
+    const loadInitialCompanyOptions = async () => {
+      let keyword = ''
+      if (transactionFilters.company_id) {
+        keyword = (transactionFilters as any)?.company_id?.cif || ''
+      }
+      const options = await loadCompanyOptions(keyword)
+      setDefaultCompanyOptions(options)
+    }
+    loadInitialCompanyOptions()
+  }, [])
+
+  const { data: storesData, isLoading: isLoadingStores } = useQuery({
+    queryKey: ['stores-by-company', selectedCompanyId?.value],
+    queryFn: async () => {
+      if (!selectedCompanyId?.value) return []
+      const response = await axiosInstance.post(`/v1/admin/store/list`, {
+        company_id: selectedCompanyId.value,
+      })
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data
+      }
+      throw new Error('Failed to fetch stores')
+    },
+    enabled: !!selectedCompanyId?.value,
+  })
+
+  const storeOptions =
+    storesData?.map((store: any) => ({
+      label: store.code_name,
+      value: store.id,
+    })) || []
+
+  useEffect(() => {
+    setValue('code', currentFilters.code || '')
     setValue(
       'transaction_type',
-      transactionFilters.transaction_type
+      currentFilters.transaction_type
         ? transactionTypeOptions.find(
-            (type: any) => type.value === transactionFilters.transaction_type
+            (type: any) => type.value === currentFilters.transaction_type
           ) || null
         : null
     )
     setValue(
       'status',
-      transactionFilters.status
+      currentFilters.status
         ? TRANSACTION_STATUS.find(
-            (s) => JSON.stringify(s.value) === JSON.stringify(transactionFilters.status)
+            (s) => JSON.stringify(s.value) === JSON.stringify(currentFilters.status)
           ) || null
         : null
     )
-    setValue('store_code', transactionFilters.store_code || '')
+    setValue('store_code', currentFilters.store_code || '')
     setValue(
       'duration',
-      transactionFilters.duration
+      currentFilters.duration
         ? [
-            dayjs(transactionFilters.duration[0]),
-            dayjs(transactionFilters.duration[1]),
+            dayjs(currentFilters.duration[0]),
+            dayjs(currentFilters.duration[1]),
           ]
         : null
     )
-    setValue('staff_code', transactionFilters.staff_code || '')
-    setValue('staff_phone', transactionFilters.staff_phone || '')
+    setValue('staff_code', currentFilters.staff_code || '')
+    setValue('staff_phone', currentFilters.staff_phone || '')
+    setValue('company_id', (currentFilters as any).company_id || null)
+    setValue('store_id', (currentFilters as any).store_id || null)
   }, [
-    JSON.stringify(transactionFilters),
+    JSON.stringify(currentFilters),
     JSON.stringify(transactionTypeOptions),
   ])
 
@@ -155,6 +230,8 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
       store_code: data.store_code,
       staff_code: data.staff_code,
       staff_phone: data.staff_phone,
+      company_id: data.company_id || null,
+      store_id: data.store_id || null,
     }
 
     // If duration exists and is an array, parse the dates
@@ -167,7 +244,7 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
       processedData.duration = null
     }
 
-    setTransactionFilters({
+    setCurrentFilters({
       ...processedData,
       page: 1,
       limit: 10,
@@ -183,8 +260,10 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
       duration: null,
       staff_code: '',
       staff_phone: '',
+      company_id: null,
+      store_id: null,
     })
-    resetTransactionFilters()
+    resetCurrentFilters()
   }
 
   const handleExport = async () => {
@@ -195,6 +274,60 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
     <div className="w-full p-6 bg-[#F8FAFC] rounded-sm outline outline-1 outline-[#DAE0E7] inline-flex flex-col justify-start items-start gap-4">
       <form onSubmit={handleSubmit(onSubmit)} className="w-full">
         <div className="grid grid-cols-3 gap-4 w-full">
+          <div>
+            <div className="text-sm text-[#000000] mb-[6px]">Công ty</div>
+            <Controller
+              name="company_id"
+              control={control}
+              render={({ field }) => (
+                <AsyncSelect
+                  {...field}
+                  isClearable
+                  loadOptions={loadCompanyOptions}
+                  defaultOptions={defaultCompanyOptions}
+                  cacheOptions
+                  value={field.value}
+                  isLoading={isLoadingCompanies}
+                  onChange={(newValue) => {
+                    field.onChange(newValue)
+                    setValue('store_id', null)
+                    if (!newValue) {
+                      loadCompanyOptions('').then((options) => {
+                        setDefaultCompanyOptions(options)
+                      })
+                    }
+                  }}
+                  placeholder="Chọn công ty"
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
+              )}
+            />
+          </div>
+
+          <div>
+            <div className="text-sm text-[#000000] mb-[6px]">Điểm đại lý</div>
+            <Controller
+              name="store_id"
+              control={control}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  isClearable
+                  options={storeOptions}
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder={
+                    isLoadingStores ? 'Loading...' : 'Chọn điểm đại lý'
+                  }
+                  isDisabled={!selectedCompanyId?.value}
+                  className="react-select-container"
+                  classNamePrefix="react-select"
+                />
+              )}
+            />
+          </div>
+
           <div>
             <div className="rizzui-input-label block text-sm mb-1.5 font-medium">
               Thời gian

@@ -31,6 +31,7 @@ export function MerchantChangeInfo({
     changeRequestData.code ||
     changeRequestData.name ||
     changeRequestData.address ||
+    changeRequestData.management_unit ||
     changeRequestData.income_account ||
     changeRequestData.expense_account ||
     changeRequestData.status
@@ -104,6 +105,17 @@ export function MerchantChangeInfo({
                     <span className="text-sm text-gray-400">Địa chỉ</span>
                     <span className="text-base font-semibold">
                       {changeRequestData.address || '---'}
+                    </span>
+                  </div>
+                ) : null}
+
+                {changeRequestData.management_unit ? (
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">
+                      Đơn vị quản lý
+                    </span>
+                    <span className="text-base font-semibold break-all">
+                      {changeRequestData.management_unit || '---'}
                     </span>
                   </div>
                 ) : null}
