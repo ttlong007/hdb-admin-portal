@@ -4,7 +4,8 @@ export interface MerchantFormValues {
   name: string
   code: string
   address: string
-  management_unit: string
+  branch_code: Option | null
+  hdb_staff_code: string
   city: Option | null
   ward: Option | null
   expense_account: Option | null
@@ -17,6 +18,12 @@ export interface MerchantFormValues {
   active: boolean
   level?: Option | null
   parent_id?: Option | null
+}
+
+export interface BranchInfo {
+  branch_code: string
+  branch_name: string
+  address: string
 }
 
 export interface ChangeRequestPayload {

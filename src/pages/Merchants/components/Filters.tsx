@@ -211,18 +211,6 @@ const Filters: React.FC = () => {
               />
             )}
           />
-          <Controller
-            name="management_unit"
-            control={control}
-            render={({ field }) => (
-              <Input
-                {...field}
-                label="Đơn vị quản lý"
-                placeholder="Đơn vị quản lý"
-                inputClassName="bg-white"
-              />
-            )}
-          />
           <div>
             <div className="text-sm text-[#000000] mb-[6px]">Trạng thái</div>
             <Controller
