@@ -8,6 +8,7 @@ import {
   MERCHANT_STATUS_COLOR_MAP,
   MERCHANT_STATUS_MAP,
 } from '@/config/constants'
+import { BranchInfo } from '../types'
 
 interface MerchantChangeInfoProps {
   isWaitingApprovalForEdit: boolean
@@ -18,35 +19,26 @@ export function MerchantChangeInfo({
   isWaitingApprovalForEdit,
   changeRequestData,
 }: MerchantChangeInfoProps) {
-  if (!changeRequestData) return null
-
-  const monthlyLimit = changeRequestData.limits?.find(
-    (limit) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
-  )?.amount
-  const dailyLimit = changeRequestData.limits?.find(
-    (limit) => limit.type === 'TRANSACTION_QUOTA_DAILY'
-  )?.amount
-
-  const isShowMerchantInfo =
-    changeRequestData.code ||
-    changeRequestData.name ||
-    changeRequestData.address ||
-    changeRequestData.management_unit ||
-    changeRequestData.income_account ||
-    changeRequestData.expense_account ||
-    changeRequestData.status
-
-  const isShowTransactionQuotaInfo = monthlyLimit || dailyLimit
-
-  // Handle need_approve_transaction_data from proposed changes
-  const needApproveData = changeRequestData.need_approve_transaction_data
+  const needApproveData = changeRequestData?.need_approve_transaction_data
   const isDisablingApproval =
     needApproveData &&
     needApproveData.approve_amount === 0 &&
     (!needApproveData.need_approve_transaction_ids ||
       needApproveData.need_approve_transaction_ids.length === 0)
   const isEnablingOrChangingApproval = needApproveData && !isDisablingApproval
-  // Fetch transaction type names when enabling/changing approval
+
+  const { data: branchList } = useQuery<BranchInfo[]>({
+    queryKey: ['store-branch-info-raw'],
+    queryFn: async () => {
+      const response = await axiosInstance.get('/v1/admin/store/branch-info')
+      if (response.data.status_code === 'ACCEPT') {
+        return response.data.data || []
+      }
+      throw new Error('Failed to fetch branch info')
+    },
+    enabled: !!changeRequestData?.branch_code,
+  })
+
   const { data: transactionTypes } = useQuery({
     queryKey: ['transaction-types'],
     queryFn: async () => {
@@ -62,6 +54,39 @@ export function MerchantChangeInfo({
       isEnablingOrChangingApproval &&
       needApproveData?.need_approve_transaction_ids?.length > 0,
   })
+
+  if (!changeRequestData) return null
+
+  const monthlyLimit = changeRequestData.limits?.find(
+    (limit) => limit.type === 'TRANSACTION_QUOTA_MONTHLY'
+  )?.amount
+  const dailyLimit = changeRequestData.limits?.find(
+    (limit) => limit.type === 'TRANSACTION_QUOTA_DAILY'
+  )?.amount
+
+  const branchLabel = changeRequestData.branch_code
+    ? (() => {
+        const matched = branchList?.find(
+          (b) => b.branch_code === changeRequestData.branch_code
+        )
+        return matched
+          ? `${matched.branch_code} - ${matched.branch_name}`
+          : changeRequestData.branch_code
+      })()
+    : ''
+
+  const isShowMerchantInfo =
+    changeRequestData.code ||
+    changeRequestData.name ||
+    changeRequestData.address ||
+    changeRequestData.management_unit ||
+    changeRequestData.branch_code ||
+    changeRequestData.hdb_staff_code ||
+    changeRequestData.income_account ||
+    changeRequestData.expense_account ||
+    changeRequestData.status
+
+  const isShowTransactionQuotaInfo = monthlyLimit || dailyLimit
 
   return (
     <div className="mt-8 flex flex-col gap-6">
@@ -116,6 +141,28 @@ export function MerchantChangeInfo({
                     </span>
                     <span className="text-base font-semibold break-all">
                       {changeRequestData.management_unit || '---'}
+                    </span>
+                  </div>
+                ) : null}
+
+                {changeRequestData.branch_code ? (
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">
+                      Đơn vị quản lý
+                    </span>
+                    <span className="text-base font-semibold break-all">
+                      {branchLabel || '---'}
+                    </span>
+                  </div>
+                ) : null}
+
+                {changeRequestData.hdb_staff_code ? (
+                  <div className="flex flex-col flex-1 gap-2">
+                    <span className="text-sm text-gray-400">
+                      Mã NV HDBank
+                    </span>
+                    <span className="text-base font-semibold break-all">
+                      {changeRequestData.hdb_staff_code || '---'}
                     </span>
                   </div>
                 ) : null}
