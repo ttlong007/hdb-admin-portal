@@ -337,11 +337,14 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
               control={control}
               render={({ field }) => (
                 <RangePicker
-                  rootClassName="px-3.5 py-2 w-full"
+                  className="w-full"
+                  style={{ width: '100%' }}
                   value={field.value}
                   onChange={(dates) => field.onChange(dates)}
+                  getPopupContainer={(triggerNode) =>
+                    (triggerNode.parentElement as HTMLElement) || document.body
+                  }
                   disabledDate={(current) => {
-                    // Disable dates after today
                     return current && current.valueOf() > dayjs().endOf('day').valueOf()
                   }}
                 />

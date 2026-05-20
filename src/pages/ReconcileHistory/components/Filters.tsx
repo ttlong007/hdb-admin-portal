@@ -151,12 +151,17 @@ const Filters: React.FC = () => {
               name="period"
               control={control}
               render={({ field }) => (
-                <DatePicker.MonthPicker
-                  rootClassName="px-3.5 py-2 w-full"
+                <DatePicker
+                  picker="month"
+                  className="w-full"
+                  style={{ width: '100%' }}
                   value={field.value}
                   onChange={(date) => field.onChange(date)}
                   format="MM/YYYY"
                   placeholder="Tháng / Năm"
+                  getPopupContainer={(triggerNode) =>
+                    (triggerNode.parentElement as HTMLElement) || document.body
+                  }
                   disabledDate={(current) =>
                     current && current.valueOf() > dayjs().endOf('month').valueOf()
                   }
