@@ -168,3 +168,19 @@ export const STATUS_WAITING_APPROVE = [
   'WAITING_APPROVE',
   'WAITING_APPROVAL_FOR_EDIT',
 ]
+
+export const RECONCILE_TYPE = [
+  { value: 'TRANSACTION', label: 'Giao dịch tài chính' },
+  { value: 'BUSINESS_STAFF', label: 'Giao dịch phi tài chính - NV' },
+  { value: 'BUSINESS_CONTRACTOR', label: 'Giao dịch phi tài chính - CTV' },
+]
+
+export const RECONCILE_STATUS = [
+  { value: 'SUCCESS', label: 'Thành công' },
+  { value: 'FAILED', label: 'Thất bại' },
+]
+
+export const RECONCILE_STATUS_COLOR_MAP: Record<string, string> = {
+  SUCCESS: 'green',
+  FAILED: 'red',
+}

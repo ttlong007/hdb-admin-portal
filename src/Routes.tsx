@@ -16,6 +16,7 @@ import MerchantDetail from './pages/Merchants/MerchantDetail'
 import MasterMerchantEdit from './pages/MasterMerchants/MasterMerchantEdit'
 // import StaffEdit from './pages/Staffs/StaffEdit'
 import MerchantEdit from './pages/Merchants/MerchantEdit'
+import ReconcileHistory from './pages/ReconcileHistory'
 import Unauthorize from './pages/Unauthorize'
 import { useAuth } from './store/authSlice/useAuth'
 
@@ -55,6 +56,7 @@ function RootRoutes() {
         { path: routes.staffDetail, element: <StaffDetail /> },
         { path: routes.createStaff, element: <CreateStaff /> },
         // { path: routes.editStaff, element: <StaffEdit /> },
+        { path: routes.reconcileHistory, element: <ReconcileHistory /> },
       ],
     },
     { path: routes.unauthorize, element: <Unauthorize /> },

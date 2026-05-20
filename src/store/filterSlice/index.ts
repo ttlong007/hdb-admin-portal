@@ -59,6 +59,15 @@ interface FilterState {
     staff_code?: string
     staff_phone?: string
   }
+  reconcileHistory: {
+    page?: number
+    limit?: number
+    company_id?: any
+    type?: string
+    year?: number
+    month?: number
+    status?: string
+  }
 }
 
 const initialState: FilterState = {
@@ -119,6 +128,15 @@ const initialState: FilterState = {
     store_code: '',
     staff_code: '',
     staff_phone: '',
+  },
+  reconcileHistory: {
+    page: 1,
+    limit: 10,
+    company_id: undefined,
+    type: '',
+    year: undefined,
+    month: undefined,
+    status: '',
   },
 }
 
@@ -186,6 +204,18 @@ const filterSlice = createSlice({
     resetTransactionNonFinancialFilter: (state) => {
       state.transactionNonFinancial = initialState.transactionNonFinancial
     },
+    setReconcileHistoryFilter: (
+      state,
+      action: PayloadAction<Partial<FilterState['reconcileHistory']>>
+    ) => {
+      state.reconcileHistory = {
+        ...state.reconcileHistory,
+        ...action.payload,
+      }
+    },
+    resetReconcileHistoryFilter: (state) => {
+      state.reconcileHistory = initialState.reconcileHistory
+    },
     resetAllFilters: () => {
       return initialState
     },
@@ -198,11 +228,13 @@ export const {
   setStaffFilter,
   setTransactionFilter,
   setTransactionNonFinancialFilter,
+  setReconcileHistoryFilter,
   resetMasterMerchantFilter,
   resetMerchantFilter,
   resetStaffFilter,
   resetTransactionFilter,
   resetTransactionNonFinancialFilter,
+  resetReconcileHistoryFilter,
   resetAllFilters,
 } = filterSlice.actions
 
