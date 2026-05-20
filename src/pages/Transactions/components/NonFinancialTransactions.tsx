@@ -101,7 +101,7 @@ const NonFinancialTransactions: React.FC = () => {
       sorter: true,
       render: (date: string) =>
         date
-          ? dayjs.utc(date).tz('Asia/Ho_Chi_Minh').format('HH:mm:ss DD/MM/YYYY')
+          ? dayjs.utc(date).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
           : '---',
     },
     {
