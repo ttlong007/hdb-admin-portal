@@ -4,11 +4,12 @@ import { NavLink, useSearchParams } from 'react-router-dom'
 import { routes } from '@/config/routes'
 import FinancialTransactions from './components/FinancialTransactions'
 import NonFinancialTransactions from './components/NonFinancialTransactions'
+import CollaboratorTransactions from './components/CollaboratorTransactions'
 import { useFilter } from '@/store/filterSlice/useFilter'
 
 const { TabPane } = Tabs
 
-const TAB_KEYS = ['financial', 'non-financial'] as const
+const TAB_KEYS = ['financial', 'non-financial', 'collaborator'] as const
 
 const Transactions: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams()
@@ -16,10 +17,16 @@ const Transactions: React.FC = () => {
     ? searchParams.get('tab')!
     : 'financial'
 
-  const { resetTransactionFilters } = useFilter()
+  const {
+    resetTransactionFilters,
+    resetNonFinancialTransactionFilters,
+    resetCollaboratorTransactionFilters,
+  } = useFilter()
 
   const handleTabChange = (key: string) => {
     resetTransactionFilters()
+    resetNonFinancialTransactionFilters()
+    resetCollaboratorTransactionFilters()
     setSearchParams({ tab: key }, { replace: true })
   }
 
@@ -33,6 +40,11 @@ const Transactions: React.FC = () => {
       key: 'non-financial',
       label: 'Giao dịch phi tài chính',
       children: <NonFinancialTransactions />,
+    },
+    {
+      key: 'collaborator',
+      label: 'Giao dịch cộng tác viên',
+      children: <CollaboratorTransactions />,
     },
   ]
 

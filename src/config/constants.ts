@@ -102,6 +102,28 @@ export const TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
   CREATED: 'blue',
 }
 
+export const COLLABORATOR_TRANSACTION_STATUS = [
+  { label: 'Tất cả', value: ['ALL'] },
+  { label: 'Thành công', value: ['SUCCESSFUL'] },
+  { label: 'Chờ duyệt', value: ['WAITING_APPROVE'] },
+  { label: 'Đang xử lý', value: ['PROCESSING'] },
+  { label: 'Liên hệ DVKH HDB', value: ['CONTACT_CS'] },
+  { label: 'Từ chối', value: ['REJECTED'] },
+]
+export const COLLABORATOR_TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
+  ALL: 'default',
+  SUCCESSFUL: 'green',
+  WAITING_APPROVE: 'orange',
+  PROCESSING: 'blue',
+  CONTACT_CS: 'gold',
+  REJECTED: 'red',
+}
+
+export const COLLABORATOR_TRANSACTION_TYPE_OPTIONS = [
+  { label: 'Mở TKTT', value: 'HDB_EKYC' },
+  { label: 'Mở Thẻ tín dụng', value: 'CARD_LMS' },
+]
+
 export const TRANSACTION_TYPE = [
   { label: 'Nạp tiền', value: 'DEPOSIT' },
   { label: 'Rút tiền', value: 'WITHDRAW' },

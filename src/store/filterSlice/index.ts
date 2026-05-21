@@ -68,6 +68,15 @@ interface FilterState {
     month?: number
     status?: string
   }
+  transactionCollaborator: {
+    status?: any
+    page?: number
+    limit?: number
+    duration?: [string, string]
+    company_id?: any
+    transaction_type?: string
+    referral_code?: string
+  }
 }
 
 const initialState: FilterState = {
@@ -137,6 +146,15 @@ const initialState: FilterState = {
     year: undefined,
     month: undefined,
     status: '',
+  },
+  transactionCollaborator: {
+    status: '',
+    page: 1,
+    limit: 10,
+    duration: undefined,
+    company_id: undefined,
+    transaction_type: '',
+    referral_code: '',
   },
 }
 
@@ -216,6 +234,18 @@ const filterSlice = createSlice({
     resetReconcileHistoryFilter: (state) => {
       state.reconcileHistory = initialState.reconcileHistory
     },
+    setTransactionCollaboratorFilter: (
+      state,
+      action: PayloadAction<Partial<FilterState['transactionCollaborator']>>
+    ) => {
+      state.transactionCollaborator = {
+        ...state.transactionCollaborator,
+        ...action.payload,
+      }
+    },
+    resetTransactionCollaboratorFilter: (state) => {
+      state.transactionCollaborator = initialState.transactionCollaborator
+    },
     resetAllFilters: () => {
       return initialState
     },
@@ -229,12 +259,14 @@ export const {
   setTransactionFilter,
   setTransactionNonFinancialFilter,
   setReconcileHistoryFilter,
+  setTransactionCollaboratorFilter,
   resetMasterMerchantFilter,
   resetMerchantFilter,
   resetStaffFilter,
   resetTransactionFilter,
   resetTransactionNonFinancialFilter,
   resetReconcileHistoryFilter,
+  resetTransactionCollaboratorFilter,
   resetAllFilters,
 } = filterSlice.actions
 

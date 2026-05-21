@@ -9,12 +9,14 @@ import {
   setTransactionFilter,
   setTransactionNonFinancialFilter,
   setReconcileHistoryFilter,
+  setTransactionCollaboratorFilter,
   resetMasterMerchantFilter,
   resetMerchantFilter,
   resetStaffFilter,
   resetTransactionFilter,
   resetTransactionNonFinancialFilter,
   resetReconcileHistoryFilter,
+  resetTransactionCollaboratorFilter,
   resetAllFilters
 } from '.'
 
@@ -74,6 +76,16 @@ export const useFilter = () => {
     dispatch(resetReconcileHistoryFilter())
   }
 
+  // Transaction filters (collaborator / CTV)
+  const setCollaboratorTransactionFilters = (
+    filters: Partial<typeof filterState.transactionCollaborator>
+  ) => {
+    dispatch(setTransactionCollaboratorFilter(filters))
+  }
+  const resetCollaboratorTransactionFilters = () => {
+    dispatch(resetTransactionCollaboratorFilter())
+  }
+
   // Reset all filters
   const resetAll = () => {
     dispatch(resetAllFilters())
@@ -87,6 +99,7 @@ export const useFilter = () => {
     transactionFilters: filterState.transaction,
     nonFinancialTransactionFilters: filterState.transactionNonFinancial,
     reconcileHistoryFilters: filterState.reconcileHistory,
+    collaboratorTransactionFilters: filterState.transactionCollaborator,
 
     // Master Merchant actions
     setMasterMerchantFilters,
@@ -111,6 +124,10 @@ export const useFilter = () => {
     // Reconcile history actions
     setReconcileHistoryFilters,
     resetReconcileHistoryFilters,
+
+    // Transaction actions (collaborator)
+    setCollaboratorTransactionFilters,
+    resetCollaboratorTransactionFilters,
 
     // Global actions
     resetAll
