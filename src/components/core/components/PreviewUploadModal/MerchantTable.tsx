@@ -32,6 +32,8 @@ interface TableRecord {
   AllowPayment: string
   AllowCollectionAuthorization: string
   AllowPaymentAuthorization: string
+  BranchCode: string
+  HDBStaffCode: string
 }
 
 const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
@@ -173,6 +175,16 @@ const MerchantTable: React.FC<MerchantTableProps> = ({ objectKey, isOpen }) => {
       title: 'Ủy nhiệm chi',
       dataIndex: 'AllowPaymentAuthorization',
       key: 'AllowPaymentAuthorization',
+    },
+    {
+      title: 'Mã chi nhánh',
+      dataIndex: 'BranchCode',
+      key: 'BranchCode',
+    },
+    {
+      title: 'Mã nhân viên HDB',
+      dataIndex: 'HDBStaffCode',
+      key: 'HDBStaffCode',
     },
   ]
 
