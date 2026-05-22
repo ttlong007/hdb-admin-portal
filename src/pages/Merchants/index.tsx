@@ -167,6 +167,20 @@ const Merchants: React.FC = () => {
       render: (text: string) => (text ? text : '---'),
     },
     {
+      title: 'Mã chi nhánh',
+      dataIndex: 'branch_code',
+      key: 'branch_code',
+      sorter: true,
+      render: (text: string) => (text ? text : '---'),
+    },
+    {
+      title: 'Mã nhân viên HDB',
+      dataIndex: 'hdb_staff_code',
+      key: 'hdb_staff_code',
+      sorter: true,
+      render: (text: string) => (text ? text : '---'),
+    },
+    {
       title: 'Trạng thái',
       dataIndex: 'status',
       key: 'status',
@@ -390,7 +404,7 @@ const Merchants: React.FC = () => {
             columns={columns}
             dataSource={dataSource}
             loading={isPending}
-            scroll={{ x: 2080 }}
+            scroll={{ x: 2480 }}
             pagination={{
               total,
               pageSize: merchantFilters.limit || 10,
