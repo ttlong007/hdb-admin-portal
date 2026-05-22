@@ -337,10 +337,11 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
               control={control}
               render={({ field }) => (
                 <RangePicker
-                  className="w-full"
+                  className="px-3.5 py-2 w-full"
                   style={{ width: '100%' }}
                   value={field.value}
                   onChange={(dates) => field.onChange(dates)}
+                  placement="bottomLeft"
                   getPopupContainer={(triggerNode) =>
                     (triggerNode.parentElement as HTMLElement) || document.body
                   }

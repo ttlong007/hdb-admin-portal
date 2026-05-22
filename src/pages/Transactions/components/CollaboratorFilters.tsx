@@ -210,9 +210,13 @@ const CollaboratorFilters: React.FC<CollaboratorFiltersProps> = ({
               control={control}
               render={({ field }) => (
                 <RangePicker
-                  rootClassName="px-3.5 py-2 w-full"
+                  className="px-3.5 py-2 w-full"
                   value={field.value}
                   onChange={(dates) => field.onChange(dates)}
+                  placement="bottomLeft"
+                  getPopupContainer={(trigger) =>
+                    (trigger.parentElement as HTMLElement) || document.body
+                  }
                   disabledDate={(current) =>
                     current && current.valueOf() > dayjs().endOf('day').valueOf()
                   }

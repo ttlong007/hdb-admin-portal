@@ -20,11 +20,11 @@ const FieldItem: React.FC<{ label: string; value?: React.ReactNode }> = ({
   label,
   value,
 }) => (
-  <div className="flex flex-col">
+  <div className="flex flex-col min-w-0">
     <label className="text-[#A1AAB2] text-[14px] font-normal leading-normal">
       {label}
     </label>
-    <span className="text-[#344054] text-[16px] font-medium leading-normal">
+    <span className="text-[#344054] text-[16px] font-medium leading-normal break-all">
       {value ?? '---'}
     </span>
   </div>
