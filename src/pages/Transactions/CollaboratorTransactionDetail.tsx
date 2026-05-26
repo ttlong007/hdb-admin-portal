@@ -118,6 +118,7 @@ const CollaboratorTransactionDetail: React.FC = () => {
               value={<Tag color={statusColor}>{statusLabel}</Tag>}
             />
             <FieldItem label="Đại lý tổng" value={data.company_name} />
+            <FieldItem label="Đơn vị quản lý" value={data.management_unit} />
           </div>
         </div>
 

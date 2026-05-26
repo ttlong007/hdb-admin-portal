@@ -21,6 +21,7 @@ interface CollaboratorTransactionRow {
   transaction_time: string
   referral_code: string
   company_name?: string
+  management_unit?: string
 }
 
 const TRANSACTION_TYPE_LABEL: Record<string, string> = {
@@ -90,6 +91,12 @@ const CollaboratorTransactions: React.FC<CollaboratorTransactionsProps> = ({
           },
         ]
       : []),
+    {
+      title: 'Đơn vị quản lý',
+      dataIndex: 'management_unit',
+      key: 'management_unit',
+      render: (text: string) => text || '---',
+    },
     {
       title: 'Mã giao dịch',
       dataIndex: 'transaction_code',
@@ -181,7 +188,7 @@ const CollaboratorTransactions: React.FC<CollaboratorTransactionsProps> = ({
           columns={columns}
           dataSource={dataSource}
           loading={isPending}
-          scroll={{ x: showCompanyColumn ? 1200 : 1000 }}
+          scroll={{ x: showCompanyColumn ? 1400 : 1200 }}
           pagination={{
             total,
             current: page,
