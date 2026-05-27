@@ -83,6 +83,7 @@ const FinancialTransactions: React.FC = () => {
       title: 'Đại lý tổng',
       dataIndex: 'company_name',
       key: 'company_name',
+      sorter: true,
       render: (text: string) => text || '---',
     },
     {
