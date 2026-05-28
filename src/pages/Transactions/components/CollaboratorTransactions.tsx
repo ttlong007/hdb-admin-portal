@@ -17,8 +17,6 @@ interface CollaboratorTransactionRow {
   transaction_code?: string
   code?: string
   status: string
-  approval_status?: string
-  status_id?: string
   transaction_type: string
   transaction_time: string
   referral_code: string
@@ -124,18 +122,6 @@ const CollaboratorTransactions: React.FC<CollaboratorTransactionsProps> = ({
       },
     },
     {
-      title: 'Kết quả phê duyệt',
-      dataIndex: 'approval_status',
-      key: 'approval_status',
-      render: (text: string) => text || '---',
-    },
-    {
-      title: 'Mã trạng thái',
-      dataIndex: 'status_id',
-      key: 'status_id',
-      render: (text: string) => text || '---',
-    },
-    {
       title: 'Loại GD',
       dataIndex: 'transaction_type',
       key: 'transaction_type',
@@ -202,7 +188,7 @@ const CollaboratorTransactions: React.FC<CollaboratorTransactionsProps> = ({
           columns={columns}
           dataSource={dataSource}
           loading={isPending}
-          scroll={{ x: showCompanyColumn ? 1700 : 1500 }}
+          scroll={{ x: showCompanyColumn ? 1400 : 1200 }}
           pagination={{
             total,
             current: page,

@@ -82,18 +82,6 @@ const NonFinancialTransactions: React.FC = () => {
       },
     },
     {
-      title: 'Kết quả phê duyệt',
-      dataIndex: 'approval_status',
-      key: 'approval_status',
-      render: (text: string) => text || '---',
-    },
-    {
-      title: 'Mã trạng thái',
-      dataIndex: 'status_id',
-      key: 'status_id',
-      render: (text: string) => text || '---',
-    },
-    {
       title: 'Họ tên',
       dataIndex: 'full_name',
       key: 'full_name',
@@ -201,7 +189,7 @@ const NonFinancialTransactions: React.FC = () => {
           columns={columns}
           dataSource={dataSource}
           loading={isPending}
-          scroll={{ x: 2100 }}
+          scroll={{ x: 1800 }}
           pagination={{
             total,
             current: page,

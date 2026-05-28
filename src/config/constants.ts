@@ -105,7 +105,7 @@ export const TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
 export const NON_FINANCIAL_TRANSACTION_STATUS = [
   { label: 'Tất cả', value: ['ALL'] },
   { label: 'Thành Công', value: ['SUCCESSFUL'] },
-  { label: 'Thất bại', value: ['FAILED'] },
+  { label: 'Liên hệ DVKH HDB', value: ['FAILED'] },
   { label: 'Đã Tạo', value: ['CREATED'] },
   { label: 'Đang xử lý', value: ['TIME_OUT'] },
   { label: 'Từ chối', value: ['REJECTED'] },
@@ -122,7 +122,7 @@ export const NON_FINANCIAL_TRANSACTION_STATUS_COLOR_MAP: Record<string, string> 
 export const COLLABORATOR_TRANSACTION_STATUS = [
   { label: 'Tất cả', value: ['ALL'] },
   { label: 'Thành Công', value: ['SUCCESSFUL'] },
-  { label: 'Thất bại', value: ['FAILED'] },
+  { label: 'Liên hệ DVKH HDB', value: ['FAILED'] },
   { label: 'Đã Tạo', value: ['CREATED'] },
   { label: 'Đang xử lý', value: ['TIME_OUT'] },
   { label: 'Từ chối', value: ['REJECTED'] },
