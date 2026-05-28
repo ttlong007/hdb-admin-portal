@@ -104,18 +104,18 @@ export const TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
 
 export const COLLABORATOR_TRANSACTION_STATUS = [
   { label: 'Tất cả', value: ['ALL'] },
-  { label: 'Thành công', value: ['SUCCESSFUL'] },
-  { label: 'Chờ duyệt', value: ['WAITING_APPROVE'] },
-  { label: 'Đang xử lý', value: ['PROCESSING'] },
-  { label: 'Liên hệ DVKH HDB', value: ['CONTACT_CS'] },
+  { label: 'Thành Công', value: ['SUCCESSFUL'] },
+  { label: 'Thất bại', value: ['FAILED'] },
+  { label: 'Đã Tạo', value: ['CREATED'] },
+  { label: 'Đang xử lý', value: ['TIME_OUT'] },
   { label: 'Từ chối', value: ['REJECTED'] },
 ]
 export const COLLABORATOR_TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
   ALL: 'default',
   SUCCESSFUL: 'green',
-  WAITING_APPROVE: 'orange',
-  PROCESSING: 'blue',
-  CONTACT_CS: 'gold',
+  FAILED: 'red',
+  CREATED: 'blue',
+  TIME_OUT: 'orange',
   REJECTED: 'red',
 }
 
