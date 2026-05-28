@@ -102,6 +102,23 @@ export const TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
   CREATED: 'blue',
 }
 
+export const NON_FINANCIAL_TRANSACTION_STATUS = [
+  { label: 'Tất cả', value: ['ALL'] },
+  { label: 'Thành Công', value: ['SUCCESSFUL'] },
+  { label: 'Thất bại', value: ['FAILED'] },
+  { label: 'Đã Tạo', value: ['CREATED'] },
+  { label: 'Đang xử lý', value: ['TIME_OUT'] },
+  { label: 'Từ chối', value: ['REJECTED'] },
+]
+export const NON_FINANCIAL_TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
+  ALL: 'default',
+  SUCCESSFUL: 'green',
+  FAILED: 'red',
+  CREATED: 'blue',
+  TIME_OUT: 'orange',
+  REJECTED: 'red',
+}
+
 export const COLLABORATOR_TRANSACTION_STATUS = [
   { label: 'Tất cả', value: ['ALL'] },
   { label: 'Thành Công', value: ['SUCCESSFUL'] },
