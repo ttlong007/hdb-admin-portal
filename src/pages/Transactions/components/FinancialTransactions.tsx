@@ -23,6 +23,9 @@ const FinancialTransactions: React.FC = () => {
     sortOrder,
   })
 
+  const getSortOrder = (key: string) =>
+    sortField === key ? sortOrder : null
+
   const columns = [
     {
       title: 'STT',
@@ -35,6 +38,7 @@ const FinancialTransactions: React.FC = () => {
       dataIndex: 'code',
       key: 'code',
       sorter: true,
+      sortOrder: getSortOrder('code'),
       render: (text: string) => text || '---',
     },
     {
@@ -42,6 +46,7 @@ const FinancialTransactions: React.FC = () => {
       dataIndex: 'ref_code',
       key: 'ref_code',
       sorter: true,
+      sortOrder: getSortOrder('ref_code'),
       render: (text: string) => text || '---',
     },
     {
@@ -49,6 +54,7 @@ const FinancialTransactions: React.FC = () => {
       dataIndex: 'amount',
       key: 'amount',
       sorter: true,
+      sortOrder: getSortOrder('amount'),
       render: (amount: number) =>
         amount ? amount.toLocaleString('en-US') : '---',
     },
@@ -57,6 +63,7 @@ const FinancialTransactions: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       sorter: true,
+      sortOrder: getSortOrder('status'),
       render: (status: string) => {
         const statusKey = status?.toUpperCase()
         const label =
@@ -76,6 +83,7 @@ const FinancialTransactions: React.FC = () => {
       dataIndex: 'created_at',
       key: 'created_at',
       sorter: true,
+      sortOrder: getSortOrder('created_at'),
       render: (date: string) =>
         date ? new Date(date).toLocaleString('en-US') : '---',
     },
@@ -84,6 +92,7 @@ const FinancialTransactions: React.FC = () => {
       dataIndex: 'company_name',
       key: 'company_name',
       sorter: true,
+      sortOrder: getSortOrder('company_name'),
       render: (text: string) => text || '---',
     },
     {
@@ -91,6 +100,7 @@ const FinancialTransactions: React.FC = () => {
       dataIndex: 'store_code_name',
       key: 'store_code_name',
       sorter: true,
+      sortOrder: getSortOrder('store_code_name'),
       render: (text: string) => text || '---',
     },
     {
@@ -98,6 +108,7 @@ const FinancialTransactions: React.FC = () => {
       dataIndex: 'created_by_staff_code',
       key: 'created_by_staff_code',
       sorter: true,
+      sortOrder: getSortOrder('created_by_staff_code'),
       render: (text: string) => text || '---',
     },
     {
@@ -105,6 +116,7 @@ const FinancialTransactions: React.FC = () => {
       dataIndex: 'transaction_fee',
       key: 'transaction_fee',
       sorter: true,
+      sortOrder: getSortOrder('transaction_fee'),
       render: (fee: number) => (fee != null ? fee.toLocaleString('en-US') : '---'),
     },
     {
@@ -123,24 +135,20 @@ const FinancialTransactions: React.FC = () => {
     },
   ]
 
-  const onPaginationChange = (pagination: any) => {
+  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
+    const newSortField = sorter.order ? sorter.field : null
+    const newSortOrder = sorter.order || null
+    const sortChanged =
+      newSortField !== sortField || newSortOrder !== sortOrder
+
+    setSortField(newSortField)
+    setSortOrder(newSortOrder)
+
     setTransactionFilters({
       ...transactionFilters,
-      page: pagination.current,
+      page: sortChanged ? 1 : pagination.current,
       limit: pagination.pageSize,
     })
-  }
-
-  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
-    onPaginationChange(pagination)
-
-    if (sorter.field) {
-      setSortField(sorter.field)
-      setSortOrder(sorter.order)
-    } else {
-      setSortField(null)
-      setSortOrder(null)
-    }
   }
 
   return (
