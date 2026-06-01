@@ -81,7 +81,7 @@ const ReconcileHistory: React.FC = () => {
                 onClick={() =>
                   download.mutate({ id: r.id, fileName: r.file_name })
                 }
-                className="text-[#DA2128] underline hover:opacity-80 disabled:opacity-50 text-left"
+                className="text-blue-600 underline hover:opacity-80 disabled:opacity-50 text-left"
               >
                 {r.file_name || "---"}
               </button>
