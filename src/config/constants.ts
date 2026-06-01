@@ -123,7 +123,6 @@ export const COLLABORATOR_TRANSACTION_STATUS = [
   { label: 'Tất cả', value: ['ALL'] },
   { label: 'Thành Công', value: ['SUCCESSFUL'] },
   { label: 'Liên hệ DVKH HDB', value: ['FAILED'] },
-  { label: 'Đã Tạo', value: ['CREATED'] },
   { label: 'Đang xử lý', value: ['TIME_OUT'] },
   { label: 'Từ chối', value: ['REJECTED'] },
 ]
