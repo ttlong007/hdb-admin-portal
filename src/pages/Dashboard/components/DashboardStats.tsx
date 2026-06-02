@@ -1,13 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { DatePicker, Spin } from 'antd'
+import { FilterOutlined } from '@ant-design/icons'
 import dayjs, { Dayjs } from 'dayjs'
+import { toast } from 'react-toastify'
 import Select from 'react-select'
 import AsyncSelect from 'react-select/async'
-import { useCompaniesOptions } from '@/hooks/useCompaniesOptions'
+import {
+  useCompaniesOptions,
+  useCompaniesDefaultOptions,
+} from '@/hooks/useCompaniesOptions'
 import { useStores } from '@/hooks/useStores'
 import { useStatsOverview } from '@/hooks/useStatsOverview'
 import { useCompanyOverview } from '@/hooks/useCompanyOverview'
 import { useSalesStats } from '@/hooks/useSalesStats'
+import { useTransactionsOverview } from '@/hooks/useTransactionsOverview'
 
 const { RangePicker } = DatePicker
 
@@ -74,7 +80,15 @@ const selectStyles = {
   }),
 }
 
+interface AppliedFilters {
+  fromDate: string
+  toDate: string
+  companyId?: number
+  storeId?: number
+}
+
 const DashboardStats: React.FC = () => {
+  // ── Draft filters (chỉnh nhưng chưa apply, không trigger fetch) ──
   const [dateRange, setDateRange] = useState<[Dayjs | null, Dayjs | null] | null>([
     dayjs().subtract(7, 'days'),
     dayjs(),
@@ -83,23 +97,66 @@ const DashboardStats: React.FC = () => {
   const [selectedStore, setSelectedStore] = useState<any>({ value: null, label: 'Tất cả đại lý' })
   const [lookupCompany, setLookupCompany] = useState<any>(null)
 
+  // ── Applied filters (chỉ set khi click "Áp dụng" → trigger fetch) ──
+  const [appliedFilters, setAppliedFilters] = useState<AppliedFilters | null>(null)
+
   const { loadOptions: loadCompanyOptions } = useCompaniesOptions()
-  const { loadOptions: loadCompanyOptionsForLookup } = useCompaniesOptions()
+  const { data: companyDefaultOptions = [] } = useCompaniesDefaultOptions()
   const { data: storeOptions, isLoading: isLoadingStores } = useStores(selectedCompany?.value)
 
   const { data: summaryStats } = useStatsOverview()
   const { data: lookupStats } = useCompanyOverview(lookupCompany?.value)
 
-  const fromDate = dateRange?.[0]?.format('YYYY-MM-DD')
-  const toDate = dateRange?.[1]?.format('YYYY-MM-DD')
-  const { data: salesData, isLoading: isLoadingRevenue } = useSalesStats({
-    companyId: selectedCompany?.value,
-    storeId: selectedStore?.value ?? undefined,
-    fromDate,
-    toDate,
+  const hasCompanyOrStore = !!(
+    appliedFilters?.companyId || appliedFilters?.storeId
+  )
+
+  // Chọn endpoint theo applied filters: có company/store → sales-by-company/store;
+  // chỉ có date → transactions-overview (cross-company).
+  const {
+    data: salesData,
+    isFetching: isFetchingSales,
+    error: salesError,
+  } = useSalesStats({
+    companyId: appliedFilters?.companyId,
+    storeId: appliedFilters?.storeId,
+    fromDate: hasCompanyOrStore ? appliedFilters?.fromDate : undefined,
+    toDate: hasCompanyOrStore ? appliedFilters?.toDate : undefined,
   })
-  const revenueStats = salesData?.sales_stats
-  const onboardingStats = salesData?.onboarding_customer_stats
+  const {
+    data: overviewData,
+    isFetching: isFetchingOverview,
+    error: overviewError,
+  } = useTransactionsOverview({
+    fromDate: !hasCompanyOrStore ? appliedFilters?.fromDate : undefined,
+    toDate: !hasCompanyOrStore ? appliedFilters?.toDate : undefined,
+    enabled: !!appliedFilters && !hasCompanyOrStore,
+  })
+
+  useEffect(() => {
+    const err = hasCompanyOrStore ? salesError : overviewError
+    if (!err) return
+    const status = (err as any)?.response?.status
+    if (status === 401 || status === 403) {
+      toast.error(
+        'Bạn không có quyền truy cập thống kê này. Vui lòng liên hệ quản trị.'
+      )
+    } else if (status === 400) {
+      toast.error(
+        (err as any)?.response?.data?.reason_message ||
+          'Khoảng thời gian không hợp lệ.'
+      )
+    } else {
+      toast.error((err as Error).message || 'Tải thống kê thất bại.')
+    }
+  }, [salesError, overviewError, hasCompanyOrStore])
+
+  const activeData = hasCompanyOrStore ? salesData : overviewData
+  const isLoadingRevenue = hasCompanyOrStore
+    ? isFetchingSales
+    : isFetchingOverview
+  const revenueStats = activeData?.sales_stats
+  const onboardingStats = activeData?.onboarding_customer_stats
 
   const storeOptionsWithAll = [
     { value: null, label: 'Tất cả đại lý' },
@@ -109,6 +166,19 @@ const DashboardStats: React.FC = () => {
   useEffect(() => {
     setSelectedStore({ value: null, label: 'Tất cả đại lý' })
   }, [selectedCompany?.value])
+
+  const handleApply = () => {
+    if (!dateRange?.[0] || !dateRange?.[1]) {
+      toast.warning('Vui lòng chọn khoảng thời gian trước khi áp dụng bộ lọc')
+      return
+    }
+    setAppliedFilters({
+      fromDate: dateRange[0].format('YYYY-MM-DD'),
+      toDate: dateRange[1].format('YYYY-MM-DD'),
+      companyId: selectedCompany?.value,
+      storeId: selectedStore?.value ?? undefined,
+    })
+  }
 
   const maxTransactionAmount = useMemo(() => {
     if (!revenueStats?.sales_by_transaction_type?.length) return 1
@@ -168,8 +238,8 @@ const DashboardStats: React.FC = () => {
             <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Chọn công ty</label>
             <AsyncSelect
               cacheOptions
-              defaultOptions
-              loadOptions={loadCompanyOptionsForLookup}
+              defaultOptions={companyDefaultOptions}
+              loadOptions={loadCompanyOptions}
               value={lookupCompany}
               onChange={setLookupCompany}
               placeholder="-- Chọn một công ty --"
@@ -215,7 +285,7 @@ const DashboardStats: React.FC = () => {
 
         {/* Filters */}
         <div className="bg-gray-50 rounded-lg p-4 mb-5 border border-gray-100">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_1fr_auto] gap-4 items-end">
             <div>
               <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Thời gian</label>
               <RangePicker
@@ -228,6 +298,11 @@ const DashboardStats: React.FC = () => {
                 disabledDate={(current) => {
                   if (!current) return false
                   if (current.valueOf() > dayjs().endOf('day').valueOf()) return true
+                  if (
+                    current.valueOf() <
+                    dayjs().subtract(MAX_DATE_RANGE_DAYS, 'day').startOf('day').valueOf()
+                  )
+                    return true
                   const start = dateRange?.[0]
                   const end = dateRange?.[1]
                   if (start && !end && Math.abs(current.diff(start, 'day')) >= MAX_DATE_RANGE_DAYS) return true
@@ -240,7 +315,7 @@ const DashboardStats: React.FC = () => {
               <label className="block text-xs font-medium text-gray-400 uppercase tracking-wide mb-1.5">Đối tác</label>
               <AsyncSelect
                 cacheOptions
-                defaultOptions
+                defaultOptions={companyDefaultOptions}
                 loadOptions={loadCompanyOptions}
                 value={selectedCompany}
                 onChange={setSelectedCompany}
@@ -268,6 +343,15 @@ const DashboardStats: React.FC = () => {
                 styles={selectStyles}
               />
             </div>
+            <button
+              type="button"
+              onClick={handleApply}
+              disabled={isLoadingRevenue}
+              className="h-10 px-4 bg-[#DA2128] text-white rounded-[10px] text-sm font-semibold hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5 flex-shrink-0"
+            >
+              <FilterOutlined />
+              {isLoadingRevenue ? 'Đang tải...' : 'Áp dụng'}
+            </button>
           </div>
         </div>
 
