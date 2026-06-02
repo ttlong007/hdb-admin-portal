@@ -25,6 +25,9 @@ const NonFinancialTransactions: React.FC = () => {
     sortOrder,
   })
 
+  const getSortOrder = (key: string) =>
+    sortField === key ? sortOrder : null
+
   const exportMutation = useExportNonFinancialTransactions({
     filter: {
       channel: nonFinancialTransactionFilters.transaction_type || undefined,
@@ -52,6 +55,7 @@ const NonFinancialTransactions: React.FC = () => {
       dataIndex: 'code',
       key: 'code',
       sorter: true,
+      sortOrder: getSortOrder('code'),
       render: (text: string) => text || '---',
     },
     {
@@ -59,6 +63,7 @@ const NonFinancialTransactions: React.FC = () => {
       dataIndex: 'status',
       key: 'status',
       sorter: true,
+      sortOrder: getSortOrder('status'),
       render: (status: string) => {
         const statusKey = status?.toUpperCase()
         const label =
@@ -72,6 +77,7 @@ const NonFinancialTransactions: React.FC = () => {
       dataIndex: 'full_name',
       key: 'full_name',
       sorter: true,
+      sortOrder: getSortOrder('full_name'),
       render: (text: string) => text || '---',
     },
     {
@@ -79,6 +85,7 @@ const NonFinancialTransactions: React.FC = () => {
       dataIndex: 'phone_number',
       key: 'phone_number',
       sorter: true,
+      sortOrder: getSortOrder('phone_number'),
       render: (text: string) => text || '---',
     },
     {
@@ -86,6 +93,7 @@ const NonFinancialTransactions: React.FC = () => {
       dataIndex: 'transaction_type',
       key: 'transaction_type',
       sorter: true,
+      sortOrder: getSortOrder('transaction_type'),
       render: (name: string) => name || '---',
     },
     {
@@ -93,6 +101,7 @@ const NonFinancialTransactions: React.FC = () => {
       dataIndex: 'transaction_time',
       key: 'transaction_time',
       sorter: true,
+      sortOrder: getSortOrder('transaction_time'),
       render: (date: string) =>
         date ? new Date(date).toLocaleString('vi-VN') : '---',
     },
@@ -100,6 +109,8 @@ const NonFinancialTransactions: React.FC = () => {
       title: 'Đại lý tổng',
       dataIndex: 'company_name',
       key: 'company_name',
+      sorter: true,
+      sortOrder: getSortOrder('company_name'),
       render: (text: string) => text || '---',
     },
     {
@@ -107,6 +118,7 @@ const NonFinancialTransactions: React.FC = () => {
       dataIndex: 'store_code',
       key: 'store_code',
       sorter: true,
+      sortOrder: getSortOrder('store_code'),
       render: (text: string) => text || '---',
     },
     {
@@ -114,6 +126,7 @@ const NonFinancialTransactions: React.FC = () => {
       dataIndex: 'store_name',
       key: 'store_name',
       sorter: true,
+      sortOrder: getSortOrder('store_name'),
       render: (text: string) => text || '---',
     },
     {
@@ -121,6 +134,7 @@ const NonFinancialTransactions: React.FC = () => {
       dataIndex: 'staff_code',
       key: 'staff_code',
       sorter: true,
+      sortOrder: getSortOrder('staff_code'),
       render: (text: string) => text || '---',
     },
     {
@@ -139,24 +153,20 @@ const NonFinancialTransactions: React.FC = () => {
     },
   ]
 
-  const onPaginationChange = (pagination: any) => {
+  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
+    const newSortField = sorter.order ? sorter.field : null
+    const newSortOrder = sorter.order || null
+    const sortChanged =
+      newSortField !== sortField || newSortOrder !== sortOrder
+
+    setSortField(newSortField)
+    setSortOrder(newSortOrder)
+
     setNonFinancialTransactionFilters({
       ...nonFinancialTransactionFilters,
-      page: pagination.current,
+      page: sortChanged ? 1 : pagination.current,
       limit: pagination.pageSize,
     })
-  }
-
-  const onTableChange = (pagination: any, _filters: any, sorter: any) => {
-    onPaginationChange(pagination)
-
-    if (sorter.field) {
-      setSortField(sorter.field)
-      setSortOrder(sorter.order)
-    } else {
-      setSortField(null)
-      setSortOrder(null)
-    }
   }
 
   return (
