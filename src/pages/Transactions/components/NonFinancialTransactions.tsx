@@ -73,6 +73,20 @@ const NonFinancialTransactions: React.FC = () => {
       },
     },
     {
+      title: 'Kết quả phê duyệt',
+      dataIndex: 'approval_status',
+      key: 'approval_status',
+      sorter: true,
+      render: (text: string) => text || '---',
+    },
+    {
+      title: 'Mã trạng thái',
+      dataIndex: 'status_id',
+      key: 'status_id',
+      sorter: true,
+      render: (text: string) => text || '---',
+    },
+    {
       title: 'Họ tên',
       dataIndex: 'full_name',
       key: 'full_name',
