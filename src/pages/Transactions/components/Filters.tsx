@@ -13,6 +13,7 @@ import { useExportTransactions } from '@/hooks/useExportTransactions'
 import { toast } from 'react-toastify'
 import {
   TRANSACTION_STATUS,
+  NON_FINANCIAL_TRANSACTION_STATUS,
 } from '@/config/constants'
 import { useFilter } from '@/store/filterSlice/useFilter'
 import dayjs from 'dayjs'
@@ -103,7 +104,10 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
             ) || null
           : null,
         status: currentFilters.status
-          ? TRANSACTION_STATUS.find(
+          ? (isNonFinancial
+              ? NON_FINANCIAL_TRANSACTION_STATUS
+              : TRANSACTION_STATUS
+            ).find(
               (s) =>
                 JSON.stringify(s.value) ===
                 JSON.stringify(currentFilters.status)
@@ -178,7 +182,10 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
     setValue(
       'status',
       currentFilters.status
-        ? TRANSACTION_STATUS.find(
+        ? (isNonFinancial
+            ? NON_FINANCIAL_TRANSACTION_STATUS
+            : TRANSACTION_STATUS
+          ).find(
             (s) => JSON.stringify(s.value) === JSON.stringify(currentFilters.status)
           ) || null
         : null
@@ -203,7 +210,9 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
   ])
 
   // Map status options from constants
-  const statusOptions = TRANSACTION_STATUS
+  const statusOptions = isNonFinancial
+    ? NON_FINANCIAL_TRANSACTION_STATUS
+    : TRANSACTION_STATUS
 
   const defaultExportMutation = useExportTransactions({
     filter: {
@@ -337,10 +346,11 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
               control={control}
               render={({ field }) => (
                 <RangePicker
-                  className="w-full"
+                  className="px-3.5 py-2 w-full"
                   style={{ width: '100%' }}
                   value={field.value}
                   onChange={(dates) => field.onChange(dates)}
+                  placement="bottomLeft"
                   getPopupContainer={(triggerNode) =>
                     (triggerNode.parentElement as HTMLElement) || document.body
                   }

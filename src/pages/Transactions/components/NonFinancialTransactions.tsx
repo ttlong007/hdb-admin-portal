@@ -7,8 +7,8 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import {
-  TRANSACTION_STATUS,
-  TRANSACTION_STATUS_COLOR_MAP,
+  NON_FINANCIAL_TRANSACTION_STATUS,
+  NON_FINANCIAL_TRANSACTION_STATUS_COLOR_MAP,
 } from '@/config/constants'
 import { useTransactionHistory } from '@/hooks/useTransactionHistory'
 import { useExportNonFinancialTransactions } from '@/hooks/useExportNonFinancialTransactions'
@@ -73,24 +73,13 @@ const NonFinancialTransactions: React.FC = () => {
       render: (status: string) => {
         const statusKey = status?.toUpperCase()
         const label =
-          TRANSACTION_STATUS.find((s) => s.value.includes(statusKey))?.label || '---'
-        const color = TRANSACTION_STATUS_COLOR_MAP[statusKey] || 'default'
+          NON_FINANCIAL_TRANSACTION_STATUS.find((s) =>
+            s.value.includes(statusKey)
+          )?.label || '---'
+        const color =
+          NON_FINANCIAL_TRANSACTION_STATUS_COLOR_MAP[statusKey] || 'default'
         return <Tag color={color}>{label}</Tag>
       },
-    },
-    {
-      title: 'Kết quả phê duyệt',
-      dataIndex: 'approval_status',
-      key: 'approval_status',
-      sorter: true,
-      render: (text: string) => text || '---',
-    },
-    {
-      title: 'Mã trạng thái',
-      dataIndex: 'status_id',
-      key: 'status_id',
-      sorter: true,
-      render: (text: string) => text || '---',
     },
     {
       title: 'Họ tên',

@@ -15,6 +15,7 @@ export interface Routes {
     transactionDetail: string;
     nonFinancialTransactionDetail: string;
     reconcileHistory: string;
+    collaboratorTransactionDetail: string;
     unauthorize: string;
 }
 
@@ -35,5 +36,6 @@ export const routes: Routes = {
     transactionDetail: '/transactions/:id',
     nonFinancialTransactionDetail: '/transactions/non-financial/:id',
     reconcileHistory: '/reconcile-history',
+    collaboratorTransactionDetail: '/transactions/collaborator/:id',
     unauthorize: '/unauthorize',
 };
