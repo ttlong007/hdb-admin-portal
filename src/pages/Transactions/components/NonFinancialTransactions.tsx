@@ -37,6 +37,10 @@ const NonFinancialTransactions: React.FC = () => {
       staff_code: nonFinancialTransactionFilters.staff_code || undefined,
       time_start: nonFinancialTransactionFilters.duration?.[0] || undefined,
       time_end: nonFinancialTransactionFilters.duration?.[1] || undefined,
+      company_id:
+        (nonFinancialTransactionFilters as any).company_id?.value || undefined,
+      store_id:
+        (nonFinancialTransactionFilters as any).store_id?.value || undefined,
     },
   })
 

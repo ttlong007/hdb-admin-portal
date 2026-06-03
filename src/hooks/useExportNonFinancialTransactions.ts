@@ -11,6 +11,8 @@ interface ExportNonFinancialTransactionsProps {
     staff_code?: string
     time_start?: string
     time_end?: string
+    company_id?: number
+    store_id?: number
   }
 }
 
@@ -38,6 +40,12 @@ export const useExportNonFinancialTransactions = ({
       }
       if (filter?.time_end) {
         cleanFilter.time_end = filter.time_end
+      }
+      if (filter?.company_id) {
+        cleanFilter.company_id = filter.company_id
+      }
+      if (filter?.store_id) {
+        cleanFilter.store_id = filter.store_id
       }
 
       const response = await axiosInstance.post(

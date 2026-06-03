@@ -214,6 +214,7 @@ const Filters: React.FC<FiltersProps> = ({ exportMutationOverride, tabType }) =>
       duration: transactionFilters.duration,
       staff_code: transactionFilters.staff_code,
       staff_phone: transactionFilters.staff_phone,
+      company_id: (transactionFilters as any).company_id?.value,
     },
   })
   const exportMutation = exportMutationOverride || defaultExportMutation
