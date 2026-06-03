@@ -3,6 +3,9 @@ import { Table, Tag, Space, Button } from 'antd'
 import type { TableProps } from 'antd'
 import { BsEye } from 'react-icons/bs'
 import { Link } from 'react-router-dom'
+import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
 import {
   TRANSACTION_STATUS,
   TRANSACTION_STATUS_COLOR_MAP,
@@ -11,6 +14,9 @@ import { useTransactionHistory } from '@/hooks/useTransactionHistory'
 import { useExportNonFinancialTransactions } from '@/hooks/useExportNonFinancialTransactions'
 import Filters from './Filters'
 import { useFilter } from '@/store/filterSlice/useFilter'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const NonFinancialTransactions: React.FC = () => {
   const { nonFinancialTransactionFilters, setNonFinancialTransactionFilters } =
@@ -117,7 +123,9 @@ const NonFinancialTransactions: React.FC = () => {
       sorter: true,
       sortOrder: getSortOrder('transaction_time'),
       render: (date: string) =>
-        date ? new Date(date).toLocaleString('vi-VN') : '---',
+        date
+          ? dayjs.utc(date).tz('Asia/Ho_Chi_Minh').format('DD/MM/YYYY HH:mm:ss')
+          : '---',
     },
     {
       title: 'Đại lý tổng',
