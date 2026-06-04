@@ -102,6 +102,44 @@ export const TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
   CREATED: 'blue',
 }
 
+export const NON_FINANCIAL_TRANSACTION_STATUS = [
+  { label: 'Tất cả', value: ['ALL'] },
+  { label: 'Thành Công', value: ['SUCCESSFUL'] },
+  { label: 'Liên hệ DVKH HDB', value: ['FAILED'] },
+  { label: 'Đã Tạo', value: ['CREATED'] },
+  { label: 'Đang xử lý', value: ['TIME_OUT'] },
+  { label: 'Từ chối', value: ['REJECTED'] },
+]
+export const NON_FINANCIAL_TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
+  ALL: 'default',
+  SUCCESSFUL: 'green',
+  FAILED: 'red',
+  CREATED: 'blue',
+  TIME_OUT: 'orange',
+  REJECTED: 'red',
+}
+
+export const COLLABORATOR_TRANSACTION_STATUS = [
+  { label: 'Tất cả', value: ['ALL'] },
+  { label: 'Thành Công', value: ['SUCCESSFUL'] },
+  { label: 'Liên hệ DVKH HDB', value: ['FAILED'] },
+  { label: 'Đang xử lý', value: ['TIME_OUT'] },
+  { label: 'Từ chối', value: ['REJECTED'] },
+]
+export const COLLABORATOR_TRANSACTION_STATUS_COLOR_MAP: Record<string, string> = {
+  ALL: 'default',
+  SUCCESSFUL: 'green',
+  FAILED: 'red',
+  CREATED: 'blue',
+  TIME_OUT: 'orange',
+  REJECTED: 'red',
+}
+
+export const COLLABORATOR_TRANSACTION_TYPE_OPTIONS = [
+  { label: 'Mở TKTT', value: 'HDB_EKYC' },
+  { label: 'Mở Thẻ tín dụng', value: 'CARD_LMS' },
+]
+
 export const TRANSACTION_TYPE = [
   { label: 'Nạp tiền', value: 'DEPOSIT' },
   { label: 'Rút tiền', value: 'WITHDRAW' },
@@ -168,3 +206,19 @@ export const STATUS_WAITING_APPROVE = [
   'WAITING_APPROVE',
   'WAITING_APPROVAL_FOR_EDIT',
 ]
+
+export const RECONCILE_TYPE = [
+  { value: 'TRANSACTION', label: 'Giao dịch tài chính' },
+  { value: 'BUSINESS_STAFF', label: 'Giao dịch phi tài chính - NV' },
+  { value: 'BUSINESS_CONTRACTOR', label: 'Giao dịch phi tài chính - CTV' },
+]
+
+export const RECONCILE_STATUS = [
+  { value: 'SUCCESS', label: 'Thành công' },
+  { value: 'FAILED', label: 'Thất bại' },
+]
+
+export const RECONCILE_STATUS_COLOR_MAP: Record<string, string> = {
+  SUCCESS: 'green',
+  FAILED: 'red',
+}

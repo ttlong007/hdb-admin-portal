@@ -8,11 +8,15 @@ import {
   setStaffFilter,
   setTransactionFilter,
   setTransactionNonFinancialFilter,
+  setReconcileHistoryFilter,
+  setTransactionCollaboratorFilter,
   resetMasterMerchantFilter,
   resetMerchantFilter,
   resetStaffFilter,
   resetTransactionFilter,
   resetTransactionNonFinancialFilter,
+  resetReconcileHistoryFilter,
+  resetTransactionCollaboratorFilter,
   resetAllFilters
 } from '.'
 
@@ -62,6 +66,26 @@ export const useFilter = () => {
     dispatch(resetTransactionNonFinancialFilter())
   }
 
+  // Reconcile history filters
+  const setReconcileHistoryFilters = (
+    filters: Partial<typeof filterState.reconcileHistory>
+  ) => {
+    dispatch(setReconcileHistoryFilter(filters))
+  }
+  const resetReconcileHistoryFilters = () => {
+    dispatch(resetReconcileHistoryFilter())
+  }
+
+  // Transaction filters (collaborator / CTV)
+  const setCollaboratorTransactionFilters = (
+    filters: Partial<typeof filterState.transactionCollaborator>
+  ) => {
+    dispatch(setTransactionCollaboratorFilter(filters))
+  }
+  const resetCollaboratorTransactionFilters = () => {
+    dispatch(resetTransactionCollaboratorFilter())
+  }
+
   // Reset all filters
   const resetAll = () => {
     dispatch(resetAllFilters())
@@ -74,6 +98,8 @@ export const useFilter = () => {
     staffFilters: filterState.staff,
     transactionFilters: filterState.transaction,
     nonFinancialTransactionFilters: filterState.transactionNonFinancial,
+    reconcileHistoryFilters: filterState.reconcileHistory,
+    collaboratorTransactionFilters: filterState.transactionCollaborator,
 
     // Master Merchant actions
     setMasterMerchantFilters,
@@ -94,6 +120,14 @@ export const useFilter = () => {
     // Transaction actions (non-financial)
     setNonFinancialTransactionFilters,
     resetNonFinancialTransactionFilters,
+
+    // Reconcile history actions
+    setReconcileHistoryFilters,
+    resetReconcileHistoryFilters,
+
+    // Transaction actions (collaborator)
+    setCollaboratorTransactionFilters,
+    resetCollaboratorTransactionFilters,
 
     // Global actions
     resetAll

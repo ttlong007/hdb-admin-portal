@@ -3,22 +3,20 @@ import axiosInstance from '@/config/axios'
 import { toast } from 'react-toastify'
 import { downloadFromPresignedUrl } from './useExportTransactions'
 
-interface ExportNonFinancialTransactionsProps {
+interface ExportCollaboratorTransactionsProps {
   filter: {
     channel?: string
-    status?: string[]
-    store_code?: string
-    staff_code?: string
+    status?: string
+    referral_code?: string
     time_start?: string
     time_end?: string
-    company_id?: number
-    store_id?: number
+    company_id?: number | string
   }
 }
 
-export const useExportNonFinancialTransactions = ({
+export const useExportCollaboratorTransactions = ({
   filter,
-}: ExportNonFinancialTransactionsProps) => {
+}: ExportCollaboratorTransactionsProps) => {
   return useMutation({
     mutationFn: async () => {
       const cleanFilter: any = {}
@@ -26,14 +24,11 @@ export const useExportNonFinancialTransactions = ({
       if (filter?.channel) {
         cleanFilter.channel = filter.channel
       }
-      if (filter?.status?.length) {
+      if (filter?.status) {
         cleanFilter.status = filter.status
       }
-      if (filter?.store_code) {
-        cleanFilter.store_code = filter.store_code
-      }
-      if (filter?.staff_code) {
-        cleanFilter.staff_code = filter.staff_code
+      if (filter?.referral_code) {
+        cleanFilter.referral_code = filter.referral_code
       }
       if (filter?.time_start) {
         cleanFilter.time_start = filter.time_start
@@ -44,12 +39,9 @@ export const useExportNonFinancialTransactions = ({
       if (filter?.company_id) {
         cleanFilter.company_id = filter.company_id
       }
-      if (filter?.store_id) {
-        cleanFilter.store_id = filter.store_id
-      }
 
       const response = await axiosInstance.post(
-        '/v1/admin/transaction/non-financial/export',
+        '/v1/admin/transaction/collaborator/export',
         cleanFilter
       )
 
@@ -69,7 +61,7 @@ export const useExportNonFinancialTransactions = ({
               response.data.data !== 'PROCESSING'
             ) {
               const downloadUrl = response.data.data
-              const filename = `non_financial_transactions_${new Date()
+              const filename = `collaborator_transactions_${new Date()
                 .toISOString()
                 .replace(/[:.]/g, '-')}.xlsx`
 

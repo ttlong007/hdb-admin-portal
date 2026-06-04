@@ -48,5 +48,6 @@ export function useSalesStats({ companyId, storeId, fromDate, toDate }: UseSales
       throw new Error(response.data.reason_message || 'Failed to fetch sales stats')
     },
     enabled: !!(companyId || storeId) && !!fromDate && !!toDate,
+    retry: false,
   })
 }
