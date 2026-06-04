@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc *)",
+      "Bash(echo \"exit: $?\")",
+      "Bash(echo \"tsc exit: $?\")",
+      "Bash(echo \"eslint exit: $?\")",
+      "Bash(echo \"tsc: $?\")",
+      "Bash(find /Users/tothanhthuong/Workplace/company/HDBank -maxdepth 4 -iname \"*Master Agent Management*\" -o -iname \"*AB-*Admin Portal*\" 2>/dev/null | head -20)",
+      "Read(//Users/tothanhthuong/Workplace/company/HDBank/**)",
+      "Bash(mdls -name kMDItemNumberOfPages \"AB-[Admin Portal] - Master Agent Management-260526-035210.pdf\")",
+      "Bash(pdfimages -all \"AB-[Admin Portal] - Master Agent Management-260526-035210.pdf\" docs/master-agent-images/img)",
+      "Bash(awk '$5 > 5000 {print $5, $9}')",
+      "Bash(rm docs/master-agent-images/*.png)",
+      "Bash(pdftoppm -png -r 110 \"AB-[Admin Portal] - Master Agent Management-260526-035210.pdf\" docs/master-agent-images/page)",
+      "Bash(awk '$5 > 30000')",
+      "Bash(sort -nrk5)",
+      "Bash(awk '$5 > 5000 && $5 < 30000 {print $5, $9}')",
+      "Bash(sort -nrk1)",
+      "Bash(mv img-002.png 4.2-list-view.png)",
+      "Bash(mv img-004.png 4.3-detail-view.png)",
+      "Bash(mv img-006.png 4.3-han-muc.png)",
+      "Bash(mv img-007.png 4.3-fee-table.png)",
+      "Bash(mv img-008.png 4.4-edit-full.png)",
+      "Bash(git mv *)",
+      "Bash(mv \"AB-[Admin Portal] - Master Agent Management-260526-035210.md\" docs/ && mv AGENT-1048-special-fee.md docs/ && ls docs/)",
+      "Bash(git checkout *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git merge *)",
+      "Bash(git commit *)"
+    ],
+    "additionalDirectories": [
+      "/Users/tothanhthuong/Workplace/company/HDBank/agent/admin-portal/docs/master-agent-images",
+      "/Users/tothanhthuong/Workplace/company/HDBank/agent/admin-portal"
+    ]
+  }
+}

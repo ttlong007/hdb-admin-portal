@@ -868,7 +868,7 @@ export default function EditStaff() {
                         control={control}
                         render={({ field }) => (
                           <RangePicker
-                            rootClassName="px-3.5 py-2 w-full"
+                            className="px-3.5 py-2 w-full"
                             value={field.value}
                             onChange={(dates) => field.onChange(dates)}
                           />
